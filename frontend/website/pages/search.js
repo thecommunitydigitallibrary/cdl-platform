@@ -119,13 +119,6 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
                 No results found for <i>"{data.query}" </i> in {searchedCommunity}
               </h6>
             )}
-            <a
-              href={"https://google.com/search?q=" + data.query}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {"Try the search on Google."}
-            </a>
           </div>
         </div>
         <Footer alt={true} />
