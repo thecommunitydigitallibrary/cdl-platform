@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@material-ui/icons": "^4.11.3",
+    "@material-ui/utils": "^4.11.3",
+    "@mui/icons-material": "^5.11.11",
+    "@mui/material": "^5.11.11",
+    "@uiw/react-md-editor": "^3.20.5",
+    "bootstrap": "^5.2.3",
+    "js-cookie": "^3.0.1",
+    "katex": "^0.16.4",
+    "next": "^12.3.4",
+    "next-remove-imports": "^1.0.10",
+    "react-bootstrap": "^2.7.2",
+    "react-client-session": "0.0.8",
+    "react-infinite-scroll-component": "^6.1.0",
+    "rehype-sanitize": "^5.0.1",
+    "save": "^2.5.0",
+    "@mui/base": "5.0.0-alpha.123",
+    "@mui/system": "5.11.15"
+  }
+}

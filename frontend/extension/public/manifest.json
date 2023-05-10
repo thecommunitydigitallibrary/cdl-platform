@@ -1,0 +1,28 @@
+{
+	"name": "The Community Digital Library",
+	"description": "A platform to describe, save, search, share, and connect web content.",
+	"version": "0.0.0.2",
+	"manifest_version": 3,
+	"action": {
+		"default_popup": "index.html",
+		"default_title": "Open The Community Digital Library"
+	},
+	"icons": {
+		"16": "tree16.png",
+		"48": "tree48.png",
+		"128": "tree128.png"
+	},
+	"permissions": [
+		"activeTab",
+		"tabs",
+		"scripting"
+	],
+	"commands": {
+		"_execute_action": {
+			"suggested_key": {
+				"default": "Alt+S",
+				"mac": "Alt+S"
+			}
+		}
+	}
+}
