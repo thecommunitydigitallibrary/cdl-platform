@@ -131,5 +131,7 @@ dmypy.json
 
 
 /backend/env*
-/deployment/reverseproxy/letsencrypt-domain.pem
-/deployment/reverseproxy/letsencrypt-domain.key
+/reverseproxy/letsencrypt-domain.pem
+/reverseproxy/letsencrypt-domain.key
+docker-compose-prod.yml
+docker-compose-local.yml
