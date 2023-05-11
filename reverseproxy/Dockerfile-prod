@@ -1,5 +1,5 @@
 FROM nginx:alpine
 COPY nginx-prod.conf /etc/nginx/nginx.conf
-COPY letsencrypt-domain.pem /etc/ssl/private/letsencrypt-domain.pem
-COPY letsencrypt-domain.key /etc/ssl/private/letsencrypt-domain.key
+COPY cloudflare.pem /etc/ssl/private/cloudflare.pem
+COPY cloudflare.key /etc/ssl/private/cloudflare.key
 RUN apk update && apk add bash
