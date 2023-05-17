@@ -61,7 +61,7 @@ services:
         image: api
         build: .\backend
         restart: always
-        env_file: .\backend\env_local_full.ini
+        env_file: .\backend\env_local.ini
 
 
 # docker-compose -f docker-compose-offline.yml down
