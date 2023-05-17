@@ -11,10 +11,17 @@ Note that the local version is still under development:
 
 - No data is persisted; once the Docker containers stops, all data is lost.
 - The Chrome extension (from the Web store) is not compatible with the local version (yet).
+- "Reset Password" will not work due to no access to SendGrid.
 
 ### Requirements for running locally
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Windows
 - [Configuring Docker for OpenSearch](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/). If you are running on Windows (and thus using WSL for Docker), then follow [these directions](https://github.com/docker/for-win/issues/5202) for increasing vm.max_map_count.
+```
+open powershell
+wsl -d docker-desktop
+sysctl -w vm.max_map_count=262144
+```
 - With all of the Docker containers, packages, and models, the total size is ~10GB.
 
 ### Configuring the env files
