@@ -1026,7 +1026,7 @@ def get_recommendations(current_user):
 
 		# convert communities to str for elastic
 		requested_communities = [str(x) for x in user_communities]
-		if CDLweb_community_id in requested_communities:
+		if CDLweb_community_id in requested_communities and method == "recent":
 			requested_communities.remove(CDLweb_community_id)
 
 		# set up cache
