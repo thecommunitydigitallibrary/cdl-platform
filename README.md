@@ -53,7 +53,7 @@ NEXT_PUBLIC_FROM_CLIENT=http://localhost:8080/
  
 ### Starting the services
 
-Add the following to ``docker-compose.yml``:
+Add the following to ``\docker-compose.yml``:
 
 ```
 services:
@@ -119,7 +119,7 @@ services:
         image: api
         build: .\backend
         restart: always
-        env_file: .\backend\env_local_full.ini
+        env_file: .\backend\env_local.ini
 
 ```
 
