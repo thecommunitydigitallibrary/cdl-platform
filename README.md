@@ -25,7 +25,7 @@ sysctl -w vm.max_map_count=262144
 - With all of the Docker containers, packages, and models, the total size is ~10GB.
 
 ### Configuring the env files
-Copy the following to ``\backend\env_local.ini``
+Copy the following to ``\backend\env_local.ini``:
 
 ```
 api_url=http://localhost
@@ -44,7 +44,7 @@ elastic_domain_old=http://localhost:9200/
 elastic_domain=http://host.docker.internal:9200/
 ```
 
-Copy the following to ``\frontend\website\.env.local``
+Copy the following to ``\frontend\website\.env.local``":
 
 ```
 NEXT_PUBLIC_FROM_SERVER=http://host.docker.internal:8080/
@@ -52,4 +52,78 @@ NEXT_PUBLIC_FROM_CLIENT=http://localhost:8080/
 ```
  
 ### Starting the services
-Run the docker-compose file: ``docker-compose -f docker-compose-offline.yml up -d --build``
+
+Add the following to ``docker-compose.yml``:
+
+```
+services:
+    redis:
+        image: redis:alpine
+        command: redis-server --requirepass admin
+        restart: always
+        ports:
+            - '6379:6379'
+
+    reverseproxy:
+        image: reverseproxy
+        build:
+            context: .\reverseproxy
+            dockerfile: Dockerfile-local
+        ports:
+            - 8080:8080
+        restart: always
+
+    mongodb:
+        image: mongo
+        ports:
+        - 27017:27017
+        restart: always
+
+    opensearch-node1: # This is also the hostname of the container within the Docker network (i.e. https://opensearch-node1/)
+        image: opensearchproject/opensearch:latest # Specifying the latest available image - modify if you want a specific version
+        container_name: opensearch-node1
+        environment:
+            - cluster.name=opensearch-cluster # Name the cluster
+            - node.name=opensearch-node1 # Name the node that will run in this container
+            - discovery.seed_hosts=opensearch-node1 # Nodes to look for when discovering the cluster
+            - cluster.initial_cluster_manager_nodes=opensearch-node1 # Nodes eligible to serve as cluster manager
+            - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+            - DISABLE_SECURITY_PLUGIN=true
+            - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+        ulimits:
+            memlock:
+                soft: -1 # Set memlock to unlimited (no soft or hard limit)
+                hard: -1
+            nofile:
+                soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+                hard: 65536
+        ports:
+        - 9200:9200 # REST API
+
+    website:
+        depends_on:
+            - reverseproxy
+        image: website
+        build: .\frontend\website
+        env_file: .\frontend\website\.env.local
+        restart: always
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+
+    api:
+        depends_on:
+            - reverseproxy
+            - redis
+            - mongodb
+            - opensearch-node1
+        image: api
+        build: .\backend
+        restart: always
+        env_file: .\backend\env_local_full.ini
+
+```
+
+
+Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --build``
+
+To stop: ``docker-compose -f docker-compose.yml down``
