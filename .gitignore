@@ -134,3 +134,4 @@ dmypy.json
 /reverseproxy/letsencrypt-domain.pem
 /reverseproxy/letsencrypt-domain.key
 docker-compose.yml
+cicd.sh
