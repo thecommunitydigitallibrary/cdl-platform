@@ -131,7 +131,7 @@ dmypy.json
 
 
 /backend/env*
-/reverseproxy/letsencrypt-domain.pem
-/reverseproxy/letsencrypt-domain.key
+/reverseproxy/cloudflare.pem
+/reverseproxy/cloudflare.key
 docker-compose.yml
 cicd.sh
