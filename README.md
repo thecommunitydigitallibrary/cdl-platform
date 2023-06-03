@@ -25,7 +25,7 @@ sysctl -w vm.max_map_count=262144
 - With all of the Docker containers, packages, and models, the total size is ~10GB.
 
 ### Configuring the env files
-Copy the following to ``\backend\env_local.ini``:
+Copy the following to ``backend\env_local.ini``:
 
 ```
 api_url=http://localhost
@@ -44,7 +44,7 @@ elastic_domain_old=http://localhost:9200/
 elastic_domain=http://host.docker.internal:9200/
 ```
 
-Copy the following to ``\frontend\website\.env.local``":
+Copy the following to ``frontend\website\.env.local``":
 
 ```
 NEXT_PUBLIC_FROM_SERVER=http://host.docker.internal:8080/
@@ -53,7 +53,7 @@ NEXT_PUBLIC_FROM_CLIENT=http://localhost:8080/
  
 ### Starting the services
 
-Add the following to ``\docker-compose.yml``:
+Add the following to ``docker-compose.yml``:
 
 ```
 services:
@@ -123,6 +123,7 @@ services:
 
 ```
 
+Note that the slashes need to be reversed if running on Mac/Linux (above is written for windows).
 
 Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --build``
 
