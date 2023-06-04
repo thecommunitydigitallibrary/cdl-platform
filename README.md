@@ -4,7 +4,7 @@ The Community Digital Library (CDL) is a platform for users to save, search, and
 To use the CDL, you have two options:
 
 1. Online version: Visit [the CDL website](https://textdata.org/), install the Chrome extension, create an account, and begin saving websites.
-2. Local version: Clone this repository, set up Docker, and run the services locally.
+2. Offline version: Clone this repository, set up Docker, and run the services locally.
 
 ## Setting up the local version
 Note that the local version is still under development:
@@ -128,3 +128,6 @@ Note that the slashes need to be reversed if running on Mac/Linux (above is writ
 Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --build``
 
 To stop: ``docker-compose -f docker-compose.yml down``
+
+## Building on top of the online version
+See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
