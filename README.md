@@ -135,7 +135,10 @@ See the API documentation [here](https://github.com/thecommunitydigitallibrary/c
 ## Development Roadmap
 ### Refactoring
 #### User Accounts
-[] Place account API endpoints under common structure.
-[] Rename "token" to "hash" in password change request to avoid confusion with JWT.
-[] Extract username/password validation and move to helpers to avoid duplication.
-[] Change 202 status to 200 under password change request
+- [ ] Place account API endpoints under common structure.
+
+- [ ] Rename "token" to "hash" in password change request to avoid confusion with JWT.
+
+- [ ] Extract username/password validation and move to helpers to avoid duplication.
+
+- [ ] Change 202 status to 200 under password change request
