@@ -1,4 +1,4 @@
-# The CDL 
+# The Community Digital Library 
 The Community Digital Library (CDL) is a platform for users to save, search, and discover online content. 
 
 To use the CDL, you have two options:
@@ -79,20 +79,20 @@ services:
         - 27017:27017
         restart: always
 
-    opensearch-node1: # This is also the hostname of the container within the Docker network (i.e. https://opensearch-node1/)
-        image: opensearchproject/opensearch:latest # Specifying the latest available image - modify if you want a specific version
+    opensearch-node1:
+        image: opensearchproject/opensearch:latest
         container_name: opensearch-node1
         environment:
-            - cluster.name=opensearch-cluster # Name the cluster
-            - node.name=opensearch-node1 # Name the node that will run in this container
-            - discovery.seed_hosts=opensearch-node1 # Nodes to look for when discovering the cluster
-            - cluster.initial_cluster_manager_nodes=opensearch-node1 # Nodes eligible to serve as cluster manager
-            - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+            - cluster.name=opensearch-cluster
+            - node.name=opensearch-node1
+            - discovery.seed_hosts=opensearch-node1
+            - cluster.initial_cluster_manager_nodes=opensearch-node1
+            - bootstrap.memory_lock=true
             - DISABLE_SECURITY_PLUGIN=true
-            - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+            - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
         ulimits:
             memlock:
-                soft: -1 # Set memlock to unlimited (no soft or hard limit)
+                soft: -1
                 hard: -1
             nofile:
                 soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
@@ -131,3 +131,10 @@ To stop: ``docker-compose -f docker-compose.yml down``
 
 ## Building on top of the online version
 See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
+
+## Development Roadmap
+### Refactoring
+#### User Accounts
+[] Place account API endpoints under common structure.
+[] Rename "token" to "hash" in password change request to avoid confusion with JWT.
+[] Extract username/password validation and move to helpers to avoid duplication.
