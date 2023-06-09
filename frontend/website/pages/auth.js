@@ -166,10 +166,10 @@ export default function ({ data }) {
         );
         let resJson = await res.json();
 
-        if (res.status === 202) {
+        if (res.status === 200) {
           setPwdResetReqSent(true);
           setTempEmail(
-            "mailto:kjros2@illinois.edu?subject=Subject&body=Requesting password reset link for: " +
+            "mailto:" + resetEmailInput + "?subject=Subject&body=Requesting password reset link for: " +
               resetEmailInput
           );
         } else {
