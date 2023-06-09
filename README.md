@@ -133,12 +133,15 @@ To stop: ``docker-compose -f docker-compose.yml down``
 See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
 
 ## Development Roadmap
+### Frontend
+#### Search Results
+- [ ] Don't cut off words, split at spaces
+- [ ] Extend title length to match width
 ### Refactoring
-#### User Accounts
+#### General
+- [ ] Add traceback.print_exc() for all print(e) calls for more helpful debugging
+#### User Accounts API
 - [ ] Place account API endpoints under common structure.
-
 - [ ] Rename "token" to "hash" in password change request to avoid confusion with JWT.
-
 - [ ] Extract username/password validation and move to helpers to avoid duplication.
-
 - [ ] Change 202 status to 200 under password change request

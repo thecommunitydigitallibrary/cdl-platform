@@ -8,6 +8,8 @@ All endpoints are under the following base URL: ``https://textdata.org/``
 
 Endpoint: ``/api/createAccount``
 
+---
+
 #### POST
 Creates a new account for the CDL. [Implementation](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/ba23a0e1bb23edb71dfe7fb41eae5cf87096fc85/backend/app/views/users.py#L25).
 
@@ -26,6 +28,8 @@ On success, status ``200`` with the following JSON body fields:
 
 On failure, status code indicating respective error with body describing the error.
 
+---
+
 #### PATCH
 Changes a user's password. [Implementation](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/98b2bcbfa59b45e172621648032e9d05b46c6775/backend/app/views/users.py#L168).
 
@@ -42,6 +46,53 @@ On success, status ``200`` with the following JSON body fields:
 - ``userid``: The CDL-generated ID of the user. 
 
 On failure, status code indicating respective error with body describing the error.
+
+---
+
+### Account Login
+
+Endpoint: ``/api/login``
+
+---
+
+#### POST
+For a user to log into the CDL. [Implementation](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/2918f2928cb90a1a0db2cb0524a3d252deae6b81/backend/app/views/users.py#L219).
+
+##### Requires
+Requires the following in the request body:
+
+- ``username``: The CDL username of the account.
+- ``password``: The CDL password of the account.
+
+##### Returns
+On success, status ``200`` with the following JSON body fields:
+- ``username``: Username provided by request.
+- ``token``: Login JWT token for the session.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+### Account Password Reset Request
+
+Endpoint: ``/api/account/passwordReset``
+
+---
+
+#### POST
+Requests a password reset link to be sent via email. Uses SendGrid and DOES NOT work locally. [Implementation](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/2918f2928cb90a1a0db2cb0524a3d252deae6b81/backend/app/views/users.py#L112).
+
+##### Requires
+Requires the following in the request body:
+
+- ``email``: Email for the account requesting reset.
+
+##### Returns
+On success, status ``200`` with success message in body. User should also receive an email at the provided account.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
 
 
 
