@@ -26,16 +26,15 @@ def create_account():
 	"""
 	Endpoint to create an account.
 	Arguments:
-		request form (extension) or request data (website)
+		Request data with
 			email : (string) : the email of the user.
 			username : (string) : the username of the user (must be unique)
 			password : (string) : the password of the user
 	Returns:
-		200 : a dictionary with "status" = "ok, the username, and the JWT token.
-		500 : a dictionary with "status" = "error" and an error in the "message" field.
-	TODO: fix data transport method so that it is consistent between website and extension.
-	TODO: make more descriptive error message responses
-	TODO: more robust error handling
+		On success:
+			Status 200 and a dictionary with "status" = "ok", the username, the JWT token, and the user_id.
+		On Failure
+			Status number indicating failure and dictionary with "status" = "error" and an error description in the "message" field.
 	"""
 	try:
 		fields = ["email", "username", "password"]
@@ -82,10 +81,14 @@ def create_account():
 			return response.error("Internal server error.", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to create user account, please try again later.", Status.INTERNAL_SERVER_ERROR)
 	
 def send_reset_email(username, token, email):
-
+	"""
+	Helper function for sending a password reset email.
+	Uses SendGrid, and therefore, does not work locally.
+	"""
 
 	reset_url =  os.environ["api_url"] + ":" + os.environ["api_port"] + "/auth?reset=True&hash=" + token
 
@@ -104,7 +107,8 @@ def send_reset_email(username, token, email):
 		assert resp.status_code == 202
 		return True
 	except Exception as e:
-		print("Email failed", e)
+		print(e)
+		traceback.print_exc()
 		return False
 
 
@@ -114,10 +118,13 @@ def forgot_password():
 	"""
 	API for reset password request.
 	Arguments:
-		request form (extension) or request data (website)
-	:return:
-		202 : a dictionary with "status" = "accepted, the username, and the JWT token.
-		401 : a dictionary with "status" = "error" and an error in the "message" field.
+		request data (website) with
+			email : (string) : user email requesting reset (where reset link is sent) 
+	Returns:
+		On success:
+			Status 200 and a dictionary with "status" = "ok" and message indicating success.
+		On Failure
+			Status number indicating failure and dictionary with "status" = "error" and an error description in the "message" field.
 	"""
 	try:
 		fields = ["email"]
@@ -135,7 +142,8 @@ def forgot_password():
 		if not user_accounts:
 			return response.error("User does not exist.", Status.FORBIDDEN)
 
-		# TODO: Remove the for loop when email id becomes unique.
+		# This loop is here because some emails are tied to multiple accounts.
+		# So we sent a reset request for each one.
 		for user_account in user_accounts:
 			try:
 				reset_reqs = resets.find({"email": email, "user_id": user_account.id})
@@ -159,9 +167,10 @@ def forgot_password():
 				traceback.print_exc()
 				return response.error("Internal server error.", Status.INTERNAL_SERVER_ERROR)
 
-		return response.success({"message": "Password reset request sent."}, Status.ACCEPTED)
+		return response.success("Password reset request sent.", Status.OK)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to reset password, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
@@ -171,9 +180,11 @@ def reset_password():
 	API for reset password request.
 	Arguments:
 		request form (extension) or request data (website)
-	:return:
-		202 : a dictionary with "status" = "accepted, the username, and the JWT token.
-		401 : a dictionary with "status" = "error" and an error in the "message" field.
+	Returns:
+		On success:
+			Status 200 and a dictionary with "status" = "ok" and message
+		On Failure
+			Status number indicating failure and dictionary with "status" = "error" and an error description in the "message" field
 	"""
 	try:
 		fields = ["token", "password"]
@@ -213,6 +224,7 @@ def reset_password():
 			return response.error("Internal server error.", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to reset password, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
@@ -225,11 +237,11 @@ def login():
 			username : (string) : the username of the user (must be unique)
 			password : (string) : the password of the user
 	Returns:
-		200 : a dictionary with "status" = "ok, the username, and the JWT token.
-		401 : a dictionary with "status" = "error" and an error in the "message" field.
+		On success:
+			Status 200 and a dictionary with "status" = "ok", the username, and the JWT token.
+		On Failure
+			Status number indicating failure and dictionary with "status" = "error" and an error description in the "message" field
 	TODO: fix data transport method so that it is consistent between website and extension.
-	TODO: make more descriptive error message responses
-	TODO: more robust error handling
 	"""
 	try:
 		fields = ["username", "password"]
@@ -256,4 +268,5 @@ def login():
 			return response.error("Internal server error. Please try again later.", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to login, please try again later.", Status.INTERNAL_SERVER_ERROR)
