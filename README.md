@@ -11,6 +11,7 @@ Note that the local version is still under development:
 
 - No data is persisted; once the Docker containers stops, all data is lost.
 - The Chrome extension (from the Web store) is not compatible with the local version (yet).
+- However, you can build and load the extension locally.
 - "Reset Password" will not work due to no access to SendGrid.
 
 ### Requirements for running locally
@@ -44,13 +45,12 @@ elastic_domain_old=http://localhost:9200/
 elastic_domain=http://host.docker.internal:9200/
 ```
 
-Copy the following to ``frontend\website\.env.local``":
-
+Copy the following to ``frontend\website\.env.local`` and `frontend\extension\.env.local` ":
 ```
 NEXT_PUBLIC_FROM_SERVER=http://host.docker.internal:8080/
 NEXT_PUBLIC_FROM_CLIENT=http://localhost:8080/
 ```
- 
+
 ### Starting the services
 
 Add the following to ``docker-compose.yml``:
