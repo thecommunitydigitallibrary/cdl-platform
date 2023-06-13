@@ -45,13 +45,20 @@ elastic_domain_old=http://localhost:9200/
 elastic_domain=http://host.docker.internal:9200/
 ```
 
-Copy the following to ``frontend\website\.env.local`` and `frontend\extension\.env.local` ":
+Copy the following to ``frontend\website\.env.local``":
 ```
 NEXT_PUBLIC_FROM_SERVER=http://host.docker.internal:8080/
 NEXT_PUBLIC_FROM_CLIENT=http://localhost:8080/
 ```
+Copy the following to ``frontend\extension\.env.local`` ":
+```
+REACT_APP_URL=http://localhost:8080/
+REACT_APP_WEBSITE=http://localhost:8080/
+```
 
 ### Starting the services
+
+#### Website, backend API, MongoDB, and OpenSearch:
 
 Add the following to ``docker-compose.yml``:
 
@@ -128,6 +135,9 @@ Note that the slashes need to be reversed if running on Mac/Linux (above is writ
 Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --build``
 
 To stop: ``docker-compose -f docker-compose.yml down``
+
+#### Extension:
+Navigate to ``frontend\extension`` and ``run npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
 
 ## Building on top of the online version
 See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
