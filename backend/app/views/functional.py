@@ -8,6 +8,7 @@ from flask import Blueprint, request, redirect
 from flask_cors import CORS
 import validators
 from textblob import TextBlob
+import traceback
 from sentence_transformers import CrossEncoder
 
 from app.db import get_redis
@@ -128,11 +129,10 @@ def create_submission(current_user):
 			source_url : (string) : the full URL of the webpage where the extension is opened.
 			explanation/title : (string) : the reason provided by the user for why the webpage is helpful.
 			community : (string) : the ID of the community to add the result to
-				Note that it can be the user ID (personal community)
+
 	Returns:
 		200 : a dictionary with "status" = "ok and a note in the "message" field.
 		500 : a dictionary with "status" = "error" and an error in the "message" field.
-	TODO: add error handling for not indexing doc successfully in elastic
 	"""
 	try:
 		ip = request.remote_addr
@@ -175,6 +175,7 @@ def create_submission(current_user):
 			return response.error("Unable to make submission. Please try again later.", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 @functional.route("/api/submission/batch/", methods=["POST"])
@@ -360,8 +361,6 @@ def submission(current_user, id):
 			Response:
 				On error, a JSON dictionary with "status" as "error" and a message.
 				On success, a JSON dictionary with "status" as "ok" and a message.
-
-	TODO: better error handling around elastic
 	"""
 	try:
 		user_id = current_user.id
@@ -501,7 +500,7 @@ def submission(current_user, id):
 						submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
 						return response.success({"submission": submission}, Status.OK)
 
-				# case where user is the original submitter but it has been removed from all communities
+				# Case where user is the original submitter but it has been removed from all communities.
 				if str(submission.user_id) == str(user_id):
 					search_id = log_submission_view(ip, user_id, submission.id).inserted_id
 					submission = format_submission_for_display(submission, current_user, communities, search_id)
@@ -513,6 +512,7 @@ def submission(current_user, id):
 				return response.error("Cannot find submission.", Status.NOT_FOUND)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
