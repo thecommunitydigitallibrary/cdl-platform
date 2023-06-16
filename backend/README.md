@@ -125,6 +125,43 @@ On failure, status code indicating respective error with body describing the err
 
 ---
 
+### Batch Submission Creation
+
+Endpoint: ``/api/submission/batch/``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### POST
+Creates multiple new submissions. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/functional.py).
+
+##### Requires
+Requires the following in the request body:
+
+community : (string) : the ID of the community to add the result to
+			data : (array) : array of JSON objects:
+				highlighted_text/description : (string) : any highlighted text from the user's webpage (can be "").
+				source_url : (string) : the full URL of the webpage where the extension is opened.
+				explanation/title : (string) : the reason provided by the user for why the webpage is helpful.
+- ``community``: The ID of the community to which the submissions are being added to.
+- ``data``: A list of JSON objects, where each entry contains the following:
+  - ``explanation``: The now-called title of the submission (displayed as clickable hyperlink at top of submission).
+  - ``highlighted_text``: The now-called description of the submission (displayed as main body text of submission).
+  - ``source_url``: The URL of the webpage being submitted.
+
+##### Returns
+On success, status ``200`` with a list that contains, for each submission sent in the data field:
+- ``message``: A success message.
+- ``submission_id``: The ID of the newly-indexed submission.
+- ``status``: A ``200`` status.
+
+If any of the submissions fail to be indexed, then the respective list entry will contain the following fields:
+- ``message``: A message describing the error.
+- ``status``: A status code for the error.
+
+---
+
 ### Submission Get, Edit, and Delete
 Endpoint: ``/api/submission/<id>``
 
@@ -181,6 +218,30 @@ On success, status ``200`` and a message describing the success. To get the upda
 On failure, status code indicating respective error with body describing the error.
 
 ---
+
+### Connections
+Endpoint: ``/api/connect/``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### POST
+Connects two submissions with a provided description. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/functional.py).
+
+##### Requires
+Requires the following in the request body. Note that ``connection_description`` is optional.
+
+- ``connection_source``: The ID of the source submission source.
+- ``connection_target``: The ID of the target submission.
+- ``connection_description``: Text describing the connection (e.g., why someone may want to go from source to target).
+##### Returns
+On success, status ``200`` and a message describing the success. 
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
 
 # Data Models
 ## Submission

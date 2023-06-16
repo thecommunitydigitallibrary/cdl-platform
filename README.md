@@ -139,8 +139,8 @@ To stop: ``docker-compose -f docker-compose.yml down``
 #### Extension:
 Navigate to ``frontend\extension`` and ``run npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
 
-## Building on top of the online version
-See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
+## Building on Top of the Hosted CDL
+See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend). Please be courteous regarding the amount of API calls so that the backend servers do not get overwhelmed.
 
 ## Development Roadmap
 ### Frontend
@@ -156,9 +156,10 @@ See the API documentation [here](https://github.com/thecommunitydigitallibrary/c
 - [ ] Extract username/password validation and move to helpers to avoid duplication.
 - [ ] Change 202 status to 200 under password change request
 #### Submissions API
-- [ ] Pull out from functional to separate file (like users, notes)
+- [ ] Pull out from functional to separate file (like users, notes) --> search, submission, and misc
 - [ ] Change highlighted to description and explanation to title (requires front-end API change)
 - [ ] Add error handling for not indexing doc successfully in elastic (get, patch, delete)
 - [ ] Change highlighted text and explanation in return object to description and title
 - [ ] Double-check if user id is needed in submission get return. If not, remove it.
-
+- [ ] Move validate_submission to helpers
+- [ ] Change batch call to loop over existing POST endpoint

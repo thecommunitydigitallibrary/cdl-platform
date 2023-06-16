@@ -73,7 +73,7 @@ def create_connection(current_user):
 			connection_source_id = ObjectId(connection_source)
 			connection_target_id = ObjectId(connection_target)
 		except:
-			print(connection_source, connection_target)
+			print("Cannot convert to ObjectID", connection_source, connection_target)
 			return response.error("Error: Invalid source or target id.", Status.BAD_REQUEST)
 		ack = log_connection(ip, user_id, connection_source_id, connection_target_id, connection_description)
 		if ack.acknowledged:
@@ -85,6 +85,7 @@ def create_connection(current_user):
 			return response.error("Cannot make connection, please try again later.", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to create connection, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
@@ -121,7 +122,7 @@ def validate_submission(highlighted_text, explanation, source_url=None):
 @token_required
 def create_submission(current_user):
 	"""
-	Endpoint for a user to submit a webpage using the extension. 
+	Endpoint for a user to submit a webpage. 
 	Arguments:
 		current_user : (dictionary): the user recovered from the JWT token.
 		request form with
@@ -181,6 +182,21 @@ def create_submission(current_user):
 @functional.route("/api/submission/batch/", methods=["POST"])
 @token_required
 def create_batch_submission(current_user):
+	"""
+	Endpoint for a user to submit a batch of webpages.
+	Arguments:
+		current_user : (dictionary): the user recovered from the JWT token.
+		request form with
+			community : (string) : the ID of the community to add the submissions to
+			data : (list) : list of JSON objects:
+				highlighted_text/description : (string) : any highlighted text from the user's webpage (can be "").
+				source_url : (string) : the full URL of the webpage where the extension is opened.
+				explanation/title : (string) : the reason provided by the user for why the webpage is helpful.
+
+	Returns:
+		In all cases, a status code and a list containing the status/error message (if any) for each attempted submission.
+		This is so that errors can be assessed individually and so you can re-send the submissions that failed.
+	"""
 	requests = request.get_json()
 	data = requests['data']
 	community = requests['community']
