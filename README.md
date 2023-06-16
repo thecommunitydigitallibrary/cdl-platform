@@ -1,12 +1,13 @@
 # The Community Digital Library 
 The Community Digital Library (CDL) is a platform for users to save, search, and discover online content. 
 
-To use the CDL, you have two options:
+To use the CDL, you have three options:
 
-1. Online version: Visit [the CDL website](https://textdata.org/), install the Chrome extension, create an account, and begin saving websites.
-2. Offline version: Clone this repository, set up Docker, and run the services locally.
+1. Full online version: Visit [the CDL website](https://textdata.org/), install the Chrome extension, create an account, and begin saving websites.
+2. Full offline version: Clone this repository, set up Docker, and run the services locally. This is described in the section below titled "Setting Up the Local Version".
+3. Hosted backend, local frontend: You can leverage the APIs for the backend of the CDL, and create or extend your own frontend. The API documentation is [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
 
-## Setting up the local version
+## Setting Up the Local Version
 Note that the local version is still under development:
 
 - No data is persisted; once the Docker containers stops, all data is lost.
@@ -163,3 +164,5 @@ See the API documentation [here](https://github.com/thecommunitydigitallibrary/c
 - [ ] Double-check if user id is needed in submission get return. If not, remove it.
 - [ ] Move validate_submission to helpers
 - [ ] Change batch call to loop over existing POST endpoint
+#### Notes API
+- [ ] On PATCH, make title and content optional, just like submission PATCH

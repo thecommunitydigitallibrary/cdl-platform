@@ -242,6 +242,75 @@ On failure, status code indicating respective error with body describing the err
 
 ---
 
+## Notes
+
+### Note Get, Create, Edit, and Delete
+
+Endpoint: ``/api/notes/<id>/<id>/<id>``
+
+Requires user token passed as "Authorization" in the header.
+
+Notes are arranged by a hierarchy of ``<id>``'s (up to three), and certain requests do not require any ``<id>``'s.
+
+---
+
+#### Get
+Gets a note given some ID path. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/notes.py).
+
+##### Requires
+Nothing in the request body. 
+
+##### Returns
+On success, status code indicating success and a body with the following fields:
+- ``titles``: A list containing nested dictionaries of the following:
+  - ``title``: The title of the note page.
+  - ``id``: The ID of the note page.
+  - ``notes``: The children of the note page (list of more titles, ids, and notes).
+- ``note``: The raw markdown of the requested note (only when the ``<id>`` path is provided).
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+#### POST
+Creates a new note page according to the specified ``<id>`` path. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/notes.py).
+
+##### Requires
+- ``title``: The title of the new note page.
+
+##### Returns
+On success, status code indicating success and a body with the following field:
+- ``id``: The ID of the new note page. This ID is the provided ``<id>`` path with an additional UUID hash appended to the end. Each ``<id>`` is separated by a "|".  
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+#### PATCH
+Updates a note page according to the specified ``<id>`` path. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/notes.py).
+
+##### Requires
+- ``title``: The title to update the note page with.
+- ``content``: The content to update the note page with.
+
+##### Returns
+On success, status code indicating success and a message in body.
+
+On failure, status code indicating respective error with message describing the error.
+
+---
+
+#### Delte
+Deletes a note page according to the specified ``<id>`` path. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/notes.py).
+
+##### Requires
+Nothing required in the request body.
+
+##### Returns
+On success, status code indicating success and a message in body.
+
+On failure, status code indicating respective error with message describing the error.
+
 
 # Data Models
 ## Submission
