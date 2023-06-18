@@ -290,6 +290,8 @@ On failure, status code indicating respective error with body describing the err
 Updates a note page according to the specified ``<id>`` path. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/notes.py).
 
 ##### Requires
+Requires the following in the request body:
+
 - ``title``: The title to update the note page with.
 - ``content``: The content to update the note page with.
 
@@ -300,7 +302,7 @@ On failure, status code indicating respective error with message describing the 
 
 ---
 
-#### Delte
+#### Delete
 Deletes a note page according to the specified ``<id>`` path. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/notes.py).
 
 ##### Requires
@@ -311,8 +313,202 @@ On success, status code indicating success and a message in body.
 
 On failure, status code indicating respective error with message describing the error.
 
+---
+
+## Communities
+
+### Get Communities
+
+Endpoint: ``/api/getCommunities``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### GET
+Gets all of a user's communities. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/communities.py).
+
+##### Requires
+Nothing in the request body. 
+
+##### Returns
+On success, status code indicating success and a body with the following fields:
+- ``username``: The username of the user
+- ``community_info``: A list of the following entries:
+  - ``community_id``: The ID of the community.
+  - ``name``: The name of the community.
+  - ``description``: The description of the community.
+  - ``join_key``: The join key for the community.
+  - ``is_admin``: True if the user is a community admin, and false otherwise.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+### Create and Edit a Community
+
+Endpoint: ``/api/createCommunity``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### POST
+Create a new community. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/communities.py).
+
+##### Requires
+Requires the following in the request body:
+
+- ``community_name``: The name of the new community (limit 100 characters).
+- ``description``: The description of the new community (limit 500 characters, optional).
+
+
+##### Returns
+On success, status code indicating success and a body with the success message.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+#### PATCH
+Edits a community. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/communities.py).
+
+##### Requires
+Requires at least one of the following in the request body:
+
+- ``community_name``: The name of the new community (limit 100 characters).
+- ``description``: The description of the new community (limit 500 characters).
+
+
+##### Returns
+On success, status code indicating success and a body with the success message.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+### Join a Community
+
+Endpoint: ``/api/joinCommunity``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### POST
+Join a community. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/communities.py).
+
+##### Requires
+Requires the following in the request body:
+
+- ``join_key``: The join key of the community that the user requests to join.
+
+
+##### Returns
+On success, status code indicating success and a body with the success message.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+### Leave a Community
+
+Endpoint: ``/api/leaveCommunity``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### POST
+Leave a community. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/communities.py).
+
+##### Requires
+Requires the following in the request body:
+
+- ``community_id``: The ID of the community that the user requests to leave.
+
+
+##### Returns
+On success, status code indicating success and a body with the success message.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+### Community History
+
+Endpoint: ``/api/communityHistory``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### GET
+Get all communities that have been left by a user. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/communities.py).
+
+##### Requires
+Nothing in the request body. 
+
+##### Returns
+On success, status code indicating success and a body with the following field:
+- ``left_communities``: A list of the following entries:
+  - ``community_id``: The ID of the community.
+  - ``name``: The name of the community.
+  - ``description``: The description of the community.
+  - ``join_key``: The join key for the community.
+  - ``is_admin``: True if the user is a community admin, and false otherwise.
+  - ``time``: The time that the user left the community.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+## Search
+
+### Search over Submissions
+
+Endpoint: ``/api/search``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### GET
+Search over submissions. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/functional.py).
+
+##### Requires
+This API endpoint handles multiple types of searches and paging. 
+
+Requires the following in the request body (on a new query):
+
+- ``query``: The query to search.
+- ``community``: The community ID to search over. If "all", then the query will be searched over all communities joined by the user.
+- ``page``: The page of the search to be returned. If not included, then defaults to 0. Pages are returned in batches of 10.
+- ``source``: The type of query to perform. This can be one of the following (defaults to ``webpage_search``):
+  - ``webpage_search``: The search performed by a user entering a query on the main CDL website in the search bar.
+  - ``note_automatic``: The search performed automatically when a user edits a notes page.
+  - ``extension_open``: The search performed automatically when a user opens the extension.
+
+In the case of ``extension_open``, two additional, contextual fields can be passed:
+- ``highlighted_text``: The highlighted text when the user opens the extension, if any.
+` ``url``: The URL of the website when the user opens the extension.
+
+
+For paging, one can pass the following in the request body:
+- ``search_id``: The ID of the search, returned by the first new query request.
+- ``page``: The page of the search to be returned. Pages are returned in batches of 10. 
+
+
+##### Returns
+On success, status ``200`` with the JSON body fields corresponding to the "Search" data model, located at the bottom of this document.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
 
 # Data Models
+
 ## Submission
 ```
 {
@@ -347,3 +543,33 @@ On failure, status code indicating respective error with message describing the 
   hashtags : list of hashtags present in highlighted_text or explanation
 }
 ```
+
+## Search
+
+```
+{
+  search_id : the string ObjectId of the search log
+  total_num_results : the total number of hits returned by OpenSearch
+  query : the query entered by the user
+  current_page : the current page being requested by the user
+  search_results_page [
+    {
+      redirect_url : the full URL + metadata so when the user clicks, it redirects through the CDL server to log
+      display_url : the URL displayed to the user (with ">")
+      raw_source_url : the full URL as submitted for editing
+      submission_id: the string ObjectId of the submission
+      result_hash : the rank_searchId_resultId, identifying the result in the context of search
+      highlighted_text : the highlighted text of the submission
+      explanation : the explanation of the submission
+      communities_part_of {
+        <community_id> : <community_name>,
+        ...
+      },
+      children : list of search results that share the same URL, but are not the highest-scoring
+      hashtags : list of hashtags present in highlighted_text or explanation
+    },
+    ...
+  ]
+}
+```
+

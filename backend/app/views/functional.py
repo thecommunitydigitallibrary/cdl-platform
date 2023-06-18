@@ -807,6 +807,7 @@ def search(current_user):
 		return response.success(return_obj, Status.OK)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to search, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
