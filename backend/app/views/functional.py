@@ -1013,6 +1013,12 @@ def get_recommendations(current_user):
 	Endpoint for the webpage recommendation functionality.
 	Arguments:
 		current_user: (dictionary) : the user recovered from the JWT token.
+		request args with:
+			method : (string) : the typed query of the user.
+				'recent' --> most recent submissions to user's communities
+				'explore_user_submissions' --> similar to three most recent user submissions
+			page: (int) : the page number of be returned (if not included, sets to 0)
+			recommendation_id : (string) : the ID of the recommendation session, used for efficient paging.
 	Returns:
 		200 : return_obj : (dictionary) : recommendations for user
 	"""
@@ -1030,7 +1036,7 @@ def get_recommendations(current_user):
 		user_communities = current_user.communities
 		CDLweb_community_id = "63a4c21aee3be6ac5c533a55"
 
-		# settign default method to 'explore_user_submissions'
+		# setting default method to 'explore_user_submissions'
 		method = request.args.get("method", "explore_user_submissions")
 
 		# paging

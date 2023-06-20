@@ -506,6 +506,41 @@ On failure, status code indicating respective error with body describing the err
 
 ---
 
+## Recommendation
+
+### Get Recommendations
+
+Endpoint: ``/api/recommend``
+
+Requires user token passed as "Authorization" in the header.
+
+---
+
+#### GET
+Get Recommendations. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/functional.py).
+
+##### Requires
+This API endpoint handles multiple types of recommendation for a user. 
+
+Requires the following in the request body (on a new recommendation request):
+
+- ``method``: The type of recommendation to return. Can either be:
+  - ``recent``: Which will return the most recent submissions to the user's communities (not including CDLWeb or own submissions).
+  - ``explore_user_submissions``: Which will return most similar submissions to user's communities according to their most recent three submissions.
+- ``page``: The page of the search to be returned. If not included, then defaults to 0. Pages are returned in batches of 10.
+
+For paging, one can pass the following in the request body:
+- ``recommendation_id``: The ID of the recommendation, returned by the first new recommendation request.
+- ``page``: The page of the recommendation to be returned. Pages are returned in batches of 10. 
+
+
+##### Returns
+On success, status ``200`` with the JSON body fields corresponding to the "Recommendation" data model, located at the bottom of this document.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
 
 # Data Models
 
@@ -549,7 +584,7 @@ On failure, status code indicating respective error with body describing the err
 ```
 {
   search_id : the string ObjectId of the search log
-  total_num_results : the total number of hits returned by OpenSearch
+  total_num_results : the total number of search results
   query : the query entered by the user
   current_page : the current page being requested by the user
   search_results_page [
@@ -570,6 +605,16 @@ On failure, status code indicating respective error with body describing the err
     },
     ...
   ]
+}
+```
+
+## Recommendation
+```
+{
+  recommendation_id : the string ObjectID of the recommendation log
+  total_num_results: the total number of recommendations for this request (capped at 50)
+  current_page: the current page of results being requested by the user
+  recommendation_results_page: same as "search_result_page" in Search above
 }
 ```
 

@@ -175,3 +175,5 @@ See the API documentation [here](https://github.com/thecommunitydigitallibrary/c
 - [ ] Remove "message" from success (need to update frontend community page + components)
 - [ ] Move out relevance judgments to separate view
 - [ ] Rename createCommunity endpoint to reflect that it can also be edited using this endpoint
+#### Recommendations API
+- [ ] Merge new recommendation method from old repo, remove old method
