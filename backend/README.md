@@ -1,6 +1,6 @@
 # CDL Backend API Documentation
 
-All endpoints are under the following base URL: ``https://textdata.org/``
+All endpoints are under the following base URL: ``https://textdata.org``
 
 ## Account Management
 
