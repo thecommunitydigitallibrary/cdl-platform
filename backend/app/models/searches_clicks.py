@@ -5,7 +5,7 @@ from app.models.mongo import Mongo
 
 # TODO resolve the community and multiple models in db
 
-
+# changed all instances of 'search_time' to 'time'
 class SearchesClicks(Mongo):
 	def __init__(self):
 		cdl_db = get_db()
@@ -14,7 +14,7 @@ class SearchesClicks(Mongo):
 	def convert(self, click_db):
 
 		if click_db["type"] == "webpage_search":
-			return SearchClick(
+			return SearchClickWebpageSearch(
 				click_db["_id"],
 				click_db["ip"],
 				click_db["user_id"],
@@ -24,60 +24,81 @@ class SearchesClicks(Mongo):
 				click_db["time"],
 				own_submissions=click_db.get("own_submissions", False)
 			)
-		else:
-			try:
-				hash = click_db["hash"]
-			except:
-				hash = None
-			return SearchClick(
-				click_db["_id"],
-				click_db["ip"],
-				click_db["user_id"],
-				click_db["url"],
-				click_db["highlighted_text"],
-				click_db["query"],
-				click_db["type"],
-				hash=hash,
-				search_time=click_db["time"],
-				community=click_db["community"]
-			)
+		elif click_db["type"] == "extension_open":
+				try:
+					hash = click_db.get("hash", None)
+				except:
+					print('hash err: ',hash)
 
-	def insert(self, click):
-		click_db = {
-			"ip": click.ip,
-			"user_id": click.user_id,
-			"url": click.url,
-			"highlighted_text": click.highlighted_text,
-			"query": click.query,
-			"type": click.type,
-			"time": click.time,
-			"community": click.community
-		}
-		if click.hash:
-			click_db['hash'] = click.hash
-		click.id = self.collection.insert_one(click_db)
-		return click.id
+				url = click_db.get("url","")
+				source_url = click_db.get("source_url","")
+				click_db['url'] = url or source_url
+				
+				return SearchClickExtension(
+					click_db["_id"],
+					click_db["ip"],
+					click_db["user_id"],
+					click_db["highlighted_text"],
+					click_db["query"],
+					click_db["type"],
+					click_db["url"],
+					hash=hash,
+					time=click_db["time"],
+				)
 
-
-class SearchClick:
-	def __init__(self, id, ip, user_id, url, highlighted_text, query, typ, hash=None, community=None, search_time=None):
+class SearchClickExtension:
+	def __init__(self, id, ip, user_id, url, highlighted_text, type, query,  time=None, community=None, hash=None, own_submissions=False):
 		self.id = id
 		self.ip = ip
 		self.user_id = user_id
 		self.url = url
 		self.highlighted_text = highlighted_text
 		self.query = query
-		self.type = typ
+		self.type = type
 		self.hash = hash
-		# self.community = community
-		self.time = time.time() if not search_time else search_time
+		self.own_submissions = own_submissions
+		self.community = community
+		self.time = time.time() if not time else time
 
-	def __init__(self, id, ip, user_id, typ, query, community, search_time, own_submissions=False):
+	def insert(self):
+		click_db = {
+			"_id": self.id,
+			"ip": self.ip,
+			"user_id": self.user_id,
+			"highlighted_text": self.highlighted_text,
+			"query": self.query,
+			"type": self.type,
+			"url": self.url,
+			"hash": self.hash,
+			"time": self.time,
+			"community": self.community,
+			"own_submissions": self.own_submissions
+		}
+		self.id = self.collection.insert_one(click_db)
+		return self.id
+
+class SearchClickWebpageSearch:
+
+	def __init__(self, id, ip, user_id, typ, query, community, time, own_submissions=False):
 		self.id = id
 		self.ip = ip
 		self.user_id = user_id
 		self.query = query
 		self.type = typ
 		self.community = community
-		self.time = time.time() if not search_time else search_time
+		self.time = time.time() if not time else time
 		self.own_submissions = own_submissions
+
+	def insert(self):
+		click_db = {
+            "_id": self.id,
+            "ip": self.ip,
+            "user_id": self.user_id,
+            "query": self.query,
+            "type": self.type,
+            "community": self.community,
+            "time": self.time,
+            "own_submissions": self.own_submissions
+        }
+		self.id = self.collection.insert_one(click_db)
+		return self.id

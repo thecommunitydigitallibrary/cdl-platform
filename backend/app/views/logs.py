@@ -52,7 +52,8 @@ def log_extension_search(ip, user_id, source_url, highlighted_text, query, typ):
 	cdl_searches_clicks = SearchesClicks()
 
 	hash = str(uuid.uuid4()) if typ == "extension_open" else None
-	log = SearchClick(ip, user_id, source_url, highlighted_text, query, typ, hash)
+	# changed class here to SearchClickExtension
+	log = SearchClickExtension(ip, user_id, source_url, highlighted_text, query, typ, hash) 
 	insert = cdl_searches_clicks.insert(log)
 	if not insert.acknowledged:
 		print("Error: unable to log extension search")
@@ -278,5 +279,3 @@ def log_recommendation_click(ip, rec_result_hash, redirect_url):
 	if not insert.acknowledged:
 		print("Error: unable to log rec click")
 	return
-
-	

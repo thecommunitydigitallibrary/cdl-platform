@@ -1036,8 +1036,8 @@ def get_recommendations(current_user):
 		user_communities = current_user.communities
 		CDLweb_community_id = "63a4c21aee3be6ac5c533a55"
 
-		# setting default method to 'explore_user_submissions'
-		method = request.args.get("method", "explore_user_submissions")
+		# setting default method to 'explore_similar_extension'
+		method = request.args.get("method", "explore_similar_extension")
 
 		# paging
 		page_number = request.args.get("page", 0)
@@ -1049,7 +1049,7 @@ def get_recommendations(current_user):
 
 		# convert communities to str for elastic
 		requested_communities = [str(x) for x in user_communities]
-		if CDLweb_community_id in requested_communities and method == "recent":
+		if CDLweb_community_id in requested_communities:
 			requested_communities.remove(CDLweb_community_id)
 
 		# set up cache
@@ -1073,8 +1073,8 @@ def get_recommendations(current_user):
 
 		# if the recommendation_id is not included, then this is first page/fresh request
 		if not recommendation_id:
-			# Create a new recommendation_id (as it is the first request by the user)
 
+			# Create a new recommendation_id (first request by the user)
 			recommendation_id, _ = log_recommendation_request(ip, user_id, requested_communities, method)
 
 			recommendation_id = str(recommendation_id)  # for returning
@@ -1088,42 +1088,7 @@ def get_recommendations(current_user):
 				pages = hydrate_with_hashtags(pages)
 				page = cache.insert(user_id_str, recommendation_id, pages, page_number)
 			
-			elif method == "explore_user_submissions":
-				try:
-					# obj to access db
-					cdl_logs = Logs()
-					user_latest_submissions = cdl_logs.find({"user_id":ObjectId(user_id_str)})
-					user_latest_submissions = sorted(user_latest_submissions, reverse=True, key=lambda x: x.time)[:3]
-					query_ids = {str(x.id) for x in user_latest_submissions}
-				except Exception as e:
-					user_latest_submissions = []
-					query_ids = {}
-					print(e)
-
-				search_text = ""
-				
-				# limit to recent 3
-				for submission in user_latest_submissions:
-					highlighted_text_nohash = re.sub("#", " ", submission.highlighted_text)
-					title_text_nohash = re.sub("#", " ", submission.explanation)
-
-					full_text = highlighted_text_nohash + " " + title_text_nohash
-
-					if len(full_text) > 10:
-						blob = TextBlob(full_text)
-						new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
-						search_text +=" "+ new_terms
-
-				# keep duplicate words in search query for weighting towards more popular
-				number_of_hits, hits = elastic_manager.search(search_text, list(communities.keys()), page=0, page_size=1000)
-
-				pages = create_page(hits, rc_dict)
-				pages = deduplicate_by_ids(pages, query_ids)
-
-				pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
-				pages = hydrate_with_hashtags(pages)
-				page = cache.insert(user_id_str, recommendation_id, pages, page_number)
-
+			
 			elif method == "explore_similar_extension":
 				"""
 				1. call mongo, get most recent extension opens
@@ -1135,45 +1100,56 @@ def get_recommendations(current_user):
 
 				v2: Eventually: do for submissions or clicks, too. But will need to filter step 4 with submissions
 				"""
-
-				# Get most recent extension opens for that user
-
-				# 63478124d1fce33fba41bc66
-				# x = cdl_searches_clicks.find_one({"_id":ObjectId("6348498c81f921820b087b2e")})
-
-				# user_extension_open_data = cdl_searches_clicks.find({ "user_id": ObjectId(user_id_str), "type": "extension_open" })
-				# y = cdl_logs.find({ "type": "submit_context" })
 				
-				# returns 'url'?
+				# Combining user's latest 3 submissions with all 'extension open' searches
+				search_text = ""
+				full_text=""
+				
+				# explore: user's submission data
 				try:
-					# obj to acc to db
-					cdl_searches_clicks = SearchesClicks()
-					y = cdl_searches_clicks.find({"user_id":ObjectId(user_id_str)})
-
+					cdl_logs = Logs()
+					user_latest_submissions = cdl_logs.find({"user_id":ObjectId(user_id_str)})
+					user_latest_submissions = sorted(user_latest_submissions, reverse=True, key=lambda x: x.time)[:3]
+					query_ids = {str(x.id) for x in user_latest_submissions}
 				except Exception as e:
+					user_latest_submissions = []
+					query_ids = {}
 					print(e)
 
-				highlighted_texts_ext_open = ""
+				for submission in user_latest_submissions:
+					highlighted_text_nohash = re.sub("#", " ", submission.highlighted_text)
+					title_text_nohash = re.sub("#", " ", submission.explanation)
+
+					full_text = highlighted_text_nohash + " " + title_text_nohash
+
+				# explore user's extension opens data
+				try:
+					cdl_searches_clicks = SearchesClicks()
+					users_extension_opens = cdl_searches_clicks.find({ "type": "extension_open", "user_id": ObjectId(user_id_str) })	
+
+				except Exception as e:
+					users_extension_opens=[]	
+					print(e)					
 				
-				# limit to last 10
-				for i in y:
-					highlighted_text_nohash = re.sub("#", " ", i.highlighted_text)
+				for submission in users_extension_opens:
+					if submission and submission.highlighted_text:
+						highlighted_text_nohash = re.sub("#", " ", submission.highlighted_text)
+						full_text += highlighted_text_nohash
 
-					# if not i.highlighted_text:
-					# 	# query_ext_open.append(i.query)
-					# 	pass
+				if len(full_text) > 10:
+					blob = TextBlob(full_text)
+					new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
+					search_text+=" "+ new_terms
 
-					if len(i.highlighted_text.split()) > 10:
-						blob = TextBlob(highlighted_text_nohash)
-						new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
-						highlighted_texts_ext_open+=" "+ new_terms
-
-				number_of_hits, hits = elastic_manager.search(highlighted_texts_ext_open, list(communities.keys()), page=0, page_size=1000)
+				number_of_hits, hits = elastic_manager.search(search_text, list(communities.keys()), page=0, page_size=1000)
 
 				pages = create_page(hits, rc_dict)
+				pages = deduplicate_by_ids(pages, query_ids)
+
 				pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
 				pages = hydrate_with_hashtags(pages)
 				page = cache.insert(user_id_str, recommendation_id, pages, page_number)
+
 
 		# if the recommendation_id is included, then the user is looking for a specific page of a previous request
 		else:
