@@ -176,3 +176,6 @@ See the API documentation [here](https://github.com/thecommunitydigitallibrary/c
 - [ ] Rename createCommunity endpoint to reflect that it can also be edited using this endpoint
 #### Recommendations API
 - [ ] Merge new recommendation method from old repo, remove old method
+#### Feedback API
+- [ ] Remove "/" and "message" in /api/feedback/ success, "message" in /api/submitRelJudgment
+- [ ] Extract /api/feedback/ and /api/submitRelJudgment to separate views file

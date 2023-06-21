@@ -282,8 +282,9 @@ def click():
 	Endpoint for redirecting clicked search results (in both extension and website).
 	Arguments:
 		request args with:
-			hash : (string) : the hash of the search result.
+			hash : (string) : the hash of the search result: "rank_submissionID_searchID"
 			redirect_url : (string) : to redirect URL. 
+			method: "search" or "recommendation"
 
 	Returns:
 		A Flask redirect object pointed to the redirect URL.
@@ -305,6 +306,7 @@ def click():
 		return redirect(redirect_url)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to redirect link, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
@@ -338,6 +340,7 @@ def feedback(current_user):
 			                      Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to record feedback, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 

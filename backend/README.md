@@ -541,6 +541,75 @@ On failure, status code indicating respective error with body describing the err
 
 ---
 
+## Feedback
+
+### Submit Textual Feedback
+
+Endpoint: ``/api/feedback/``
+
+---
+
+#### POST
+Submit textual feedback. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/users.py).
+
+##### Requires
+Requires the following in the request body:
+
+- ``submission_id``: The ID of the submission to submit feedback for. Only necessary if feedback is tied to submission.
+- ``message``: The feedback itself.
+
+##### Returns
+On success, status ``200`` with the field "message" describing the success.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+### Submit Relevance Judgment Feedback
+
+Endpoint: ``/api/submitRelJudgments/``
+
+---
+
+#### POST
+Submit relevant judgment feedback. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/communities.py).
+
+##### Requires
+Requires the following in the request body:
+- A dictionary containing entries where keys are concatenated resultRank_submissionID_queryID and values are judgments ("1" for relevant, "0" for not relevant).
+
+##### Returns
+On success, status ``200`` with the field "message" describing the success.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+## Redirect
+
+### Redirect Submission Click
+
+Endpoint: ``/api/redirect/``
+
+---
+
+#### GET
+Redirects a submission click. [Implementation File]https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/functional.py).
+
+##### Requires
+Requires the following in the request body:
+
+- ``hash``: The hash of the result: "rank_submissionID_searchID"
+- ``redirect_url``: The URL to redirect a user to.
+- ``method``: How the submission was served ("search" or "recommendation")
+
+##### Returns
+On success, returns a Flask redirect.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
 
 # Data Models
 
