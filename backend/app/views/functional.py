@@ -1091,14 +1091,7 @@ def get_recommendations(current_user):
 			
 			elif method == "explore_similar_extension":
 				"""
-				1. call mongo, get most recent extension opens
-				2. extract highlighted text, query (v2: eventually, url --> website title/description)
-				3. pass through textblob to extract noun phrases
-				4. call elastic search to get results with 3. as query
-				5. continue as recent
-				6. rerank by user clusters (v2)
-
-				v2: Eventually: do for submissions or clicks, too. But will need to filter step 4 with submissions
+				Combines three most recent submissions with the three most recent extension opens
 				"""
 				
 				# Combining user's latest 3 submissions with all 'extension open' searches
@@ -1125,7 +1118,8 @@ def get_recommendations(current_user):
 				# explore user's extension opens data
 				try:
 					cdl_searches_clicks = SearchesClicks()
-					users_extension_opens = cdl_searches_clicks.find({ "type": "extension_open", "user_id": ObjectId(user_id_str) })	
+					users_extension_opens = cdl_searches_clicks.find({ "type": "extension_open", "user_id": ObjectId(user_id_str) })
+					users_extension_opens = sorted(users_extension_opens, reverse=True, key=lambda x: x.time)[:3]
 
 				except Exception as e:
 					users_extension_opens=[]	
