@@ -29,16 +29,6 @@ class ScrapeWorker:
             data["scrape_status"] = {
                 "code": CODE_URL_NAME_TOO_LONG, "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_URL_NAME_TOO_LONG]}
             return data
-        # if os.path.exists(self.out_path + url_path + "data.json"):
-        #     data["scrape_status"] = {
-        #         "code": CODE_SCRAPE_ALREADY_ATTEMPTED, "message": "file already exists"}
-        #     return data
-        # else:
-        #     # handle case where we fail before we write anything
-        #     try:
-        #         os.makedirs(self.out_path + url_path)
-        #     except:
-        #         pass
 
         if url.split(".")[-1] in ["bz2", "zip", "csv", "sqlite3", "exe", "mp3", "mp4", "pdf", "gz", "png", "jpg"]:
             data["scrape_status"] = {"code": CODE_INVALID_FILE_ENDING_FOR_URL,
@@ -58,13 +48,7 @@ class ScrapeWorker:
         finally:
             sys.settrace(None)
 
-        print("\t Page acquired")
-
-        # Check if the response header contains `html`, if not then discard the request. # ["bz2", "zip", "csv", "sqlite3", "exe", "mp3", "mp4", "pdf", "gz", "png", "jpg"]:
-        # if "html" not in resp.headers['Content-Type']:
-        #     data["scrape_status"] = {"code": CODE_INVALID_FILE_ENDING_FOR_URL,
-        #                              "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_INVALID_FILE_ENDING_FOR_URL]}
-        #     return data
+        # print("\t Page acquired")
 
         # For the case where the response code is Unauthorized, Forbidden, Method Not Allowed, Not Acceptable or Proxy Authentication Required
         if resp.status_code in [401, 403, 405, 406, 407]:
