@@ -16,28 +16,40 @@ from app.helpers.helpers import token_required, build_display_url, build_result_
 	format_time_for_display
 from app.helpers import response
 from app.helpers.status import Status
+from app.helpers.scraper import ScrapeWorker
 from app.models.cache import Cache
 from app.models.communities import Communities
 from app.models.connections import Connections
+from app.models.webpages import Webpages
 from app.models.logs import Logs
 from app.models.searches_clicks import SearchesClicks
 from app.models.recommendations_clicks import RecommendationsClicks
 from app.models.user_feedback import UserFeedbacks, UserFeedback
 from app.views.communities import get_communities_helper
 from app.views.logs import log_connection, log_submission, log_click, log_community_action, log_submission_view, \
-	log_search, log_recommendation_request, log_recommendation_click
+	log_search, log_recommendation_request, log_recommendation_click, log_webpage
 from elastic.manage_data import ElasticManager
 
 functional = Blueprint('functional', __name__)
 CORS(functional)
 
-# Connect to elastic
+# Connect to elastic for submissions index operations
 elastic_manager = ElasticManager(
 	os.environ["elastic_username"],
 	os.environ["elastic_password"],
 	os.environ["elastic_domain"],
 	os.environ["elastic_index_name"],
-	None)
+	None,
+	"submissions")
+
+# Connect to elastic for webpages index operations
+webpages_elastic_manager = ElasticManager(
+	os.environ["elastic_username"],
+	os.environ["elastic_password"],
+	os.environ["elastic_domain"],
+	os.environ["elastic_webpages_index_name"],
+	None,
+	"webpages")
 
 # Set up neural reranking model
 try:
@@ -168,6 +180,24 @@ def create_submission(current_user):
 		if status.acknowledged:
 			doc.id = status.inserted_id
 			index_status = elastic_manager.add_to_index(doc)
+
+			scraper = ScrapeWorker()
+			if not scraper.is_scraped_before(source_url):
+				data = scraper.scrape(source_url)  # Triggering Scraper
+
+				# insert in MongoDB
+				insert_status, webpage = log_webpage(data["url"],
+						data["webpage"],
+						doc.communities,
+						data["scrape_status"],
+						data["scrape_time"]
+				)
+				if insert_status.acknowledged:
+					# index in Openaseacrch
+					webpages_elastic_manager.add_to_index(webpage)
+				else:
+					print("Unable to insert webpage data in database.")
+			
 			return response.success({
 				"message": "Context successfully submitted and indexed.",
 				"submission_id": str(status.inserted_id)
@@ -254,6 +284,24 @@ def create_batch_submission(current_user):
 			if status.acknowledged:
 				doc.id = status.inserted_id
 				index_status = elastic_manager.add_to_index(doc)
+
+				scraper = ScrapeWorker()
+				if not scraper.is_scraped_before(source_url):
+					data = scraper.scrape(source_url)  # Triggering Scraper
+
+					# insert in MongoDB
+					insert_status, webpage = log_webpage(data["url"],
+							data["webpage"],
+							doc.communities,
+							data["scrape_status"],
+							data["scrape_time"]
+					)
+					if insert_status.acknowledged:
+						# index in Openaseacrch
+						webpages_elastic_manager.add_to_index(webpage)
+					else:
+						print("Unable to insert webpage data in database.")
+
 				results[f'Submission {i}'] = {
 					"message": "Context successfully submitted and indexed.",
 					"submission_id": str(status.inserted_id),

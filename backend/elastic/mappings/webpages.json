@@ -1,0 +1,33 @@
+{
+    "mappings": {
+      "properties": {
+        "community": {
+          "type": "keyword"
+        },
+        "url": {
+          "type": "text"
+        },
+        "webpage": {
+          "properties": {
+            "metadata": {
+              "properties": {
+                "title": {
+                  "type": "text"
+                },
+                "h1": {
+                  "type": "text"
+                },
+                "description": {
+                  "type": "text"
+                }
+              }
+            },
+            "paragraphs": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    }
+  }
+  

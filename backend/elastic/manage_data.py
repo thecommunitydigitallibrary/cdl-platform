@@ -1,3 +1,4 @@
+import os
 import requests
 from requests.auth import HTTPBasicAuth
 import json
@@ -8,7 +9,7 @@ import validators
 # TODO: added better error handling
 
 class ElasticManager:
-  def __init__(self, elastic_username, elastic_password, elastic_domain, elastic_index_name, cdl_logs):
+  def __init__(self, elastic_username, elastic_password, elastic_domain, elastic_index_name, cdl_logs, index_mapping):
     """
     Initializes the ElasticManager.
 
@@ -32,8 +33,8 @@ class ElasticManager:
 
     resp = requests.head(self.domain + self.index_name, auth=self.auth)
     if resp.status_code != 200:
-      self.create_index_with_mapping()
-      print("Index not found, created with mapping.")
+      self.create_index_with_mapping(index_mapping)
+      print(f"Index not found, created with {index_mapping} mapping.")
     else:
       print("Index already exists!")
 
@@ -196,45 +197,56 @@ class ElasticManager:
         The response string from elastic.
     """
 
-
-    highlighted_text = doc.highlighted_text
-    doc_id = str(doc.id)
-
-
-    # saved content will be when a user id appears in communities
-    # submittted content will be pulled from mongodb (can't search it easily)
-    communities = doc.communities
-
-    flat_communities = []
-    for user_id in communities:
-      for community_id in communities[user_id]:
-        flat_communities.append(str(community_id))
+    if self.index_name == os.environ["elastic_index_name"]:
+      highlighted_text = doc.highlighted_text
+      doc_id = str(doc.id)
 
 
-    # for recovering submissions
-    user_id = str(doc.user_id)
+      # saved content will be when a user id appears in communities
+      # submittted content will be pulled from mongodb (can't search it easily)
+      communities = doc.communities
 
-    # for ordering by time
-    time = int(float(doc.time))
+      flat_communities = self.flatten_communities(communities)
 
 
-    explanation = doc.explanation
-    source_url = doc.source_url
+      # for recovering submissions
+      user_id = str(doc.user_id)
 
-     # extract hashtags for elastic from both fields
-    hashtags_explanation = [x for x in explanation.split() if len(x) > 1 and x[0] == "#"]
-    hashtags_ht = [x for x in highlighted_text.split() if len(x) > 1 and x[0] == "#"]
-    hashtags = list(set(hashtags_explanation + hashtags_ht))
+      # for ordering by time
+      time = int(float(doc.time))
 
-    inserted_doc = {
-      "source_url": source_url,
-      "highlighted_text": highlighted_text,
-      "explanation": explanation,
-      "communities": flat_communities,
-      "user_id": user_id,
-      "hashtags": hashtags,
-      "time": time
-    }
+
+      explanation = doc.explanation
+      source_url = doc.source_url
+
+      # extract hashtags for elastic from both fields
+      hashtags_explanation = [x for x in explanation.split() if len(x) > 1 and x[0] == "#"]
+      hashtags_ht = [x for x in highlighted_text.split() if len(x) > 1 and x[0] == "#"]
+      hashtags = list(set(hashtags_explanation + hashtags_ht))
+
+      inserted_doc = {
+        "source_url": source_url,
+        "highlighted_text": highlighted_text,
+        "explanation": explanation,
+        "communities": flat_communities,
+        "user_id": user_id,
+        "hashtags": hashtags,
+        "time": time
+      }
+    
+    elif self.index_name == os.environ["elastic_webpages_index_name"]:
+      doc_id = str(doc.id)
+      communities = doc.communities
+      flat_communities = self.flatten_communities(communities)
+
+      inserted_doc = {
+        "community" : flat_communities,
+        "url": doc.url,
+        "webpage":{
+          "metadata":doc.webpage.get("metadata"),
+          "all_paragraphs": doc.webpage.get("all_paragraphs")
+          }
+        }
 
     r = requests.put(self.domain + self.index_name + "/_doc/" + doc_id, json = inserted_doc, auth=self.auth)
     return r.text
@@ -249,24 +261,14 @@ class ElasticManager:
         status = self.add_to_index(content)
         print(status)
 
-  def create_index_with_mapping(self):
+  def create_index_with_mapping(self, index_mapping):
     """
     Method to create a new elastic index with mapping. Uses the config information. 
     """
+    mapping_file = os.path.join(os.path.dirname(__file__),"mappings",f"{index_mapping}.json")
+    with open(mapping_file) as f:
+        mapping = json.load(f)
 
-    mapping = {
-      "mappings" : {
-          "properties":{
-            "source_url": {"type": "text"},
-            "highlighted_text": {"type": "text"},
-            "explanation": {"type": "text"},
-            "communities": {"type": "keyword"},
-            "hashtags": {"type": "keyword"},
-            "time": {"type": "date"},
-            "user_id": {"type": "keyword"}
-          }
-        }
-    }
     r = requests.put(self.domain + self.index_name, json=mapping, auth=self.auth)
     return r.text
 
@@ -338,4 +340,12 @@ class ElasticManager:
     print(json.loads(r.text))
     hits = json.loads(r.text)["hits"]
     return hits["total"]["value"], hits["hits"]
-   
+
+  def flatten_communities(self, communities)->list:
+      flat_communities = []
+      for user_id in communities:
+        for community_id in communities[user_id]:
+          flat_communities.append(str(community_id))
+      
+      return flat_communities
+    

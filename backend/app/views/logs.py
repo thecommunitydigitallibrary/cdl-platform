@@ -8,6 +8,7 @@ from app.models.logs import *
 from app.models.searches_clicks import *
 from app.models.recommendations_requests import *
 from app.models.recommendations_clicks import *
+from app.models.webpages import *
 
 
 def log_community_action(ip, user_id, community_id, action, submission_id=None):
@@ -279,4 +280,17 @@ def log_recommendation_click(ip, rec_result_hash, redirect_url):
 		print("Error: unable to log rec click")
 	return
 
+def log_webpage(url, webpage, communities, scrape_status, scrape_time):
+	webpage = Webpage(url,
+        webpage,
+        communities,
+        scrape_status,
+		scrape_time)
 	
+	cdl_webpages = Webpages()
+	insert_status = cdl_webpages.insert(webpage)
+	if not insert_status.acknowledged:
+		print("Error: unable to insert scraped webpage")
+	else:
+		webpage.id = insert_status.inserted_id
+	return insert_status, webpage

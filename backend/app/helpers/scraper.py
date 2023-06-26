@@ -7,8 +7,10 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import os
 from urllib.parse import urljoin
-from scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, SCRAPECODE_TO_MESSAGE_MAP
+from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, SCRAPECODE_TO_MESSAGE_MAP
 import sys
+
+from app.models.webpages import Webpages
 
 
 class ScrapeWorker:
@@ -21,6 +23,24 @@ class ScrapeWorker:
         return self.trace_function
 
     def scrape(self, url) -> dict:
+        """
+
+        returns: {
+            url,
+            scrape_initiation_time,
+            scrape_status {
+                code,
+                message,
+                resp_status_code
+            }
+            webpage {
+                metadata
+                paragraphs
+                outgoing_urls
+            }
+            scrape_time
+        }
+        """
         data = {"url": url, "scrape_initiation_time": time.time()}
 
         url, url_path = self.format_url_to_path(url)
@@ -267,3 +287,9 @@ class ScrapeWorker:
             full_path += "/"
 
         return url, full_path
+    
+    def is_scraped_before(self, source_url):
+        webpages = Webpages()
+        webpage = webpages.find({"url": source_url})
+        
+        return True if webpage else False
