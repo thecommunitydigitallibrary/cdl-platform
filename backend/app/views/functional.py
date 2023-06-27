@@ -185,6 +185,11 @@ def create_submission(current_user):
 			if not scraper.is_scraped_before(source_url):
 				data = scraper.scrape(source_url)  # Triggering Scraper
 
+				# Check if the scrape was success or not
+				if data["scrape_status"]["code"] != 1:
+					data["webpage"] = {}
+					data["scrape_time"] = None
+
 				# insert in MongoDB
 				insert_status, webpage = log_webpage(data["url"],
 						data["webpage"],
@@ -192,7 +197,7 @@ def create_submission(current_user):
 						data["scrape_status"],
 						data["scrape_time"]
 				)
-				if insert_status.acknowledged:
+				if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
 					# index in Openaseacrch
 					webpages_elastic_manager.add_to_index(webpage)
 				else:
@@ -289,6 +294,11 @@ def create_batch_submission(current_user):
 				if not scraper.is_scraped_before(source_url):
 					data = scraper.scrape(source_url)  # Triggering Scraper
 
+					# Check if the scrape was success or not
+					if data["scrape_status"]["code"] != 1:
+						data["webpage"] = {}
+						data["scrape_time"] = None
+
 					# insert in MongoDB
 					insert_status, webpage = log_webpage(data["url"],
 							data["webpage"],
@@ -296,7 +306,7 @@ def create_batch_submission(current_user):
 							data["scrape_status"],
 							data["scrape_time"]
 					)
-					if insert_status.acknowledged:
+					if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
 						# index in Openaseacrch
 						webpages_elastic_manager.add_to_index(webpage)
 					else:
