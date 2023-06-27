@@ -190,13 +190,13 @@ function Home({ data }) {
             next={fetchNextPage}
             hasMore={!endOfRecommendations}
             loader={!endOfRecommendations && <h6 style={{ textAlign: 'center' }} >Loading...</h6>}
-            endMessage={endOfRecommendations && page>1? 
+            endMessage={endOfRecommendations && items.length > 0? 
             <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4> 
             : 
-            <>
-            <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> Click <Button variant="outline" onClick={()=>{
-      router.push("/communities");}}>here</Button> to join a new community!</h6>
-            </>}
+              <>
+              <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> Click <Button variant="outline" onClick={()=>{
+        router.push("/communities");}}>here</Button> to join a new community!</h6>
+              </>}
           >
             <Grid item>
               {(items !== undefined && items.length > 0) &&

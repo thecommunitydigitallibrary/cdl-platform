@@ -137,7 +137,7 @@ Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --buil
 To stop: ``docker-compose -f docker-compose.yml down``
 
 #### Extension:
-Navigate to ``frontend\extension`` and ``run npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
+Navigate to ``frontend\extension`` and run ``npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
 
 ## Building on Top of the Hosted CDL
 See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend). Please be courteous regarding the amount of API calls so that the backend servers do not get overwhelmed.

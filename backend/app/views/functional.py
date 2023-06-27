@@ -1057,6 +1057,7 @@ def get_recommendations(current_user):
 			cache = Cache()
 		except Exception as e:
 			print(e)
+			traceback.print_exc()
 			return response.error("Cannot provide recommendations, please try again later.",
 			                      Status.INTERNAL_SERVER_ERROR)
 
@@ -1108,12 +1109,14 @@ def get_recommendations(current_user):
 					user_latest_submissions = []
 					query_ids = {}
 					print(e)
+					traceback.print_exc()
+
 
 				for submission in user_latest_submissions:
 					highlighted_text_nohash = re.sub("#", " ", submission.highlighted_text)
 					title_text_nohash = re.sub("#", " ", submission.explanation)
 
-					full_text = highlighted_text_nohash + " " + title_text_nohash
+					full_text += " " + highlighted_text_nohash + " " + title_text_nohash
 
 				# explore user's extension opens data
 				try:
@@ -1122,15 +1125,16 @@ def get_recommendations(current_user):
 					users_extension_opens = sorted(users_extension_opens, reverse=True, key=lambda x: x.time)[:3]
 
 				except Exception as e:
-					users_extension_opens=[]	
+					users_extension_opens=[]
+					traceback.print_exc()
 					print(e)					
 				
-				for submission in users_extension_opens:
-					if submission and submission.highlighted_text:
-						highlighted_text_nohash = re.sub("#", " ", submission.highlighted_text)
-						full_text += highlighted_text_nohash
+				for extension_open in users_extension_opens:
+					if extension_open and extension_open.highlighted_text:
+						highlighted_text_nohash = re.sub("#", " ", extension_open.highlighted_text)
+						full_text += " " + highlighted_text_nohash
 
-				if len(full_text) > 10:
+				if len(full_text) > 3:
 					blob = TextBlob(full_text)
 					new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
 					search_text+=" "+ new_terms
