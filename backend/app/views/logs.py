@@ -31,34 +31,6 @@ def log_community_action(ip, user_id, community_id, action, submission_id=None):
 	return insert
 
 
-def log_extension_search(ip, user_id, source_url, highlighted_text, query, typ):
-	"""
-	Logs when a user performs a search with a query from the Chrome extension.
-	Arguments:
-		ip : (string) : the IP address of the request sent by the user.
-		user_id : (ObjectID) : the ID of the user making the search.
-		source_url : (string) : the full URL of the webpage where the extension is opened.
-		highlighted_text : (string) : any highlighted text from the user's webpage (can be "").
-		query : (string) the typed query submitted by the user into the extension.
-		typ : (string) the search type. One of
-			extension_open : no query entered, query is highlighted text, automatic search.
-			google_search : "Search Google" button selected.
-			dl_search : "Search CS410 DL" button selected.
-	Returns:
-		hash : either None or search ID for "extension_open" type. None because dl_search opens a new tab with the search,
-		so the hash is created when the request to the website search engine happens. This causes "dl_search" to also log
-		a "webpage_search".
-	TODO: add community
-	"""
-	cdl_searches_clicks = SearchesClicks()
-
-	hash = str(uuid.uuid4()) if typ == "extension_open" else None
-	log = SearchClick(ip, user_id, source_url, highlighted_text, query, typ, hash)
-	insert = cdl_searches_clicks.insert(log)
-	if not insert.acknowledged:
-		print("Error: unable to log extension search")
-	return hash
-
 
 def log_connection(ip, user_id, source_id, target_id, description):
 	"""

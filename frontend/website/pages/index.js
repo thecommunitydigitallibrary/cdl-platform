@@ -12,8 +12,9 @@ import Typography from "@mui/material/Typography";
 import Footer from "../components/footer";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useEffect, useState } from "react";
-import { IconButton } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
+import { Router, useRouter } from "next/router";
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -21,12 +22,13 @@ const recommendationsEndPoint = "recommend";
 
 function Home({ data }) {
 
+  const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
   const [page, setPage] = useState(parseInt(data.current_page) + 1);
   const [latestRecommendationId, setLatestRecommendationId] = useState(data.recommendation_id)
-  const [endOfRecommendations, setEndOfRecommendations] = useState(false)
-  // set 'explore_user_submissions' as default method
-  const [selectedRecOption, setSelectedRecOption] = useState("explore_user_submissions");
+  const [endOfRecommendations, setEndOfRecommendations] = useState((data.recommendation_results_page.length) < 10)
+  // set 'explore_similar_extension' as default method
+  const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
 
   const fetchNextPage = async () => {
     let pg = page
@@ -57,7 +59,8 @@ function Home({ data }) {
     let pg = 0
     const value = event.target.value;
     setSelectedRecOption(value);
-    setEndOfRecommendations(true)
+    setItems([])
+    setEndOfRecommendations(false)
     var recommendationURLClient = baseURL_client + recommendationsEndPoint;
     const response = await fetch(`${recommendationURLClient}?method=${value}&page=${'0'}`,
       {
@@ -65,9 +68,11 @@ function Home({ data }) {
           Authorization: jsCookie.get("token"),
         }),
       });
-
     const content = await response.json();
-    let response_rec_id = content.recommendation_id
+    let response_rec_id = content.recommendation_id;
+    if(content.recommendation_results_page < 10){ //0 to 10
+      setEndOfRecommendations(true)
+    }
     setLatestRecommendationId(response_rec_id);
     setItems(content.recommendation_results_page);
     pg += 1
@@ -76,15 +81,16 @@ function Home({ data }) {
 
   useEffect(() => {
     if (page) {
-      console.log("Updated page no:", page);
+      console.log("On page no:", page);
     }
   }, [page])
 
   useEffect(() => {
-    if (latestRecommendationId) {
-      console.log("Updated latestRecommendationId no:", latestRecommendationId);
-    }
   }, [latestRecommendationId])
+
+  
+  useEffect(() => {
+  }, [endOfRecommendations])
 
   // code to add a 'scroll to top of page' sticky button that is visible once user scrolls down
   const [visible, setVisible] = useState(false);
@@ -156,19 +162,17 @@ function Home({ data }) {
                   labelId="select-small"
                   id="select-recommendation-type"
                   name="method"
-                  defaultValue={"explore_user_submissions"}
+                  defaultValue={"explore_similar_extension"}
                   value={selectedRecOption}
                   onChange={handleRecTypeChange}
                 >
-                  {/* Currently is : User Submission History */}
-                  <MenuItem value="explore_user_submissions">Explore</MenuItem>
+                  {/* Currently is : User Submission History + Extension opens searches*/}
+                  <MenuItem value="explore_similar_extension">Explore</MenuItem>
                   <MenuItem value="recent">Most Recent</MenuItem>
-                  {/* <MenuItem value="explore_similar_extension" disabled>Explore More</MenuItem> */}
                 </Select>
               </FormControl>
             </Grid>
           </Grid>
-
         </Grid>
 
         <Grid item marginX="20%">
@@ -184,14 +188,18 @@ function Home({ data }) {
           <InfiniteScroll
             dataLength={items.length}
             next={fetchNextPage}
-            // currently doing only 5 page loads so setting condition to pg <= 5
-            // hasMore={page<6}
             hasMore={!endOfRecommendations}
-            loader={<h6 style={{ textAlign: 'center' }} >Loading...</h6>}
-            endMessage={<h4 style={{ textAlign: 'center' }} >You've reached the end of your recommendations.</h4>}
+            loader={!endOfRecommendations && <h6 style={{ textAlign: 'center' }} >Loading...</h6>}
+            endMessage={endOfRecommendations && items.length > 0? 
+            <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4> 
+            : 
+              <>
+              <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> Click <Button variant="outline" onClick={()=>{
+        router.push("/communities");}}>here</Button> to join a new community!</h6>
+              </>}
           >
             <Grid item>
-              {(items !== undefined && items.length > 0) ?
+              {(items !== undefined && items.length > 0) &&
                 items.map(function (d, idx) {
                   return (
                     <div key={idx}>
@@ -212,12 +220,7 @@ function Home({ data }) {
                     </div>
 
                   );
-                })
-                :
-                <Typography style={{ textAlign: 'center'}}>
-                  There are no new recommendations to show you from your
-                  communities.
-                </Typography>}
+                })}
             </Grid>
           </InfiniteScroll>
         </Grid>
@@ -248,9 +251,7 @@ export async function getServerSideProps(context) {
     };
   } else {
     var recommendationURL = baseURL_server + recommendationsEndPoint;
-
-    recommendationURL += "?method=" + "explore_user_submissions" + "&page=0";
-    
+    recommendationURL += "?method=" + "explore_similar_extension" + "&page=0";
     const res = await fetch(recommendationURL, {
       headers: new Headers({
         Authorization: context.req.cookies.token,

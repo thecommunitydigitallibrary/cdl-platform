@@ -362,7 +362,6 @@ def submit_rel_judgments(current_user):
 				This result ID should be included in the search result items.
 	Returns:
 		200 : JSON with "status" as "ok" and a success "message".
-	TODO: change 200 too 400 (will avoid changing for now, as it is during the assignment)
 	"""
 	try:
 		user_id = current_user.id
@@ -378,5 +377,6 @@ def submit_rel_judgments(current_user):
 		return response.error("Something went wrong. Please try again later", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to submit relevant judgement, please try again later.",
 		                      Status.INTERNAL_SERVER_ERROR)
