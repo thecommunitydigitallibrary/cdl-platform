@@ -373,7 +373,6 @@ function Header(props) {
   }, [jsCookie.get("token")]);
 
   useEffect(() => {
-    console.log("Updated dropdowndata:", dropdowndata);
   }, [dropdowndata]);
 
   const createSubmissionEndpoint = "submission/";

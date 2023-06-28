@@ -526,7 +526,7 @@ Requires the following in the request body (on a new recommendation request):
 
 - ``method``: The type of recommendation to return. Can either be:
   - ``recent``: Which will return the most recent submissions to the user's communities (not including CDLWeb or own submissions).
-  - ``explore_user_submissions``: Which will return most similar submissions to user's communities according to their most recent three submissions.
+  - ``explore_similar_extension``: Which will return most similar submissions to user's communities according to their most recent three submissions and their three most recent extension opens.
 - ``page``: The page of the search to be returned. If not included, then defaults to 0. Pages are returned in batches of 10.
 
 For paging, one can pass the following in the request body:
@@ -536,6 +536,75 @@ For paging, one can pass the following in the request body:
 
 ##### Returns
 On success, status ``200`` with the JSON body fields corresponding to the "Recommendation" data model, located at the bottom of this document.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+## Feedback
+
+### Submit Textual Feedback
+
+Endpoint: ``/api/feedback/``
+
+---
+
+#### POST
+Submit textual feedback. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/users.py).
+
+##### Requires
+Requires the following in the request body:
+
+- ``submission_id``: The ID of the submission to submit feedback for. Only necessary if feedback is tied to submission.
+- ``message``: The feedback itself.
+
+##### Returns
+On success, status ``200`` with the field "message" describing the success.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+### Submit Relevance Judgment Feedback
+
+Endpoint: ``/api/submitRelJudgments/``
+
+---
+
+#### POST
+Submit relevant judgment feedback. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/communities.py).
+
+##### Requires
+Requires the following in the request body:
+- A dictionary containing entries where keys are concatenated resultRank_submissionID_queryID and values are judgments ("1" for relevant, "0" for not relevant).
+
+##### Returns
+On success, status ``200`` with the field "message" describing the success.
+
+On failure, status code indicating respective error with body describing the error.
+
+---
+
+## Redirect
+
+### Redirect Submission Click
+
+Endpoint: ``/api/redirect/``
+
+---
+
+#### GET
+Redirects a submission click. [Implementation File]https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/functional.py).
+
+##### Requires
+Requires the following in the request body:
+
+- ``hash``: The hash of the result: "rank_submissionID_searchID"
+- ``redirect_url``: The URL to redirect a user to.
+- ``method``: How the submission was served ("search" or "recommendation")
+
+##### Returns
+On success, returns a Flask redirect.
 
 On failure, status code indicating respective error with body describing the error.
 
