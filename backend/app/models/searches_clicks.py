@@ -63,7 +63,6 @@ class SearchClickExtension:
 			"query": self.query,
 			"type": self.type,
 			"url": self.url,
-			"hash": self.hash,
 			"time": self.time,
 			"community": self.community,
 			"own_submissions": self.own_submissions
