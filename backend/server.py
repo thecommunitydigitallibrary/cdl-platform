@@ -40,14 +40,6 @@ with app.app_context():
 	get_db()
 	get_redis()
 
-# Connect to elastic
-elastic_manager = ElasticManager(os.environ["elastic_username"],
-								 os.environ["elastic_password"],
-								 os.environ["elastic_domain"],
-								 os.environ["elastic_index_name"],
-								 None,
-								 "submissions")
-
 # for nltk data, used for parsing queries
 nltk.download("brown")
 nltk.download("punkt")
