@@ -1,13 +1,18 @@
 # The Community Digital Library 
-The Community Digital Library (CDL) is a platform for users to save, search, and discover online content. 
+The Community Digital Library (CDL) is an open-source platform for users to save, search, and discover online content. Our long-term vision is to anticipate the information needs of a user and proactively provide them with helpful information while minimizing user effort.
+
 
 To use the CDL, you have three options:
 
-1. Full online version: Visit [the CDL website](https://textdata.org/), install the Chrome extension, create an account, and begin saving websites.
+1. Full online version: Visit [the CDL website](https://textdata.org/), install the [Chrome extension](https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0), create an account, and begin using the CDL.
 2. Full offline version: Clone this repository, set up Docker, and run the services locally. This is described in the section below titled "Setting Up the Local Version".
-3. Hosted backend, local frontend: You can leverage the APIs for the backend of the CDL, and create or extend your own frontend. The API documentation is [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
+3. Hosted backend, local frontend: You can leverage the APIs for the backend of the CDL, and create or extend your own frontend (website or browser extension). The API documentation is [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
 
-## Setting Up the Local Version
+<details>
+<summary>Setting Up the Offline Version</summary>
+<br>
+
+## Setting Up the Offline Version
 Note that the local version is still under development:
 
 - No data is persisted; once the Docker containers stops, all data is lost.
@@ -137,10 +142,23 @@ Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --buil
 To stop: ``docker-compose -f docker-compose.yml down``
 
 #### Extension:
-Navigate to ``frontend\extension`` and ``run npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
+Navigate to ``frontend\extension`` and run ``npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
+
+</details>
+
+<details>
+<summary>Building on Top of the Hosted CDL</summary>
+<br>
 
 ## Building on Top of the Hosted CDL
 See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend). Please be courteous regarding the amount of API calls so that the backend servers do not get overwhelmed.
+
+</details>
+
+<details>
+<summary>Roadmap</summary>
+<br>
+
 
 ## Development Roadmap
 - [ ] UNIT TESTING / AUTOMATIC BUILDS. Can do this all locally since data is not persisted, no need to worry about cleanups.
@@ -175,7 +193,14 @@ See the API documentation [here](https://github.com/thecommunitydigitallibrary/c
 - [ ] Move out relevance judgments to separate view
 - [ ] Rename createCommunity endpoint to reflect that it can also be edited using this endpoint
 #### Recommendations API
-- [ ] Merge new recommendation method from old repo, remove old method
-#### Feedback API
-- [ ] Remove "/" and "message" in /api/feedback/ success, "message" in /api/submitRelJudgment
-- [ ] Extract /api/feedback/ and /api/submitRelJudgment to separate views file
+- [x] Merge new recommendation method from old repo, remove old method
+
+</details>
+
+
+## Contributors
+- [Kevin Ros](https://kevinros.github.io/) is a 4th year Ph.D. student at the University of Illinois Urbana Champaign. This is the main component of his thesis project. He built the initial version of the CDL platform and has led its development since its beginning (September 2022). 
+- [ChengXiang Zhai](https://czhai.cs.illinois.edu/) is Kevin's advisor, and he has played a crucial role in shaping the vision of the CDL. Moreover, he has provided the grant funding to support the CDL infrastructure, the research, and the development.
+
+## Publications
+...TBD...
