@@ -920,7 +920,8 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             _, webpages_hits = webpages_elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
 
             submissions_pages = create_page(submissions_hits, communities)
-            # Building an inverted index to map orig_url to index in the submissions_pages list
+
+            # Building an inverted index to map orig_url to index using the submissions_pages list
             subpgs_url_to_id = {}
             for i, submission_page in enumerate(submissions_pages):
                 subpgs_url_to_id[submission_page["orig_url"]] = i
