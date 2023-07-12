@@ -200,8 +200,18 @@ See the API documentation [here](https://github.com/thecommunitydigitallibrary/c
 
 
 ## Contributors
+<details>
+<summary>How can I contribute?</summary>
+<br>
+For any single bug fix or small feature: fork this repository, make a pull request, and describe the change in the request.
+
+For a longer-term collaboration, big feature, or large change, please send an email to ``kjros2@illinois.edu``. 
+</details>
+
 - [Kevin Ros](https://kevinros.github.io/) is a 4th year Ph.D. student at the University of Illinois Urbana Champaign. This is the main component of his thesis project. He built the initial version of the CDL platform and has led its development since its beginning (September 2022). 
 - [ChengXiang Zhai](https://czhai.cs.illinois.edu/) is Kevin's advisor, and he has played a crucial role in shaping the vision of the CDL. Moreover, he has provided the grant funding to support the CDL infrastructure, the research, and the development.
+
+
 
 ## Publications
 ...TBD...
