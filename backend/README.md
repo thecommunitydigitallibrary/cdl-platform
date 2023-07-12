@@ -526,7 +526,7 @@ Requires the following in the request body (on a new recommendation request):
 
 - ``method``: The type of recommendation to return. Can either be:
   - ``recent``: Which will return the most recent submissions to the user's communities (not including CDLWeb or own submissions).
-  - ``explore_user_submissions``: Which will return most similar submissions to user's communities according to their most recent three submissions.
+  - ``explore_similar_extension``: Which will return most similar submissions to user's communities according to their most recent three submissions and their three most recent extension opens.
 - ``page``: The page of the search to be returned. If not included, then defaults to 0. Pages are returned in batches of 10.
 
 For paging, one can pass the following in the request body:

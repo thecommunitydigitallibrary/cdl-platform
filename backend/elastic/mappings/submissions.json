@@ -1,0 +1,13 @@
+{
+    "mappings" : {
+        "properties":{
+          "source_url": {"type": "text"},
+          "highlighted_text": {"type": "text"},
+          "explanation": {"type": "text"},
+          "communities": {"type": "keyword"},
+          "hashtags": {"type": "keyword"},
+          "time": {"type": "date"},
+          "user_id": {"type": "keyword"}
+        }
+      }
+  }

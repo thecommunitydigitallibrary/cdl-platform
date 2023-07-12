@@ -47,6 +47,7 @@ db_name=cdl-local
 elastic_username=admin
 elastic_password=admin
 elastic_index_name=submissions
+elastic_webpages_index_name=webpages
 elastic_domain=http://host.docker.internal:9200/
 ```
 
