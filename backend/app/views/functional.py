@@ -242,9 +242,9 @@ def create_batch_submission(current_user):
         try:
             ip = request.remote_addr
             user_id = current_user.id
-            highlighted_text = submission["description"]
+            highlighted_text = submission["highlighted_text"]
             source_url = submission["source_url"]
-            explanation = submission["title"]
+            explanation = submission["explanation"]
             # hard-coded to prevent submissions to the web community
             if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
                 error_message = "You cannot submit to this community."
