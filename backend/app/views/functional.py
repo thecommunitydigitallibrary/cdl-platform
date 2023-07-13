@@ -185,10 +185,9 @@ def create_submission(current_user):
             if not scraper.is_scraped_before(source_url):
                 data = scraper.scrape(source_url)  # Triggering Scraper
 
-                # Check if the scrape was success or not
+                # Check if the scrape was not successful
                 if data["scrape_status"]["code"] != 1:
                     data["webpage"] = {}
-                    data["scrape_time"] = None
 
                 # insert in MongoDB
                 insert_status, webpage = log_webpage(data["url"],

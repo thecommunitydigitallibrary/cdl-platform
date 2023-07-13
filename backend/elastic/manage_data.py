@@ -232,13 +232,13 @@ class ElasticManager:
             doc_id = str(doc.id)
             communities = doc.communities
             flat_communities = self.flatten_communities(communities)
-
+            paragraphs = doc.webpage.get("paragraphs")
             inserted_doc = {
                 "communities": flat_communities,
                 "source_url": doc.url,
                 "webpage": {
                     "metadata": doc.webpage.get("metadata"),
-                    "all_paragraphs": doc.webpage.get("all_paragraphs")
+                    "all_paragraphs": " ".join(paragraphs) if paragraphs is not None else ""
                 }
             }
 

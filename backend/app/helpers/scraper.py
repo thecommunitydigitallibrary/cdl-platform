@@ -7,7 +7,10 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import os
 from urllib.parse import urljoin
-from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, SCRAPECODE_TO_MESSAGE_MAP
+from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, \
+    CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, \
+    CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, \
+    SCRAPECODE_TO_MESSAGE_MAP
 import sys
 import traceback
 from app.models.webpages import Webpages
@@ -27,7 +30,7 @@ class ScrapeWorker:
 
         returns: {
             url,
-            scrape_initiation_time,
+            scrape_time,
             scrape_status {
                 code,
                 message,
@@ -38,10 +41,9 @@ class ScrapeWorker:
                 paragraphs
                 outgoing_urls
             }
-            scrape_time
         }
         """
-        data = {"url": url, "scrape_initiation_time": time.time()}
+        data = {"url": url, "scrape_time": time.time()}
 
         url, url_path = self.format_url_to_path(url)
 
@@ -112,8 +114,8 @@ class ScrapeWorker:
         # Add the metadata, paragraphs and all the outgoing URLs to the `data` JSON
         data["webpage"] = {
             "metadata": metadata,
-           "paragraphs": paragraphs,
-           "outgoing_urls": outgoing_urls
+            "paragraphs": paragraphs,
+            "outgoing_urls": outgoing_urls
         }
         data["scrape_status"] = {
             "code": CODE_SUCCESS,
@@ -121,11 +123,6 @@ class ScrapeWorker:
             "resp_status_code": resp.status_code
         }
         all_outgoing = [x["url"] for x in outgoing_urls]
-
-        # Add the amount of time taken for scraping the webpage
-        data["scrape_time"] = None
-        if self.start_time is not None and self.end_time is not None:
-            data["scrape_time"] = self.end_time - self.start_time
 
         return data
 
@@ -236,7 +233,7 @@ class ScrapeWorker:
         num_sentences = len(string.split(". "))
 
         letter_ratio = len(re.sub("[^a-z ]", "", string.lower())) / \
-            max(len(re.sub("[a-z ]", "", string.lower())), 1)
+                       max(len(re.sub("[a-z ]", "", string.lower())), 1)
         avg_word_length = sum([len(x) for x in string.split(" ")]) / num_words
 
         if type == "paragraph":
@@ -303,9 +300,9 @@ class ScrapeWorker:
             full_path += "/"
 
         return url, full_path
-    
+
     def is_scraped_before(self, source_url):
         webpages = Webpages()
         webpage = webpages.find({"url": source_url})
-        
+
         return True if webpage else False
