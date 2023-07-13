@@ -233,49 +233,49 @@ def create_batch_submission(current_user):
 		In all cases, a status code and a list containing the status/error message (if any) for each attempted submission.
 		This is so that errors can be assessed individually and so you can re-send the submissions that failed.
 	"""
-	requests = request.get_json()
-	data = requests['data']
-	community = requests['community']
-	results = {}
-	errors = []
-	for i, submission in enumerate(data):
-		try:
-			ip = request.remote_addr
-			user_id = current_user.id
-			highlighted_text = submission["description"]
-			source_url = submission["source_url"]
-			explanation = submission["title"]
-			# hard-coded to prevent submissions to the web community
-			if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
-				error_message = "You cannot submit to this community."
-				error_status = Status.BAD_REQUEST
-				results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-				errors.append(i)
-				continue
-			if community == "":
-				error_message = "Error: A community must be selected."
-				error_status = Status.BAD_REQUEST
-				results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-				errors.append(i)
-				continue
-			if not Communities().find_one({"_id": ObjectId(community)}):
-				error_message = "Error: Cannot find community."
-				error_status = Status.BAD_REQUEST
-				results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-				continue
-			if ObjectId(community) not in current_user.communities:
-				error_message = "Error: You do not have access to this community."
-				error_status = Status.FORBIDDEN
-				results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-				errors.append(i)
-				continue
-			# for some reason, in the case that there is no explanation or URL
-			if not explanation or not source_url:
-				error_message = "Missing explanation or source url."
-				error_status = Status.BAD_REQUEST
-				results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-				errors.append(i)
-				continue
+    requests = request.get_json()
+    data = requests['data']
+    community = requests['community']
+    results = {}
+    errors = []
+    for i, submission in enumerate(data):
+        try:
+            ip = request.remote_addr
+            user_id = current_user.id
+            highlighted_text = submission["description"]
+            source_url = submission["source_url"]
+            explanation = submission["title"]
+            # hard-coded to prevent submissions to the web community
+            if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
+                error_message = "You cannot submit to this community."
+                error_status = Status.BAD_REQUEST
+                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
+                errors.append(i)
+                continue
+            if community == "":
+                error_message = "Error: A community must be selected."
+                error_status = Status.BAD_REQUEST
+                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
+                errors.append(i)
+                continue
+            if not Communities().find_one({"_id": ObjectId(community)}):
+                error_message = "Error: Cannot find community."
+                error_status = Status.BAD_REQUEST
+                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
+                continue
+            if ObjectId(community) not in current_user.communities:
+                error_message = "Error: You do not have access to this community."
+                error_status = Status.FORBIDDEN
+                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
+                errors.append(i)
+                continue
+            # for some reason, in the case that there is no explanation or URL
+            if not explanation or not source_url:
+                error_message = "Missing explanation or source url."
+                error_status = Status.BAD_REQUEST
+                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
+                errors.append(i)
+                continue
 
             validated, message = validate_submission(highlighted_text, explanation, source_url=source_url)
             if not validated:
@@ -319,21 +319,21 @@ def create_batch_submission(current_user):
                     "status": Status.OK
                 }
 
-			else:
-				error_message = "Unable to make submission. Please try again later."
-				error_status = Status.INTERNAL_SERVER_ERROR
-				results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-				errors.append(i)
-		except Exception as e:
-			print(e)
-			error_message = "Failed to create submission, please try again later."
-			error_status = Status.INTERNAL_SERVER_ERROR
-			results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-			errors.append(i)
-	if len(errors) == 0:
-		return response.success(results, Status.OK)
-	else:
-		return response.error(results, Status.INTERNAL_SERVER_ERROR)
+            else:
+                error_message = "Unable to make submission. Please try again later."
+                error_status = Status.INTERNAL_SERVER_ERROR
+                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
+                errors.append(i)
+        except Exception as e:
+            print(e)
+            error_message = "Failed to create submission, please try again later."
+            error_status = Status.INTERNAL_SERVER_ERROR
+            results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
+            errors.append(i)
+    if len(errors) == 0:
+        return response.success(results, Status.OK)
+    else:
+        return response.error(results, Status.INTERNAL_SERVER_ERROR)
 
 @functional.route("/api/redirect", methods=["GET"])
 def click():
