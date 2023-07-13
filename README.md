@@ -91,6 +91,7 @@ services:
         ports:
         - 27017:27017
         restart: always
+        command: mongod --bind_ip 0.0.0.0 # This is to enable connecting to container from outside
 
     opensearch-node1:
         image: opensearchproject/opensearch:latest
@@ -144,6 +145,14 @@ To stop: ``docker-compose -f docker-compose.yml down``
 
 #### Extension:
 Navigate to ``frontend\extension`` and run ``npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
+
+
+### Running Test cases
+Note: Local Docker containers must be up and running before you run below commands
+```
+cd <project-directory>\backend
+pytest .\tests\test_server.py
+```
 
 </details>
 
