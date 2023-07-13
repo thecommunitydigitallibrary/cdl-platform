@@ -20,7 +20,7 @@ services:
         ports:
             - 27017:27017
         restart: always
-        command: mongod --bind_ip 0.0.0.0 # This is to enable connecting to container from outside
+        command: mongod --bind_ip 0.0.0.0
 
     opensearch-node1:
         image: opensearchproject/opensearch:latest

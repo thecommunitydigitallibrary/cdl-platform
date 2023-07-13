@@ -27,13 +27,18 @@ class Setup():
                 name = split_line[0]
                 value = "=".join(split_line[1:]).strip("\n")
                 os.environ[name] = value
-
-        client = MongoClient("mongodb://0.0.0.0:27017/?retryWrites=true&w=majority")
+    
+        client = MongoClient([os.environ["test_cdl_uri"]])
         cdl_db = client[os.environ["db_name"]]
         return client, cdl_db
 
     def clear_db(self):
-        return self.db_client.drop_database(os.environ["db_name"])
+        if self.db_client.address == ('0.0.0.0', 27017):
+            self.db_client.drop_database(os.environ["db_name"])
+            return True
+        else:
+            return False
+
 
 cred = Setup()
 
@@ -60,7 +65,6 @@ def test_signup(data):
     }
 
     resp = requests.post(url, headers=headers, data=json.dumps(payload,indent=4))       
-
     assert resp.status_code == 200
     resp_body = resp.json()
     assert resp_body['status'] == 'ok'
@@ -385,5 +389,5 @@ def test_feedback(data):
     assert resp_body["message"] == "Feedback saved!"
 
 #function to clean up test data for successful multi test runs
-def test_data_format(data):
-    data.clear_db()
+def test_cleanup(data):
+    assert data.clear_db() == True
