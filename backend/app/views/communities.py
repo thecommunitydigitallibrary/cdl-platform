@@ -95,7 +95,7 @@ def get_communities_helper(current_user, return_dict=False):
 		return_dict : boolean : to return as a dictionary.
 	Returns:
 		A dictionary with
-			community_info: a list of dicts, each containing commnuity_id, name, join_key, is_admin. If return_dict is true, then this is a dictionary mapped with the community_id.
+			community_info: a list of dicts, each containing community_id, name, join_key, is_admin. If return_dict is true, then this is a dictionary mapped with the community_id.
 			username: the username of the user.
 	"""
 

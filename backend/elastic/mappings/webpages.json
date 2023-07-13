@@ -1,10 +1,10 @@
 {
     "mappings": {
       "properties": {
-        "community": {
+        "communities": {
           "type": "keyword"
         },
-        "url": {
+        "source_url": {
           "type": "text"
         },
         "webpage": {
@@ -22,7 +22,7 @@
                 }
               }
             },
-            "paragraphs": {
+            "all_paragraphs": {
               "type": "text"
             }
           }
