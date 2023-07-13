@@ -40,7 +40,6 @@ with app.app_context():
 	get_db()
 	get_redis()
 
-
 # for nltk data, used for parsing queries
 nltk.download("brown")
 nltk.download("punkt")
