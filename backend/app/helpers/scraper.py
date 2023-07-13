@@ -7,9 +7,12 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import os
 from urllib.parse import urljoin
-from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, SCRAPECODE_TO_MESSAGE_MAP
+from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, \
+    CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, \
+    CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, \
+    SCRAPECODE_TO_MESSAGE_MAP
 import sys
-
+import traceback
 from app.models.webpages import Webpages
 
 
@@ -27,7 +30,7 @@ class ScrapeWorker:
 
         returns: {
             url,
-            scrape_initiation_time,
+            scrape_time,
             scrape_status {
                 code,
                 message,
@@ -38,21 +41,24 @@ class ScrapeWorker:
                 paragraphs
                 outgoing_urls
             }
-            scrape_time
         }
         """
-        data = {"url": url, "scrape_initiation_time": time.time()}
+        data = {"url": url, "scrape_time": time.time()}
 
         url, url_path = self.format_url_to_path(url)
 
         if len(url_path) > 255:
             data["scrape_status"] = {
-                "code": CODE_URL_NAME_TOO_LONG, "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_URL_NAME_TOO_LONG]}
+                "code": CODE_URL_NAME_TOO_LONG,
+                "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_URL_NAME_TOO_LONG]
+            }
             return data
 
         if url.split(".")[-1] in ["bz2", "zip", "csv", "sqlite3", "exe", "mp3", "mp4", "pdf", "gz", "png", "jpg"]:
-            data["scrape_status"] = {"code": CODE_INVALID_FILE_ENDING_FOR_URL,
-                                     "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_INVALID_FILE_ENDING_FOR_URL]}
+            data["scrape_status"] = {
+                "code": CODE_INVALID_FILE_ENDING_FOR_URL,
+                "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_INVALID_FILE_ENDING_FOR_URL]
+            }
             return data
 
         self.start_time = time.time()
@@ -63,53 +69,60 @@ class ScrapeWorker:
             self.end_time = time.time()
         except:
             data["scrape_status"] = {
-                "code": CODE_TIMEOUT, "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_TIMEOUT]}
+                "code": CODE_TIMEOUT,
+                "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_TIMEOUT]
+            }
             return data
         finally:
             sys.settrace(None)
 
-        # print("\t Page acquired")
-
-        # For the case where the response code is Unauthorized, Forbidden, Method Not Allowed, Not Acceptable or Proxy Authentication Required
+        # For the case where the response code is Unauthorized, Forbidden, Method Not Allowed, Not Acceptable or
+        # Proxy Authentication Required
         if resp.status_code in [401, 403, 405, 406, 407]:
             data["scrape_status"] = {
-                "code": CODE_URL_NOT_PUBLICILY_ACCESSIBLE, "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_URL_NOT_PUBLICILY_ACCESSIBLE], "resp_status_code": resp.status_code
+                "code": CODE_URL_NOT_PUBLICILY_ACCESSIBLE,
+                "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_URL_NOT_PUBLICILY_ACCESSIBLE],
+                "resp_status_code": resp.status_code
             }
             return data
 
         # If response code is anything but 200, assign the appropriate status code and return JSON object
         if resp.status_code != 200:
             data["scrape_status"] = {
-                "code": CODE_INVALID_STATUS_CODE, "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_INVALID_STATUS_CODE], "resp_status_code": resp.status_code}
+                "code": CODE_INVALID_STATUS_CODE,
+                "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_INVALID_STATUS_CODE],
+                "resp_status_code": resp.status_code
+            }
             return data
 
         if resp.status_code == 200:
             try:
                 len_text = len(resp.text)
-                print("\tLen of text: ", len_text)
                 if len_text > 9731000:  # 50000000:
-                    raise Exception("too long!")
+                    raise Exception("Scraping response is too long!")
                 metadata, paragraphs, outgoing_urls = self.parse_html(
                     resp.text, url)
             except Exception as e:
                 print(e)
-                data["scrape_status"] = {"code": CODE_UNABLE_TO_PARSE,
-                                         "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_UNABLE_TO_PARSE]}
+                traceback.print_exc()
+                data["scrape_status"] = {
+                    "code": CODE_UNABLE_TO_PARSE,
+                    "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_UNABLE_TO_PARSE]
+                }
                 return data
 
         # Add the metadata, paragraphs and all the outgoing URLs to the `data` JSON
-        data["webpage"] = {"metadata": metadata,
-                           "paragraphs": paragraphs,
-                           "outgoing_urls": outgoing_urls}
-        data["scrape_status"] = {"code": CODE_SUCCESS,
-                                 "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_SUCCESS],
-                                 "resp_status_code": resp.status_code}
+        data["webpage"] = {
+            "metadata": metadata,
+            "paragraphs": paragraphs,
+            "outgoing_urls": outgoing_urls
+        }
+        data["scrape_status"] = {
+            "code": CODE_SUCCESS,
+            "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_SUCCESS],
+            "resp_status_code": resp.status_code
+        }
         all_outgoing = [x["url"] for x in outgoing_urls]
-
-        # Add the amount of time taken for scraping the webpage
-        data["scrape_time"] = None
-        if self.start_time is not None and self.end_time is not None:
-            data["scrape_time"] = self.end_time - self.start_time
 
         return data
 
@@ -220,7 +233,7 @@ class ScrapeWorker:
         num_sentences = len(string.split(". "))
 
         letter_ratio = len(re.sub("[^a-z ]", "", string.lower())) / \
-            max(len(re.sub("[a-z ]", "", string.lower())), 1)
+                       max(len(re.sub("[a-z ]", "", string.lower())), 1)
         avg_word_length = sum([len(x) for x in string.split(" ")]) / num_words
 
         if type == "paragraph":
@@ -287,9 +300,9 @@ class ScrapeWorker:
             full_path += "/"
 
         return url, full_path
-    
+
     def is_scraped_before(self, source_url):
         webpages = Webpages()
         webpage = webpages.find({"url": source_url})
-        
+
         return True if webpage else False
