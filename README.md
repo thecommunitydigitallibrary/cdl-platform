@@ -43,6 +43,7 @@ redis_host=redis
 redis_port=6379
 redis_password=admin
 cdl_uri=mongodb://mongodb:27017/?retryWrites=true&w=majority
+cdl_test_uri=mongodb://localhost:27017
 db_name=cdl-local
 elastic_username=admin
 elastic_password=admin
