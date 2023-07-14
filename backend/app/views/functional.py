@@ -917,7 +917,9 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             # Searching exactly a user's community from the webpages index
             _, webpages_hits = webpages_elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
 
+
             submissions_pages = create_page(submissions_hits, communities)
+
 
             # Building an inverted index to map orig_url to index using the submissions_pages list
             subpgs_url_to_id = {}
@@ -930,7 +932,9 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             for webpage in webpages_index_pages:
                 if subpgs_url_to_id.get(webpage["orig_url"]):
                     i = subpgs_url_to_id.get(webpage["orig_url"])
-                    submissions_pages[i]["score"] = max(submissions_pages[i]["score"], webpage["score"])
+                    submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
+
+            submissions_pages = submissions_pages + webpages_index_pages
 
             pages = deduplicate(submissions_pages)
             pages = neural_rerank(query, pages)
@@ -968,16 +972,13 @@ def create_page(hits, communities):
             "communities_part_of": []
         }
 
-        # truncate highlighted text if too long
-        if hit["_source"].get("highlighted_text"):
-            # if len(hit["_source"]["highlighted_text"]) > 197:
-            #		highlighted_text = hit["_source"]["highlighted_text"][:197] + "..."
-            # else:
-            highlighted_text = hit["_source"]["highlighted_text"]
+        if "webpage" in hit["_source"]:
+            result["highlighted_text"] = hit["_source"]["webpage"]["metadata"].get("description", "No Preview Available")
+            result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
         else:
-            highlighted_text = "No Preview Available"
-        result["highlighted_text"] = highlighted_text
-        result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
+            result["highlighted_text"] = hit["_source"].get("highlighted_text", "No Preview Available")
+            result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
+        
 
         # possible that returns additional communities?
         result["communities_part_of"] = {community_id: communities[community_id] for community_id in
@@ -988,6 +989,8 @@ def create_page(hits, communities):
         if "time" in hit["_source"]:
             formatted_time = "Submitted " + format_time_for_display(hit["_source"]["time"])
             result["time"] = formatted_time
+        else:
+            result["time"] = "Website"
 
         # Display URL
         url = hit["_source"].get("source_url", "")

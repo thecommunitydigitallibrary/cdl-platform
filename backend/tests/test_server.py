@@ -12,14 +12,11 @@ app = Flask(__name__)
 
 class Setup():
     def __init__(self) -> None:
-        self.token = '',
-        self.userId =  '',
-        self.communityId=  '',
-        self.submissionId = '',
+        self.token = ''
+        self.userId =  ''
+        self.communityId=  ''
+        self.submissionId = ''
         self.connectionId = ''
-        self.db_client, self.cdl_db = self.get_db()
-
-    def get_db(self):
         env_file_path = os.path.join(os.path.dirname(__file__),"..","env_local.ini")
         with open(env_file_path, "r") as f:
             for line in f:
@@ -27,13 +24,21 @@ class Setup():
                 name = split_line[0]
                 value = "=".join(split_line[1:]).strip("\n")
                 os.environ[name] = value
-    
-        client = MongoClient([os.environ["test_cdl_uri"]])
+        
+
+
+        self.db_client, self.cdl_db = self.get_db()
+        self.URL = os.environ["api_url"] + ":" + os.environ["api_port"] 
+
+
+
+    def get_db(self):
+        client = MongoClient([os.environ["cdl_test_uri"]])
         cdl_db = client[os.environ["db_name"]]
         return client, cdl_db
 
     def clear_db(self):
-        if self.db_client.address == ('0.0.0.0', 27017):
+        if self.db_client.address == ('localhost', 27017):
             self.db_client.drop_database(os.environ["db_name"])
             return True
         else:
@@ -41,9 +46,8 @@ class Setup():
 
 
 cred = Setup()
+URL = cred.URL
 
-# Mention the API you want to test on 
-URL='http://localhost:8080'
 
 def pytest_namespace():
     return {'my_global_variable': 0}
