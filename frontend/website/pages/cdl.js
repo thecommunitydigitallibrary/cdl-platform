@@ -22,7 +22,7 @@ const CDL = () => {
       </Head>
       <Navbar/>
       <div>
-     <Hero />
+     <Hero /> 
      <SectionTitle
         pretitle="Why CDL?"
         title=" What we offer">

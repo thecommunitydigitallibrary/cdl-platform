@@ -17,6 +17,7 @@ import Head from "next/head";
 import Footer from "../components/footer";
 import CDL from "./cdl";
 import Home from ".";
+import { Router } from "next/router";
 
 // Taken from: https://mui.com/material-ui/react-tabs/
 function TabPanel(props) {
@@ -56,29 +57,19 @@ function a11yProps(index) {
   };
 }
 
-export default function About() {
+export default function About({loggedOut}) {
   const [value, setValue] = React.useState(0);
-  const [loggedOut, setLoggedOut] = useState(true);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  useEffect(()=>{
-    setLoggedOut(
-      jsCookie.get("token") == "" || jsCookie.get("token") == undefined
-    );
-  })
-
   return (
-    loggedOut?
-    <CDL/>
-    :
-    <Home/>
-      
+    <CDL loggedOut={loggedOut}/>
+        
   );
 
-  /*
+/*
   <Header />
       <div
         className="allResults"
@@ -124,3 +115,18 @@ export default function About() {
 
 }
 
+export async function getServerSideProps(context) {
+  // Fetch data from external API
+  if (
+    context.req.cookies.token === "" ||
+    context.req.cookies.token === undefined
+  ) {
+    return {
+      redirect: {
+        destination: "/cdl",
+        permanent: false,
+      },
+    };
+  } 
+  else return { props: { loggedOut: false } };
+}
