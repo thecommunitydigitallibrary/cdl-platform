@@ -13,7 +13,6 @@ class Webpages(Mongo):
         return Webpage(
             webpage_db["url"],
             webpage_db["webpage"],
-            webpage_db["communities"],
             webpage_db["scrape_status"],
             webpage_db["scrape_time"],
             id=webpage_db["_id"],
@@ -24,7 +23,6 @@ class Webpages(Mongo):
             {
                 "url": webpage.url,
                 "webpage": webpage.webpage,
-                "communities": webpage.communities,
                 "scrape_status": webpage.scrape_status,
                 "scrape_time": webpage.scrape_time,
             }
@@ -37,7 +35,6 @@ class Webpage:
         self,
         url,
         webpage,
-        communities,
         scrape_status,
         scrape_time,
         id=None,
@@ -46,7 +43,6 @@ class Webpage:
         self.scrape_status = scrape_status
         self.webpage = webpage
         self.url = url
-        self.communities = communities
         self.scrape_time = scrape_time
 
     def to_dict(self):
@@ -54,7 +50,6 @@ class Webpage:
             "_id": self.id,
             "url": self.url,
             "webpage": self.webpage,
-            "communities": self.communities,
             "scrape_time": self.scrape_time,
             "scrape_status": self.scrape_status,
         }

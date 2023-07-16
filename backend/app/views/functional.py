@@ -192,7 +192,6 @@ def create_submission(current_user):
                 # insert in MongoDB
                 insert_status, webpage = log_webpage(data["url"],
                                                      data["webpage"],
-                                                     doc.communities,
                                                      data["scrape_status"],
                                                      data["scrape_time"]
                                                      )
@@ -302,7 +301,6 @@ def create_batch_submission(current_user):
                     # insert in MongoDB
                     insert_status, webpage = log_webpage(data["url"],
                                                          data["webpage"],
-                                                         doc.communities,
                                                          data["scrape_status"],
                                                          data["scrape_time"]
                                                          )
@@ -770,6 +768,9 @@ def search(current_user):
         user_id = current_user.id
         user_communities = current_user.communities
 
+        # flag for searching over webpage index
+        toggle_webpage_results = True
+
         query = request.args.get("query", "")
         source = request.args.get("source", "webpage_search")
 
@@ -816,6 +817,8 @@ def search(current_user):
                 # search over all communities of the user
                 requested_communities = user_communities
             else:
+                # Turn off webpages for single, specific community search
+                toggle_webpage_results = False
                 try:
                     requested_communities = [ObjectId(requested_communities)]  # assume only one for now
                 except:
@@ -859,7 +862,7 @@ def search(current_user):
         user_id_str = str(user_id)
 
         total_num_results, search_results_page = cache_search(query, search_id, page, rc_dict, user_id=user_id_str,
-                                                              own_submissions=own_submissions)
+                                                              own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results)
 
         return_obj["total_num_results"] = total_num_results
         return_obj["search_results_page"] = search_results_page
@@ -871,7 +874,7 @@ def search(current_user):
         return response.error("Failed to search, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-def cache_search(query, search_id, index, communities, user_id, own_submissions=False):
+def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True):
     """
 	Helper function for pulling search results.
 	Arguments:
@@ -914,27 +917,28 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
         # If we cannot find cache page, (re)do the search
         if not page:
             _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
-            # Searching exactly a user's community from the webpages index
-            _, webpages_hits = webpages_elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
-
 
             submissions_pages = create_page(submissions_hits, communities)
 
+            if toggle_webpage_results:
 
-            # Building an inverted index to map orig_url to index using the submissions_pages list
-            subpgs_url_to_id = {}
-            for i, submission_page in enumerate(submissions_pages):
-                subpgs_url_to_id[submission_page["orig_url"]] = i
+                # Searching exactly a user's community from the webpages index
+                _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
 
-            webpages_index_pages = create_page(webpages_hits, communities)
+                # Building an inverted index to map orig_url to index using the submissions_pages list
+                subpgs_url_to_id = {}
+                for i, submission_page in enumerate(submissions_pages):
+                    subpgs_url_to_id[submission_page["orig_url"]] = i
 
-            # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
-            for webpage in webpages_index_pages:
-                if subpgs_url_to_id.get(webpage["orig_url"]):
-                    i = subpgs_url_to_id.get(webpage["orig_url"])
-                    submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
+                webpages_index_pages = create_page(webpages_hits, communities)
 
-            submissions_pages = submissions_pages + webpages_index_pages
+                # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
+                for webpage in webpages_index_pages:
+                    if subpgs_url_to_id.get(webpage["orig_url"]):
+                        i = subpgs_url_to_id.get(webpage["orig_url"])
+                        submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
+
+                submissions_pages = submissions_pages + webpages_index_pages
 
             pages = deduplicate(submissions_pages)
             pages = neural_rerank(query, pages)
@@ -982,15 +986,17 @@ def create_page(hits, communities):
 
         # possible that returns additional communities?
         result["communities_part_of"] = {community_id: communities[community_id] for community_id in
-                                         hit["_source"]["communities"] if community_id in communities}
+                                         hit["_source"].get("communities", []) if community_id in communities}
 
         result["submission_id"] = str(hit["_id"])
 
         if "time" in hit["_source"]:
             formatted_time = "Submitted " + format_time_for_display(hit["_source"]["time"])
             result["time"] = formatted_time
-        else:
-            result["time"] = "Website"
+        elif "scrape_time" in hit["_source"]:
+            formatted_time = "Indexed " + format_time_for_display(hit["_source"]["scrape_time"])
+            result["time"] = formatted_time
+
 
         # Display URL
         url = hit["_source"].get("source_url", "")
