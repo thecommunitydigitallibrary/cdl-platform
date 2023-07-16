@@ -16,7 +16,7 @@ const CDL = () => {
         <title>The Community Digital Library</title>
         <meta
           name="description"
-          content="CDl"
+          content="CDL"
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>

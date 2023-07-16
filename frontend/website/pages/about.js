@@ -1,10 +1,10 @@
-import * as React from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-
+import jsCookie from "js-cookie";
 import PropTypes from "prop-types";
 // Import pages within each tab
 import Summary from "./summary";
@@ -15,6 +15,8 @@ import Usage from "./usage";
 import Header from "../components/header";
 import Head from "next/head";
 import Footer from "../components/footer";
+import CDL from "./cdl";
+import Home from ".";
 
 // Taken from: https://mui.com/material-ui/react-tabs/
 function TabPanel(props) {
@@ -56,13 +58,28 @@ function a11yProps(index) {
 
 export default function About() {
   const [value, setValue] = React.useState(0);
+  const [loggedOut, setLoggedOut] = useState(true);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  useEffect(()=>{
+    setLoggedOut(
+      jsCookie.get("token") == "" || jsCookie.get("token") == undefined
+    );
+  })
+
   return (
-    <>
-      <Header />
+    loggedOut?
+    <CDL/>
+    :
+    <Home/>
+      
+  );
+
+  /*
+  <Header />
       <div
         className="allResults"
         style={{
@@ -103,6 +120,7 @@ export default function About() {
         </Box>
       </div>
       <Footer alt={true} />
-    </>
-  );
+  */
+
 }
+

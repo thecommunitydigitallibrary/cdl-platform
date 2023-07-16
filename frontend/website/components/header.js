@@ -366,7 +366,6 @@ function Header(props) {
       updateDropDownSearch();
       // window.location.reload()
     }
-    console.log("1", dropdowndata);
     setLoggedOut(
       jsCookie.get("token") == "" || jsCookie.get("token") == undefined
     );
