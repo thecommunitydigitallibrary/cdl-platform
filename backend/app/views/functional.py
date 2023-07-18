@@ -180,6 +180,8 @@ def create_submission(current_user):
         if status.acknowledged:
             doc.id = status.inserted_id
             index_status = elastic_manager.add_to_index(doc)
+            
+            print("SUBMISSION_INDEX_STATUS", index_status)
 
             scraper = ScrapeWorker()
             if not scraper.is_scraped_before(source_url):
@@ -196,8 +198,10 @@ def create_submission(current_user):
                                                      data["scrape_time"]
                                                      )
                 if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                    # index in Openaseacrch
-                    webpages_elastic_manager.add_to_index(webpage)
+                    # index in OpenSearch
+                    index_status = webpages_elastic_manager.add_to_index(webpage)
+                    print("WEBPAGE_INDEX_STATUS", index_status)
+
                 else:
                     print("Unable to insert webpage data in database.")
 
@@ -441,6 +445,9 @@ def submission(current_user, id):
         user_id = current_user.id
         ip = request.remote_addr
         cdl_logs = Logs()
+        cdl_webpages = Webpages()
+
+
         if request.method == "DELETE":
             if request.data:
                 request_data = json.loads(request.data.decode("utf-8"))
@@ -557,7 +564,9 @@ def submission(current_user, id):
             communities = current_user.communities
             try:
                 submission = cdl_logs.find_one({"_id": ObjectId(id)})
-            except:
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
                 return response.error("Invalid submission ID", Status.NOT_FOUND)
 
             try:
@@ -571,27 +580,89 @@ def submission(current_user, id):
                 for community in communities:
                     if str(community) in community_submissions:
                         search_id = log_submission_view(ip, user_id, submission.id).inserted_id
-                        submission = format_submission_for_display(submission, current_user, communities, search_id)
+                        submission = format_submission_for_display(submission, current_user, search_id)
                         submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
                         return response.success({"submission": submission}, Status.OK)
 
                 # Case where user is the original submitter but it has been removed from all communities.
                 if str(submission.user_id) == str(user_id):
                     search_id = log_submission_view(ip, user_id, submission.id).inserted_id
-                    submission = format_submission_for_display(submission, current_user, communities, search_id)
+                    submission = format_submission_for_display(submission, current_user, search_id)
                     submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
                     return response.success({"submission": submission}, Status.OK)
 
                 return response.error("You do not have access to this submission.", Status.FORBIDDEN)
-            else:
+            elif not submission:
+                try:
+                    webpage = cdl_webpages.find_one({"_id": ObjectId(id)})
+                    if webpage:
+                        search_id = log_submission_view(ip, user_id, webpage.id).inserted_id
+                        submission = format_webpage_for_display(webpage, search_id)
+                        return response.success({"submission": submission}, Status.OK)
+                except Exception as e:
+                    print(e)
+                    traceback.print_exc()
+                    pass
+
                 return response.error("Cannot find submission.", Status.NOT_FOUND)
     except Exception as e:
         print(e)
         traceback.print_exc()
         return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
+    
+def format_webpage_for_display(webpage, search_id):
+    webpage = webpage.to_dict()
+    submission = {}
+
+    submission["submission_id"] = webpage["_id"]
 
 
-def format_submission_for_display(submission, current_user, communities, search_id, for_connection=False):
+    submission["stats"] = {
+        "views": 0,
+        "clicks": 0,
+        "shares": 0
+    }
+    cdl_searches_clicks = SearchesClicks()
+    num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "click_search_result"})
+    submission["stats"]["clicks"] = num__search_clicks
+
+    cdl_recommendations_clicks = RecommendationsClicks()
+    num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["submission_id"]})
+    submission["stats"]["clicks"] += num_rec_clicks
+
+    num_views = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "submission_view"})
+    submission["stats"]["views"] = num_views
+
+    submission["communities"] = {}
+    submission["communities_part_of"] = {}
+    submission["can_delete"] = False
+    submission["hashtags"] = []
+    submission["user_id"] = None
+    submission["highlighted_text"] = webpage["webpage"]["metadata"].get("description", "No Preview Available")
+    submission["explanation"] = webpage["webpage"]["metadata"].get("title")
+        
+    display_time = format_time_for_display(webpage["scrape_time"])
+    submission["time"] = "Indexed " + display_time
+
+    # make display url
+    display_url = build_display_url(webpage["url"])
+    submission["display_url"] = display_url
+    submission["raw_source_url"] = webpage["url"]  # added for editing submission
+
+    # make redirect url (need result hash)
+    submission["submission_id"] = str(submission["submission_id"])
+    result_hash = build_result_hash(-1, str(submission["submission_id"]), str(search_id))
+    redirect_url = build_redirect_url(webpage["url"], result_hash, submission["highlighted_text"], "search")
+    submission["redirect_url"] = redirect_url
+
+    submission["connections"] = []
+
+    submission["type"] = "webpage"
+
+    return submission
+
+
+def format_submission_for_display(submission, current_user, search_id):
     """
 	Helper method to format a raw mongodb submission for frontend display.
 	Mostly takes the original format, except removes any unnecessary information.
@@ -600,7 +671,6 @@ def format_submission_for_display(submission, current_user, communities, search_
 		current_user : the User object of the current user.
 		communities : list : list of communities that the user is a member of
 		search_id : ObjectID : the id of the view submission log (for tracking clicks)
-		TODO for_connection : boolean : if true, no need for community field, stats
 	Returns:
 		submission : dict : a slightly-modified submission object.
 	"""
@@ -669,7 +739,7 @@ def format_submission_for_display(submission, current_user, communities, search_
     submission["submission_id"] = str(submission["_id"])
     submission["user_id"] = str(submission["user_id"])
 
-    display_time = format_time_for_display(submission["time"])
+    display_time = "Submitted" + format_time_for_display(submission["time"])
 
     submission["time"] = display_time
 
@@ -691,6 +761,9 @@ def format_submission_for_display(submission, current_user, communities, search_
     del submission["ip"]
     del submission["type"]
     del submission["_id"]
+
+    submission["type"] = "user_submission"
+
 
     return submission
 
@@ -731,8 +804,7 @@ def find_connections(submission_id, user_communities, current_user, search_id):
         for community in user_communities:
             community = str(community)
             if community in connection_communities:
-                formatted_connection = format_submission_for_display(target_connection, current_user,
-                                                                     user_communities, search_id)
+                formatted_connection = format_submission_for_display(target_connection, current_user, search_id)
                 formatted_connection["connection_description"] = connection.description
                 filtered_connections.append(formatted_connection)
                 break
