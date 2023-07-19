@@ -39,9 +39,9 @@ class ElasticManager:
 
     def process_query(self, query):
         """
-    Cleans up query for stopwords.
-    Also checks if query is URL, and returns flag accordingly
-    """
+        Cleans up query for stopwords.
+        Also checks if query is URL, and returns flag accordingly
+        """
         query_obj = {
             "query": query,
             "isURL": False,
@@ -149,16 +149,38 @@ class ElasticManager:
             fields = []
 
 
-        if self.index_name == "webpages":
-            must_terms = []
-        else:
-            must_terms = [
-                {"terms": {"communities": communities}}
-            ]
+        query_comm = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {
+                            "multi_match": {
+                                "query": query,
+                                "fields": fields
+                            }
+                        },
+                    ]
+                }
+            },
+            "from": page * page_size,
+            "size": page_size,
+            "min_score": 0.1
+        }
 
-        if query_obj["hashtags"]:
-            must_terms.append({"terms": {"hashtags": query_obj["hashtags"]}})
+        if self.index_name != "webpages":
+            filter =  {
+                        "bool": {
+                            "must": [
+                                {"terms": {"communities": communities}}
+                            ]
+                        }
+                    }
+            if query_obj["hashtags"]:
+                filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
+                
+            query_comm["query"]["bool"]["filter"] = filter
 
+        """
         # now with hashtag
         query_comm = {
             "query": {
@@ -182,6 +204,8 @@ class ElasticManager:
             "size": page_size,
             "min_score": 0.1
         }
+        """
+        print(query_comm)
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
         hits = json.loads(r.text)["hits"]
         return hits["total"]["value"], hits["hits"]
@@ -235,9 +259,10 @@ class ElasticManager:
         elif self.index_name == os.environ["elastic_webpages_index_name"]:
             doc_id = str(doc.id)
             paragraphs = doc.webpage.get("paragraphs")
+            scrape_time = int(float(doc.scrape_time))
             inserted_doc = {
                 "source_url": doc.url,
-                "scrape_time": doc.scrape_time,
+                "scrape_time": scrape_time,
                 "webpage": {
                     "metadata": doc.webpage.get("metadata"),
                     "all_paragraphs": " ".join(paragraphs) if paragraphs is not None else ""

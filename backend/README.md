@@ -645,6 +645,7 @@ On failure, status code indicating respective error with body describing the err
       A list of api/submission/<id> GET return objects EXCEPT for the connections field
   ]
   hashtags : list of hashtags present in highlighted_text or explanation
+  type: either "user_submission" or "webpage"
 }
 ```
 
