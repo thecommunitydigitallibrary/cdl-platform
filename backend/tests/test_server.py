@@ -3,6 +3,7 @@ import json
 import pytest
 import os
 import time
+import random
 from bson import ObjectId
 from pymongo import MongoClient
 from app.db import get_db
@@ -17,6 +18,7 @@ class Setup():
         self.communityId=  ''
         self.submissionId = ''
         self.connectionId = ''
+        self.join_key = ''
         env_file_path = os.path.join(os.path.dirname(__file__),"..","env_local.ini")
         with open(env_file_path, "r") as f:
             for line in f:
@@ -25,12 +27,8 @@ class Setup():
                 value = "=".join(split_line[1:]).strip("\n")
                 os.environ[name] = value
         
-
-
         self.db_client, self.cdl_db = self.get_db()
-        self.URL = os.environ["api_url"] + ":" + os.environ["api_port"] 
-
-
+        self.URL = os.environ["api_url"] + ":" + os.environ["api_port"]
 
     def get_db(self):
         client = MongoClient([os.environ["cdl_test_uri"]])
@@ -38,11 +36,27 @@ class Setup():
         return client, cdl_db
 
     def clear_db(self):
-        if self.db_client.address == ('localhost', 27017):
+        if self.db_client.address == ('0.0.0.0', 27017):
             self.db_client.drop_database(os.environ["db_name"])
             return True
         else:
             return False
+    
+    def get_new_user(self):
+        url = URL+"/api/createAccount"
+    
+        headers = {'Content-Type': 'application/json' } 
+
+        random_num = random.getrandbits(12)
+        payload = {
+            "email":f"testuser{random_num}@gmail.com",
+            "username":f"test{random_num}",
+            "password":"testpassword"
+        }
+
+        resp = requests.post(url, headers=headers, data=json.dumps(payload,indent=4))
+        resp_body = resp.json()
+        return resp_body["token"]
 
 
 cred = Setup()
@@ -127,6 +141,7 @@ def test_getCommunities(data):
     assert resp_body['username']=='testuser'
     assert resp_body['community_info'][0]['name'] == "testcommunity"
     data.communityId=resp_body['community_info'][0]['community_id']
+    data.join_key = resp_body['community_info'][0]["join_key"]
 
 
 def test_community_db_data(data):
@@ -192,21 +207,11 @@ def test_community_submission_invalid_community(data):
     
 def test_community_submission_wrong_community(data):
     #create a new user session
-    url = URL+"/api/createAccount"
-    
-    headers = {'Content-Type': 'application/json' } 
+    new_token = data.get_new_user()
 
-    payload = {
-        "email":"testuser1@gmail.com",
-        "username":"testuser1",
-        "password":"testpassword"
-    }
-
-    resp = requests.post(url, headers=headers, data=json.dumps(payload,indent=4))
-    resp_body = resp.json()
     url = URL + "/api/submission/"
     headers = {
-        'authorization': resp_body['token']
+        'authorization': new_token
     }
 
     payload = {
@@ -223,7 +228,7 @@ def test_community_submission_wrong_community(data):
     assert resp_body["message"] == "Error: You do not have access to this community." 
 
 def test_api_search(data):
-    url = URL+"/api/search"
+    url = URL + "/api/search"
     time.sleep(2)
 
     headers = {
@@ -278,6 +283,50 @@ def test_submission_get(data):
     assert resp_body["submission"]["communities_part_of"] == {data.communityId: "testcommunity"}
     assert len(resp_body["submission"]["connections"]) == 1
     assert resp_body["submission"]["connections"][0]["connection_description"] == ""
+
+def test_recommendation(data):
+    #Test creates a new user, joins a community and submits a new submission.
+    new_token = data.get_new_user()
+    url = URL+"/api/joinCommunity"
+
+    payload = json.dumps({
+    "join_key": data.join_key
+    })
+    headers = {
+    'Authorization': new_token,
+    'Content-Type': 'application/json'
+    }
+
+    resp = requests.post(url, headers=headers, data=payload)
+    assert resp.status_code == 200
+
+    url = URL + "/api/submission/"
+    headers = {
+        'authorization':new_token
+    }
+    payload = {
+        "highlighted_text": "World world test",
+        "source_url": "https://seeyouworld.com",
+        "explanation": "A different page about hello world",
+        "community": data.communityId
+    }
+
+    resp = requests.post(url, headers=headers, data=payload)
+    assert resp.status_code == 200
+
+    # Use the primary user (data) to search for recommendation with explore method.
+    url = URL + "/api/recommend"
+    headers = {
+        'authorization': data.token # request sent by different test user
+    }
+    params = {
+        "method": "explore_similar_extension"
+    }
+    resp = requests.request("GET", url, params=params, headers=headers)
+    assert resp.status_code == 200
+    resp_body = resp.json()
+    assert len(resp_body["recommendation_results_page"]) == 1
+    assert resp_body["recommendation_results_page"][0]["highlighted_text"] == "World world test"
 
 def test_submission_save(data):
     url = URL + "/api/submission/" + data.submissionId
@@ -391,6 +440,7 @@ def test_feedback(data):
     resp_body = resp.json()
     assert resp_body["status"] == "ok"
     assert resp_body["message"] == "Feedback saved!"
+
 
 #function to clean up test data for successful multi test runs
 def test_cleanup(data):
