@@ -67,7 +67,9 @@ class ScrapeWorker:
             resp = requests.get(
                 url, timeout=CONNECTION_READ_TIMEOUT, headers=HEADERS)
             self.end_time = time.time()
-        except:
+        except Exception as err:
+            print(err)
+            traceback.print_exc()
             data["scrape_status"] = {
                 "code": CODE_TIMEOUT,
                 "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_TIMEOUT]
