@@ -125,7 +125,7 @@ def build_redirect_url(url, result_hash, highlighted_text, method="search"):
 	elif "youtube" in url:
 		redirect_url += "&redirect_url=" + quote(url)
 	else:
-		if highlighted_text == "No Preview Available":
+		if highlighted_text == "" or highlighted_text == "No Preview Available":
 			redirect_url += "&redirect_url=" + url
 		else:
 			redirect_url += "&redirect_url=" + url + "#:~:text=" + highlighted_text[:-3]

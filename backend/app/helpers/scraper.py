@@ -212,7 +212,9 @@ class ScrapeWorker:
         text = text.replace("\\r\\n", " ")
         text = text.replace("\\n", " ")
         text = text.replace("\\t", " ")
+        text = text.replace("<p>", "")
         text = " ".join(text.split())
+
         return text
 
     def test_fix_relative_url(self, url, base_url):

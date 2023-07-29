@@ -150,10 +150,14 @@ def create_submission(current_user):
     try:
         ip = request.remote_addr
         user_id = current_user.id
-        highlighted_text = request.form.get("highlighted_text")
+        highlighted_text = request.form.get("highlighted_text", "")
         source_url = request.form.get("source_url")
         explanation = request.form.get("explanation")
         community = request.form.get("community", "")
+
+        # assumed string, so check to make sure is not none
+        if highlighted_text == None:
+            highlighted_text = ""
 
         # hard-coded to prevent submissions to the web community
         if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
@@ -1037,12 +1041,20 @@ def create_page(hits, communities):
         }
 
         if "webpage" in hit["_source"]:
-            result["highlighted_text"] = hit["_source"]["webpage"]["metadata"].get("description", "No Preview Available")
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
+            description = hit["_source"]["webpage"]["metadata"].get("description", None)
+            if not description:
+                description = hit["_source"]["webpage"]["metadata"].get("h1", None)
+            if not description:
+                description = "No Preview Available"
+            result["highlighted_text"] = description
+
         else:
-            result["highlighted_text"] = hit["_source"].get("highlighted_text", "No Preview Available")
             result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-        
+            description = hit["_source"].get("highlighted_text", None)
+            if not description:
+                description ="No Preview Available"
+            result["highlighted_text"] = description
 
         # possible that returns additional communities?
         result["communities_part_of"] = {community_id: communities[community_id] for community_id in

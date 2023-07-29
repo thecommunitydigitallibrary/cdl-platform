@@ -138,9 +138,9 @@ class ElasticManager:
         print("hashtags", query_obj["hashtags"])
         print("is url?", query_obj["isURL"])
 
-        if self.index_name == "webpages":
-            fields = ["webpage.metadata.title", "webpage.metadata.h1", "webpage.metadata.description", "webpage.paragraphs"]
-        elif self.index_name == "submissions":
+        if self.index_name == os.environ["elastic_webpages_index_name"]:
+            fields = ["webpage.metadata.title", "webpage.metadata.h1", "webpage.metadata.description", "webpage.all_paragraphs"]
+        elif self.index_name == os.environ["elastic_index_name"]:
             if query_obj["isURL"]:
                 fields = ["source_url"]
             else:
@@ -167,7 +167,7 @@ class ElasticManager:
             "min_score": 0.1
         }
 
-        if self.index_name != "webpages":
+        if self.index_name != os.environ["elastic_webpages_index_name"]:
             filter =  {
                         "bool": {
                             "must": [
