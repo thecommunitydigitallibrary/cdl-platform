@@ -996,21 +996,9 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
                 # Searching exactly a user's community from the webpages index
                 _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
-
-                # Building an inverted index to map orig_url to index using the submissions_pages list
-                subpgs_url_to_id = {}
-                for i, submission_page in enumerate(submissions_pages):
-                    subpgs_url_to_id[submission_page["orig_url"]] = i
-
                 webpages_index_pages = create_page(webpages_hits, communities)
 
-                # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
-                for webpage in webpages_index_pages:
-                    if subpgs_url_to_id.get(webpage["orig_url"]):
-                        i = subpgs_url_to_id.get(webpage["orig_url"])
-                        submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
-
-                submissions_pages = submissions_pages + webpages_index_pages
+                submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
 
             pages = deduplicate(submissions_pages)
             pages = neural_rerank(query, pages)
@@ -1162,15 +1150,31 @@ def deduplicate(pages):
 
     return [p[0] for p in map_pages.values()]
 
+def combine_pages(submissions_pages, webpages_index_pages):
+
+    # Building an inverted index to map orig_url to index using the submissions_pages list
+    subpgs_url_to_id = {}
+    for i, submission_page in enumerate(submissions_pages):
+        subpgs_url_to_id[submission_page["orig_url"]] = i
+
+    # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
+    for webpage in webpages_index_pages:
+        if subpgs_url_to_id.get(webpage["orig_url"]):
+            i = subpgs_url_to_id.get(webpage["orig_url"])
+            submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
+    
+    return submissions_pages + webpages_index_pages
+
 
 # recommender
 @functional.route("/api/recommend", methods=["GET"])
 @token_required
-def get_recommendations(current_user):
+def get_recommendations(current_user, toggle_webpage_results = True):
     """
 	Endpoint for the webpage recommendation functionality.
 	Arguments:
 		current_user: (dictionary) : the user recovered from the JWT token.
+        toggle_webpage_results: To add webpage index results in recommendation feed
 		request args with:
 			method : (string) : the typed query of the user.
 				'recent' --> most recent submissions to user's communities
@@ -1297,10 +1301,19 @@ def get_recommendations(current_user):
                     new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
                     search_text += " " + new_terms
 
-                number_of_hits, hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
+                number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
                                                               page_size=1000)
+                submissions_pages = create_page(submissions_hits, rc_dict)
 
-                pages = create_page(hits, rc_dict)
+                if toggle_webpage_results:
+                    # Searching for recommendations from the webpages index
+                    _, webpages_hits = webpages_elastic_manager.search(search_text, [], page=0, page_size=50)
+                    webpages_index_pages = create_page(webpages_hits, rc_dict)
+
+                    submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
+
+                # Sorting pages based on score, high to low
+                pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
                 pages = deduplicate_by_ids(pages, query_ids)
 
                 pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
