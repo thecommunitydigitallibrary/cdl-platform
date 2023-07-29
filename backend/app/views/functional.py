@@ -910,6 +910,31 @@ def search(current_user):
                                       highlighted_text=highlighted_text)
             search_id = str(search_id)  # for return
 
+
+            # also scrape the webpage if there is a url
+            if url:
+                scraper = ScrapeWorker()
+                if not scraper.is_scraped_before(url):
+                    data = scraper.scrape(url)  # Triggering Scraper
+
+                    # Check if the scrape was not successful
+                    if data["scrape_status"]["code"] != 1:
+                        data["webpage"] = {}
+
+                    # insert in MongoDB
+                    insert_status, webpage = log_webpage(data["url"],
+                                                        data["webpage"],
+                                                        data["scrape_status"],
+                                                        data["scrape_time"]
+                                                        )
+                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                        # index in OpenSearch
+                        index_status = webpages_elastic_manager.add_to_index(webpage)
+                        print("WEBPAGE_INDEX_STATUS", index_status)
+
+                    else:
+                        print("Unable to insert webpage data in database.")
+
         # if the search_id is included, then the user is looking for a specific page of a previous search
         else:
             cdl_searches_clicks = SearchesClicks()
