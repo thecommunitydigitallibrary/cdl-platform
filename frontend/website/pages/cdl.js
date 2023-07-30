@@ -1,13 +1,13 @@
 import Head from "next/head";
-import Navbar from "../components/navbar";
-import Hero from "../components/hero";
-import SectionTitle from "../components/sectionTitle";
-import { benefitOne, benefitTwo } from "../components/data/landingpage";
-import Benefits from "../components/benefits";
+import Hero from "../components/homepage/hero";
+import SectionTitle from "../components/homepage/sectionTitle";
+import { benefitOne, benefitTwo, benefitThree } from "../components/data/landingpage";
+import Benefits from "../components/homepage/benefits";
 import FrequentlyAskedQuestions from "./faq";
-import Testimonials from "../components/testimonials";
-import Cta from "../components/cta";
+import Testimonials from "../components/homepage/testimonials";
+import Cta from "../components/homepage/cta";
 import Footer from "../components/footer";
+import Header from "../components/header";
 
 
 const CDL = () => {
@@ -20,8 +20,8 @@ const CDL = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Navbar/>
-      <div>
+      <Header/>
+      <div className="allResults">
      <Hero /> 
      <SectionTitle
         pretitle="Why CDL?"
@@ -30,12 +30,18 @@ const CDL = () => {
       </SectionTitle>
       
       <Benefits data={benefitOne} />
-      <SectionTitle
+      <Benefits data={benefitTwo} imgPos="right" />
+      <Benefits data={benefitThree} />
+
+      {/* commenting out testimonials temporarily */}
+
+      {/* <SectionTitle
         pretitle="Testimonials"
         title="Here's what our users said">
         Here's what professors and students using our platform have said!
       </SectionTitle>
-      <Testimonials />
+      <Testimonials /> */}
+
       <SectionTitle pretitle="FAQ" title="Frequently Asked Questions">  
         
       </SectionTitle>

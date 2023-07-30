@@ -27,7 +27,7 @@ import {
 } from "@mui/material";
 
 import SearchBarHeader from "./forms/searchBarHeader";
-import DrawerComp from "./drawer";
+import DrawerComp from "../components/homepage/drawer"
 import AppContext from "./appContext";
 
 import { Add, Upload } from "@mui/icons-material";
@@ -43,6 +43,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
+import Navbar from "./homepage/navbar";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 
 // Example of JSON, this is displayed to frontend.
@@ -432,7 +433,7 @@ function Header(props) {
     return (
       <ThemeProvider theme={theme}>
         <AppBar>
-          <Toolbar>
+          <Toolbar >
             <Grid
               container
               justifyContent={"space-between"}
@@ -725,22 +726,8 @@ function Header(props) {
     );
   } else {
     return (
-      <AppBar>
-        <Toolbar>
-          <a href="/auth" style={{ color: "white" }}>
-            Log In or Create An Account
-          </a>
-          <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
-            <Alert
-              onClose={handleClose}
-              severity={severity}
-              sx={{ width: "100%" }}
-            >
-              {message}
-            </Alert>
-          </Snackbar>
-        </Toolbar>
-      </AppBar>
+      <Navbar/>
+  
     );
   }
 }

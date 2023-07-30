@@ -16,7 +16,7 @@ import TextField from "@mui/material/TextField";
 // Snackbar related imports
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import Container from "./container";
+import Container from "./homepage/container";
 import { Link } from "@mui/material";
 import Image from "next/image";
 
