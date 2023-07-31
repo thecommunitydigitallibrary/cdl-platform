@@ -27,7 +27,7 @@ import {
 } from "@mui/material";
 
 import SearchBarHeader from "./forms/searchBarHeader";
-import DrawerComp from "./drawer";
+import DrawerComp from "../components/homepage/drawer"
 import AppContext from "./appContext";
 
 import { Add, Upload } from "@mui/icons-material";
@@ -43,6 +43,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
+import Image from "next/image";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 
 // Example of JSON, this is displayed to frontend.
@@ -202,7 +203,7 @@ function Header(props) {
     setCommunity("");
   };
   const createNewSubmission = async (event) => {
-    
+
     if (batch) {
 
       if (uploadJSON == null) {
@@ -211,7 +212,7 @@ function Header(props) {
         setUploaded(true);
         return;
       }
-      
+
       // Assumes the file has been parsed and saved to uploadJSON
       var ret_issues = await validateSubmissionJSON(uploadJSON["data"]);
       var URL = baseURL_client + createSubmissionEndpoint + "batch/";
@@ -344,6 +345,13 @@ function Header(props) {
   });
   const [loggedOut, setLoggedOut] = useState(false);
   const [dropdowndata, setDropDownData] = useState({});
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+ 
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
 
   const getCommunitiesEndpoint = "getCommunities";
   const updateDropDownSearch = async () => {
@@ -366,7 +374,6 @@ function Header(props) {
       updateDropDownSearch();
       // window.location.reload()
     }
-    console.log("1", dropdowndata);
     setLoggedOut(
       jsCookie.get("token") == "" || jsCookie.get("token") == undefined
     );
@@ -393,6 +400,21 @@ function Header(props) {
       label: "Make Submission",
       value: "indexSubmission",
     },
+  ];
+
+  const loggedOutSettings = [
+    {
+      label: "Setup",
+      value: "setup",
+    },
+    {
+      label: "FAQ",
+      value: "faq",
+    },
+    {
+      label: "Release Log",
+      value: "releaselog",
+    }
   ];
 
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -433,16 +455,24 @@ function Header(props) {
     return (
       <ThemeProvider theme={theme}>
         <AppBar>
-          <Toolbar>
+          <Toolbar >
             <Grid
               container
               justifyContent={"space-between"}
               alignItems={"center"}
               sx={{ minHeight: "65px", overflow: "hidden" }}
             >
-              <Grid item className="logo_temp_body" sx={{ width: "50px" }}>
-                <a href="/" className="logo_temp">
-                  CDL
+              <Grid className="flex items-center space-x-2 text-2xl mr-2 mt-2 font-medium text-white-500 dark:text-white-100">
+                <a href="/">
+                  <a>
+                    <Image
+                      src="/../public/images/tree48.png"
+                      alt="CDL"
+                      width="40"
+                      height="40"
+                      className="w-8"
+                    />
+                  </a>
                 </a>
               </Grid>
               <Grid item sx={{ flexGrow: 1 }}>
@@ -469,7 +499,7 @@ function Header(props) {
                 <>
                   {settings.map((setting) => (
                     <>
-                      
+
                       {setting.value == 'indexSubmission' ?
                         <Grid item sx={{ flexGrow: 0 }}>
                           <MenuItem onClick={handleClickSubmission}>
@@ -480,21 +510,21 @@ function Header(props) {
                         </Grid>
                         :
                         <Grid item sx={{ flexGrow: 0 }}>
-                        <MenuItem
-                          key={setting.value}
-                          value={setting.value}
-                          variant="outline"
-                          onClick={(event) =>
-                            handleUserClickMenu(event, setting.value)
-                          }
-                        >
-                          {setting.label}
-                        </MenuItem>
-                      </Grid>
+                          <MenuItem
+                            key={setting.value}
+                            value={setting.value}
+                            variant="outline"
+                            onClick={(event) =>
+                              handleUserClickMenu(event, setting.value)
+                            }
+                          >
+                            {setting.label}
+                          </MenuItem>
+                        </Grid>
                       }
                     </>
                   ))}
-                
+
                   <Grid item sx={{ flexGrow: 0, ml: "1%" }}>
                     <Tooltip title="Account Information">
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -728,9 +758,71 @@ function Header(props) {
     return (
       <AppBar>
         <Toolbar>
-          <a href="/auth" style={{ color: "white" }}>
-            Log In or Create An Account
-          </a>
+
+          <div style={{ position: 'sticky', top: '0', right: '0', zIndex: '50' }} className="w-full">
+            <nav className="container relative flex flex-wrap items-center justify-between mx-auto lg:justify-between xl:px-0">
+              {/* Logo */}
+              <div className="flex items-center space-x-2 text-2xl font-medium text-white-500 dark:text-white-100">
+                <a href="/">
+                  <a>
+                    <Image
+                      src="/../public/images/tree48.png"
+                      alt="CDL"
+                      width="40"
+                      height="40"
+                      className="w-8"
+                    />
+                  </a>
+                </a>
+                <span className="mb-2">CDL</span>
+              </div>
+
+              {/* Add below based on what to show on About page whne logged out */}
+
+              {/* Desktop Menu */}
+              {/* <div className="hidden text-center lg:flex lg:items-center">
+                <ul className="items-center justify-end flex-1 pt-6 list-none lg:pt-0 lg:flex">
+                  {Object.entries(loggedOutSettings).map(([key, item]) => (
+
+                    <li key={key}>
+                      <a className="no-underline" href={`/${item.value}`}>
+                        <a className="block px-4 py-2 text-white rounded-md dark:text-white-300 hover:text-white-500 focus:text-white-500 focus:bg-white-100 dark:focus:bg-white-800 focus:outline-none no-underline">
+                          {item.label}
+                        </a>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div> */}
+
+              <div className="hidden mr-3 space-x-4 lg:flex nav__item">
+                {!loggedOut ? (
+                  <a href="/" className="w-full px-6 py-2 text-center text-white bg-blue-500 rounded-md lg:ml-5 no-underline">
+                    Home
+                  </a>
+                ) : (
+                  <a href="/auth" className="w-full px-6 py-2 text-center text-white bg-blue-500 rounded-md lg:ml-5 no-underline">
+                    Log in
+                  </a>
+                )}
+                  
+                {/* WIP- Dark mode */}
+                {/* <ThemeChanger /> */}
+              </div>
+              {isMedium ? (
+                <Grid item>
+                  <DrawerComp
+                    settings={loggedOutSettings}
+                    handleUserClickMenu={handleUserClickMenu}
+                    handleClickSubmission={handleClickSubmission}
+                    username={dropdowndata.username}
+                    style={{ position: 'sticky', top: '0', right: '0' }}
+                  />
+                </Grid>
+              ) : <></>}
+            </nav>
+          </div>
+
           <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
             <Alert
               onClose={handleClose}

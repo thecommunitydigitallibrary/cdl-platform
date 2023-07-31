@@ -15,7 +15,7 @@ export default function FrequentlyAskedQuestions() {
     <div
       style={{
         padding: "10px 20px 5px 20px",
-        width: "1200px",
+        // removed hard set width
         display: "flex",
         flexDirection: "column",
         margin: "auto",
