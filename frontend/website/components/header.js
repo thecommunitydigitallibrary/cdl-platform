@@ -346,7 +346,7 @@ function Header(props) {
   const [loggedOut, setLoggedOut] = useState(false);
   const [dropdowndata, setDropDownData] = useState({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
- 
+
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -466,7 +466,7 @@ function Header(props) {
                 <a href="/">
                   <a>
                     <Image
-                      src="/../public/images/tree48.png"
+                      src="/images/tree48.png"
                       alt="CDL"
                       width="40"
                       height="40"
@@ -564,6 +564,7 @@ function Header(props) {
                           onClick={(event) =>
                             handleUserClickMenu(event, "logout")
                           }
+                          className="text-white bg-red-500 rounded-md no-underline"
                         >
                           Logout
                         </Button>
@@ -761,12 +762,12 @@ function Header(props) {
 
           <div style={{ position: 'sticky', top: '0', right: '0', zIndex: '50' }} className="w-full">
             <nav className="container relative flex flex-wrap items-center justify-between mx-auto lg:justify-between xl:px-0">
-              {/* Logo */}
+
               <div className="flex items-center space-x-2 text-2xl font-medium text-white-500 dark:text-white-100">
                 <a href="/">
                   <a>
                     <Image
-                      src="/../public/images/tree48.png"
+                      src="/images/tree48.png"
                       alt="CDL"
                       width="40"
                       height="40"
@@ -777,7 +778,7 @@ function Header(props) {
                 <span className="mb-2">CDL</span>
               </div>
 
-              {/* Add below based on what to show on About page whne logged out */}
+              {/* Add links below based on what to show on About page when logged out */}
 
               {/* Desktop Menu */}
               {/* <div className="hidden text-center lg:flex lg:items-center">
@@ -795,7 +796,7 @@ function Header(props) {
                 </ul>
               </div> */}
 
-              <div className="hidden mr-3 space-x-4 lg:flex nav__item">
+              <div className="mr-3 space-x-4 lg:flex nav__item ">
                 {!loggedOut ? (
                   <a href="/" className="w-full px-6 py-2 text-center text-white bg-blue-500 rounded-md lg:ml-5 no-underline">
                     Home
@@ -805,11 +806,15 @@ function Header(props) {
                     Log in
                   </a>
                 )}
-                  
+
                 {/* WIP- Dark mode */}
                 {/* <ThemeChanger /> */}
+
               </div>
-              {isMedium ? (
+
+              {/* If we decide to add more links to the header, we'll need a collapsabel drawer but not rn. So commenting it out: */}
+
+              {/* {isMedium ? (
                 <Grid item>
                   <DrawerComp
                     settings={loggedOutSettings}
@@ -819,7 +824,7 @@ function Header(props) {
                     style={{ position: 'sticky', top: '0', right: '0' }}
                   />
                 </Grid>
-              ) : <></>}
+              ) : <></>} */}
             </nav>
           </div>
 

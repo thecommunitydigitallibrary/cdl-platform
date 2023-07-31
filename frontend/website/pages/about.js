@@ -66,7 +66,6 @@ export default function About({loggedOut}) {
 
   return (
     <CDL loggedOut={loggedOut}/>
-        
   );
 
 /*
