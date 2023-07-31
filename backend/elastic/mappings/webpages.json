@@ -1,8 +1,8 @@
 {
     "mappings": {
       "properties": {
-        "communities": {
-          "type": "keyword"
+        "scrape_time": {
+          "type": "date"
         },
         "source_url": {
           "type": "text"

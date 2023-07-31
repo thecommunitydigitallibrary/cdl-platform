@@ -252,10 +252,9 @@ def log_recommendation_click(ip, rec_result_hash, redirect_url):
 		print("Error: unable to log rec click")
 	return
 
-def log_webpage(url, webpage, communities, scrape_status, scrape_time):
+def log_webpage(url, webpage, scrape_status, scrape_time):
 	webpage = Webpage(url,
         webpage,
-        communities,
         scrape_status,
 		scrape_time)
 	

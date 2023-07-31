@@ -150,10 +150,14 @@ def create_submission(current_user):
     try:
         ip = request.remote_addr
         user_id = current_user.id
-        highlighted_text = request.form.get("highlighted_text")
+        highlighted_text = request.form.get("highlighted_text", "")
         source_url = request.form.get("source_url")
         explanation = request.form.get("explanation")
         community = request.form.get("community", "")
+
+        # assumed string, so check to make sure is not none
+        if highlighted_text == None:
+            highlighted_text = ""
 
         # hard-coded to prevent submissions to the web community
         if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
@@ -180,6 +184,8 @@ def create_submission(current_user):
         if status.acknowledged:
             doc.id = status.inserted_id
             index_status = elastic_manager.add_to_index(doc)
+            
+            print("SUBMISSION_INDEX_STATUS", index_status)
 
             scraper = ScrapeWorker()
             if not scraper.is_scraped_before(source_url):
@@ -192,13 +198,14 @@ def create_submission(current_user):
                 # insert in MongoDB
                 insert_status, webpage = log_webpage(data["url"],
                                                      data["webpage"],
-                                                     doc.communities,
                                                      data["scrape_status"],
                                                      data["scrape_time"]
                                                      )
                 if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                    # index in Openaseacrch
-                    webpages_elastic_manager.add_to_index(webpage)
+                    # index in OpenSearch
+                    index_status = webpages_elastic_manager.add_to_index(webpage)
+                    print("WEBPAGE_INDEX_STATUS", index_status)
+
                 else:
                     print("Unable to insert webpage data in database.")
 
@@ -302,7 +309,6 @@ def create_batch_submission(current_user):
                     # insert in MongoDB
                     insert_status, webpage = log_webpage(data["url"],
                                                          data["webpage"],
-                                                         doc.communities,
                                                          data["scrape_status"],
                                                          data["scrape_time"]
                                                          )
@@ -443,6 +449,9 @@ def submission(current_user, id):
         user_id = current_user.id
         ip = request.remote_addr
         cdl_logs = Logs()
+        cdl_webpages = Webpages()
+
+
         if request.method == "DELETE":
             if request.data:
                 request_data = json.loads(request.data.decode("utf-8"))
@@ -559,7 +568,9 @@ def submission(current_user, id):
             communities = current_user.communities
             try:
                 submission = cdl_logs.find_one({"_id": ObjectId(id)})
-            except:
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
                 return response.error("Invalid submission ID", Status.NOT_FOUND)
 
             try:
@@ -573,27 +584,89 @@ def submission(current_user, id):
                 for community in communities:
                     if str(community) in community_submissions:
                         search_id = log_submission_view(ip, user_id, submission.id).inserted_id
-                        submission = format_submission_for_display(submission, current_user, communities, search_id)
+                        submission = format_submission_for_display(submission, current_user, search_id)
                         submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
                         return response.success({"submission": submission}, Status.OK)
 
                 # Case where user is the original submitter but it has been removed from all communities.
                 if str(submission.user_id) == str(user_id):
                     search_id = log_submission_view(ip, user_id, submission.id).inserted_id
-                    submission = format_submission_for_display(submission, current_user, communities, search_id)
+                    submission = format_submission_for_display(submission, current_user, search_id)
                     submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
                     return response.success({"submission": submission}, Status.OK)
 
                 return response.error("You do not have access to this submission.", Status.FORBIDDEN)
-            else:
+            elif not submission:
+                try:
+                    webpage = cdl_webpages.find_one({"_id": ObjectId(id)})
+                    if webpage:
+                        search_id = log_submission_view(ip, user_id, webpage.id).inserted_id
+                        submission = format_webpage_for_display(webpage, search_id)
+                        return response.success({"submission": submission}, Status.OK)
+                except Exception as e:
+                    print(e)
+                    traceback.print_exc()
+                    pass
+
                 return response.error("Cannot find submission.", Status.NOT_FOUND)
     except Exception as e:
         print(e)
         traceback.print_exc()
         return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
+    
+def format_webpage_for_display(webpage, search_id):
+    webpage = webpage.to_dict()
+    submission = {}
+
+    submission["submission_id"] = webpage["_id"]
 
 
-def format_submission_for_display(submission, current_user, communities, search_id, for_connection=False):
+    submission["stats"] = {
+        "views": 0,
+        "clicks": 0,
+        "shares": 0
+    }
+    cdl_searches_clicks = SearchesClicks()
+    num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "click_search_result"})
+    submission["stats"]["clicks"] = num__search_clicks
+
+    cdl_recommendations_clicks = RecommendationsClicks()
+    num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["submission_id"]})
+    submission["stats"]["clicks"] += num_rec_clicks
+
+    num_views = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "submission_view"})
+    submission["stats"]["views"] = num_views
+
+    submission["communities"] = {}
+    submission["communities_part_of"] = {}
+    submission["can_delete"] = False
+    submission["hashtags"] = []
+    submission["user_id"] = None
+    submission["highlighted_text"] = webpage["webpage"]["metadata"].get("description", "No Preview Available")
+    submission["explanation"] = webpage["webpage"]["metadata"].get("title")
+        
+    display_time = format_time_for_display(webpage["scrape_time"])
+    submission["time"] = "Indexed " + display_time
+
+    # make display url
+    display_url = build_display_url(webpage["url"])
+    submission["display_url"] = display_url
+    submission["raw_source_url"] = webpage["url"]  # added for editing submission
+
+    # make redirect url (need result hash)
+    submission["submission_id"] = str(submission["submission_id"])
+    result_hash = build_result_hash(-1, str(submission["submission_id"]), str(search_id))
+    redirect_url = build_redirect_url(webpage["url"], result_hash, submission["highlighted_text"], "search")
+    submission["redirect_url"] = redirect_url
+
+    submission["connections"] = []
+
+    submission["type"] = "webpage"
+
+    return submission
+
+
+def format_submission_for_display(submission, current_user, search_id):
     """
 	Helper method to format a raw mongodb submission for frontend display.
 	Mostly takes the original format, except removes any unnecessary information.
@@ -602,7 +675,6 @@ def format_submission_for_display(submission, current_user, communities, search_
 		current_user : the User object of the current user.
 		communities : list : list of communities that the user is a member of
 		search_id : ObjectID : the id of the view submission log (for tracking clicks)
-		TODO for_connection : boolean : if true, no need for community field, stats
 	Returns:
 		submission : dict : a slightly-modified submission object.
 	"""
@@ -671,7 +743,7 @@ def format_submission_for_display(submission, current_user, communities, search_
     submission["submission_id"] = str(submission["_id"])
     submission["user_id"] = str(submission["user_id"])
 
-    display_time = format_time_for_display(submission["time"])
+    display_time = "Submitted" + format_time_for_display(submission["time"])
 
     submission["time"] = display_time
 
@@ -693,6 +765,9 @@ def format_submission_for_display(submission, current_user, communities, search_
     del submission["ip"]
     del submission["type"]
     del submission["_id"]
+
+    submission["type"] = "user_submission"
+
 
     return submission
 
@@ -733,8 +808,7 @@ def find_connections(submission_id, user_communities, current_user, search_id):
         for community in user_communities:
             community = str(community)
             if community in connection_communities:
-                formatted_connection = format_submission_for_display(target_connection, current_user,
-                                                                     user_communities, search_id)
+                formatted_connection = format_submission_for_display(target_connection, current_user, search_id)
                 formatted_connection["connection_description"] = connection.description
                 filtered_connections.append(formatted_connection)
                 break
@@ -769,6 +843,9 @@ def search(current_user):
         ip = request.remote_addr
         user_id = current_user.id
         user_communities = current_user.communities
+
+        # flag for searching over webpage index
+        toggle_webpage_results = True
 
         query = request.args.get("query", "")
         source = request.args.get("source", "webpage_search")
@@ -816,6 +893,8 @@ def search(current_user):
                 # search over all communities of the user
                 requested_communities = user_communities
             else:
+                # Turn off webpages for single, specific community search
+                toggle_webpage_results = False
                 try:
                     requested_communities = [ObjectId(requested_communities)]  # assume only one for now
                 except:
@@ -830,6 +909,31 @@ def search(current_user):
             search_id, _ = log_search(ip, user_id, source, query, requested_communities, own_submissions, url=url,
                                       highlighted_text=highlighted_text)
             search_id = str(search_id)  # for return
+
+
+            # also scrape the webpage if there is a url
+            if url:
+                scraper = ScrapeWorker()
+                if not scraper.is_scraped_before(url):
+                    data = scraper.scrape(url)  # Triggering Scraper
+
+                    # Check if the scrape was not successful
+                    if data["scrape_status"]["code"] != 1:
+                        data["webpage"] = {}
+
+                    # insert in MongoDB
+                    insert_status, webpage = log_webpage(data["url"],
+                                                        data["webpage"],
+                                                        data["scrape_status"],
+                                                        data["scrape_time"]
+                                                        )
+                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                        # index in OpenSearch
+                        index_status = webpages_elastic_manager.add_to_index(webpage)
+                        print("WEBPAGE_INDEX_STATUS", index_status)
+
+                    else:
+                        print("Unable to insert webpage data in database.")
 
         # if the search_id is included, then the user is looking for a specific page of a previous search
         else:
@@ -859,7 +963,7 @@ def search(current_user):
         user_id_str = str(user_id)
 
         total_num_results, search_results_page = cache_search(query, search_id, page, rc_dict, user_id=user_id_str,
-                                                              own_submissions=own_submissions)
+                                                              own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results)
 
         return_obj["total_num_results"] = total_num_results
         return_obj["search_results_page"] = search_results_page
@@ -871,7 +975,7 @@ def search(current_user):
         return response.error("Failed to search, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-def cache_search(query, search_id, index, communities, user_id, own_submissions=False):
+def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True):
     """
 	Helper function for pulling search results.
 	Arguments:
@@ -914,27 +1018,16 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
         # If we cannot find cache page, (re)do the search
         if not page:
             _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
-            # Searching exactly a user's community from the webpages index
-            _, webpages_hits = webpages_elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
-
 
             submissions_pages = create_page(submissions_hits, communities)
 
+            if toggle_webpage_results:
 
-            # Building an inverted index to map orig_url to index using the submissions_pages list
-            subpgs_url_to_id = {}
-            for i, submission_page in enumerate(submissions_pages):
-                subpgs_url_to_id[submission_page["orig_url"]] = i
+                # Searching exactly a user's community from the webpages index
+                _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
+                webpages_index_pages = create_page(webpages_hits, communities)
 
-            webpages_index_pages = create_page(webpages_hits, communities)
-
-            # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
-            for webpage in webpages_index_pages:
-                if subpgs_url_to_id.get(webpage["orig_url"]):
-                    i = subpgs_url_to_id.get(webpage["orig_url"])
-                    submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
-
-            submissions_pages = submissions_pages + webpages_index_pages
+                submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
 
             pages = deduplicate(submissions_pages)
             pages = neural_rerank(query, pages)
@@ -973,24 +1066,34 @@ def create_page(hits, communities):
         }
 
         if "webpage" in hit["_source"]:
-            result["highlighted_text"] = hit["_source"]["webpage"]["metadata"].get("description", "No Preview Available")
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
+            description = hit["_source"]["webpage"]["metadata"].get("description", None)
+            if not description:
+                description = hit["_source"]["webpage"]["metadata"].get("h1", None)
+            if not description:
+                description = "No Preview Available"
+            result["highlighted_text"] = description
+
         else:
-            result["highlighted_text"] = hit["_source"].get("highlighted_text", "No Preview Available")
             result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-        
+            description = hit["_source"].get("highlighted_text", None)
+            if not description:
+                description ="No Preview Available"
+            result["highlighted_text"] = description
 
         # possible that returns additional communities?
         result["communities_part_of"] = {community_id: communities[community_id] for community_id in
-                                         hit["_source"]["communities"] if community_id in communities}
+                                         hit["_source"].get("communities", []) if community_id in communities}
 
         result["submission_id"] = str(hit["_id"])
 
         if "time" in hit["_source"]:
             formatted_time = "Submitted " + format_time_for_display(hit["_source"]["time"])
             result["time"] = formatted_time
-        else:
-            result["time"] = "Website"
+        elif "scrape_time" in hit["_source"]:
+            formatted_time = "Indexed " + format_time_for_display(hit["_source"]["scrape_time"])
+            result["time"] = formatted_time
+
 
         # Display URL
         url = hit["_source"].get("source_url", "")
@@ -1084,15 +1187,31 @@ def deduplicate(pages):
 
     return [p[0] for p in map_pages.values()]
 
+def combine_pages(submissions_pages, webpages_index_pages):
+
+    # Building an inverted index to map orig_url to index using the submissions_pages list
+    subpgs_url_to_id = {}
+    for i, submission_page in enumerate(submissions_pages):
+        subpgs_url_to_id[submission_page["orig_url"]] = i
+
+    # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
+    for webpage in webpages_index_pages:
+        if subpgs_url_to_id.get(webpage["orig_url"]):
+            i = subpgs_url_to_id.get(webpage["orig_url"])
+            submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
+    
+    return submissions_pages + webpages_index_pages
+
 
 # recommender
 @functional.route("/api/recommend", methods=["GET"])
 @token_required
-def get_recommendations(current_user):
+def get_recommendations(current_user, toggle_webpage_results = True):
     """
 	Endpoint for the webpage recommendation functionality.
 	Arguments:
 		current_user: (dictionary) : the user recovered from the JWT token.
+        toggle_webpage_results: To add webpage index results in recommendation feed
 		request args with:
 			method : (string) : the typed query of the user.
 				'recent' --> most recent submissions to user's communities
@@ -1219,10 +1338,19 @@ def get_recommendations(current_user):
                     new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
                     search_text += " " + new_terms
 
-                number_of_hits, hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
+                number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
                                                               page_size=1000)
+                submissions_pages = create_page(submissions_hits, rc_dict)
 
-                pages = create_page(hits, rc_dict)
+                if toggle_webpage_results:
+                    # Searching for recommendations from the webpages index
+                    _, webpages_hits = webpages_elastic_manager.search(search_text, [], page=0, page_size=50)
+                    webpages_index_pages = create_page(webpages_hits, rc_dict)
+
+                    submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
+
+                # Sorting pages based on score, high to low
+                pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
                 pages = deduplicate_by_ids(pages, query_ids)
 
                 pages = hydrate_with_hash_url(pages, recommendation_id, method=method)

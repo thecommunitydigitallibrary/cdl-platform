@@ -657,41 +657,43 @@ export default function SubmissionResult({ errorCode, data }) {
             </div>
 
             <Typography sx={{ fontSize: 16 }}>
-              Submitted {data.submission.time}
+              {data.submission.time}
             </Typography>
 
-              
-            {data.submission.hashtags !== undefined && data.submission.hashtags.length !== 0 &&
-            <div style={{ display:"flex", width:"100%"}}>
-                <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
-                <Tooltip title="HashTags">
-                  <TagIcon style={{ height: "22px", color: "#1976d2" }}/>
-                </Tooltip> 
-                </div>
-                <div>
-                <p>{hashtag_results}</p>
-                </div>
-            </div>}
+            
+            
+              {data.submission.hashtags !== undefined && data.submission.hashtags.length !== 0 &&
+              <div style={{ display:"flex", width:"100%"}}>
+                  <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
+                  <Tooltip title="HashTags">
+                    <TagIcon style={{ height: "22px", color: "#1976d2" }}/>
+                  </Tooltip> 
+                  </div>
+                  <div>
+                  <p>{hashtag_results}</p>
+                  </div>
+              </div>}
 
-            <div
-              style={{
-                display: "inline",
-                margin: "10px 0px 0px -5px",
-                width: "100%",
-              }}
-            >
-              <div style={{ float: "left" }}>
-                <Tooltip title="Communities">
-                  <LocalLibraryRoundedIcon
-                    style={{ height: "21px", color: "#1976d2" }}
-                  />
-                </Tooltip>{" "}
-                {communityNamesList.length > 0
-                  ? communityNamesList.map((link, i) => [i > 0, link])
-                  : "None"}
+              <div
+                style={{
+                  display: "inline",
+                  margin: "10px 0px 0px -5px",
+                  width: "100%",
+                }}
+              >
+                <div style={{ float: "left" }}>
+                  <Tooltip title="Communities">
+                    <LocalLibraryRoundedIcon
+                      style={{ height: "21px", color: "#1976d2" }}
+                    />
+                  </Tooltip>{" "}
+                  {communityNamesList.length > 0
+                    ? communityNamesList.map((link, i) => [i > 0, link])
+                    : "None"}
+                </div>
+                
               </div>
-              
-            </div>
+
               
 
             <Grid
@@ -735,27 +737,89 @@ export default function SubmissionResult({ errorCode, data }) {
                   {submissionDataResponse.submission.stats["shares"]}
                 </Box>
               </Grid>
-              <Grid item>
-                <Grid container>
-                  <Grid item>
-                    {true && (
+
+              {data.submission.type == "user_submission" && 
+                <Grid item>
+                  <Grid container>
+                    <Grid item>
+                      {true && (
+                        <Grid container alignItems="center">
+                          <Grid item>
+                            <div>
+                              <FormControl
+                                sx={{ maxWidth: 225, minWidth: 225 }}
+                                size="small"
+                              >
+                                <InputLabel id="demo-multiple-checkbox-label">
+                                  Remove from Community
+                                </InputLabel>
+                                <Select
+                                  labelId="demo-multiple-checkbox-label"
+                                  id="demo-multiple-checkbox"
+                                  value={removeCommunityIDList}
+                                  onChange={handleRemoveDropdownChange}
+                                  input={
+                                    <OutlinedInput label="Remove from Community" />
+                                  }
+                                  renderValue={(selected) =>
+                                    selected
+                                      .map((x) => communityNameMap[x])
+                                      .join(", ")
+                                  }
+                                  MenuProps={MenuProps}
+                                >
+                                  {removeCommunityID.map((item) => (
+                                    <MenuItem key={item} value={item}>
+                                      <Checkbox
+                                        checked={
+                                          removeCommunityIDList.indexOf(item) > -1
+                                        }
+                                      />
+                                      <ListItemText
+                                        primary={communityNameMap[item]}
+                                      />
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </div>
+                          </Grid>
+                          <Grid item>
+                            <Tooltip title="Remove">
+                              <IconButton
+                                size="small"
+                                onClick={deleteSubmissionfromCommunity}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Tooltip>
+                          </Grid>
+                        </Grid>
+                      )}
+                    </Grid>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Grid item>
                       <Grid container alignItems="center">
+                        {/* save */}
                         <Grid item>
                           <div>
                             <FormControl
                               sx={{ maxWidth: 225, minWidth: 225 }}
                               size="small"
                             >
-                              <InputLabel id="demo-multiple-checkbox-label">
-                                Remove from Community
+                              <InputLabel
+                                id="demo-multiple-checkbox-label"
+                                sx={{ width: 225 }}
+                              >
+                                Save to Community
                               </InputLabel>
                               <Select
                                 labelId="demo-multiple-checkbox-label"
                                 id="demo-multiple-checkbox"
-                                value={removeCommunityIDList}
-                                onChange={handleRemoveDropdownChange}
+                                value={saveCommunityIDList}
+                                onChange={handleSaveDropdownChange}
                                 input={
-                                  <OutlinedInput label="Remove from Community" />
+                                  <OutlinedInput label="Save to Community" />
                                 }
                                 renderValue={(selected) =>
                                   selected
@@ -764,11 +828,11 @@ export default function SubmissionResult({ errorCode, data }) {
                                 }
                                 MenuProps={MenuProps}
                               >
-                                {removeCommunityID.map((item) => (
+                                {saveCommunityID.map((item) => (
                                   <MenuItem key={item} value={item}>
                                     <Checkbox
                                       checked={
-                                        removeCommunityIDList.indexOf(item) > -1
+                                        saveCommunityIDList.indexOf(item) > -1
                                       }
                                     />
                                     <ListItemText
@@ -781,76 +845,17 @@ export default function SubmissionResult({ errorCode, data }) {
                           </div>
                         </Grid>
                         <Grid item>
-                          <Tooltip title="Remove">
-                            <IconButton
-                              size="small"
-                              onClick={deleteSubmissionfromCommunity}
-                            >
-                              <Delete />
+                          <Tooltip title="Save">
+                            <IconButton size="small" onClick={saveSubmission}>
+                              <Save />
                             </IconButton>
                           </Tooltip>
                         </Grid>
                       </Grid>
-                    )}
-                  </Grid>
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  <Grid item>
-                    <Grid container alignItems="center">
-                      {/* save */}
-                      <Grid item>
-                        <div>
-                          <FormControl
-                            sx={{ maxWidth: 225, minWidth: 225 }}
-                            size="small"
-                          >
-                            <InputLabel
-                              id="demo-multiple-checkbox-label"
-                              sx={{ width: 225 }}
-                            >
-                              Save to Community
-                            </InputLabel>
-                            <Select
-                              labelId="demo-multiple-checkbox-label"
-                              id="demo-multiple-checkbox"
-                              value={saveCommunityIDList}
-                              onChange={handleSaveDropdownChange}
-                              input={
-                                <OutlinedInput label="Save to Community" />
-                              }
-                              renderValue={(selected) =>
-                                selected
-                                  .map((x) => communityNameMap[x])
-                                  .join(", ")
-                              }
-                              MenuProps={MenuProps}
-                            >
-                              {saveCommunityID.map((item) => (
-                                <MenuItem key={item} value={item}>
-                                  <Checkbox
-                                    checked={
-                                      saveCommunityIDList.indexOf(item) > -1
-                                    }
-                                  />
-                                  <ListItemText
-                                    primary={communityNameMap[item]}
-                                  />
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </div>
-                      </Grid>
-                      <Grid item>
-                        <Tooltip title="Save">
-                          <IconButton size="small" onClick={saveSubmission}>
-                            <Save />
-                          </IconButton>
-                        </Tooltip>
-                      </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-              </Grid>
+              }
             </Grid>
             <div style={{ display: "flex" }}>
               <div>

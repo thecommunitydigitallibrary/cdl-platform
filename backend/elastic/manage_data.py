@@ -39,9 +39,9 @@ class ElasticManager:
 
     def process_query(self, query):
         """
-    Cleans up query for stopwords.
-    Also checks if query is URL, and returns flag accordingly
-    """
+        Cleans up query for stopwords.
+        Also checks if query is URL, and returns flag accordingly
+        """
         query_obj = {
             "query": query,
             "isURL": False,
@@ -68,16 +68,16 @@ class ElasticManager:
 
     def get_community(self, community, page=0, page_size=10):
         """
-    Get the community submissions.
+        Get the community submissions.
 
-    Arguments:
-        community : (string) : the community ID.
-        page : (int) : the page number to return (default 0).
-        page_size : (int) : the number of results per page (default 10).
-      
-    Returns:
-        The JSON hits for the community.
-    """
+        Arguments:
+            community : (string) : the community ID.
+            page : (int) : the page number to return (default 0).
+            page_size : (int) : the number of results per page (default 10).
+        
+        Returns:
+            The JSON hits for the community.
+        """
         query = {
             "from": page * page_size,
             "size": page_size,
@@ -95,16 +95,16 @@ class ElasticManager:
 
     def get_submissions(self, user_id, page=0, page_size=10):
         """
-    Get the community submissions.
+        Get the community submissions.
 
-    Arguments:
-        user_id : (string) : the user_id.
-        page : (int) : the page number to return (default 0).
-        page_size : (int) : the number of results per page (default 10).
-      
-    Returns:
-        The JSON hits for the community.
-    """
+        Arguments:
+            user_id : (string) : the user_id.
+            page : (int) : the page number to return (default 0).
+            page_size : (int) : the number of results per page (default 10).
+        
+        Returns:
+            The JSON hits for the community.
+        """
         query = {
             "from": page * page_size,
             "size": page_size,
@@ -122,25 +122,25 @@ class ElasticManager:
 
     def search(self, query, communities, page=0, page_size=10):
         """
-    The method for searching a query over all of the saved webpage submissions.
+        The method for searching a query over all of the saved webpage submissions.
 
-    Arguments: 
-        query : (string) : the submitted query by the user.
-        communities : (list) : the communities to condition the search. Currently not used in production.
-        page : (int) : the page number to return (default 0).
-        page_size : (int) : the number of results per page (default 10).
-    Returns:
-        The JSON hits for the query.
-    """
+        Arguments: 
+            query : (string) : the submitted query by the user.
+            communities : (list) : the communities to condition the search.
+            page : (int) : the page number to return (default 0).
+            page_size : (int) : the number of results per page (default 10).
+        Returns:
+            The JSON hits for the query.
+        """
 
         query_obj = self.process_query(query)
         print("new query: ", query_obj["query"])
         print("hashtags", query_obj["hashtags"])
         print("is url?", query_obj["isURL"])
 
-        if self.index_name == "webpages":
-            fields = ["webpage.metadata.title", "webpage.metadata.h1", "webpage.metadata.description", "webpage.paragraphs"]
-        elif self.index_name == "submissions":
+        if self.index_name == os.environ["elastic_webpages_index_name"]:
+            fields = ["webpage.metadata.title", "webpage.metadata.h1", "webpage.metadata.description", "webpage.all_paragraphs"]
+        elif self.index_name == os.environ["elastic_index_name"]:
             if query_obj["isURL"]:
                 fields = ["source_url"]
             else:
@@ -148,13 +148,39 @@ class ElasticManager:
         else:
             fields = []
 
-        must_terms = [
-            {"terms": {"communities": communities}}
-        ]
 
-        if query_obj["hashtags"]:
-            must_terms.append({"terms": {"hashtags": query_obj["hashtags"]}})
+        query_comm = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {
+                            "multi_match": {
+                                "query": query,
+                                "fields": fields
+                            }
+                        },
+                    ]
+                }
+            },
+            "from": page * page_size,
+            "size": page_size,
+            "min_score": 0.1
+        }
 
+        if self.index_name != os.environ["elastic_webpages_index_name"]:
+            filter =  {
+                        "bool": {
+                            "must": [
+                                {"terms": {"communities": communities}}
+                            ]
+                        }
+                    }
+            if query_obj["hashtags"]:
+                filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
+                
+            query_comm["query"]["bool"]["filter"] = filter
+
+        """
         # now with hashtag
         query_comm = {
             "query": {
@@ -178,21 +204,23 @@ class ElasticManager:
             "size": page_size,
             "min_score": 0.1
         }
+        """
+        print(query_comm)
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
         hits = json.loads(r.text)["hits"]
         return hits["total"]["value"], hits["hits"]
 
     def add_to_index(self, doc):
         """
-    Method to index a submission in Elastic. Simply saves the raw highlighted text, explanation, and source URL as searchable text.
-    Also saves community and user id as communities to match terms.
+        Method to index a submission in Elastic. Simply saves the raw highlighted text, explanation, and source URL as searchable text.
+        Also saves community and user id as communities to match terms.
 
-    Arguments: 
-        doc : (dictionary) : user submission with highlighted_text, communities, explanation, and source_url.
+        Arguments: 
+            doc : (dictionary) : user submission with highlighted_text, communities, explanation, and source_url.
 
-    Returns:
-        The response string from elastic.
-    """
+        Returns:
+            The response string from elastic.
+        """
 
         if self.index_name == os.environ["elastic_index_name"]:
             highlighted_text = doc.highlighted_text
@@ -230,12 +258,11 @@ class ElasticManager:
 
         elif self.index_name == os.environ["elastic_webpages_index_name"]:
             doc_id = str(doc.id)
-            communities = doc.communities
-            flat_communities = self.flatten_communities(communities)
             paragraphs = doc.webpage.get("paragraphs")
+            scrape_time = int(float(doc.scrape_time))
             inserted_doc = {
-                "communities": flat_communities,
                 "source_url": doc.url,
+                "scrape_time": scrape_time,
                 "webpage": {
                     "metadata": doc.webpage.get("metadata"),
                     "all_paragraphs": " ".join(paragraphs) if paragraphs is not None else ""
