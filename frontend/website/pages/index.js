@@ -194,8 +194,8 @@ function Home({ data }) {
             <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4> 
             : 
               <>
-              <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> Click <Button variant="outline" onClick={()=>{
-        router.push("/communities");}}>here</Button> to join a new community!</h6>
+              <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> <br/>
+              <a variant="outline" href={"/communities"}>{" Click here to join a new community!"}</a></h6>
               </>}
           >
             <Grid item>

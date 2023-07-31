@@ -170,7 +170,7 @@ export default function ({ data }) {
           setPwdResetReqSent(true);
           setTempEmail(
             "mailto:" + resetEmailInput + "?subject=Subject&body=Requesting password reset link for: " +
-              resetEmailInput
+            resetEmailInput
           );
         } else {
           setSeverity("error");
@@ -284,14 +284,14 @@ export default function ({ data }) {
               </ActionButton>
             </div>
             <div align="center" style={{ marginTop: 10 }}>
-              Not registered yet?
+              Not registered yet?  {" "}
               <div style={{ display: "inline-block" }}>
-                <ActionButton
-                  style={{ textTransform: "none" }}
-                  action={() => changeAuthMode("signup")}
-                >
+
+                <button className="appearance-none text-blue-500 underline cursor-pointer"
+                  onClick={() => changeAuthMode("signup")}>
                   Create Account
-                </ActionButton>
+                </button>
+
               </div>
             </div>
           </div>
@@ -387,12 +387,11 @@ export default function ({ data }) {
             <div className="text-center" style={{ marginTop: 10 }}>
               Already registered?{" "}
               <div style={{ display: "inline-block" }}>
-                <ActionButton
-                  style={{ textTransform: "none" }}
-                  action={() => changeAuthMode("signin")}
-                >
-                  Sign In
-                </ActionButton>
+
+                <button className="appearance-none text-blue-500 underline cursor-pointer"
+                  onClick={() => changeAuthMode("signin")}>
+                  Create Account
+                </button>
               </div>
             </div>
           </div>

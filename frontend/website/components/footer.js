@@ -49,12 +49,16 @@ export default function Footer(props) {
     };
   }
 
-  const navigation = [
-    "About",
-    "Privacy Policy",
-    "Feedback",
-    "Contact"
-  ];
+  const navigationCol1 = {
+    About: { label: "About", value: "/about" },
+    Contribute: { label: "Contribute", value: "https://github.com/thecommunitydigitallibrary/cdl-platform" },
+  };
+
+  const navigationCol2 = {
+    Setup: { label: "Setup Instructions", value: "/setup" },
+    PrivacyPolicy: { label: "Privacy Policy", value: "/privacypolicy" },
+    ReleaseLog: { label: "Release Log", value: "/releaselog" }
+  };
 
   // Necessary States for Alert Message
   const [showSnackbar, setSnackbarState] = React.useState(false);
@@ -143,16 +147,16 @@ export default function Footer(props) {
           <div className="lg:col-span-2">
             <div>
               {" "}
-              <Link href="/" className="flex items-center space-x-2 text-2xl font-medium text-blue-500 dark:text-gray-100">
+              <a href="/" className="flex items-center space-x-2 text-2xl font-medium text-blue-500 dark:text-gray-100 no-underline">
                 <Image
-                  src="/img/logo.svg"
+                  src="/images/tree48.png"
                   alt="CDL"
                   width="32"
                   height="32"
                   className="w-8"
                 />
                 <span>CDL</span>
-              </Link>
+              </a>
             </div>
 
             <div className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
@@ -164,122 +168,49 @@ export default function Footer(props) {
           </div>
 
           <div>
-            <div className="flex flex-wrap w-full -mt-2 -ml-3 lg:ml-0">
-
-              {/* TO DO: Can add all links in nav array and set to redirect to respective page like below instead of hard coding each*/}
-
-              {/* {navigation.map((item, index) => (
-                <Link key={index} href="/" className="w-full px-4 py-2 text-gray-500 rounded-md dark:text-gray-300 hover:text-blue-500 focus:text-blue-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700">                 
-                    {item}
+            <div className="flex flex-wrap w-full -ml-3 lg:ml-0">
+              {Object.entries(navigationCol1).map(([key, { label, value }]) => (
+                <Link
+                  key={key}
+                  href={value}
+                  className="w-full px-4 py-2 text-gray-500 rounded-md dark:text-gray-300 hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700 no-underline"
+                >
+                  {label}
                 </Link>
-              ))} */}
-
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  margin: "15px 0px",
-                }}
+              ))}
+              <p
+                onClick={handleOpenFeedbackModal}
+                className="w-full px-4 py-2 text-gray-500 rounded-md dark:text-gray-300 hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700 no-underline"
+                style={{ cursor: "pointer" }}
               >
-                <p
-                  onClick={() => NavigateTo("/about")}
-                  style={{ cursor: "pointer", margin: "0px 0px 0px 25px" }}
-                >
-                  About
-                </p>
-                <p
-                  onClick={() => NavigateTo("/privacy")}
-                  style={{ cursor: "pointer", margin: "0px 0px 0px 25px" }}
-                >
-                  Privacy Policy
-                </p>
-                <p
-                  onClick={handleOpenFeedbackModal}
-                  style={{ cursor: "pointer", margin: "0px 0px 0px 25px" }}
-                >
-                  Feedback
-                </p>
-                <p
-                  onClick={handleOpenContactModal}
-                  style={{ cursor: "pointer", margin: "0px 0px 0px 25px" }}
-                >
-                  Contact
-                </p>
-              </div>
-
-              {/* Dialog for Feedback */}
-              <Dialog open={showFeedbackModal} onClose={handleCloseFeedbackModal}>
-                <DialogTitle>Feedback</DialogTitle>
-                <DialogContent style={{ width: "500px" }}>
-                  <DialogContentText>
-                    If you have any suggestions or feedback for the CDL, you may input
-                    it into the field below and submit it.
-                  </DialogContentText>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="feedbackInput"
-                    label=""
-                    fullWidth
-                    multiline
-                    variant="standard"
-                    defaultValue=""
-                  />
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseFeedbackModal}>Cancel</Button>
-                  <Button onClick={handleSubmitFeedback}>Submit</Button>
-                </DialogActions>
-              </Dialog>
-              {/* Dialog for Contact */}
-              <Dialog open={showContactModal} onClose={handleCloseContactModal}>
-                <DialogTitle>Get in Contact</DialogTitle>
-                <DialogContent style={{ width: "500px" }}>
-                  <DialogContentText>
-                    <p>
-                      If you encounter an issues, please reach out to Kevin. His email
-                      is{" "}
-                      <p
-                        onClick={() => CopyToClipboard("kjros2@illinois.edu")}
-                        style={{
-                          cursor: "pointer",
-                          display: "inline-block",
-                          color: "#3281a8",
-                        }}
-                      >
-                        kjros2@illinois.edu
-                      </p>{" "}
-                      (Click to copy the email).
-                    </p>
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseContactModal}>OK</Button>
-                </DialogActions>
-              </Dialog>
-
-              <Snackbar
-                open={showSnackbar}
-                autoHideDuration={2000}
-                onClose={handleCloseSnackbar}
+                Feedback
+              </p>
+              <p
+                onClick={handleOpenContactModal}
+                className="w-full px-4 py-2 -mt-4 text-gray-500 rounded-md dark:text-gray-300 hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700 no-underline"
+                style={{ cursor: "pointer" }}
               >
-                <Alert
-                  onClose={handleCloseSnackbar}
-                  severity={severity}
-                  sx={{ width: "100%" }}
+                Contact
+              </p>
+            </div>
+          </div>
+          <div>
+            <div className="flex flex-wrap w-full -ml-3 lg:ml-0">
+              {Object.entries(navigationCol2).map(([key, { label, value }]) => (
+                <Link
+                  key={key}
+                  href={value}
+                  className="w-full px-4 py-2 text-gray-500 rounded-md dark:text-gray-300 hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700 no-underline"
                 >
-                  {message}
-                </Alert>
-              </Snackbar>
-
-
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
 
           <div className="">
             <div>Social Media links</div>
-            <div className="flex mt-5 space-x-5 text-gray-400 dark:text-gray-500">
+            <div className="flex mt-3 space-x-5 text-gray-400 dark:text-gray-500">
               <a
                 href="https://github.com/thecommunitydigitallibrary/cdl-platform"
                 target="_blank"
@@ -287,21 +218,6 @@ export default function Footer(props) {
                 <span className="sr-only">Twitter</span>
                 <Twitter />
               </a>
-              {/* <a
-                href="https://github.com/thecommunitydigitallibrary/cdl-platform"
-                target="_blank"
-                rel="noopener"
-                >
-                <span className="sr-only">Facebook</span>
-                <Facebook />
-              </a> */}
-              {/* <a
-                href="https://github.com/thecommunitydigitallibrary/cdl-platform"
-                target="_blank"
-                rel="noopener">
-                <span className="sr-only">Instagram</span>
-                <Instagram />
-              </a> */}
               <a
                 href="https://github.com/thecommunitydigitallibrary/cdl-platform"
                 target="_blank"
@@ -313,9 +229,72 @@ export default function Footer(props) {
           </div>
         </div>
 
+        {/* Dialog for Feedback */}
+        <Dialog open={showFeedbackModal} onClose={handleCloseFeedbackModal}>
+          <DialogTitle>Feedback</DialogTitle>
+          <DialogContent style={{ width: "500px" }}>
+            <DialogContentText>
+              If you have any suggestions or feedback for the CDL, you may input
+              it into the field below and submit it.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="feedbackInput"
+              label=""
+              fullWidth
+              multiline
+              variant="outlined"
+              defaultValue=""
+              rows={5}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseFeedbackModal}>Cancel</Button>
+            <Button onClick={handleSubmitFeedback}>Submit</Button>
+          </DialogActions>
+        </Dialog>
+        {/* Dialog for Contact */}
+        <Dialog open={showContactModal} onClose={handleCloseContactModal}>
+          <DialogTitle>Get in Contact</DialogTitle>
+          <DialogContent style={{ width: "500px" }}>
+            <DialogContentText>
+              <p>
+                If you encounter an issues, please reach out to Kevin. His email
+                is{" "}
+                <p
+                  onClick={() => CopyToClipboard("kjros2@illinois.edu")}
+                  style={{
+                    cursor: "pointer",
+                    display: "inline-block",
+                    color: "#3281a8",
+                  }}
+                >
+                  kjros2@illinois.edu
+                </p>{" "}
+                (Click to copy the email).
+              </p>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseContactModal}>OK</Button>
+          </DialogActions>
+        </Dialog>
 
+        <Snackbar
+          open={showSnackbar}
+          autoHideDuration={2000}
+          onClose={handleCloseSnackbar}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={severity}
+            sx={{ width: "100%" }}
+          >
+            {message}
+          </Alert>
+        </Snackbar>
       </Container>
-
     </>
   );
 }
@@ -324,7 +303,7 @@ export default function Footer(props) {
 
 const Twitter = ({ size = 24 }) => (
   <svg
-    
+
     width={size}
     height={size}
     viewBox="0 0 24 24"
@@ -335,7 +314,7 @@ const Twitter = ({ size = 24 }) => (
 
 const Facebook = ({ size = 24 }) => (
   <svg
-    
+
     width={size}
     height={size}
     viewBox="0 0 24 24"
@@ -345,7 +324,7 @@ const Facebook = ({ size = 24 }) => (
 );
 const Instagram = ({ size = 24 }) => (
   <svg
-    
+
     width={size}
     height={size}
     viewBox="0 0 24 24"
@@ -356,7 +335,7 @@ const Instagram = ({ size = 24 }) => (
 
 const Linkedin = ({ size = 24 }) => (
   <svg
-    
+
     width={size}
     height={size}
     viewBox="0 0 24 24"

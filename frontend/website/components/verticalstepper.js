@@ -36,6 +36,7 @@ export default function VerticalLinearStepper(props) {
               <Box sx={{ mb: 2 }}>
                 <div>
                   <Button
+                  className="bg-blue-500"
                     variant="contained"
                     onClick={handleNext}
                     sx={{ mt: 1, mr: 1 }}

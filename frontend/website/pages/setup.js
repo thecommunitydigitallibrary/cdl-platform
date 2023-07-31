@@ -2,6 +2,8 @@ import Paper from "@mui/material/Paper";
 
 import * as React from "react";
 import VerticalLinearStepper from "../components/verticalstepper";
+import Footer from "../components/footer";
+import Header from "../components/header";
 
 const steps = [
   {
@@ -46,6 +48,8 @@ const steps = [
 
 export default function Setup() {
   return (
+   <>
+   <Header/>
     <Paper
       elevation={0}
       sx={{
@@ -54,6 +58,7 @@ export default function Setup() {
         display: "flex",
         flexDirection: "column",
         margin: "auto",
+        marginTop:"65px"
       }}
     >
       <h1 style={{ margin: "10px 0px 10px 0px" }}>
@@ -63,5 +68,7 @@ export default function Setup() {
       The following instructions will walk you through account creation and Chrome extension setup.
       <VerticalLinearStepper steps={steps} />
     </Paper>
+    <Footer/>
+   </>
   );
 }
