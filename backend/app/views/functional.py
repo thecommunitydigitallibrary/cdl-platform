@@ -1337,7 +1337,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
                     blob = TextBlob(full_text)
                     new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
                     search_text += " " + new_terms
-
+                
                 number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
                                                               page_size=1000)
                 submissions_pages = create_page(submissions_hits, rc_dict)
@@ -1371,4 +1371,5 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
     except Exception as e:
         print(e)
+        traceback.print_exc()
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
