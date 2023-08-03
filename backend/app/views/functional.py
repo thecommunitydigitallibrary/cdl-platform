@@ -313,7 +313,7 @@ def create_batch_submission(current_user):
                                                          data["scrape_time"]
                                                          )
                     if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                        # index in Openaseacrch
+                        # index in Openasearch
                         webpages_elastic_manager.add_to_index(webpage)
                     else:
                         print("Unable to insert webpage data in database.")
