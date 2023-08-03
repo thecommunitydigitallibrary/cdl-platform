@@ -262,6 +262,7 @@ function SearchResult(props) {
   } else {
     var communityNamesList = [];
   }
+  console.log(communityNamesList);
 
   let image_url;
   if (props.display_url != null) {
@@ -465,9 +466,16 @@ function SearchResult(props) {
           </Tooltip>
         </div>
 
-        <div style={{ width:"85%", float:"left", overflowX:"auto"}}>  
-          {communityNamesList !== undefined && communityNamesList !== 0 &&
-               <p style={{verticalAlign:"top", whiteSpace:"nowrap",marginBottom: "auto"}}>{communityNamesList}</p>}
+        <div style={{ width: "85%", float: "left", overflowX: "auto" }}>
+        {communityNamesList && communityNamesList.length !== 0 ? (
+          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+            {communityNamesList}
+          </p>
+        ) : (
+          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+            Webpage
+          </p>
+        )}
         </div>
 
         {props.show_relevant ? (
