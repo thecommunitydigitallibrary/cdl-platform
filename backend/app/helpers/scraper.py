@@ -43,11 +43,11 @@ class ScrapeWorker:
             }
         }
         """
+        url, _ = self.format_url_to_path(url)
+
         data = {"url": url, "scrape_time": time.time()}
 
-        url, url_path = self.format_url_to_path(url)
-
-        if len(url_path) > 255:
+        if len(url) > 255:
             data["scrape_status"] = {
                 "code": CODE_URL_NAME_TOO_LONG,
                 "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_URL_NAME_TOO_LONG]

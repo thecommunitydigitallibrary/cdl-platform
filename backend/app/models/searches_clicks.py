@@ -39,7 +39,7 @@ class SearchesClicks(Mongo):
 					click_db["query"],
 					id=click_db["_id"],
 					time=click_db["time"],
-					community=click_db["community"]
+					community=click_db.get("community", None)
 				)
 
 class SearchClickExtension:
