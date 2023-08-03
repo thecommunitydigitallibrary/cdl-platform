@@ -262,7 +262,6 @@ function SearchResult(props) {
   } else {
     var communityNamesList = [];
   }
-  console.log(communityNamesList);
 
   let image_url;
   if (props.display_url != null) {
