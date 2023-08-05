@@ -313,7 +313,7 @@ def create_batch_submission(current_user):
                                                          data["scrape_time"]
                                                          )
                     if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                        # index in Openaseacrch
+                        # index in Opensearch
                         webpages_elastic_manager.add_to_index(webpage)
                     else:
                         print("Unable to insert webpage data in database.")
@@ -1068,6 +1068,17 @@ def create_page(hits, communities):
         if "webpage" in hit["_source"]:
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
             description = hit["_source"]["webpage"]["metadata"].get("description", None)
+
+            # Handling special cases where there is `http` in the description and the webpage has paragraphs from which
+            # we can pull description
+            if (not description or len(description) <= 10 or "http" in description) and len(hit["_source"]["webpage"]["all_paragraphs"]) >= 10:
+                paragraph_list = hit["_source"]["webpage"]["all_paragraphs"].split("\n")
+
+                # To handle the case when there is `\n` at the beginning of `all_paragraphs`
+                for paragraph in paragraph_list:
+                    if len(paragraph) >= 5:
+                        description = paragraph
+                        break
             if not description:
                 description = hit["_source"]["webpage"]["metadata"].get("h1", None)
             if not description:

@@ -170,7 +170,7 @@ def handle_notes(current_user, subpath):
 				                                     "notes." + full_note_path + ".content": updated_content,
 				                                     "notes." + full_note_path + ".id": "|".join(note_path)}})
 				if ack.acknowledged:
-					return response.success("Note updated successfully", Status.OK)
+					return response.success({"message": "Note updated successfully"}, Status.OK)
 				else:
 					return response.error("Could not update note page.", Status.INTERNAL_SERVER_ERROR)
 
