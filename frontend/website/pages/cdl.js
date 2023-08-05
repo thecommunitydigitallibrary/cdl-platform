@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Hero from "../components/homepage/hero";
 import SectionTitle from "../components/homepage/sectionTitle";
-import { benefitOne, benefitTwo, benefitThree } from "../components/data/landingpage";
+import { benefitOne, benefitTwo, benefitThree, benefitFour } from "../components/data/landingpage";
 import Benefits from "../components/homepage/benefits";
 import FrequentlyAskedQuestions from "./faq";
 import Testimonials from "../components/homepage/testimonials";
@@ -26,12 +26,14 @@ const CDL = () => {
      <SectionTitle
         pretitle="Why CDL?"
         title=" What we offer">
-        The CDL is a platform for bookmarking webpages, taking notes, and discovering online content. Our vision is to anticipate the questions that you may have while viewing online content and proactively provide you with answers without requiring any effort.
+        The CDL is an online and open-sourced social bookmarking platform where users can save, search for, and discover webpages.
       </SectionTitle>
       
       <Benefits data={benefitOne} />
       <Benefits data={benefitTwo} imgPos="right" />
       <Benefits data={benefitThree} />
+      <Benefits data={benefitFour} imgPos="right" />
+
 
       {/* commenting out testimonials temporarily */}
 
