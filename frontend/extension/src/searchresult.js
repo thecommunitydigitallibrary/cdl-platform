@@ -467,9 +467,16 @@ const [open, setOpen] = React.useState(false);
         </Tooltip> 
         </div>
 
-        <div style={{ width:"80%", float:"left", overflowX:"auto"}}>
-          {communityNamesList !== undefined && communityNamesList !== 0 &&
-          <p style={{verticalAlign:"top", whiteSpace:"nowrap"}}>{communityNamesList}</p>}
+        <div style={{ width: "85%", float: "left", overflowX: "auto" }}>
+        {communityNamesList && communityNamesList.length !== 0 ? (
+          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+            {communityNamesList}
+          </p>
+        ) : (
+          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+            Webpage
+          </p>
+        )}
         </div>
 
         {props.show_relevant ? (
