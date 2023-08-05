@@ -390,7 +390,7 @@ export default function ({ data }) {
 
                 <button className="appearance-none text-blue-500 underline cursor-pointer"
                   onClick={() => changeAuthMode("signin")}>
-                  Create Account
+                  Log in
                 </button>
               </div>
             </div>
