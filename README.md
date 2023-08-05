@@ -228,8 +228,12 @@ For a longer-term collaboration, big feature, or large change, please send an em
 
 - [Kevin Ros](https://kevinros.github.io/) is a 4th year Ph.D. student at the University of Illinois Urbana Champaign. This is the main component of his thesis project. He built the initial version of the CDL platform and has led its development since its beginning (September 2022). 
 - [ChengXiang Zhai](https://czhai.cs.illinois.edu/) is Kevin's advisor, and he has played a crucial role in shaping the vision of the CDL. Moreover, he has provided the grant funding to support the CDL infrastructure, the research, and the development.
+- Current contributors: Rakshana Jayaprakash, Dhyey Pandya, Kedar Takwane, and Sharath Chandra.
+- Past contributors: Ashwin Patil, Alvin Zhang, Nikhitha Reddeddy, Heth Gala
+
 
 
 
 ## Publications
-...TBD...
+- Kevin Ros and ChengXiang Zhai. 2023. The CDL: An Online Platform for Creating Community-based Digital Libraries. In Computer Supported Cooperative Work and Social Computing (CSCW ’23 Companion), October 14–18, 2023, Minneapolis, MN, USA. ACM, New York, NY, USA, 4 pages. https://doi.org/10.1145/3584931.3607495
+- Kevin Ros, Matthew Jin, Jacob Levine, and ChengXiang Zhai. 2023. Retrieving Webpages Using Online Discussions. In Proceedings of the 2023 ACM SIGIR International Conference on the Theory of Information Retrieval (ICTIR ’23), July 23, 2023, Taipei, Taiwan. ACM, New York, NY, USA, 10 pages. https://doi.org/10.1145/3578337.3605139
