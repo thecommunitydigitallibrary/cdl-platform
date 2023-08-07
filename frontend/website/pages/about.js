@@ -5,7 +5,7 @@ import Footer from "../components/footer";
 import Head from "next/head";
 import Hero from "../components/homepage/hero";
 import SectionTitle from "../components/homepage/sectionTitle";
-import { benefitOne, benefitTwo, benefitThree } from "../components/data/landingpage";
+import { benefitOne, benefitTwo, benefitThree, benefitFour } from "../components/data/landingpage";
 import Benefits from "../components/homepage/benefits";
 import Testimonials from "../components/homepage/testimonials";
 import Cta from "../components/homepage/cta";
@@ -40,6 +40,8 @@ export default function About({ loggedOut }) {
         <Benefits data={benefitOne} />
         <Benefits data={benefitTwo} imgPos="right" />
         <Benefits data={benefitThree} />
+        <Benefits data={benefitFour} imgPos="right" />
+
 
         {/* commenting out testimonials temporarily */}
 
