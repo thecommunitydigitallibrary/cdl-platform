@@ -56,7 +56,7 @@ export default function Footer(props) {
 
   const navigationCol2 = {
     Setup: { label: "Setup Instructions", value: "/setup" },
-    PrivacyPolicy: { label: "Privacy Policy", value: "/privacypolicy" },
+    PrivacyPolicy: { label: "Privacy Policy", value: "/privacy" },
     ReleaseLog: { label: "Release Log", value: "/releaselog" }
   };
 

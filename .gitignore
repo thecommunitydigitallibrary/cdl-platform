@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+#Docker file
+docker-compose.yml
+
 # Distribution / packaging
 .Python
 build/

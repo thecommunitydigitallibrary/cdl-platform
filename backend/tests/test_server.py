@@ -157,9 +157,9 @@ def test_submit(data):
         'authorization': data.token
     }
     payload = {
-        "highlighted_text": "hello world",
-        "source_url": "https://helloworld.com",
-        "explanation": "A page about hello world",
+        "highlighted_text": "community digital library",
+        "source_url": "https://en.wikipedia.org/wiki/Community",
+        "explanation": "A page about communities",
         "community": data.communityId
     }
     resp = requests.post(url, headers=headers, data=payload)
@@ -239,7 +239,7 @@ def test_api_search(data):
     params = {
         "community": data.communityId,
         "page": 0,
-        "query": "hello world"
+        "query": "community digital library"
     }
 
     resp = requests.request("GET", url, params=params, headers=headers)
@@ -249,7 +249,7 @@ def test_api_search(data):
     results = resp_body["search_results_page"]
     assert len(results) > 0
     first_result = results[0]
-    assert first_result["explanation"] == "A page about hello world"
+    assert first_result["explanation"] == "A page about communities"
     data.submissionId = first_result["submission_id"]
 
 def test_connection(data):
@@ -279,7 +279,7 @@ def test_submission_get(data):
     assert resp.status_code == 200
     resp_body = resp.json()
     assert resp_body["status"] == "ok"
-    assert resp_body["submission"]["highlighted_text"] == "hello world"
+    assert resp_body["submission"]["highlighted_text"] == "community digital library"
     assert resp_body["submission"]["communities_part_of"] == {data.communityId: "testcommunity"}
     assert len(resp_body["submission"]["connections"]) == 1
     assert resp_body["submission"]["connections"][0]["connection_description"] == ""
@@ -305,19 +305,19 @@ def test_recommendation(data):
         'authorization':new_token
     }
     payload = {
-        "highlighted_text": "World world test",
-        "source_url": "https://seeyouworld.com",
-        "explanation": "A different page about hello world",
+        "highlighted_text": "Latest tech news from the Wikimedia technical groups",
+        "source_url": "https://en.wikipedia.org/wiki/Wikipedia:Community_portal",
+        "explanation": "portal of different groups in wiki",
         "community": data.communityId
     }
 
     resp = requests.post(url, headers=headers, data=payload)
     assert resp.status_code == 200
 
-    # Use the primary user (data) to search for recommendation with explore method.
+    # Use the primary user token to search for recommendation
     url = URL + "/api/recommend"
     headers = {
-        'authorization': data.token # request sent by different test user
+        'authorization': data.token
     }
     params = {
         "method": "explore_similar_extension"
@@ -325,8 +325,11 @@ def test_recommendation(data):
     resp = requests.request("GET", url, params=params, headers=headers)
     assert resp.status_code == 200
     resp_body = resp.json()
-    assert len(resp_body["recommendation_results_page"]) == 1
-    assert resp_body["recommendation_results_page"][0]["highlighted_text"] == "World world test"
+
+    # The expected results are webpages integrated in recommendation feed
+    assert len(resp_body["recommendation_results_page"]) == 2
+    assert "Indexed" in resp_body["recommendation_results_page"][0]["time"] # this ensures the results are webpage
+
 
 def test_submission_save(data):
     url = URL + "/api/submission/" + data.submissionId

@@ -313,7 +313,7 @@ def create_batch_submission(current_user):
                                                          data["scrape_time"]
                                                          )
                     if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                        # index in Openaseacrch
+                        # index in Opensearch
                         webpages_elastic_manager.add_to_index(webpage)
                     else:
                         print("Unable to insert webpage data in database.")
@@ -1068,6 +1068,17 @@ def create_page(hits, communities):
         if "webpage" in hit["_source"]:
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
             description = hit["_source"]["webpage"]["metadata"].get("description", None)
+
+            # Handling special cases where there is `http` in the description and the webpage has paragraphs from which
+            # we can pull description
+            if (not description or len(description) <= 10 or "http" in description) and len(hit["_source"]["webpage"]["all_paragraphs"]) >= 10:
+                paragraph_list = hit["_source"]["webpage"]["all_paragraphs"].split("\n")
+
+                # To handle the case when there is `\n` at the beginning of `all_paragraphs`
+                for paragraph in paragraph_list:
+                    if len(paragraph) >= 5:
+                        description = paragraph
+                        break
             if not description:
                 description = hit["_source"]["webpage"]["metadata"].get("h1", None)
             if not description:
@@ -1337,7 +1348,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
                     blob = TextBlob(full_text)
                     new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
                     search_text += " " + new_terms
-
+                
                 number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
                                                               page_size=1000)
                 submissions_pages = create_page(submissions_hits, rc_dict)
@@ -1371,4 +1382,5 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
     except Exception as e:
         print(e)
+        traceback.print_exc()
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
