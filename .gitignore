@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 #Docker file
-docker-compose.yml
+docker-compose*
 
 # Distribution / packaging
 .Python

@@ -82,7 +82,7 @@ services:
     reverseproxy:
         image: reverseproxy
         build:
-            context: .\reverseproxy
+            context: ./reverseproxy
             dockerfile: Dockerfile-local
         ports:
             - 8080:8080
@@ -91,9 +91,9 @@ services:
     mongodb:
         image: mongo
         ports:
-        - 27017:27017
+            - 27017:27017
         restart: always
-        command: mongod --bind_ip 0.0.0.0 # This is to enable connecting to container from outside
+        command: mongod --bind_ip 0.0.0.0
 
     opensearch-node1:
         image: opensearchproject/opensearch:latest
@@ -120,8 +120,8 @@ services:
         depends_on:
             - reverseproxy
         image: website
-        build: .\frontend\website
-        env_file: .\frontend\website\.env.local
+        build: ./frontend/website
+        env_file: ./frontend/website/.env.local
         restart: always
         extra_hosts:
             - "host.docker.internal:host-gateway"
@@ -133,9 +133,9 @@ services:
             - mongodb
             - opensearch-node1
         image: api
-        build: .\backend
+        build: ./backend
         restart: always
-        env_file: .\backend\env_local.ini
+        env_file: ./backend/env_local.ini
 
 ```
 
