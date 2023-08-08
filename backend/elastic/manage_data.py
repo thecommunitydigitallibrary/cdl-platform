@@ -205,7 +205,6 @@ class ElasticManager:
             "min_score": 0.1
         }
         """
-        print(query_comm)
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
         hits = json.loads(r.text)["hits"]
         return hits["total"]["value"], hits["hits"]
@@ -358,7 +357,6 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
-        print(json.loads(r.text))
         hits = json.loads(r.text)["hits"]
         return hits["total"]["value"], hits["hits"]
 
