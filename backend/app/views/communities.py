@@ -2,6 +2,7 @@ import json
 from bson import ObjectId
 from flask import Blueprint, request
 from flask_cors import CORS
+import traceback
 
 from app.db import *
 from app.helpers.status import Status
@@ -63,6 +64,7 @@ def get_community_history(current_user):
 		return response.success({"left_communities": left_communities}, Status.OK)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to get community history, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
@@ -76,7 +78,7 @@ def get_communities(current_user):
 		current_user : (dictionary): the user recovered from the JWT token.
 		There is no content passed in the request except for the token header.
 	Returns:
-		200 : dictionary with community info and username.
+		On success, a dictionary with community info and username (see get_communities_helper for details).
 	"""
 	try:
 		return response.success(get_communities_helper(current_user), Status.OK)
@@ -93,7 +95,7 @@ def get_communities_helper(current_user, return_dict=False):
 		return_dict : boolean : to return as a dictionary.
 	Returns:
 		A dictionary with
-			community_info: a list of dicts, each containing commnuity_id, name, join_key, is_admin.
+			community_info: a list of dicts, each containing community_id, name, join_key, is_admin. If return_dict is true, then this is a dictionary mapped with the community_id.
 			username: the username of the user.
 	"""
 
@@ -145,6 +147,7 @@ def create_community(current_user):
 		A request data JSON with
 			community_name : (str) : the name of the community sent by the user.
 			description : (str) : the description of the community sent by the user.
+		Only community_name is required for POST, and at least one is required for PATCH.
 
 	Returns:
 		200 : dictionary JSON with "status" as "ok" and success message "message"
@@ -158,11 +161,11 @@ def create_community(current_user):
 		community_description = community_info.get("community_description", None)
 		community_id = community_info.get("community_id", None)
 
-		if community_name and len(community_name) < 3:
-			return response.error("The community name must be longer than two characters.", Status.BAD_REQUEST)
-
-		if not community_name and not community_description:
-			return response.error("Must provide name and/or description", Status.BAD_REQUEST)
+		if community_name and len(community_name) < 3 or len(community_name) > 100:
+			return response.error("The community name must be between 2 characters and 100 characters.", Status.BAD_REQUEST)
+		
+		if community_description and len(community_description) > 500:
+			return response.error("The community name must be less than 500 characters.", Status.BAD_REQUEST)
 
 		cdl_communities = Communities()
 
@@ -179,7 +182,12 @@ def create_community(current_user):
 					if updated.acknowledged:
 						log_community_action(ip, user_id, inserted.inserted_id, "CREATE")
 						return response.success({"message": "Community created successfully!"}, Status.OK)
+			else:
+				return response.error("Must provide a community name.", Status.BAD_REQUEST)
+
 		elif request.method == "PATCH":
+			if not community_name and not community_description:
+				return response.error("Must provide name and/or description", Status.BAD_REQUEST)
 			try:
 				community_id = ObjectId(community_id)
 			except Exception as e:
@@ -262,7 +270,6 @@ def leave_community(current_user):
 			community_id : (str) : the ID of the community that the user would like to leave.
 	Returns:
 		200 : dictionary JSON with "status" as "ok" and success message "message"
-		403 : dictionary JSON with "status" as "ok" and success message "message"
 		500 : dictionary JSON with "status" as "error" and error message "message"
 	"""
 	try:
@@ -355,7 +362,6 @@ def submit_rel_judgments(current_user):
 				This result ID should be included in the search result items.
 	Returns:
 		200 : JSON with "status" as "ok" and a success "message".
-	TODO: change 200 too 400 (will avoid changing for now, as it is during the assignment)
 	"""
 	try:
 		user_id = current_user.id
@@ -371,5 +377,6 @@ def submit_rel_judgments(current_user):
 		return response.error("Something went wrong. Please try again later", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to submit relevant judgement, please try again later.",
 		                      Status.INTERNAL_SERVER_ERROR)

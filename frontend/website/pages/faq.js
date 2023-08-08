@@ -15,15 +15,13 @@ export default function FrequentlyAskedQuestions() {
     <div
       style={{
         padding: "10px 20px 5px 20px",
-        width: "1200px",
+        // removed hard set width
         display: "flex",
         flexDirection: "column",
         margin: "auto",
       }}
     >
-      <h1 style={{ margin: "10px 0px 20px 0px" }}>
-        Frequently Asked Questions{" "}
-      </h1>
+
       <div className="AllResults">
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -34,7 +32,7 @@ export default function FrequentlyAskedQuestions() {
           </AccordionSummary>
           <Divider />
           <AccordionDetails>
-            Please email Kevin Ros at{" "}
+            Please use the "Feedback" link in the footer or email Kevin Ros at{" "}
             <Link href={`mailto: kjros2@illinois.edu`} target="_blank">
               kjros2@illinois.edu
             </Link>
@@ -51,7 +49,7 @@ export default function FrequentlyAskedQuestions() {
           <AccordionDetails>
             For some pages, your highlighted text will not be captured by the
             extension. You can tell that this is the case when the “Highlighted
-            text:” area doesn’t display any text. If you want to save the
+            text” area doesn’t display any text. If you want to save the
             highlighted text in the context or ask a question about the
             highlighted text, then first copy-paste it into the field right
             below the highlighted text display.{" "}
@@ -95,7 +93,7 @@ export default function FrequentlyAskedQuestions() {
           <AccordionDetails>
             If you want to make a submission at a specific time, you can change
             the webpage URL to include the video time (right click video → copy
-            URL at current time → paste into address bar). Once you do this, you can open the extension, 
+            URL at current time → paste into address bar). Once you do this, you can open the extension,
             and it will pull the URL with the fragment for a submission.
           </AccordionDetails>
         </Accordion>

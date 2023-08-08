@@ -1,5 +1,7 @@
 import json
 import uuid
+import traceback
+
 
 from flask import Blueprint, request
 from flask_cors import CORS
@@ -70,6 +72,8 @@ def get_notes_helper(user_id, target_note_path=['']):
 			               "content": curr_note_level["content"]}
 	except Exception as e:
 		print("could not find note for ids ", target_note_path, e)
+		traceback.print_exc()
+
 
 	return all_titles, target_note
 
@@ -102,9 +106,6 @@ def handle_notes(current_user, subpath):
 	try:
 		user_id = current_user.id
 		note_path = subpath.split("|")
-
-		# Add in a fake path to modify a child page
-		# note_path[0] = "ccda7a22-1db6-4ca4-bbbe-e4c8f1626305"
 
 		cdl_notes = Notes()
 
@@ -150,12 +151,16 @@ def handle_notes(current_user, subpath):
 					return response.success({"id": "|".join(note_path)}, Status.OK)
 			except Exception as e:
 				print(e)
+				traceback.print_exc()
 				return response.error("Could not save note.", Status.INTERNAL_SERVER_ERROR)
 
 		elif request.method == "PATCH":
 			try:
 				json_request = request.get_json()
 
+				if "content" not in json_request or "title" not in json_request:
+					return response.error("Request must contain title and content fields.", Status.BAD_REQUEST)
+				
 				updated_content = json_request["content"]
 				updated_title = json_request["title"]
 				full_note_path = ".notes.".join(note_path)
@@ -165,12 +170,13 @@ def handle_notes(current_user, subpath):
 				                                     "notes." + full_note_path + ".content": updated_content,
 				                                     "notes." + full_note_path + ".id": "|".join(note_path)}})
 				if ack.acknowledged:
-					return response.success({"message": "Note updated successfully."}, Status.OK)
+					return response.success({"message": "Note updated successfully"}, Status.OK)
 				else:
 					return response.error("Could not update note page.", Status.INTERNAL_SERVER_ERROR)
 
 			except Exception as e:
 				print(e)
+				traceback.print_exc()
 				return response.error("Something went wrong. Please try again later", Status.INTERNAL_SERVER_ERROR)
 
 		elif request.method == "DELETE":
@@ -178,12 +184,14 @@ def handle_notes(current_user, subpath):
 				full_note_path = ".notes.".join(note_path)
 				ack = cdl_notes.update_one({"user_id": user_id}, {"$unset": {"notes." + full_note_path: ""}})
 				if ack.acknowledged:
-					return response.success({"message": ""}, Status.OK)
+					return response.success("Note successfully deleted.", Status.OK)
 				else:
 					return response.error("Could not delete note page.", Status.INTERNAL_SERVER_ERROR)
 			except Exception as e:
 				print(e)
+				traceback.print_exc()
 				return response.error("Something went wrong. Please try again later", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:
 		print(e)
+		traceback.print_exc()
 		return response.error("Failed to create notes, please try again later.", Status.INTERNAL_SERVER_ERROR)

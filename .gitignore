@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+#Docker file
+docker-compose*
+
 # Distribution / packaging
 .Python
 build/
@@ -133,5 +136,4 @@ dmypy.json
 /backend/env*
 /reverseproxy/cloudflare.pem
 /reverseproxy/cloudflare.key
-docker-compose.yml
 cicd.sh

@@ -1,108 +1,80 @@
-import * as React from "react";
-
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-
-import PropTypes from "prop-types";
-// Import pages within each tab
-import Summary from "./summary";
-import Setup from "./setup";
+import React, { useContext, useEffect, useState } from "react";
 import FrequentlyAskedQuestions from "./faq";
-import ReleaseLog from "./releaselog";
-import Usage from "./usage";
 import Header from "../components/header";
-import Head from "next/head";
 import Footer from "../components/footer";
+import Head from "next/head";
+import Hero from "../components/homepage/hero";
+import SectionTitle from "../components/homepage/sectionTitle";
+import { benefitOne, benefitTwo, benefitThree, benefitFour } from "../components/data/landingpage";
+import Benefits from "../components/homepage/benefits";
+import Testimonials from "../components/homepage/testimonials";
+import Cta from "../components/homepage/cta";
 
-// Taken from: https://mui.com/material-ui/react-tabs/
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      <Head>
-        <title>About - The CDL</title>
-        <link rel="icon" href="/images/tree32.png" />
-      </Head>
-      {value === index && (
-        <Box sx={{}}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-// Taken from: https://mui.com/material-ui/react-tabs/
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-// Taken from: https://mui.com/material-ui/react-tabs/
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
-
-export default function About() {
+export default function About({ loggedOut }) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
   return (
     <>
+      <Head>
+        <title>The Community Digital Library</title>
+        <meta
+          name="description"
+          content="CDL"
+        />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Header />
-      <div
-        className="allResults"
-        style={{
-          width: "1200px",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Box sx={{ width: "100%" }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs example"
-            >
-              <Tab label="About" {...a11yProps(0)} />
-              <Tab label="Setup" {...a11yProps(1)} />
-              <Tab label="Usage" {...a11yProps(2)} />
-              <Tab label="FAQ" {...a11yProps(3)} />
-              <Tab label="Release Log" {...a11yProps(4)} />
-            </Tabs>
-          </Box>
-          <TabPanel value={value} index={0}>
-            <Summary />
-          </TabPanel>
-          <TabPanel value={value} index={1}>
-            <Setup />
-          </TabPanel>
-          <TabPanel value={value} index={2}>
-            <Usage />
-          </TabPanel>
-          <TabPanel value={value} index={3}>
-            <FrequentlyAskedQuestions />
-          </TabPanel>
-          <TabPanel value={value} index={4}>
-            <ReleaseLog />
-          </TabPanel>
-        </Box>
+      <div className="allResults">
+        <Hero />
+        <SectionTitle
+          pretitle="Why CDL?"
+          title=" What we offer">
+          Below, we describe an overview of the CDL's features: forming communities, bookmarking webpages to these communities, taking notes, and discovering information (search and recommendation).
+        </SectionTitle>
+
+        <Benefits data={benefitOne} />
+        <Benefits data={benefitTwo} imgPos="right" />
+        <Benefits data={benefitThree} />
+        <Benefits data={benefitFour} imgPos="right" />
+
+
+        {/* commenting out testimonials temporarily */}
+
+        {/* <SectionTitle
+        pretitle="Testimonials"
+        title="Here's what our users said">
+        Here's what professors and students using our platform have said!
+      </SectionTitle>
+      <Testimonials /> */}
+
+        <SectionTitle pretitle="FAQ" title="Frequently Asked Questions">
+
+        </SectionTitle>
+        <FrequentlyAskedQuestions />
+        <Cta />
+        <Footer />
+
       </div>
-      <Footer alt={true} />
-    </>
-  );
+    </>);
 }
+
+// export async function getServerSideProps(context) {
+//   // Fetch data from external API
+//   if (
+//     context.req.cookies.token === "" ||
+//     context.req.cookies.token === undefined
+//   ) {
+//     return {
+//       redirect: {
+//         destination: "/about",
+//         permanent: false,
+//       },
+//     };
+//   }
+//   else return { props: { loggedOut: false } };
+// }

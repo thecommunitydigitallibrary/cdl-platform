@@ -24,10 +24,18 @@ function DrawerComp(props) {
         onClose={() => setOpenDrawer(false)}
       >
         <List sx={{ maxWidth: '300px', maxHeight: '50px', overflowWrap: 'break-word', textAlign: 'center' }}>
-          <h4 sx={{ marginBottom: '2%' }} >
-            Hello, {props.username}
+          
+          
+        {props.username? <>
+        
+        <h4 sx={{ marginBottom: '2%' }} >
+        "Hello, "+{props.username }
           </h4>
           <Divider sx={{ borderColor: 'black', my: '5%', mx: '5%' }} />
+        </>
+        
+        : <></>}
+        
 
           {props.settings.map((setting, index) => (
 
@@ -61,11 +69,21 @@ function DrawerComp(props) {
           <ListItem>
             <ListItemIcon>
             </ListItemIcon>
+            {props.username?
+            <>
             <Button variant="contained" color="error" onClick={(event) => {setOpenDrawer(false); props.handleUserClickMenu(event, 'logout')}}>
               <ListItemText>
                 Logout
               </ListItemText>
+            </Button></>
+          :
+          <>
+           <Button variant="contained" color="info" onClick={(event) => {setOpenDrawer(false); props.handleUserClickMenu(event, '/auth')}}>
+              <ListItemText>
+                Home
+              </ListItemText>
             </Button>
+          </>}
             <ListItemIcon>
 
             </ListItemIcon>
