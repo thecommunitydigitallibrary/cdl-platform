@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Head from "next/head";
+import { CircularProgress, LinearProgress } from "@mui/material";
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const getCommunitiesEndpoint = "getCommunities";
@@ -56,6 +57,9 @@ export default function ({ data }) {
   const [severity, setSeverity] = useState("error");
   const [authMessage, setAuthMessage] = useState("");
 
+
+  const [showProgress, setShowProgress] = useState(false);
+
   const handleClick = () => {
     setOpen(true);
   };
@@ -81,7 +85,7 @@ export default function ({ data }) {
 
   let handleSignin = async (e) => {
     e.preventDefault();
-
+    setShowProgress(true)
     try {
       let res = await fetch(baseURL_client + loginEndpoint, {
         method: "POST",
@@ -96,9 +100,10 @@ export default function ({ data }) {
 
         // adding dropdown data to local storage
         updateDropDownSearch();
-
+        setShowProgress(false)
         Router.push("/");
       } else {
+        setShowProgress(false)
         setSeverity("error");
         setAuthMessage(
           "Either the password is incorrect, or this user does not exist."
@@ -106,6 +111,8 @@ export default function ({ data }) {
         handleClick();
       }
     } catch (err) {
+
+      setShowProgress(false)
       setSeverity("error");
       setAuthMessage("Something went wrong! Please try again later.");
       handleClick();
@@ -113,6 +120,7 @@ export default function ({ data }) {
   };
   const handleCreateAccount = async (e) => {
     e.preventDefault();
+    setShowProgress(true)
     try {
       if (create_password !== check_password) {
         setSeverity("error");
@@ -132,13 +140,17 @@ export default function ({ data }) {
       if (res.status === 200) {
         jsCookie.set("token", resJson.token);
         updateDropDownSearch();
+        setShowProgress(false)
         Router.push("/");
       } else {
+        setShowProgress(false)
         setSeverity("error");
         setAuthMessage(resJson.message);
         handleClick();
       }
     } catch (err) {
+
+      setShowProgress(false)
       setSeverity("error");
       setAuthMessage("Something went wrong! Please try again later.");
       handleClick();
@@ -151,6 +163,7 @@ export default function ({ data }) {
 
   const handleResetEmail = async (e) => {
     e.preventDefault();
+    setShowProgress(true)
     try {
       if (resetEmailInput === "") {
         return alert("Please enter a valid email inside the text box.");
@@ -172,7 +185,9 @@ export default function ({ data }) {
             "mailto:" + resetEmailInput + "?subject=Subject&body=Requesting password reset link for: " +
             resetEmailInput
           );
+          setShowProgress(false)
         } else {
+          setShowProgress(false)
           setSeverity("error");
           setAuthMessage("Sorry, we were unable to process your request.");
           handleClick();
@@ -180,6 +195,8 @@ export default function ({ data }) {
         }
       }
     } catch (error) {
+
+      setShowProgress(false)
       setSeverity("error");
       setAuthMessage("Could not request a password reset.");
       handleClick();
@@ -245,7 +262,9 @@ export default function ({ data }) {
           <title>Sign In - The CDL</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
+
         <form className="Auth-form" id="signin" onSubmit={handleSignin}>
+
           <div className="Auth-form-content">
             <h3 className="Auth-form-title">
               <a href="/about">Community Digital Library</a>
@@ -279,9 +298,11 @@ export default function ({ data }) {
               </Button>
             </p>
             <div className="d-grid gap-2 mt-3 text-center">
-              <ActionButton form="Auth-form" type="submit" variant="contained">
+              <ActionButton form="Auth-form" type="submit" variant="contained" >
                 Sign In
               </ActionButton>
+              {showProgress ?
+                <LinearProgress value={showProgress} /> : null}
             </div>
             <div align="center" style={{ marginTop: 10 }}>
               Not registered yet?  {" "}
@@ -383,6 +404,9 @@ export default function ({ data }) {
               <ActionButton form="Auth-form" type="submit" variant="contained">
                 Create Account
               </ActionButton>
+
+              {showProgress ?
+                <LinearProgress value={showProgress} /> : null}
             </div>
             <div className="text-center" style={{ marginTop: 10 }}>
               Already registered?{" "}

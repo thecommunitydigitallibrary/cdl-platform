@@ -21,9 +21,7 @@ export default function FrequentlyAskedQuestions() {
         margin: "auto",
       }}
     >
-      <h1 style={{ margin: "10px 0px 20px 0px" }}>
-        Frequently Asked Questions{" "}
-      </h1>
+
       <div className="AllResults">
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -95,7 +93,7 @@ export default function FrequentlyAskedQuestions() {
           <AccordionDetails>
             If you want to make a submission at a specific time, you can change
             the webpage URL to include the video time (right click video → copy
-            URL at current time → paste into address bar). Once you do this, you can open the extension, 
+            URL at current time → paste into address bar). Once you do this, you can open the extension,
             and it will pull the URL with the fragment for a submission.
           </AccordionDetails>
         </Accordion>
