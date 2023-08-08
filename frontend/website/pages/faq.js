@@ -32,7 +32,7 @@ export default function FrequentlyAskedQuestions() {
           </AccordionSummary>
           <Divider />
           <AccordionDetails>
-            Please email Kevin Ros at{" "}
+            Please use the "Feedback" link in the footer or email Kevin Ros at{" "}
             <Link href={`mailto: kjros2@illinois.edu`} target="_blank">
               kjros2@illinois.edu
             </Link>
@@ -49,7 +49,7 @@ export default function FrequentlyAskedQuestions() {
           <AccordionDetails>
             For some pages, your highlighted text will not be captured by the
             extension. You can tell that this is the case when the “Highlighted
-            text:” area doesn’t display any text. If you want to save the
+            text” area doesn’t display any text. If you want to save the
             highlighted text in the context or ask a question about the
             highlighted text, then first copy-paste it into the field right
             below the highlighted text display.{" "}

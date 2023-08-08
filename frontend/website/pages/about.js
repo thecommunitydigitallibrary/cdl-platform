@@ -34,7 +34,7 @@ export default function About({ loggedOut }) {
         <SectionTitle
           pretitle="Why CDL?"
           title=" What we offer">
-          The CDL is a platform for bookmarking webpages, taking notes, and discovering online content. Our vision is to anticipate the questions that you may have while viewing online content and proactively provide you with answers without requiring any effort.
+          Below, we describe an overview of the CDL's features: forming communities, bookmarking webpages to these communities, taking notes, and discovering information (search and recommendation).
         </SectionTitle>
 
         <Benefits data={benefitOne} />
