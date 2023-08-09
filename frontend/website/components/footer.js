@@ -160,8 +160,7 @@ export default function Footer(props) {
             </div>
 
             <div className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
-              The CDL is a collaborative bookmarking and note-taking service, and the goal is to leverage your saved bookmarks and notes to assist in search, recommendation, and online learning.
-              And its completely open-source.
+              The Community Digital Library (CDL) is an online and open-source social bookmarking platform that allows you to collaboratively describe and save, search for, and discover webpages related to your interests. We offer a stand-alone website and a Chrome extension, all for free.
             </div>
 
 
