@@ -306,6 +306,9 @@ class ScrapeWorker:
         return url, full_path
 
     def is_scraped_before(self, source_url):
+
+        source_url, _ = self.format_url_to_path(source_url)
+
         webpages = Webpages()
         webpage = webpages.find({"url": source_url})
 
