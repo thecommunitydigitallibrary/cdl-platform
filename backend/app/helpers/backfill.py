@@ -76,13 +76,18 @@ class BackFill:
         print(f'>>> List of submissions_urls to process: {submissions_urls}')
         print(f'>>> List of webpages_urls to be skipped: {webpages_urls}')
 
+        scraper = ScrapeWorker()
+
+
         response = {}
         for source_url in submissions_urls:
             response[source_url] = {}
+            
+            source_url, _ = scraper.format_url_to_path(source_url)
+
             if source_url not in webpages_urls:
                 try:
                     # Call scraper code
-                    scraper = ScrapeWorker()
                     data = scraper.scrape(source_url)  # Triggering Scraper
 
                     # Check if the scrape was not successful
