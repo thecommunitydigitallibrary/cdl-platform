@@ -9,8 +9,8 @@ import os
 from urllib.parse import urljoin
 from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, \
     CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, \
-    CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, \
-    SCRAPECODE_TO_MESSAGE_MAP
+    CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CODE_REDIRECTED_URL_ALREADY_SCRAPED, \
+    CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, SCRAPECODE_TO_MESSAGE_MAP
 import sys
 import traceback
 from app.models.webpages import Webpages
@@ -19,6 +19,12 @@ from app.models.webpages import Webpages
 class ScrapeWorker:
     start_time = None
     end_time = None
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            self.extracted_webpages_urls = set()
+        else:
+            self.extracted_webpages_urls = args[0]
 
     def trace_function(self, frame, event, arg):
         if time.time() - self.start_time > RESPONSE_TIMEOUT:
@@ -113,6 +119,34 @@ class ScrapeWorker:
                 }
                 return data
 
+        # Check if there are any redirects
+        if len(resp.history) > 0:
+            print(
+                f'The URL was redirected from {resp.history[0].status_code, resp.history[0].url} -> {resp.url}')
+
+            # Update URL to the redirected URL in data
+            new_url, _ = self.format_url_to_path(resp.url)
+            data["url"] = new_url
+
+            # Check if this redirected URL has been scraped before
+            if self.is_scraped_before(new_url):
+                data["scrape_status"] = {
+                    "code": CODE_REDIRECTED_URL_ALREADY_SCRAPED,
+                    "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_REDIRECTED_URL_ALREADY_SCRAPED],
+                    "resp_status_code": 302
+                }
+                return data
+
+            # If the redirected page is a Sign In page
+            for s in [metadata['title'].lower(), metadata["h1"].lower(), metadata["description"].lower()]:
+                if "sign in" in s or "log in" in s or "login" in s or "signin" in s:
+                    data["scrape_status"] = {
+                        "code": CODE_URL_NOT_PUBLICILY_ACCESSIBLE,
+                        "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_URL_NOT_PUBLICILY_ACCESSIBLE],
+                        "resp_status_code": 403
+                    }
+                    return data
+
         # Add the metadata, paragraphs and all the outgoing URLs to the `data` JSON
         data["webpage"] = {
             "metadata": metadata,
@@ -124,7 +158,6 @@ class ScrapeWorker:
             "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_SUCCESS],
             "resp_status_code": resp.status_code
         }
-        all_outgoing = [x["url"] for x in outgoing_urls]
 
         return data
 
@@ -306,10 +339,5 @@ class ScrapeWorker:
         return url, full_path
 
     def is_scraped_before(self, source_url):
-
         source_url, _ = self.format_url_to_path(source_url)
-
-        webpages = Webpages()
-        webpage = webpages.find({"url": source_url})
-
-        return True if webpage else False
+        return True if source_url in self.extracted_webpages_urls else False
