@@ -89,9 +89,9 @@ class BackFill:
                     # Call scraper code
                     data = scraper.scrape(source_url)  # Triggering Scraper
 
-                    # Check if the URL was redirected and already scraped
-                    if data['scrape_status']['code'] == 8:
-                        response[source_url] = f'Redirected to {data["url"]} and is already scraped before'
+                    # Check if the URL was already scraped
+                    if data['scrape_status']['code'] == -1:
+                        response[source_url] = f'{data["url"]} was already scraped before'
                     else:
                         # To handle the case where source_url will be replaced with redirected URL
                         if source_url != data["url"]:

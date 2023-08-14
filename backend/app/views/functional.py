@@ -195,8 +195,8 @@ def create_submission(current_user):
             if not scraper.is_scraped_before(source_url):
                 data = scraper.scrape(source_url)  # Triggering Scraper
 
-                # Check if the URL was redirected and is already scraped
-                if data['scrape_status']['code'] != 8:
+                # Check if the URL was already scraped
+                if data['scrape_status']['code'] != -1:
                     # Check if the scrape was not successful
                     if data["scrape_status"]["code"] != 1:
                         data["webpage"] = {}
@@ -307,11 +307,12 @@ def create_batch_submission(current_user):
                 extracted_webpages_urls = fetch_webpages_urls()
 
                 scraper = ScrapeWorker(extracted_webpages_urls)
+
                 if not scraper.is_scraped_before(source_url):
                     data = scraper.scrape(source_url)  # Triggering Scraper
 
-                    # Check if the URL was redirected and already scraped
-                    if data['scrape_status']['code'] != 8:
+                    # Check if the URL was already scraped
+                    if data['scrape_status']['code'] != -1:
                         # Check if the scrape was success or not
                         if data["scrape_status"]["code"] != 1:
                             data["webpage"] = {}
@@ -932,8 +933,8 @@ def search(current_user):
                 if not scraper.is_scraped_before(url):
                     data = scraper.scrape(url)  # Triggering Scraper
 
-                    # Check if the URL was redirected and already scraped
-                    if data['scrape_status']['code'] != 8:
+                    # Check if the URL was already scraped
+                    if data['scrape_status']['code'] != -1:
                         # Check if the scrape was not successful
                         if data["scrape_status"]["code"] != 1:
                             data["webpage"] = {}

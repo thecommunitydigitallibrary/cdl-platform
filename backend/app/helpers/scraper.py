@@ -9,7 +9,7 @@ import os
 from urllib.parse import urljoin
 from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, \
     CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, \
-    CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, CODE_REDIRECTED_URL_ALREADY_SCRAPED, \
+    CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, \
     CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, SCRAPECODE_TO_MESSAGE_MAP
 import sys
 import traceback
@@ -131,21 +131,11 @@ class ScrapeWorker:
             # Check if this redirected URL has been scraped before
             if self.is_scraped_before(new_url):
                 data["scrape_status"] = {
-                    "code": CODE_REDIRECTED_URL_ALREADY_SCRAPED,
-                    "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_REDIRECTED_URL_ALREADY_SCRAPED],
-                    "resp_status_code": 302
+                    "code": CODE_SCRAPE_ALREADY_ATTEMPTED,
+                    "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_SCRAPE_ALREADY_ATTEMPTED],
+                    "resp_status_code": resp.status_code
                 }
                 return data
-
-            # If the redirected page is a Sign In page
-            for s in [metadata['title'].lower(), metadata["h1"].lower(), metadata["description"].lower()]:
-                if "sign in" in s or "log in" in s or "login" in s or "signin" in s:
-                    data["scrape_status"] = {
-                        "code": CODE_URL_NOT_PUBLICILY_ACCESSIBLE,
-                        "message": SCRAPECODE_TO_MESSAGE_MAP[CODE_URL_NOT_PUBLICILY_ACCESSIBLE],
-                        "resp_status_code": 403
-                    }
-                    return data
 
         # Add the metadata, paragraphs and all the outgoing URLs to the `data` JSON
         data["webpage"] = {
