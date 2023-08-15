@@ -13,6 +13,7 @@ CODE_INVALID_STATUS_CODE = 4
 CODE_UNABLE_TO_PARSE = 5
 CODE_URL_NAME_TOO_LONG = 6
 CODE_URL_NOT_PUBLICILY_ACCESSIBLE = 7
+
 SCRAPECODE_TO_MESSAGE_MAP = {
     CODE_SCRAPE_ALREADY_ATTEMPTED: "Scrape has already been attempted for the given URL",
     CODE_SUCCESS: "Scrape is successful",
@@ -21,5 +22,5 @@ SCRAPECODE_TO_MESSAGE_MAP = {
     CODE_INVALID_STATUS_CODE: "Scrape response returned an invalid status code",
     CODE_UNABLE_TO_PARSE: "Unable to parse the given URL",
     CODE_URL_NAME_TOO_LONG: "The given URL name is too long to store",
-    CODE_URL_NOT_PUBLICILY_ACCESSIBLE: "The given URL is not publicily accessible"
+    CODE_URL_NOT_PUBLICILY_ACCESSIBLE: "The given URL is not publicly accessible",
 }
