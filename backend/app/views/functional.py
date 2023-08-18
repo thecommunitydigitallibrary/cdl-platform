@@ -188,26 +188,29 @@ def create_submission(current_user):
             print("SUBMISSION_INDEX_STATUS", index_status)
 
             scraper = ScrapeWorker()
+
             if not scraper.is_scraped_before(source_url):
                 data = scraper.scrape(source_url)  # Triggering Scraper
 
-                # Check if the scrape was not successful
-                if data["scrape_status"]["code"] != 1:
-                    data["webpage"] = {}
+                # Check if the URL was already scraped
+                if data['scrape_status']['code'] != -1:
+                    # Check if the scrape was not successful
+                    if data["scrape_status"]["code"] != 1:
+                        data["webpage"] = {}
 
-                # insert in MongoDB
-                insert_status, webpage = log_webpage(data["url"],
-                                                     data["webpage"],
-                                                     data["scrape_status"],
-                                                     data["scrape_time"]
-                                                     )
-                if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                    # index in OpenSearch
-                    index_status = webpages_elastic_manager.add_to_index(webpage)
-                    print("WEBPAGE_INDEX_STATUS", index_status)
+                    # insert in MongoDB
+                    insert_status, webpage = log_webpage(data["url"],
+                                                         data["webpage"],
+                                                         data["scrape_status"],
+                                                         data["scrape_time"]
+                                                         )
+                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                        # index in OpenSearch
+                        index_status = webpages_elastic_manager.add_to_index(webpage)
+                        print("WEBPAGE_INDEX_STATUS", index_status)
 
-                else:
-                    print("Unable to insert webpage data in database.")
+                    else:
+                        print("Unable to insert webpage data in database.")
 
             return response.success({
                 "message": "Context successfully submitted and indexed.",
@@ -298,25 +301,28 @@ def create_batch_submission(current_user):
                 index_status = elastic_manager.add_to_index(doc)
 
                 scraper = ScrapeWorker()
+
                 if not scraper.is_scraped_before(source_url):
                     data = scraper.scrape(source_url)  # Triggering Scraper
 
-                    # Check if the scrape was success or not
-                    if data["scrape_status"]["code"] != 1:
-                        data["webpage"] = {}
-                        data["scrape_time"] = None
+                    # Check if the URL was already scraped
+                    if data['scrape_status']['code'] != -1:
+                        # Check if the scrape was success or not
+                        if data["scrape_status"]["code"] != 1:
+                            data["webpage"] = {}
+                            data["scrape_time"] = None
 
-                    # insert in MongoDB
-                    insert_status, webpage = log_webpage(data["url"],
-                                                         data["webpage"],
-                                                         data["scrape_status"],
-                                                         data["scrape_time"]
-                                                         )
-                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                        # index in Opensearch
-                        webpages_elastic_manager.add_to_index(webpage)
-                    else:
-                        print("Unable to insert webpage data in database.")
+                        # insert in MongoDB
+                        insert_status, webpage = log_webpage(data["url"],
+                                                             data["webpage"],
+                                                             data["scrape_status"],
+                                                             data["scrape_time"]
+                                                             )
+                        if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                            # index in Opensearch
+                            webpages_elastic_manager.add_to_index(webpage)
+                        else:
+                            print("Unable to insert webpage data in database.")
 
                 results[f'Submission {i}'] = {
                     "message": "Context successfully submitted and indexed.",
@@ -914,26 +920,29 @@ def search(current_user):
             # also scrape the webpage if there is a url
             if url:
                 scraper = ScrapeWorker()
+
                 if not scraper.is_scraped_before(url):
                     data = scraper.scrape(url)  # Triggering Scraper
 
-                    # Check if the scrape was not successful
-                    if data["scrape_status"]["code"] != 1:
-                        data["webpage"] = {}
+                    # Check if the URL was already scraped
+                    if data['scrape_status']['code'] != -1:
+                        # Check if the scrape was not successful
+                        if data["scrape_status"]["code"] != 1:
+                            data["webpage"] = {}
 
-                    # insert in MongoDB
-                    insert_status, webpage = log_webpage(data["url"],
-                                                        data["webpage"],
-                                                        data["scrape_status"],
-                                                        data["scrape_time"]
-                                                        )
-                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                        # index in OpenSearch
-                        index_status = webpages_elastic_manager.add_to_index(webpage)
-                        print("WEBPAGE_INDEX_STATUS", index_status)
+                        # insert in MongoDB
+                        insert_status, webpage = log_webpage(data["url"],
+                                                            data["webpage"],
+                                                            data["scrape_status"],
+                                                            data["scrape_time"]
+                                                            )
+                        if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                            # index in OpenSearch
+                            index_status = webpages_elastic_manager.add_to_index(webpage)
+                            print("WEBPAGE_INDEX_STATUS", index_status)
 
-                    else:
-                        print("Unable to insert webpage data in database.")
+                        else:
+                            print("Unable to insert webpage data in database.")
 
         # if the search_id is included, then the user is looking for a specific page of a previous search
         else:
@@ -1384,3 +1393,4 @@ def get_recommendations(current_user, toggle_webpage_results = True):
         print(e)
         traceback.print_exc()
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
+

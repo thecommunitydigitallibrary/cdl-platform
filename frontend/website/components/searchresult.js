@@ -308,14 +308,13 @@ function SearchResult(props) {
         <div style={{ margin: "0px 0px 0px 0px" }}>
           <Tooltip title={props.explanation}>
             <a
-              style={{ fontSize: "20px" }}
+              style={{ fontSize: "20px", maxWidth: '100%', display: '-webkit-box', WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: '1', overflow: 'hidden', textOverflow: 'ellipsis'}}
               href={props.redirect_url}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {props.explanation.length > 70
-                ? props.explanation.slice(0, 70) + "..."
-                : props.explanation}
+              {props.explanation}
             </a>
           </Tooltip>
         </div>
