@@ -187,10 +187,7 @@ def create_submission(current_user):
             
             print("SUBMISSION_INDEX_STATUS", index_status)
 
-            # Fetch already scraped URLs
-            extracted_webpages_urls = fetch_webpages_urls()
-
-            scraper = ScrapeWorker(extracted_webpages_urls)
+            scraper = ScrapeWorker()
 
             if not scraper.is_scraped_before(source_url):
                 data = scraper.scrape(source_url)  # Triggering Scraper
@@ -303,10 +300,7 @@ def create_batch_submission(current_user):
                 doc.id = status.inserted_id
                 index_status = elastic_manager.add_to_index(doc)
 
-                # Fetch already scraped URLs
-                extracted_webpages_urls = fetch_webpages_urls()
-
-                scraper = ScrapeWorker(extracted_webpages_urls)
+                scraper = ScrapeWorker()
 
                 if not scraper.is_scraped_before(source_url):
                     data = scraper.scrape(source_url)  # Triggering Scraper
@@ -925,10 +919,7 @@ def search(current_user):
 
             # also scrape the webpage if there is a url
             if url:
-                # Fetch already scraped URLs
-                extracted_webpages_urls = fetch_webpages_urls()
-
-                scraper = ScrapeWorker(extracted_webpages_urls)
+                scraper = ScrapeWorker()
 
                 if not scraper.is_scraped_before(url):
                     data = scraper.scrape(url)  # Triggering Scraper
@@ -1403,13 +1394,3 @@ def get_recommendations(current_user, toggle_webpage_results = True):
         traceback.print_exc()
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
-
-def fetch_webpages_urls():
-    """
-    Fetched the Webpages URLs from MongoDB that have already been scraped.
-    Returns:
-        webpages_urls : (set) : Webpages URLs to be skipped.
-    """
-    webpages = Webpages()
-    webpages_urls = webpages.collection.distinct("url")
-    return set(webpages_urls)

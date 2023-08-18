@@ -41,6 +41,7 @@ class BackFill:
             webpages_urls : (set) : Webpages URLs to be skipped.
         """
         webpages_urls = self.webpages_collection.distinct("url")
+        webpages_urls.append('not-empty')
         return set(webpages_urls)
 
     def log_webpage(self, url, webpage, scrape_status, scrape_time):
