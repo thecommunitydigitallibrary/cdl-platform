@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import json
 
 current = os.path.dirname(os.path.realpath(__file__))
 app_path = os.path.dirname(current)
@@ -41,7 +42,7 @@ class BackFill:
             webpages_urls : (set) : Webpages URLs to be skipped.
         """
         webpages_urls = self.webpages_collection.distinct("url")
-        webpages_urls.append('not-empty')
+        webpages_urls.append("not-empty")
         return set(webpages_urls)
 
     def log_webpage(self, url, webpage, scrape_status, scrape_time):
@@ -75,8 +76,8 @@ class BackFill:
         # Fetch all the webpage URLs from MongoDB
         webpages_urls = self.fetch_webpages_urls()
 
-        print(f'>>> List of submissions_urls to process: {submissions_urls}')
-        print(f'>>> List of webpages_urls to be skipped: {webpages_urls}')
+        print(f">>> List of submissions_urls to process: {submissions_urls}")
+        print(f">>> List of webpages_urls to be skipped: {webpages_urls}")
 
         scraper = ScrapeWorker(webpages_urls)
 
@@ -91,7 +92,7 @@ class BackFill:
                     data = scraper.scrape(source_url)  # Triggering Scraper
 
                     # Check if the URL was already scraped
-                    if data['scrape_status']['code'] == -1:
+                    if data["scrape_status"]["code"] == -1:
                         response[source_url] = f'{data["url"]} was already scraped before'
                     else:
                         # To handle the case where source_url will be replaced with redirected URL
@@ -111,21 +112,21 @@ class BackFill:
                             data["scrape_status"],
                             data["scrape_time"],
                         )
-                        response[source_url]['insert_status'] = str(insert_status.acknowledged)
-                        response[source_url]['scrape_status-message'] = data["scrape_status"]["message"]
+                        response[source_url]["insert_status"] = str(insert_status.acknowledged)
+                        response[source_url]["scrape_status-message"] = data["scrape_status"]["message"]
 
                         # Add it to webpages index in Opensearch if scrape is a success
                         if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
                             self.webpages_elastic_manager.add_to_index(webpage)
-                            response[source_url]['message'] = 'Successful scraped and added to index!'
+                            response[source_url]["message"] = "Successful scraped and added to index!"
                         else:
-                            response[source_url]['message'] = 'Scrape not successful'
-                            print(f'Unable to insert webpage data in database.')
+                            response[source_url]["message"] = "Scrape not successful"
+                            print(f"Unable to insert webpage data in database.")
                 except Exception as err:
                     print(err)
                     response[source_url] = str(err)
             else:
-                response[source_url] = 'Already scraped before'
+                response[source_url] = "Already scraped before"
 
         return response
 
@@ -156,7 +157,7 @@ if __name__ == "__main__":
 
         # If env_path is provided as an argument then pull data from this file
         if args.env_path:
-            print(f'Reading from provided env file in --env_path argument')
+            print(f"Reading from provided env file in --env_path argument")
             with open(args.env_path, "r") as f:
                 for line in f:
                     split_line = line.split("=")
@@ -167,11 +168,11 @@ if __name__ == "__main__":
             elastic_domain = file.get("elastic_domain_backfill", file.get("elastic_domain"))
         # Else pull data from the current env_file
         else:
-            print(f'Reading from current env file')
+            print(f"Reading from current env file")
             cdl_uri = os.environ.get("cdl_test_uri", os.environ.get("cdl_uri"))
             elastic_domain = os.environ.get("elastic_domain_backfill", os.environ.get("elastic_domain"))
 
-        print(f'Connecting to MongoDB at: {cdl_uri} and Opensearch at: {elastic_domain}')
+        print(f"Connecting to MongoDB at: {cdl_uri} and Opensearch at: {elastic_domain}")
 
         # MongoDB conn Info
         client = MongoClient(cdl_uri)
@@ -186,12 +187,12 @@ if __name__ == "__main__":
             None,
             "webpages")
 
-        print(f'>>> Starting the Back-fill operation...')
+        print(f">>> Starting the Back-fill operation...")
 
         bf = BackFill(cdl_db, webpages_elastic_manager)
         resp = bf.execute()
 
-        print(f'>>> Back-fill operation completed. \nResponse is as follows:\n{resp}')
+        print(f">>> Back-fill operation completed. \n{json.dumps(resp)}\n")
     except Exception as e:
         print(e)
         traceback.print_exc()
