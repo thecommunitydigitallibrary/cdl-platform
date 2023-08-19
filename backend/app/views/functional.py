@@ -9,6 +9,7 @@ from flask_cors import CORS
 import validators
 from textblob import TextBlob
 import traceback
+import random
 from sentence_transformers import CrossEncoder
 
 from app.db import get_redis
@@ -1357,9 +1358,15 @@ def get_recommendations(current_user, toggle_webpage_results = True):
                     blob = TextBlob(full_text)
                     new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
                     search_text += " " + new_terms
+
+                # randomize the search text to 10 query terms
+                split_text = search_text.split()
+                if len(split_text) > 10:
+                    random.shuffle(split_text)
+                    search_text = " ".join(split_text[:10])
                 
                 number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
-                                                              page_size=1000)
+                                                              page_size=50)
                 submissions_pages = create_page(submissions_hits, rc_dict)
 
                 if toggle_webpage_results:
