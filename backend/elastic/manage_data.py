@@ -3,6 +3,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 from pymongo import MongoClient
+import traceback
 import validators
 
 
@@ -206,7 +207,13 @@ class ElasticManager:
         }
         """
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
-        hits = json.loads(r.text)["hits"]
+        try:
+            hits = json.loads(r.text)["hits"]
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            print(hits)
+            return 0, []
         return hits["total"]["value"], hits["hits"]
 
     def add_to_index(self, doc):
@@ -357,7 +364,13 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
-        hits = json.loads(r.text)["hits"]
+        try:
+            hits = json.loads(r.text)["hits"]
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            print(hits)
+            return 0, []
         return hits["total"]["value"], hits["hits"]
 
     def flatten_communities(self, communities) -> list:
