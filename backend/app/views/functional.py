@@ -1359,11 +1359,17 @@ def get_recommendations(current_user, toggle_webpage_results = True):
                     new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
                     search_text += " " + new_terms
 
+                # if empty, assign random
+                if search_text == "":
+                    search_text = "transformer natural language processing illinois machine learning startup neural network hack hacker technology future explanation application building coding search engine computer vision recurrent classification generation chatgpt gpt3 data"
+
+
                 # randomize the search text to 10 query terms
                 split_text = search_text.split()
                 if len(split_text) > 10:
                     random.shuffle(split_text)
                     search_text = " ".join(split_text[:10])
+
                 
                 number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
                                                               page_size=50)
