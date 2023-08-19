@@ -181,34 +181,11 @@ class ElasticManager:
                 
             query_comm["query"]["bool"]["filter"] = filter
 
-        """
-        # now with hashtag
-        query_comm = {
-            "query": {
-                "bool": {
-                    "filter": {
-                        "bool": {
-                            "must": must_terms
-                        }
-                    },
-                    "should": [
-                        {
-                            "multi_match": {
-                                "query": query,
-                                "fields": fields
-                            }
-                        },
-                    ]
-                }
-            },
-            "from": page * page_size,
-            "size": page_size,
-            "min_score": 0.1
-        }
-        """
+        
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
         try:
             hits = json.loads(r.text)["hits"]
+            print("\tTook: ", r["took"])
         except Exception as e:
             print(e)
             traceback.print_exc()
