@@ -1045,28 +1045,28 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
                 # Searching exactly a user's community from the webpages index
                 _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
-                print("\Webpage search: ", time.time() - start_time)
+                print("\tWebpage search: ", time.time() - start_time)
 
                 webpages_index_pages = create_page(webpages_hits, communities)
 
-                print("\Webpage pages: ", time.time() - start_time)
+                print("\tWebpage pages: ", time.time() - start_time)
 
                 submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
 
-                print("\Combined search: ", time.time() - start_time)
+                print("\tCombined search: ", time.time() - start_time)
 
 
             pages = deduplicate(submissions_pages)
-            print("\Dedup: ", time.time() - start_time)
+            print("\tDedup: ", time.time() - start_time)
             pages = neural_rerank(query, pages)
-            print("\Neural Rerank: ", time.time() - start_time)
+            print("\tNeural Rerank: ", time.time() - start_time)
             pages = hydrate_with_hash_url(pages, search_id, page=index)
-            print("\URL: ", time.time() - start_time)
+            print("\tURL: ", time.time() - start_time)
             pages = hydrate_with_hashtags(pages)
-            print("\Hash: ", time.time() - start_time)
+            print("\tHash: ", time.time() - start_time)
             number_of_hits = len(pages)
             page = cache.insert(user_id, search_id, pages, index)
-            print("\Cache: ", time.time() - start_time)
+            print("\tCache: ", time.time() - start_time)
 
 
     return number_of_hits, page
