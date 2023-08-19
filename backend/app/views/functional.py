@@ -9,6 +9,7 @@ from flask_cors import CORS
 import validators
 from textblob import TextBlob
 import traceback
+import time
 import random
 from sentence_transformers import CrossEncoder
 
@@ -1027,24 +1028,46 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
         # If we cannot find cache page, (re)do the search
         if not page:
+            start_time = time.time()
+            print("Search metrics")
+            print("\tSearch start time: ", start_time)
+
             _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
 
+            print("\tSubmission search: ", time.time() - start_time)
+
             submissions_pages = create_page(submissions_hits, communities)
+
+            print("\tSubmission pages: ", time.time() - start_time)
+
 
             if toggle_webpage_results:
 
                 # Searching exactly a user's community from the webpages index
                 _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
+                print("\Webpage search: ", time.time() - start_time)
+
                 webpages_index_pages = create_page(webpages_hits, communities)
+
+                print("\Webpage pages: ", time.time() - start_time)
 
                 submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
 
+                print("\Combined search: ", time.time() - start_time)
+
+
             pages = deduplicate(submissions_pages)
+            print("\Dedup: ", time.time() - start_time)
             pages = neural_rerank(query, pages)
+            print("\Neural Rerank: ", time.time() - start_time)
             pages = hydrate_with_hash_url(pages, search_id, page=index)
+            print("\URL: ", time.time() - start_time)
             pages = hydrate_with_hashtags(pages)
+            print("\Hash: ", time.time() - start_time)
             number_of_hits = len(pages)
             page = cache.insert(user_id, search_id, pages, index)
+            print("\Cache: ", time.time() - start_time)
+
 
     return number_of_hits, page
 
