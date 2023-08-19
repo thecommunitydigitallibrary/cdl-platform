@@ -1104,6 +1104,8 @@ def create_page(hits, communities):
 
             # Handling special cases where there is `http` in the description and the webpage has paragraphs from which
             # we can pull description
+            # REMOVED FOR NOW for latency issues, will replace with highlighted matches eventually
+            """
             if (not description or len(description) <= 10 or "http" in description) and len(hit["_source"]["webpage"]["all_paragraphs"]) >= 10:
                 paragraph_list = hit["_source"]["webpage"]["all_paragraphs"].split("\n")
 
@@ -1112,6 +1114,7 @@ def create_page(hits, communities):
                     if len(paragraph) >= 5:
                         description = paragraph
                         break
+            """
             if not description:
                 description = hit["_source"]["webpage"]["metadata"].get("h1", None)
             if not description:

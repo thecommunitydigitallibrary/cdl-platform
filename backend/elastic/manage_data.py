@@ -180,6 +180,9 @@ class ElasticManager:
                 filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
                 
             query_comm["query"]["bool"]["filter"] = filter
+        else:
+            # Exclude paragraphs to test latency
+            query_comm["_source"]["exclude"] = ["webpage.all_paragraphs"]
 
         
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
