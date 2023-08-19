@@ -212,7 +212,7 @@ class ElasticManager:
         except Exception as e:
             print(e)
             traceback.print_exc()
-            print(hits)
+            print(r)
             return 0, []
         return hits["total"]["value"], hits["hits"]
 
@@ -369,7 +369,7 @@ class ElasticManager:
         except Exception as e:
             print(e)
             traceback.print_exc()
-            print(hits)
+            print(r)
             return 0, []
         return hits["total"]["value"], hits["hits"]
 
