@@ -1123,7 +1123,6 @@ def create_page(hits, communities):
 
         else:
             result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-            print(hit)
             description = "....".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) else hit["_source"].get("highlighted_text", None)
             if not description:
                 description ="No Preview Available"
