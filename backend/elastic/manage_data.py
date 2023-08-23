@@ -162,6 +162,14 @@ class ElasticManager:
                     ]
                 }
             },
+            "highlight": {
+                "tags_schema": "styled",
+                "fields": {
+                    "highlighted_text": {
+                        "pre_tags": ['<mark>'],
+                        "post_tags": ['</mark>']}
+                }
+            },
             "from": page * page_size,
             "size": page_size,
             "min_score": 0.1

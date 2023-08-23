@@ -1096,7 +1096,8 @@ def create_page(hits, communities):
 
         else:
             result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-            description = hit["_source"].get("highlighted_text", None)
+            print(hit)
+            description = "....".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) else hit["_source"].get("highlighted_text", None)
             if not description:
                 description ="No Preview Available"
             result["highlighted_text"] = description
@@ -1193,6 +1194,12 @@ def deduplicate_by_ids(pages, id_dict):
             pages_dedup.append(page)
     return pages_dedup
 
+def deduplicate_by_urls(pages, urls_dict):
+    pages_dedup = []
+    for page in pages:
+        if page["orig_url"] not in urls_dict:
+            pages_dedup.append(page)
+    return pages_dedup
 
 def deduplicate(pages):
     map_pages = defaultdict(list)
@@ -1323,10 +1330,10 @@ def get_recommendations(current_user, toggle_webpage_results = True):
                     cdl_logs = Logs()
                     user_latest_submissions = cdl_logs.find({"user_id": ObjectId(user_id_str)})
                     user_latest_submissions = sorted(user_latest_submissions, reverse=True, key=lambda x: x.time)[:3]
-                    query_ids = {str(x.id) for x in user_latest_submissions}
+                    source_urls = {str(x.source_url) for x in user_latest_submissions} # potential change to urls
                 except Exception as e:
                     user_latest_submissions = []
-                    query_ids = {}
+                    source_urls = {}
                     print(e)
                     traceback.print_exc()
 
@@ -1371,8 +1378,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
                 # Sorting pages based on score, high to low
                 pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
-                pages = deduplicate_by_ids(pages, query_ids)
-
+                pages = deduplicate_by_urls(pages, source_urls)
                 pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
                 pages = hydrate_with_hashtags(pages)
                 page = cache.insert(user_id_str, recommendation_id, pages, page_number)
