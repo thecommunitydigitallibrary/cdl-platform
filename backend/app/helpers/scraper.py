@@ -332,11 +332,15 @@ class ScrapeWorker:
         source_url, _ = self.format_url_to_path(source_url)
 
         # If extracted_webpages_urls are set then check if the source_url is present in it
+        # Only used for scraping - return the full website if found
         if len(self.extracted_webpages_urls) > 0:
-            return True if source_url in self.extracted_webpages_urls else False
+            if source_url in self.extracted_webpages_urls:
+                return self.extracted_webpages_urls[source_url]
+            else:
+                return False
+            #return True if source_url in self.extracted_webpages_urls else False
         # Else search it in MongoDB
         else:
             webpages = Webpages()
             webpage = webpages.find({"url": source_url})
-
             return True if webpage else False

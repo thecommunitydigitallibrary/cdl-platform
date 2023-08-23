@@ -9,6 +9,8 @@ from flask_cors import CORS
 import validators
 from textblob import TextBlob
 import traceback
+import time
+import random
 from sentence_transformers import CrossEncoder
 
 from app.db import get_redis
@@ -1026,24 +1028,46 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
         # If we cannot find cache page, (re)do the search
         if not page:
+            start_time = time.time()
+            print("Search metrics")
+            print("\tSearch start time: ", start_time)
+
             _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
 
+            print("\tSubmission search: ", time.time() - start_time)
+
             submissions_pages = create_page(submissions_hits, communities)
+
+            print("\tSubmission pages: ", time.time() - start_time)
+
 
             if toggle_webpage_results:
 
                 # Searching exactly a user's community from the webpages index
                 _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
+                print("\tWebpage search: ", time.time() - start_time)
+
                 webpages_index_pages = create_page(webpages_hits, communities)
+
+                print("\tWebpage pages: ", time.time() - start_time)
 
                 submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
 
+                print("\tCombined search: ", time.time() - start_time)
+
+
             pages = deduplicate(submissions_pages)
+            print("\tDedup: ", time.time() - start_time)
             pages = neural_rerank(query, pages)
+            print("\tNeural Rerank: ", time.time() - start_time)
             pages = hydrate_with_hash_url(pages, search_id, page=index)
+            print("\tURL: ", time.time() - start_time)
             pages = hydrate_with_hashtags(pages)
+            print("\tHash: ", time.time() - start_time)
             number_of_hits = len(pages)
             page = cache.insert(user_id, search_id, pages, index)
+            print("\tCache: ", time.time() - start_time)
+
 
     return number_of_hits, page
 
@@ -1080,6 +1104,8 @@ def create_page(hits, communities):
 
             # Handling special cases where there is `http` in the description and the webpage has paragraphs from which
             # we can pull description
+            # REMOVED FOR NOW for latency issues, will replace with highlighted matches eventually
+            """
             if (not description or len(description) <= 10 or "http" in description) and len(hit["_source"]["webpage"]["all_paragraphs"]) >= 10:
                 paragraph_list = hit["_source"]["webpage"]["all_paragraphs"].split("\n")
 
@@ -1088,6 +1114,7 @@ def create_page(hits, communities):
                     if len(paragraph) >= 5:
                         description = paragraph
                         break
+            """
             if not description:
                 description = hit["_source"]["webpage"]["metadata"].get("h1", None)
             if not description:
@@ -1364,9 +1391,21 @@ def get_recommendations(current_user, toggle_webpage_results = True):
                     blob = TextBlob(full_text)
                     new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
                     search_text += " " + new_terms
+
+                # if empty, assign random
+                if search_text == "":
+                    search_text = "transformer natural language processing illinois machine learning startup neural network hack hacker technology future explanation application building coding search engine computer vision recurrent classification generation chatgpt gpt3 data"
+
+
+                # randomize the search text to 10 query terms
+                split_text = search_text.split()
+                if len(split_text) > 10:
+                    random.shuffle(split_text)
+                    search_text = " ".join(split_text[:10])
+
                 
                 number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
-                                                              page_size=1000)
+                                                              page_size=50)
                 submissions_pages = create_page(submissions_hits, rc_dict)
 
                 if toggle_webpage_results:
