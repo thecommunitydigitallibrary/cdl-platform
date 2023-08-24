@@ -996,6 +996,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 		communities : (dict) : the communities of the user
 		user_id : (str) : the user id
 		own_submissions: (boolean) : true if user is viewing their own submissions, false otherwise
+        toggle_webpage_results: (boolean) : to include webpage results with submissions or not
 	Returns:
 		return_obj : (list) : a list of formatted submissions for frontned display
 							Note that result_hash and redirect_url will be empty (need to hydrate)
@@ -1100,21 +1101,20 @@ def create_page(hits, communities):
 
         if "webpage" in hit["_source"]:
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
-            description = hit["_source"]["webpage"]["metadata"].get("description", None)
 
-            # Handling special cases where there is `http` in the description and the webpage has paragraphs from which
-            # we can pull description
-            # REMOVED FOR NOW for latency issues, will replace with highlighted matches eventually
-            """
-            if (not description or len(description) <= 10 or "http" in description) and len(hit["_source"]["webpage"]["all_paragraphs"]) >= 10:
-                paragraph_list = hit["_source"]["webpage"]["all_paragraphs"].split("\n")
+            possible_matches = []
+            if "highlight" in hit:
+                possible_matches = hit["highlight"].get("webpage.metadata.description", [])
+                if not possible_matches:
+                     possible_matches = hit["highlight"].get("webpage.metadata.h1", [])
+                if not possible_matches:
+                    # in case there are a lot of paragraphs
+                    possible_matches = hit["highlight"].get("webpage.all_paragraphs", [])[:10]
 
-                # To handle the case when there is `\n` at the beginning of `all_paragraphs`
-                for paragraph in paragraph_list:
-                    if len(paragraph) >= 5:
-                        description = paragraph
-                        break
-            """
+            description = " .... ".join(possible_matches)
+
+            if not description:
+                description = hit["_source"]["webpage"]["metadata"].get("description", None)
             if not description:
                 description = hit["_source"]["webpage"]["metadata"].get("h1", None)
             if not description:
@@ -1123,7 +1123,7 @@ def create_page(hits, communities):
 
         else:
             result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-            description = "....".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) else hit["_source"].get("highlighted_text", None)
+            description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) else hit["_source"].get("highlighted_text", None)
             if not description:
                 description ="No Preview Available"
             result["highlighted_text"] = description
@@ -1388,7 +1388,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
                 if len(full_text) > 3:
                     blob = TextBlob(full_text)
-                    new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
+                    new_terms = " ".join(list(set([x for x in blob.noun_phrases if len(x) > 3])))
                     search_text += " " + new_terms
 
                 # if empty, assign random
