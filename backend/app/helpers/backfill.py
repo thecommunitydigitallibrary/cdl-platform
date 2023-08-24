@@ -106,8 +106,7 @@ class BackFill:
             source_url, _ = scraper.format_url_to_path(source_url)
             response[source_url] = {"message": "Redirected to another URL"}
 
-            if i > 1000:
-                break
+            if i > 5000: break
 
             webpage = scraper.is_scraped_before(source_url)
 
