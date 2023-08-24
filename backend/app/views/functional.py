@@ -188,8 +188,8 @@ def create_submission(current_user):
             index_status = elastic_manager.add_to_index(doc)
             
             print("SUBMISSION_INDEX_STATUS", index_status)
-
-            scraper = ScrapeWorker()
+            webpages = Webpages()
+            scraper = ScrapeWorker(webpages.collection)
 
             if not scraper.is_scraped_before(source_url):
                 data = scraper.scrape(source_url)  # Triggering Scraper
@@ -301,8 +301,8 @@ def create_batch_submission(current_user):
             if status.acknowledged:
                 doc.id = status.inserted_id
                 index_status = elastic_manager.add_to_index(doc)
-
-                scraper = ScrapeWorker()
+                webpages = Webpages()
+                scraper = ScrapeWorker(webpages.collection)
 
                 if not scraper.is_scraped_before(source_url):
                     data = scraper.scrape(source_url)  # Triggering Scraper
@@ -918,10 +918,10 @@ def search(current_user):
                                       highlighted_text=highlighted_text)
             search_id = str(search_id)  # for return
 
-
             # also scrape the webpage if there is a url
             if url:
-                scraper = ScrapeWorker()
+                webpages = Webpages()
+                scraper = ScrapeWorker(webpages.collection)
 
                 if not scraper.is_scraped_before(url):
                     data = scraper.scrape(url)  # Triggering Scraper
