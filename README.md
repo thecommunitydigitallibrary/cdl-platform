@@ -160,9 +160,11 @@ pytest .\tests\test_server.py
 Note: Local Docker containers must be up and running before you run below commands
 ```
 cd <project-directory>\backend
-python .\app\helpers\backfill.py
+python .\app\helpers\backfill.py [--env_path] [--type=<"submissions" or "webpages">]
 ```
+Here, `--env_path` is an optional argument that takes the path to the environment file, and the default file considered is `backend\env_local.ini`.
 
+The `--type` is another optional argument that takes two values: `submissions` or `webpages`, and the default value is `submissions`.
 </details>
 
 <details>
