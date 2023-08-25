@@ -156,7 +156,7 @@ class ElasticManager:
                     "should": [
                         {
                             "multi_match": {
-                                "query": query,
+                                "query": query_obj["query"],
                                 "fields": fields
                             }
                         },
@@ -165,11 +165,7 @@ class ElasticManager:
             },
             "highlight": {
                 "tags_schema": "styled",
-                "fields": {
-                    "highlighted_text": {
-                        "pre_tags": ['<mark>'],
-                        "post_tags": ['</mark>']}
-                }
+                "fields": {}
             },
             "from": page * page_size,
             "size": page_size,
@@ -188,10 +184,29 @@ class ElasticManager:
                 filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
                 
             query_comm["query"]["bool"]["filter"] = filter
+            query_comm["highlight"]["fields"] = {
+                        "highlighted_text": {
+                            "pre_tags": ['<mark>'],
+                            "post_tags": ['</mark>']
+                        }
+                }
         else:
             # Exclude paragraphs to test latency
             query_comm["_source"] = {"exclude": ["webpage.all_paragraphs"]}
-
+            query_comm["highlight"]["fields"] = {
+                        "webpage.metadata.h1": {
+                            "pre_tags": ['<mark>'],
+                            "post_tags": ['</mark>']
+                        },
+                        "webpage.metadata.description": {
+                            "pre_tags": ['<mark>'],
+                            "post_tags": ['</mark>']
+                        },
+                        "webpage.all_paragraphs": {
+                            "pre_tags": ['<mark>'],
+                            "post_tags": ['</mark>']
+                        },
+                }
         
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
         try:
