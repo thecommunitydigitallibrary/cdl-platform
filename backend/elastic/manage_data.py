@@ -172,6 +172,9 @@ class ElasticManager:
             "min_score": 0.1
         }
 
+        # <mark>
+        # </mark>
+
         if self.index_name != os.environ["elastic_webpages_index_name"]:
             filter =  {
                         "bool": {
@@ -186,8 +189,8 @@ class ElasticManager:
             query_comm["query"]["bool"]["filter"] = filter
             query_comm["highlight"]["fields"] = {
                         "highlighted_text": {
-                            "pre_tags": ['<mark>'],
-                            "post_tags": ['</mark>']
+                            "pre_tags": [''],
+                            "post_tags": ['']
                         }
                 }
         else:
@@ -195,16 +198,16 @@ class ElasticManager:
             query_comm["_source"] = {"exclude": ["webpage.all_paragraphs"]}
             query_comm["highlight"]["fields"] = {
                         "webpage.metadata.h1": {
-                            "pre_tags": ['<mark>'],
-                            "post_tags": ['</mark>']
+                            "pre_tags": [''],
+                            "post_tags": ['']
                         },
                         "webpage.metadata.description": {
-                            "pre_tags": ['<mark>'],
-                            "post_tags": ['</mark>']
+                            "pre_tags": [''],
+                            "post_tags": ['']
                         },
                         "webpage.all_paragraphs": {
-                            "pre_tags": ['<mark>'],
-                            "post_tags": ['</mark>']
+                            "pre_tags": [''],
+                            "post_tags": ['']
                         },
                 }
         
