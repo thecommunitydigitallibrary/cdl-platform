@@ -967,6 +967,12 @@ def search(current_user):
                 print(e)
                 print(f"Could not find community for community id: {community_id}")
 
+        # issue: in the case where we get subsequent pages in a search (1+), we cannot tell whether a single community has been requested
+        # or the user only has a single community
+        if len(rc_dict) == 1 and len(user_communities) > 1:
+            toggle_webpage_results = False
+
+
         return_obj["query"] = query
         return_obj["search_id"] = search_id
         return_obj["current_page"] = page
@@ -1026,6 +1032,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             cache = None
         if cache:
             number_of_hits, page = cache.search(user_id, search_id, index)
+            
 
         # If we cannot find cache page, (re)do the search
         if not page:
