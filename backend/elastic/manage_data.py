@@ -156,17 +156,24 @@ class ElasticManager:
                     "should": [
                         {
                             "multi_match": {
-                                "query": query,
+                                "query": query_obj["query"],
                                 "fields": fields
                             }
                         },
                     ]
                 }
             },
+            "highlight": {
+                "tags_schema": "styled",
+                "fields": {}
+            },
             "from": page * page_size,
             "size": page_size,
             "min_score": 0.1
         }
+
+        # <mark>
+        # </mark>
 
         if self.index_name != os.environ["elastic_webpages_index_name"]:
             filter =  {
@@ -180,10 +187,29 @@ class ElasticManager:
                 filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
                 
             query_comm["query"]["bool"]["filter"] = filter
+            query_comm["highlight"]["fields"] = {
+                        "highlighted_text": {
+                            "pre_tags": [''],
+                            "post_tags": ['']
+                        }
+                }
         else:
             # Exclude paragraphs to test latency
             query_comm["_source"] = {"exclude": ["webpage.all_paragraphs"]}
-
+            query_comm["highlight"]["fields"] = {
+                        "webpage.metadata.h1": {
+                            "pre_tags": [''],
+                            "post_tags": ['']
+                        },
+                        "webpage.metadata.description": {
+                            "pre_tags": [''],
+                            "post_tags": ['']
+                        },
+                        "webpage.all_paragraphs": {
+                            "pre_tags": [''],
+                            "post_tags": ['']
+                        },
+                }
         
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
         try:

@@ -22,9 +22,9 @@ class ScrapeWorker:
 
     def __init__(self, *args):
         if len(args) == 0:
-            self.extracted_webpages_urls = set()
+            raise Exception("Need to pass Webpages collection to ScrapeWorker()")
         else:
-            self.extracted_webpages_urls = args[0]
+            self.webpages_collection = args[0]
 
     def trace_function(self, frame, event, arg):
         if time.time() - self.start_time > RESPONSE_TIMEOUT:
@@ -330,17 +330,5 @@ class ScrapeWorker:
 
     def is_scraped_before(self, source_url):
         source_url, _ = self.format_url_to_path(source_url)
-
-        # If extracted_webpages_urls are set then check if the source_url is present in it
-        # Only used for scraping - return the full website if found
-        if len(self.extracted_webpages_urls) > 0:
-            if source_url in self.extracted_webpages_urls:
-                return self.extracted_webpages_urls[source_url]
-            else:
-                return False
-            #return True if source_url in self.extracted_webpages_urls else False
-        # Else search it in MongoDB
-        else:
-            webpages = Webpages()
-            webpage = webpages.find({"url": source_url})
-            return True if webpage else False
+        webpage = [document for document in self.webpages_collection.find({'url': source_url})]
+        return True if webpage else False
