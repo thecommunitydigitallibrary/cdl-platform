@@ -139,6 +139,25 @@ services:
 
 ```
 
+If you would like to add the neural reranking, add the following to the ``docker-compose.yml`` file:
+
+```
+    neural:
+            depends_on:
+                - api
+            image: neural
+            build: .\neural
+            restart: always
+            ports:
+                - 9300:80
+```
+
+And add the following to ``backend\env_local.ini``:
+
+```
+neural_api=http://host.docker.internal:9300/
+```
+
 Note that the slashes need to be reversed if running on Mac/Linux (above is written for windows).
 
 Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --build``
