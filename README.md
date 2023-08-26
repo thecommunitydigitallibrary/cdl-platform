@@ -143,13 +143,13 @@ If you would like to add the neural reranking, add the following to the ``docker
 
 ```
     neural:
-            depends_on:
-                - api
-            image: neural
-            build: .\neural
-            restart: always
-            ports:
-                - 9300:80
+        depends_on:
+            - api
+        image: neural
+        build: ./neural
+        restart: always
+        ports:
+            - 9300:80
 ```
 
 And add the following to ``backend\env_local.ini``:
