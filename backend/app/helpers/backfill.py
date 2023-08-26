@@ -232,7 +232,6 @@ if __name__ == "__main__":
     try:
         # From env_local.ini file fetch cdl_test_uri and elastic_domain_backfill if present
         # else fetch cdl_uri and elastic_domain
-        file = {}
         cdl_uri = None
         elastic_domain = None
         type_arg = None
@@ -255,22 +254,14 @@ if __name__ == "__main__":
                     split_line = line.split("=")
                     name = split_line[0]
                     value = "=".join(split_line[1:]).strip("\n")
-                    file[name] = value
-            cdl_uri = file.get("cdl_test_uri", file.get("cdl_uri"))
-            elastic_domain = file.get("elastic_domain_backfill", file.get("elastic_domain"))
-            db_name = file.get("db_name")
-            elastic_username = file.get("elastic_username")
-            elastic_password = file.get("elastic_password")
-            elastic_webpages_index_name = file.get("elastic_webpages_index_name")
-        # Else pull data from the current env_file
-        else:
-            print(f"Reading from current env file")
-            cdl_uri = os.environ.get("cdl_test_uri", os.environ.get("cdl_uri"))
-            elastic_domain = os.environ.get("elastic_domain_backfill", os.environ.get("elastic_domain"))
-            db_name = os.environ.get("db_name")
-            elastic_username = os.environ.get("elastic_username")
-            elastic_password = os.environ.get("elastic_password")
-            elastic_webpages_index_name = os.environ.get("elastic_webpages_index_name")
+                    os.environ[name] = value
+
+        cdl_uri = os.environ.get("cdl_test_uri", os.environ.get("cdl_uri"))
+        elastic_domain = os.environ.get("elastic_domain_backfill", os.environ.get("elastic_domain"))
+        db_name = os.environ.get("db_name")
+        elastic_username = os.environ.get("elastic_username")
+        elastic_password = os.environ.get("elastic_password")
+        elastic_webpages_index_name = os.environ.get("elastic_webpages_index_name")
 
         # If the type argument is passed
         if args.type:
