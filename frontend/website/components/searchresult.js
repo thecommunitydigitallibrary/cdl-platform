@@ -439,7 +439,8 @@ function SearchResult(props) {
       <p style={{fontSize: '15px', marginTop: '1%', textAlign: 'justify', maxWidth: '100%',
         display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: '5', overflow: 'hidden', textOverflow: 'ellipsis'}}>
           {props.highlighted_text && props.highlighted_text.length > 0 && (
-          <span dangerouslySetInnerHTML={{ __html: props.highlighted_text }}></span>
+            props.highlighted_text
+          //<span dangerouslySetInnerHTML={{ __html: props.highlighted_text }}></span>
         )}
         </p>
 

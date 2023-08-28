@@ -11,7 +11,7 @@ from textblob import TextBlob
 import traceback
 import time
 import random
-from sentence_transformers import CrossEncoder
+import requests
 
 from app.db import get_redis
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
@@ -52,12 +52,6 @@ webpages_elastic_manager = ElasticManager(
     os.environ["elastic_webpages_index_name"],
     None,
     "webpages")
-
-# Set up neural reranking model
-try:
-    rerank_model = CrossEncoder('cross-encoder/ms-marco-TinyBERT-L-2', max_length=512)
-except:
-    rerank_model = False
 
 
 @functional.route("/api/connect/", methods=["POST"])
@@ -244,9 +238,9 @@ def create_batch_submission(current_user):
 		In all cases, a status code and a list containing the status/error message (if any) for each attempted submission.
 		This is so that errors can be assessed individually and so you can re-send the submissions that failed.
 	"""
-    requests = request.get_json()
-    data = requests['data']
-    community = requests['community']
+    r = request.get_json()
+    data = r['data']
+    community = r['community']
     results = {}
     errors = []
     for i, submission in enumerate(data):
@@ -967,6 +961,12 @@ def search(current_user):
                 print(e)
                 print(f"Could not find community for community id: {community_id}")
 
+        # issue: in the case where we get subsequent pages in a search (1+), we cannot tell whether a single community has been requested
+        # or the user only has a single community
+        if len(rc_dict) == 1 and len(user_communities) > 1:
+            toggle_webpage_results = False
+
+
         return_obj["query"] = query
         return_obj["search_id"] = search_id
         return_obj["current_page"] = page
@@ -1026,6 +1026,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             cache = None
         if cache:
             number_of_hits, page = cache.search(user_id, search_id, index)
+            
 
         # If we cannot find cache page, (re)do the search
         if not page:
@@ -1059,8 +1060,20 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
             pages = deduplicate(submissions_pages)
             print("\tDedup: ", time.time() - start_time)
-            pages = neural_rerank(query, pages)
-            print("\tNeural Rerank: ", time.time() - start_time)
+
+            if "neural_api" in os.environ:
+                try:
+                    resp = requests.post(os.environ["neural_api"] + "neural/rerank/", json = {"pages": pages, "query": query})
+                    if resp.status_code == 200:
+                        resp_json = resp.json()
+                        pages = resp_json["pages"]
+                except Exception as e:
+                    print(e)
+                    traceback.print_exc()
+                print("\tNeural Rerank: ", time.time() - start_time)
+
+
+           
             pages = hydrate_with_hash_url(pages, search_id, page=index)
             print("\tURL: ", time.time() - start_time)
             pages = hydrate_with_hashtags(pages)
@@ -1151,31 +1164,6 @@ def create_page(hits, communities):
         return_obj.append(result)
     return return_obj
 
-
-def neural_rerank(query, pages, topn=50):
-    """
-	Helper function for neural reranking.
-	Arguments:
-		query : (string): the original user query
-		pages : (list) : an array of processed submissions
-		topn : (int, default=50) : the number of results to rerank 
-	Returns:
-		pages : (list) : a reranked pages	
-	"""
-    if rerank_model and len(query.split()) > 2:
-        model_input = []
-        for hit in pages[:topn]:
-            # limit of 200 words or 500 characters
-            trunc_exp = " ".join(hit["explanation"].split()[:200])[:500]
-            trunc_high = " ".join(hit["highlighted_text"].split()[:200])[:500]
-            trunc_query = " ".join(query.split()[:200])[:500]
-            model_input.append((trunc_query, trunc_exp + " | " + trunc_high))
-        if model_input:
-            scores = rerank_model.predict(model_input)
-            for i, score in enumerate(scores):
-                pages[i]["score"] = pages[i]["score"] + 10 * score
-            pages = sorted(pages, reverse=True, key=lambda x: x["score"])
-    return pages
 
 
 def hydrate_with_hash_url(results, search_id, page=0, page_size=10, method="search"):
