@@ -31,8 +31,8 @@ import {
 import { Close, Launch } from "@mui/icons-material";
 
 // DIFFERENT FOR WEBSITE AND EXTENSION
-const baseURL = process.env.REACT_APP_URL + "api/";
-const websiteURL = process.env.REACT_APP_WEBSITE;
+const baseURL = localStorage.getItem('backendSource') + "api/";
+const websiteURL = localStorage.getItem('backendSource');
 
 const submissionEndpoint = "submissions";
 const relJudgmentEndpoint = "submitRelJudgments";

@@ -19,7 +19,7 @@ let show_relevant = true;
 export default function Search() {
   const [currentPageResults, setCurrentPageResults] = React.useState([]);
   const [currentPageResultSpinner, setCurrentPageResultSpinner] = React.useState(false);
-  const baseURL = process.env.REACT_APP_URL + "api/";
+  const baseURL = localStorage.getItem('backendSource') + "api/";
 
   const [text, setText] = React.useState("");
   const [searchResults, setSearchResults] = React.useState();
