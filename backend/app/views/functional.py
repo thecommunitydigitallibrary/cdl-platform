@@ -1086,12 +1086,13 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
     return number_of_hits, page
 
 
-def create_page(hits, communities):
+def create_page(hits, communities, toggle_display="highlight"):
     """
 	Helper function for formatting raw elastic results.
 	Arguments:
 		hits : (dict): json raw output from elastic
 		communities : (dict) : the user's communities
+        toggle_display : (str) : highlight to show matched highlighted text, preview to show best preview
 	Returns:
 		return_obj : (list) : a list of formatted submissions for frontend display
 							Note that result_hash and redirect_url will be empty (need to hydrate)
@@ -1116,7 +1117,7 @@ def create_page(hits, communities):
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
 
             possible_matches = []
-            if "highlight" in hit:
+            if "highlight" in hit and toggle_display == "highlight":
                 possible_matches = hit["highlight"].get("webpage.metadata.description", [])
                 if not possible_matches:
                      possible_matches = hit["highlight"].get("webpage.metadata.h1", [])
@@ -1124,7 +1125,9 @@ def create_page(hits, communities):
                     # in case there are a lot of paragraphs
                     possible_matches = hit["highlight"].get("webpage.all_paragraphs", [])[:10]
 
-            description = " .... ".join(possible_matches)
+                description = " .... ".join(possible_matches)
+            else:
+                description = None
 
             if not description:
                 description = hit["_source"]["webpage"]["metadata"].get("description", None)
@@ -1136,7 +1139,11 @@ def create_page(hits, communities):
 
         else:
             result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-            description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) else hit["_source"].get("highlighted_text", None)
+
+
+
+
+            description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) and toggle_display == "highlight" else hit["_source"].get("highlighted_text", None)
             if not description:
                 description ="No Preview Available"
             result["highlighted_text"] = description
@@ -1322,7 +1329,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
             if method == "recent":
                 number_of_hits, hits = elastic_manager.get_most_recent_submissions(user_id_str, requested_communities)
-                pages = create_page(hits, rc_dict)
+                pages = create_page(hits, rc_dict, toggle_display="preview")
                 # no score for recommendation?
                 # pages = deduplicate(pages)
                 pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
@@ -1393,12 +1400,12 @@ def get_recommendations(current_user, toggle_webpage_results = True):
                 
                 number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
                                                               page_size=50)
-                submissions_pages = create_page(submissions_hits, rc_dict)
+                submissions_pages = create_page(submissions_hits, rc_dict, toggle_display="preview")
 
                 if toggle_webpage_results:
                     # Searching for recommendations from the webpages index
                     _, webpages_hits = webpages_elastic_manager.search(search_text, [], page=0, page_size=50)
-                    webpages_index_pages = create_page(webpages_hits, rc_dict)
+                    webpages_index_pages = create_page(webpages_hits, rc_dict, toggle_display="preview")
 
                     submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
 
