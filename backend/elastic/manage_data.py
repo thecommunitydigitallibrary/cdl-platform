@@ -58,7 +58,7 @@ class ElasticManager:
             # don't remove hashtags for now
             if len(word) > 1 and word[0] == "#":
                 query_obj["hashtags"].append(word)
-            if word not in self.stopwords:
+            if word.lower() not in self.stopwords:
                 new_query.append(word)
         new_query = " ".join(new_query)
 
