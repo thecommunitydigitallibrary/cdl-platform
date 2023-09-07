@@ -108,6 +108,7 @@ class ScrapeWorker:
                 len_text = len(resp.text)
                 if len_text > 9731000:  # 50000000:
                     raise Exception("Scraping response is too long!")
+                resp.encoding = 'UTF-8'
                 metadata, paragraphs, outgoing_urls = self.parse_html(
                     resp.text, url)
             except Exception as e:

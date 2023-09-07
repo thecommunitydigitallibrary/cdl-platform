@@ -213,7 +213,8 @@ class ElasticManager:
         
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
         try:
-            resp = json.loads(r.text)
+            decoded_txt = r.text.encode('latin1').decode('utf8')
+            resp = json.loads(decoded_txt)
             hits = resp["hits"]
             print("\tTook: ", resp["took"])
         except Exception as e:
