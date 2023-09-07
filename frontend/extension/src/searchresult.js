@@ -467,7 +467,7 @@ const [open, setOpen] = React.useState(false);
         </Tooltip> 
         </div>
 
-        <div style={{ width: "85%", float: "left", overflowX: "auto" }}>
+        <div style={{ width: "75%", float: "left", overflowX: "auto" }}>
         {communityNamesList && communityNamesList.length !== 0 ? (
           <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
             {communityNamesList}
@@ -480,7 +480,7 @@ const [open, setOpen] = React.useState(false);
         </div>
 
         {props.show_relevant ? (
-          <div style={{ width:"15%", float: "right"}}>
+          <div style={{ width:"25%", float: "right"}}>
             <Tooltip title="Relevant">
             <Button
               value={1}
