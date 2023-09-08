@@ -140,7 +140,8 @@ class ElasticManager:
         print("is url?", query_obj["isURL"])
 
         if self.index_name == os.environ["elastic_webpages_index_name"]:
-            fields = ["webpage.metadata.title", "webpage.metadata.h1", "webpage.metadata.description", "webpage.all_paragraphs"]
+            fields = ["webpage.metadata.title", "webpage.metadata.h1", "webpage.metadata.description",
+                      "webpage.all_paragraphs"]
         elif self.index_name == os.environ["elastic_index_name"]:
             if query_obj["isURL"]:
                 fields = ["source_url"]
@@ -148,7 +149,6 @@ class ElasticManager:
                 fields = ["explanation", "highlighted_text", "source_url"]
         else:
             fields = []
-
 
         query_comm = {
             "query": {
@@ -176,45 +176,45 @@ class ElasticManager:
         # </mark>
 
         if self.index_name != os.environ["elastic_webpages_index_name"]:
-            filter =  {
-                        "bool": {
-                            "must": [
-                                {"terms": {"communities": communities}}
-                            ]
-                        }
-                    }
+            filter = {
+                "bool": {
+                    "must": [
+                        {"terms": {"communities": communities}}
+                    ]
+                }
+            }
             if query_obj["hashtags"]:
                 filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
-                
+
             query_comm["query"]["bool"]["filter"] = filter
             query_comm["highlight"]["fields"] = {
-                        "highlighted_text": {
-                            "pre_tags": [''],
-                            "post_tags": ['']
-                        }
+                "highlighted_text": {
+                    "pre_tags": [''],
+                    "post_tags": ['']
                 }
+            }
         else:
             # Exclude paragraphs to test latency
             query_comm["_source"] = {"exclude": ["webpage.all_paragraphs"]}
             query_comm["highlight"]["fields"] = {
-                        "webpage.metadata.h1": {
-                            "pre_tags": [''],
-                            "post_tags": ['']
-                        },
-                        "webpage.metadata.description": {
-                            "pre_tags": [''],
-                            "post_tags": ['']
-                        },
-                        "webpage.all_paragraphs": {
-                            "pre_tags": [''],
-                            "post_tags": ['']
-                        },
-                }
-        
+                "webpage.metadata.h1": {
+                    "pre_tags": [''],
+                    "post_tags": ['']
+                },
+                "webpage.metadata.description": {
+                    "pre_tags": [''],
+                    "post_tags": ['']
+                },
+                "webpage.all_paragraphs": {
+                    "pre_tags": [''],
+                    "post_tags": ['']
+                },
+            }
+
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
+        text = handle_encoding(r.text)
         try:
-            decoded_txt = r.text.encode('latin1').decode('utf8')
-            resp = json.loads(decoded_txt)
+            resp = json.loads(text)
             hits = resp["hits"]
             print("\tTook: ", resp["took"])
         except Exception as e:
@@ -388,3 +388,13 @@ class ElasticManager:
                 flat_communities.append(str(community_id))
 
         return flat_communities
+
+
+def handle_encoding(text):
+    ans = ""
+    try:
+        ans = text.encode('latin1', errors='strict').decode('utf8')
+    except UnicodeDecodeError:
+        print(f'Unable to encode the text with latin1 so decoding it with utf-8')
+        ans = text.encode('utf8').decode('utf8')
+    return ans
