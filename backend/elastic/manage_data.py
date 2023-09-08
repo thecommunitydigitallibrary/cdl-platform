@@ -91,7 +91,8 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
-        hits = json.loads(r.text)["hits"]
+        text = handle_encoding(r.text)
+        hits = json.loads(text)["hits"]
         return hits["total"]["value"], hits["hits"]
 
     def get_submissions(self, user_id, page=0, page_size=10):
@@ -118,7 +119,8 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
-        hits = json.loads(r.text)["hits"]
+        text = handle_encoding(r.text)
+        hits = json.loads(text)["hits"]
         return hits["total"]["value"], hits["hits"]
 
     def search(self, query, communities, page=0, page_size=10):
@@ -372,8 +374,9 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
+        text = handle_encoding(r.text)
         try:
-            hits = json.loads(r.text)["hits"]
+            hits = json.loads(text)["hits"]
         except Exception as e:
             print(e)
             traceback.print_exc()
@@ -394,7 +397,7 @@ def handle_encoding(text):
     ans = ""
     try:
         ans = text.encode('latin1', errors='strict').decode('utf8')
-    except UnicodeDecodeError:
+    except Exception:
         print(f'Unable to encode the text with latin1 so decoding it with utf-8')
         ans = text.encode('utf8').decode('utf8')
     return ans
