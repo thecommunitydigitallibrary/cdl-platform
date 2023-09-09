@@ -91,9 +91,8 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
-        text = handle_encoding(r.text)
-        hits = json.loads(text)["hits"]
-        return hits["total"]["value"], hits["hits"]
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
 
     def get_submissions(self, user_id, page=0, page_size=10):
         """
@@ -119,9 +118,8 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
-        text = handle_encoding(r.text)
-        hits = json.loads(text)["hits"]
-        return hits["total"]["value"], hits["hits"]
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
 
     def search(self, query, communities, page=0, page_size=10):
         """
@@ -214,17 +212,9 @@ class ElasticManager:
             }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
-        text = handle_encoding(r.text)
-        try:
-            resp = json.loads(text)
-            hits = resp["hits"]
-            print("\tTook: ", resp["took"])
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            print(r)
-            return 0, []
-        return hits["total"]["value"], hits["hits"]
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
+
 
     def add_to_index(self, doc):
         """
@@ -374,15 +364,8 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
-        text = handle_encoding(r.text)
-        try:
-            hits = json.loads(text)["hits"]
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            print(r)
-            return 0, []
-        return hits["total"]["value"], hits["hits"]
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
 
     def flatten_communities(self, communities) -> list:
         flat_communities = []
@@ -393,11 +376,23 @@ class ElasticManager:
         return flat_communities
 
 
-def handle_encoding(text):
-    ans = ""
-    try:
-        ans = text.encode('latin1', errors='strict').decode('utf8')
-    except Exception:
-        print(f'Unable to encode the text with latin1 so decoding it with utf-8')
-        ans = text.encode('utf8').decode('utf8')
-    return ans
+    def postprocess(self, text):
+
+        try:
+            text = text.encode("latin1", errors="ignore").decode("utf8", errors="ignore")
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+        
+        try:
+            hits = json.loads(text)["hits"]
+            resp = json.loads(text)
+            hits = resp["hits"]
+            print("\tTook: ", resp["took"])
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            print(text)
+            return 0, []
+
+        return hits["total"]["value"], hits["hits"]
