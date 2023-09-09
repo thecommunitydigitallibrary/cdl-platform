@@ -5,6 +5,15 @@ import { MemoryRouter as Router, Route, Routes } from 'react-router-dom'
 
 
 function App() {
+  const TEXTDATA_URL = "https://textdata.org/";
+
+  if (localStorage.getItem('backendSource') === null) {
+    localStorage.setItem('backendSource', TEXTDATA_URL)
+  }
+
+  if (localStorage.getItem('defaultTab') === null) {
+    localStorage.setItem('defaultTab', "search")
+  }
 
   return (
     <div className="App">
