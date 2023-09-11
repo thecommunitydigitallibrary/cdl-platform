@@ -3,7 +3,6 @@ import argparse
 from flask_cors import CORS
 import os
 import nltk
-from elastic.manage_data import ElasticManager
 
 from app.views.users import users
 from app.views.communities import communities

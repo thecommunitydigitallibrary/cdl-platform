@@ -11,7 +11,7 @@ from textblob import TextBlob
 import traceback
 import time
 import random
-from sentence_transformers import CrossEncoder
+import requests
 
 from app.db import get_redis
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
@@ -52,12 +52,6 @@ webpages_elastic_manager = ElasticManager(
     os.environ["elastic_webpages_index_name"],
     None,
     "webpages")
-
-# Set up neural reranking model
-try:
-    rerank_model = CrossEncoder('cross-encoder/ms-marco-TinyBERT-L-2', max_length=512)
-except:
-    rerank_model = False
 
 
 @functional.route("/api/connect/", methods=["POST"])
@@ -244,9 +238,9 @@ def create_batch_submission(current_user):
 		In all cases, a status code and a list containing the status/error message (if any) for each attempted submission.
 		This is so that errors can be assessed individually and so you can re-send the submissions that failed.
 	"""
-    requests = request.get_json()
-    data = requests['data']
-    community = requests['community']
+    r = request.get_json()
+    data = r['data']
+    community = r['community']
     results = {}
     errors = []
     for i, submission in enumerate(data):
@@ -1066,8 +1060,20 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
             pages = deduplicate(submissions_pages)
             print("\tDedup: ", time.time() - start_time)
-            pages = neural_rerank(query, pages)
-            print("\tNeural Rerank: ", time.time() - start_time)
+
+            if "neural_api" in os.environ:
+                try:
+                    resp = requests.post(os.environ["neural_api"] + "neural/rerank/", json = {"pages": pages, "query": query})
+                    if resp.status_code == 200:
+                        resp_json = resp.json()
+                        pages = resp_json["pages"]
+                except Exception as e:
+                    print(e)
+                    traceback.print_exc()
+                print("\tNeural Rerank: ", time.time() - start_time)
+
+
+           
             pages = hydrate_with_hash_url(pages, search_id, page=index)
             print("\tURL: ", time.time() - start_time)
             pages = hydrate_with_hashtags(pages)
@@ -1080,12 +1086,13 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
     return number_of_hits, page
 
 
-def create_page(hits, communities):
+def create_page(hits, communities, toggle_display="highlight"):
     """
 	Helper function for formatting raw elastic results.
 	Arguments:
 		hits : (dict): json raw output from elastic
 		communities : (dict) : the user's communities
+        toggle_display : (str) : highlight to show matched highlighted text, preview to show best preview
 	Returns:
 		return_obj : (list) : a list of formatted submissions for frontend display
 							Note that result_hash and redirect_url will be empty (need to hydrate)
@@ -1110,7 +1117,7 @@ def create_page(hits, communities):
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
 
             possible_matches = []
-            if "highlight" in hit:
+            if "highlight" in hit and toggle_display == "highlight":
                 possible_matches = hit["highlight"].get("webpage.metadata.description", [])
                 if not possible_matches:
                      possible_matches = hit["highlight"].get("webpage.metadata.h1", [])
@@ -1118,7 +1125,9 @@ def create_page(hits, communities):
                     # in case there are a lot of paragraphs
                     possible_matches = hit["highlight"].get("webpage.all_paragraphs", [])[:10]
 
-            description = " .... ".join(possible_matches)
+                description = " .... ".join(possible_matches)
+            else:
+                description = None
 
             if not description:
                 description = hit["_source"]["webpage"]["metadata"].get("description", None)
@@ -1130,7 +1139,11 @@ def create_page(hits, communities):
 
         else:
             result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-            description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) else hit["_source"].get("highlighted_text", None)
+
+
+
+
+            description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) and toggle_display == "highlight" else hit["_source"].get("highlighted_text", None)
             if not description:
                 description ="No Preview Available"
             result["highlighted_text"] = description
@@ -1158,31 +1171,6 @@ def create_page(hits, communities):
         return_obj.append(result)
     return return_obj
 
-
-def neural_rerank(query, pages, topn=50):
-    """
-	Helper function for neural reranking.
-	Arguments:
-		query : (string): the original user query
-		pages : (list) : an array of processed submissions
-		topn : (int, default=50) : the number of results to rerank 
-	Returns:
-		pages : (list) : a reranked pages	
-	"""
-    if rerank_model and len(query.split()) > 2:
-        model_input = []
-        for hit in pages[:topn]:
-            # limit of 200 words or 500 characters
-            trunc_exp = " ".join(hit["explanation"].split()[:200])[:500]
-            trunc_high = " ".join(hit["highlighted_text"].split()[:200])[:500]
-            trunc_query = " ".join(query.split()[:200])[:500]
-            model_input.append((trunc_query, trunc_exp + " | " + trunc_high))
-        if model_input:
-            scores = rerank_model.predict(model_input)
-            for i, score in enumerate(scores):
-                pages[i]["score"] = pages[i]["score"] + 10 * score
-            pages = sorted(pages, reverse=True, key=lambda x: x["score"])
-    return pages
 
 
 def hydrate_with_hash_url(results, search_id, page=0, page_size=10, method="search"):
@@ -1341,7 +1329,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
             if method == "recent":
                 number_of_hits, hits = elastic_manager.get_most_recent_submissions(user_id_str, requested_communities)
-                pages = create_page(hits, rc_dict)
+                pages = create_page(hits, rc_dict, toggle_display="preview")
                 # no score for recommendation?
                 # pages = deduplicate(pages)
                 pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
@@ -1412,12 +1400,12 @@ def get_recommendations(current_user, toggle_webpage_results = True):
                 
                 number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
                                                               page_size=50)
-                submissions_pages = create_page(submissions_hits, rc_dict)
+                submissions_pages = create_page(submissions_hits, rc_dict, toggle_display="preview")
 
                 if toggle_webpage_results:
                     # Searching for recommendations from the webpages index
                     _, webpages_hits = webpages_elastic_manager.search(search_text, [], page=0, page_size=50)
-                    webpages_index_pages = create_page(webpages_hits, rc_dict)
+                    webpages_index_pages = create_page(webpages_hits, rc_dict, toggle_display="preview")
 
                     submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
 

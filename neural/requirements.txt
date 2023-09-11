@@ -1,0 +1,5 @@
+Flask==2.1.0
+Flask-Cors==3.0.10
+requests==2.25.1
+pytest==6.2.5
+sentence-transformers==2.2.2

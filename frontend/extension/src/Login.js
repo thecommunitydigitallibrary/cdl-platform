@@ -22,8 +22,7 @@ export default function SignIn() {
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [sever, setSever] = React.useState("");
-  const baseURL = process.env.REACT_APP_URL + "api/";
-
+  const baseURL = localStorage.getItem('backendSource') + "api/";
   const handleClick = () => {
     setOpen(true);
   };
@@ -54,8 +53,8 @@ export default function SignIn() {
       return;
     }
 
-    try{
-      let res = await fetch( baseURL + "login",{
+    try {
+      let res = await fetch(baseURL + "login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,11 +62,11 @@ export default function SignIn() {
         body: JSON.stringify({
           username: username,
           password: password,
-        }),  
+        }),
       });
-  
+
       let response = await res.json();
-      if(response.status === "ok") {
+      if (response.status === "ok") {
         setSever("success");
         setMessage("Successfully logged in!");
         handleClick();
@@ -79,12 +78,12 @@ export default function SignIn() {
         setMessage(response.message)
         handleClick();
       }
-    }catch (err) {
-        setSever("error");
-        setMessage("Something went wrong! Please try again later.");
-        handleClick();
-      }
-    };
+    } catch (err) {
+      setSever("error");
+      setMessage("Something went wrong! Please try again later.");
+      handleClick();
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -102,7 +101,7 @@ export default function SignIn() {
             target="_blank"
             rel="noopener noreferrer"
             style={{ fontSize: 20 }}
-            href={process.env.REACT_APP_WEBSITE}
+            href={localStorage.getItem('backendSource')}
           >
             The Community Digital Library
           </a>
