@@ -9,6 +9,5 @@ PyJWT==2.4.0
 pytest==6.2.5
 textblob==0.17.1
 redis==4.5.0
-sentence-transformers==2.2.2
 sendgrid==6.10.0
 beautifulsoup4==4.11.1

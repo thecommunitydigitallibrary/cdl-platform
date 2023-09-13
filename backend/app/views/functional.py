@@ -1,21 +1,19 @@
 import json
 import os
 import re
-from collections import defaultdict
 
 from bson import ObjectId
 from flask import Blueprint, request, redirect
 from flask_cors import CORS
-import validators
 from textblob import TextBlob
 import traceback
 import time
 import random
 import requests
 
-from app.db import get_redis
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
-    format_time_for_display
+    format_time_for_display, validate_submission, hydrate_with_hash_url, create_page, hydrate_with_hashtags, \
+    deduplicate, combine_pages
 from app.helpers import response
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
@@ -96,34 +94,6 @@ def create_connection(current_user):
         traceback.print_exc()
         return response.error("Failed to create connection, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
-
-def validate_submission(highlighted_text, explanation, source_url=None):
-    # checks to make sure submitted text is not a URL!
-    if validators.url(highlighted_text) or validators.url(explanation):
-        return False, "Error: The highlighted text or explanation should not be a URL"
-
-    # check to make sure source url is not on wrong page
-    if source_url != None:
-        if not validators.url(source_url):
-            return False, "Error: The URL is invalid: " + source_url
-        forbidden_URLs = ["chrome://"]
-        for url in forbidden_URLs:
-            if url in source_url:
-                return False, "Error: You cannot submit content on URL " + source_url
-
-    char_max_desc = 10000
-    word_max_desc = 1000
-
-    char_max_title = 1000
-    word_max_title = 100
-
-    # cap highlighted text, explanation length
-    if highlighted_text and (len(highlighted_text) > char_max_desc or len(highlighted_text.split()) > word_max_desc):
-        return False, "Highlighted text is too long. Please limit to 1000 words or 10,000 characters"
-    if explanation and (len(explanation) > char_max_title or len(explanation.split()) > word_max_title):
-        return False, "Title is too long. Please limit to 100 words or 1000 characters"
-
-    return True, "Validation successful"
 
 
 @functional.route("/api/submission/", methods=["POST"])
@@ -615,206 +585,6 @@ def submission(current_user, id):
         print(e)
         traceback.print_exc()
         return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
-    
-def format_webpage_for_display(webpage, search_id):
-    webpage = webpage.to_dict()
-    submission = {}
-
-    submission["submission_id"] = webpage["_id"]
-
-
-    submission["stats"] = {
-        "views": 0,
-        "clicks": 0,
-        "shares": 0
-    }
-    cdl_searches_clicks = SearchesClicks()
-    num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "click_search_result"})
-    submission["stats"]["clicks"] = num__search_clicks
-
-    cdl_recommendations_clicks = RecommendationsClicks()
-    num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["submission_id"]})
-    submission["stats"]["clicks"] += num_rec_clicks
-
-    num_views = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "submission_view"})
-    submission["stats"]["views"] = num_views
-
-    submission["communities"] = {}
-    submission["communities_part_of"] = {}
-    submission["can_delete"] = False
-    submission["hashtags"] = []
-    submission["user_id"] = None
-    submission["highlighted_text"] = webpage["webpage"]["metadata"].get("description", "No Preview Available")
-    submission["explanation"] = webpage["webpage"]["metadata"].get("title")
-        
-    display_time = format_time_for_display(webpage["scrape_time"])
-    submission["time"] = "Indexed " + display_time
-
-    # make display url
-    display_url = build_display_url(webpage["url"])
-    submission["display_url"] = display_url
-    submission["raw_source_url"] = webpage["url"]  # added for editing submission
-
-    # make redirect url (need result hash)
-    submission["submission_id"] = str(submission["submission_id"])
-    result_hash = build_result_hash(-1, str(submission["submission_id"]), str(search_id))
-    redirect_url = build_redirect_url(webpage["url"], result_hash, submission["highlighted_text"], "search")
-    submission["redirect_url"] = redirect_url
-
-    submission["connections"] = []
-
-    submission["type"] = "webpage"
-
-    return submission
-
-
-def format_submission_for_display(submission, current_user, search_id):
-    """
-	Helper method to format a raw mongodb submission for frontend display.
-	Mostly takes the original format, except removes any unnecessary information.
-	Arguments:
-		submission : dict : the submission object downloaded from mongodb.
-		current_user : the User object of the current user.
-		communities : list : list of communities that the user is a member of
-		search_id : ObjectID : the id of the view submission log (for tracking clicks)
-	Returns:
-		submission : dict : a slightly-modified submission object.
-	"""
-    # get some stats
-
-    submission = submission.to_dict()
-
-    user_id = current_user.id
-
-    submission["stats"] = {
-        "views": 0,
-        "clicks": 0,
-        "shares": 0
-    }
-    num_shares = sum([len(submission["communities"][str(id)]) for id in submission["communities"]])
-    submission["stats"]["shares"] = num_shares
-
-    cdl_searches_clicks = SearchesClicks()
-    num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "click_search_result"})
-    submission["stats"]["clicks"] = num__search_clicks
-
-    cdl_recommendations_clicks = RecommendationsClicks()
-    num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["_id"]})
-    submission["stats"]["clicks"] += num_rec_clicks
-
-    num_views = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "submission_view"})
-    submission["stats"]["views"] = num_views
-
-    # for deleting the entire submission
-    if submission["user_id"] == user_id:
-        submission["can_delete"] = True
-    else:
-        submission["can_delete"] = False
-
-    if str(user_id) in submission["communities"]:
-        user_contributed_communities = {str(x): True for x in submission["communities"][str(user_id)]}
-    else:
-        user_contributed_communities = {}
-    all_added_communities = {str(x): True for all_user in submission["communities"] for x in
-                             submission["communities"][all_user]}
-
-    # need to reconstruct user , but username does not matter
-    hydrated_user_communities = \
-        get_communities_helper(current_user, return_dict=True)[
-            "community_info"]
-
-    for community_id in hydrated_user_communities:
-        if community_id in user_contributed_communities:
-            hydrated_user_communities[community_id]["valid_action"] = "remove"
-        elif community_id in all_added_communities:
-            hydrated_user_communities[community_id]["valid_action"] = "view"
-        else:
-            hydrated_user_communities[community_id]["valid_action"] = "save"
-
-        del hydrated_user_communities[community_id]["is_admin"]
-        del hydrated_user_communities[community_id]["join_key"]
-        del hydrated_user_communities[community_id]["community_id"]
-
-    submission["communities"] = hydrated_user_communities
-
-    submission["communities_part_of"] = {str(x): hydrated_user_communities[x]["name"]
-                                         for x in hydrated_user_communities
-                                         if hydrated_user_communities[x]["valid_action"] != "save"}
-
-    # convert some ObjectIDs to strings for serialization
-    submission["submission_id"] = str(submission["_id"])
-    submission["user_id"] = str(submission["user_id"])
-
-    display_time = "Submitted" + format_time_for_display(submission["time"])
-
-    submission["time"] = display_time
-
-    # make display url
-    display_url = build_display_url(submission["source_url"])
-    submission["display_url"] = display_url
-    submission["raw_source_url"] = submission["source_url"]  # added for editing submission
-
-    # make redirect url (need result hash)
-    result_hash = build_result_hash(-1, str(submission["_id"]), str(search_id))
-    redirect_url = build_redirect_url(submission["source_url"], result_hash, submission["highlighted_text"], "search")
-    submission["redirect_url"] = redirect_url
-
-    # hydrate with hashtags
-    submission = hydrate_with_hashtags([submission])[0]
-
-    # delete unnecessary info
-    del submission["source_url"]
-    del submission["ip"]
-    del submission["type"]
-    del submission["_id"]
-
-    submission["type"] = "user_submission"
-
-
-    return submission
-
-
-def find_connections(submission_id, user_communities, current_user, search_id):
-    """
-	Helper method for getting the connections given a submission from mongodb.
-	A bit of work because we need to make sure that we only return connections that are
-	in the communities accessible by the user requesting the connections.
-	Arguments:
-		submission_id : ObjectID : the ObjectID of the source submission.
-		user_communities : list : a list of ObjectIDs, ids of communities accessible by user.
-		current_user : the User object of the current user
-		search_id : ObjectID : the id of the view submission log (for tracking clicks).
-
-	Returns:
-		filtered_connections : list : a list of submissions formatted according to format_submission_for_display
-			each submission also contains a "connection_description" field
-	"""
-
-    cdl_connections = Connections()
-    all_connections = cdl_connections.find({"source_id": submission_id})
-    filtered_connections = []
-    for connection in all_connections:
-        cdl_logs = Logs()
-        # todo: check this
-        target_connection = cdl_logs.find_one({"_id": connection.target_id})
-
-        if not target_connection or target_connection.deleted == True:
-            continue
-        connection_communities = {}
-
-        # gets all communities that a submission is a part of
-        for uid in target_connection.communities:
-            for community in target_connection.communities[uid]:
-                connection_communities[str(community)] = True
-        # checks user's communities and only adds connection if user is in connection's community
-        for community in user_communities:
-            community = str(community)
-            if community in connection_communities:
-                formatted_connection = format_submission_for_display(target_connection, current_user, search_id)
-                formatted_connection["connection_description"] = connection.description
-                filtered_connections.append(formatted_connection)
-                break
-    return filtered_connections
 
 
 @functional.route("/api/search", methods=["GET"])
@@ -913,6 +683,8 @@ def search(current_user):
             search_id = str(search_id)  # for return
 
             # also scrape the webpage if there is a url
+            # update 9/11/2023: this is a bit too slow to do on extension search, removing for now
+            """
             if url:
                 webpages = Webpages()
                 scraper = ScrapeWorker(webpages.collection)
@@ -939,6 +711,7 @@ def search(current_user):
 
                         else:
                             print("Unable to insert webpage data in database.")
+            """
 
         # if the search_id is included, then the user is looking for a specific page of a previous search
         else:
@@ -985,270 +758,6 @@ def search(current_user):
         traceback.print_exc()
         return response.error("Failed to search, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
-
-def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True):
-    """
-	Helper function for pulling search results.
-	Arguments:
-		query : (string): raw user query
-		search_id : (string) : the id of the current search
-		index : (int) : the page
-		communities : (dict) : the communities of the user
-		user_id : (str) : the user id
-		own_submissions: (boolean) : true if user is viewing their own submissions, false otherwise
-        toggle_webpage_results: (boolean) : to include webpage results with submissions or not
-	Returns:
-		return_obj : (list) : a list of formatted submissions for frontned display
-							Note that result_hash and redirect_url will be empty (need to hydrate)
-	"""
-
-    # Use elastic cache when we don't need to do any reranking or dedup
-    if own_submissions or query == "":
-        if own_submissions:
-            # for getting own submissions (currently can't search them)
-            number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
-        else:
-            # assuming that there will be only one
-            number_of_hits, hits = elastic_manager.get_community(list(communities.keys())[0], page=index)
-
-        results = create_page(hits, communities)
-        results = hydrate_with_hash_url(results, search_id, page=index)
-        results = hydrate_with_hashtags(results)
-        return number_of_hits, results
-
-    else:
-        page = []
-        number_of_hits = 0
-        try:
-            cache = Cache()
-        except Exception as e:
-            print(e)
-            cache = None
-        if cache:
-            number_of_hits, page = cache.search(user_id, search_id, index)
-            
-
-        # If we cannot find cache page, (re)do the search
-        if not page:
-            start_time = time.time()
-            print("Search metrics")
-            print("\tSearch start time: ", start_time)
-
-            _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
-
-            print("\tSubmission search: ", time.time() - start_time)
-
-            submissions_pages = create_page(submissions_hits, communities)
-
-            print("\tSubmission pages: ", time.time() - start_time)
-
-
-            if toggle_webpage_results:
-
-                # Searching exactly a user's community from the webpages index
-                _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
-                print("\tWebpage search: ", time.time() - start_time)
-
-                webpages_index_pages = create_page(webpages_hits, communities)
-
-                print("\tWebpage pages: ", time.time() - start_time)
-
-                submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
-
-                print("\tCombined search: ", time.time() - start_time)
-
-
-            pages = deduplicate(submissions_pages)
-            print("\tDedup: ", time.time() - start_time)
-
-            if "neural_api" in os.environ:
-                try:
-                    resp = requests.post(os.environ["neural_api"] + "neural/rerank/", json = {"pages": pages, "query": query})
-                    if resp.status_code == 200:
-                        resp_json = resp.json()
-                        pages = resp_json["pages"]
-                except Exception as e:
-                    print(e)
-                    traceback.print_exc()
-                print("\tNeural Rerank: ", time.time() - start_time)
-
-
-           
-            pages = hydrate_with_hash_url(pages, search_id, page=index)
-            print("\tURL: ", time.time() - start_time)
-            pages = hydrate_with_hashtags(pages)
-            print("\tHash: ", time.time() - start_time)
-            number_of_hits = len(pages)
-            page = cache.insert(user_id, search_id, pages, index)
-            print("\tCache: ", time.time() - start_time)
-
-
-    return number_of_hits, page
-
-
-def create_page(hits, communities, toggle_display="highlight"):
-    """
-	Helper function for formatting raw elastic results.
-	Arguments:
-		hits : (dict): json raw output from elastic
-		communities : (dict) : the user's communities
-        toggle_display : (str) : highlight to show matched highlighted text, preview to show best preview
-	Returns:
-		return_obj : (list) : a list of formatted submissions for frontend display
-							Note that result_hash and redirect_url will be empty (need to hydrate)
-	"""
-
-    return_obj = []
-    for i, hit in enumerate(hits):
-        result = {
-            "redirect_url": None,
-            "display_url": None,
-            "orig_url": None,
-            "submission_id": None,
-            "result_hash": None,
-            "highlighted_text": None,
-            "explanation": None,
-            "score": hit.get("_score", 0),
-            "time": "",
-            "communities_part_of": []
-        }
-
-        if "webpage" in hit["_source"]:
-            result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
-
-            possible_matches = []
-            if "highlight" in hit and toggle_display == "highlight":
-                possible_matches = hit["highlight"].get("webpage.metadata.description", [])
-                if not possible_matches:
-                     possible_matches = hit["highlight"].get("webpage.metadata.h1", [])
-                if not possible_matches:
-                    # in case there are a lot of paragraphs
-                    possible_matches = hit["highlight"].get("webpage.all_paragraphs", [])[:10]
-
-                description = " .... ".join(possible_matches)
-            else:
-                description = None
-
-            if not description:
-                description = hit["_source"]["webpage"]["metadata"].get("description", None)
-            if not description:
-                description = hit["_source"]["webpage"]["metadata"].get("h1", None)
-            if not description:
-                description = "No Preview Available"
-            result["highlighted_text"] = description
-
-        else:
-            result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-
-
-
-
-            description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) and toggle_display == "highlight" else hit["_source"].get("highlighted_text", None)
-            if not description:
-                description ="No Preview Available"
-            result["highlighted_text"] = description
-
-        # possible that returns additional communities?
-        result["communities_part_of"] = {community_id: communities[community_id] for community_id in
-                                         hit["_source"].get("communities", []) if community_id in communities}
-
-        result["submission_id"] = str(hit["_id"])
-
-        if "time" in hit["_source"]:
-            formatted_time = "Submitted " + format_time_for_display(hit["_source"]["time"])
-            result["time"] = formatted_time
-        elif "scrape_time" in hit["_source"]:
-            formatted_time = "Indexed " + format_time_for_display(hit["_source"]["scrape_time"])
-            result["time"] = formatted_time
-
-
-        # Display URL
-        url = hit["_source"].get("source_url", "")
-        display_url = build_display_url(url)
-        result["display_url"] = display_url
-        result["orig_url"] = url
-
-        return_obj.append(result)
-    return return_obj
-
-
-
-def hydrate_with_hash_url(results, search_id, page=0, page_size=10, method="search"):
-    """
-	Helper function hydrating with result hash and url.
-	This is separate from create_page because neural reranking happens in between.
-	Arguments:
-		results : (list): output of create_pages
-		search_id : (string) : the id of the search
-		page : (int, default=0) : current page
-		page_size : (int, default=10) : the size of each page
-	Returns:
-		pages : (list) : a reranked pages	
-	"""
-    for i, result in enumerate(results):
-        # result hash
-        result_hash = build_result_hash(str((page * page_size) + i), str(result["submission_id"]), str(search_id))
-
-        result["result_hash"] = result_hash
-
-        # build the redirect URL for clicks
-        redirect_url = build_redirect_url(result["orig_url"], result_hash, result["highlighted_text"], method)
-        result["redirect_url"] = redirect_url
-    return results
-
-
-def hydrate_with_hashtags(results):
-    for result in results:
-        # add the hashtags
-        result["hashtags"] = []
-        hashtags_explanation = [x for x in result["explanation"].split() if len(x) > 1 and x[0] == "#"]
-        hashtags_ht = [x for x in result["highlighted_text"].split() if len(x) > 1 and x[0] == "#"]
-        hashtags = list(set(hashtags_explanation + hashtags_ht))
-        result["hashtags"] = hashtags
-    return results
-
-
-def deduplicate_by_ids(pages, id_dict):
-    pages_dedup = []
-    for page in pages:
-        if page["submission_id"] not in id_dict:
-            pages_dedup.append(page)
-    return pages_dedup
-
-def deduplicate_by_urls(pages, urls_dict):
-    pages_dedup = []
-    for page in pages:
-        if page["orig_url"] not in urls_dict:
-            pages_dedup.append(page)
-    return pages_dedup
-
-def deduplicate(pages):
-    map_pages = defaultdict(list)
-
-    for page in pages:
-        url = page["orig_url"].split("#")[0]
-        map_pages[url].append(page)
-
-    for key in map_pages.keys():
-        # map_pages[key].sort(reverse=True, key=lambda x: x["score"])
-        map_pages[key][0]["children"] = map_pages[key][1:11] if len(map_pages[key]) > 10 else map_pages[key][1:]
-
-    return [p[0] for p in map_pages.values()]
-
-def combine_pages(submissions_pages, webpages_index_pages):
-
-    # Building an inverted index to map orig_url to index using the submissions_pages list
-    subpgs_url_to_id = {}
-    for i, submission_page in enumerate(submissions_pages):
-        subpgs_url_to_id[submission_page["orig_url"]] = i
-
-    # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
-    for webpage in webpages_index_pages:
-        if subpgs_url_to_id.get(webpage["orig_url"]):
-            i = subpgs_url_to_id.get(webpage["orig_url"])
-            submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
-    
-    return submissions_pages + webpages_index_pages
 
 
 # recommender
@@ -1411,7 +920,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
                 # Sorting pages based on score, high to low
                 pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
-                pages = deduplicate_by_urls(pages, source_urls)
+                pages = deduplicate(pages)
                 pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
                 pages = hydrate_with_hashtags(pages)
                 page = cache.insert(user_id_str, recommendation_id, pages, page_number)
@@ -1433,3 +942,313 @@ def get_recommendations(current_user, toggle_webpage_results = True):
         traceback.print_exc()
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
+### HELPERS ###
+
+def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True):
+    """
+	Helper function for pulling search results.
+	Arguments:
+		query : (string): raw user query
+		search_id : (string) : the id of the current search
+		index : (int) : the page
+		communities : (dict) : the communities of the user
+		user_id : (str) : the user id
+		own_submissions: (boolean) : true if user is viewing their own submissions, false otherwise
+        toggle_webpage_results: (boolean) : to include webpage results with submissions or not
+	Returns:
+		return_obj : (list) : a list of formatted submissions for frontned display
+							Note that result_hash and redirect_url will be empty (need to hydrate)
+	"""
+
+    print("Search metrics")
+    start_time = time.time()
+
+    print("\tSearch start time: ", start_time)
+
+    # Use elastic cache when we don't need to do any reranking or dedup
+    if own_submissions or query == "":
+        if own_submissions:
+            # for getting own submissions (currently can't search them)
+            number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
+        else:
+            # assuming that there will be only one
+            number_of_hits, hits = elastic_manager.get_community(list(communities.keys())[0], page=index)
+
+        results = create_page(hits, communities)
+        results = hydrate_with_hash_url(results, search_id, page=index)
+        results = hydrate_with_hashtags(results)
+        return number_of_hits, results
+    else:
+        page = []
+        number_of_hits = 0
+        try:
+            cache = Cache()
+        except Exception as e:
+            print(e)
+            cache = None
+        print("\tcache start time: ", time.time() - start_time)
+
+        if cache:
+            number_of_hits, page = cache.search(user_id, search_id, index)
+            
+        print("\tcache end time: ", time.time() - start_time)
+
+
+        # If we cannot find cache page, (re)do the search
+        if not page:
+            
+
+            _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
+
+            print("\tSubmission search: ", time.time() - start_time)
+
+            submissions_pages = create_page(submissions_hits, communities)
+
+            print("\tSubmission pages: ", time.time() - start_time)
+
+
+            if toggle_webpage_results:
+
+                # Searching exactly a user's community from the webpages index
+                _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
+                print("\tWebpage search: ", time.time() - start_time)
+
+                webpages_index_pages = create_page(webpages_hits, communities)
+
+                print("\tWebpage pages: ", time.time() - start_time)
+
+                submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
+
+                print("\tCombined search: ", time.time() - start_time)
+
+
+            pages = deduplicate(submissions_pages)
+            print("\tDedup: ", time.time() - start_time)
+
+            if "neural_api" in os.environ:
+                try:
+                    resp = requests.post(os.environ["neural_api"] + "neural/rerank/", json = {"pages": pages, "query": query})
+                    if resp.status_code == 200:
+                        resp_json = resp.json()
+                        pages = resp_json["pages"]
+                except Exception as e:
+                    print(e)
+                    traceback.print_exc()
+                    print("Removing Neural API from environment")
+                    del os.environ["neural_api"]
+
+                print("\tNeural Rerank: ", time.time() - start_time)
+            else:
+                print("\t Neural Rerank not available")
+
+
+           
+            pages = hydrate_with_hash_url(pages, search_id, page=index)
+            print("\tURL: ", time.time() - start_time)
+            pages = hydrate_with_hashtags(pages)
+            print("\tHash: ", time.time() - start_time)
+            number_of_hits = len(pages)
+            page = cache.insert(user_id, search_id, pages, index)
+            print("\tCache: ", time.time() - start_time)
+
+
+    return number_of_hits, page
+
+
+def format_webpage_for_display(webpage, search_id):
+    webpage = webpage.to_dict()
+    submission = {}
+
+    submission["submission_id"] = webpage["_id"]
+
+
+    submission["stats"] = {
+        "views": 0,
+        "clicks": 0,
+        "shares": 0
+    }
+    cdl_searches_clicks = SearchesClicks()
+    num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "click_search_result"})
+    submission["stats"]["clicks"] = num__search_clicks
+
+    cdl_recommendations_clicks = RecommendationsClicks()
+    num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["submission_id"]})
+    submission["stats"]["clicks"] += num_rec_clicks
+
+    num_views = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "submission_view"})
+    submission["stats"]["views"] = num_views
+
+    submission["communities"] = {}
+    submission["communities_part_of"] = {}
+    submission["can_delete"] = False
+    submission["hashtags"] = []
+    submission["user_id"] = None
+    submission["highlighted_text"] = webpage["webpage"]["metadata"].get("description", "No Preview Available")
+    submission["explanation"] = webpage["webpage"]["metadata"].get("title")
+        
+    display_time = format_time_for_display(webpage["scrape_time"])
+    submission["time"] = "Indexed " + display_time
+
+    # make display url
+    display_url = build_display_url(webpage["url"])
+    submission["display_url"] = display_url
+    submission["raw_source_url"] = webpage["url"]  # added for editing submission
+
+    # make redirect url (need result hash)
+    submission["submission_id"] = str(submission["submission_id"])
+    result_hash = build_result_hash(-1, str(submission["submission_id"]), str(search_id))
+    redirect_url = build_redirect_url(webpage["url"], result_hash, submission["highlighted_text"], "search")
+    submission["redirect_url"] = redirect_url
+
+    submission["connections"] = []
+
+    submission["type"] = "webpage"
+
+    return submission
+
+def format_submission_for_display(submission, current_user, search_id):
+    """
+	Helper method to format a raw mongodb submission for frontend display.
+	Mostly takes the original format, except removes any unnecessary information.
+	Arguments:
+		submission : dict : the submission object downloaded from mongodb.
+		current_user : the User object of the current user.
+		communities : list : list of communities that the user is a member of
+		search_id : ObjectID : the id of the view submission log (for tracking clicks)
+	Returns:
+		submission : dict : a slightly-modified submission object.
+	"""
+    # get some stats
+
+    submission = submission.to_dict()
+
+    user_id = current_user.id
+
+    submission["stats"] = {
+        "views": 0,
+        "clicks": 0,
+        "shares": 0
+    }
+    num_shares = sum([len(submission["communities"][str(id)]) for id in submission["communities"]])
+    submission["stats"]["shares"] = num_shares
+
+    cdl_searches_clicks = SearchesClicks()
+    num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "click_search_result"})
+    submission["stats"]["clicks"] = num__search_clicks
+
+    cdl_recommendations_clicks = RecommendationsClicks()
+    num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["_id"]})
+    submission["stats"]["clicks"] += num_rec_clicks
+
+    num_views = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "submission_view"})
+    submission["stats"]["views"] = num_views
+
+    # for deleting the entire submission
+    if submission["user_id"] == user_id:
+        submission["can_delete"] = True
+    else:
+        submission["can_delete"] = False
+
+    if str(user_id) in submission["communities"]:
+        user_contributed_communities = {str(x): True for x in submission["communities"][str(user_id)]}
+    else:
+        user_contributed_communities = {}
+    all_added_communities = {str(x): True for all_user in submission["communities"] for x in
+                             submission["communities"][all_user]}
+
+    # need to reconstruct user , but username does not matter
+    hydrated_user_communities = \
+        get_communities_helper(current_user, return_dict=True)[
+            "community_info"]
+
+    for community_id in hydrated_user_communities:
+        if community_id in user_contributed_communities:
+            hydrated_user_communities[community_id]["valid_action"] = "remove"
+        elif community_id in all_added_communities:
+            hydrated_user_communities[community_id]["valid_action"] = "view"
+        else:
+            hydrated_user_communities[community_id]["valid_action"] = "save"
+
+        del hydrated_user_communities[community_id]["is_admin"]
+        del hydrated_user_communities[community_id]["join_key"]
+        del hydrated_user_communities[community_id]["community_id"]
+
+    submission["communities"] = hydrated_user_communities
+
+    submission["communities_part_of"] = {str(x): hydrated_user_communities[x]["name"]
+                                         for x in hydrated_user_communities
+                                         if hydrated_user_communities[x]["valid_action"] != "save"}
+
+    # convert some ObjectIDs to strings for serialization
+    submission["submission_id"] = str(submission["_id"])
+    submission["user_id"] = str(submission["user_id"])
+
+    display_time = "Submitted" + format_time_for_display(submission["time"])
+
+    submission["time"] = display_time
+
+    # make display url
+    display_url = build_display_url(submission["source_url"])
+    submission["display_url"] = display_url
+    submission["raw_source_url"] = submission["source_url"]  # added for editing submission
+
+    # make redirect url (need result hash)
+    result_hash = build_result_hash(-1, str(submission["_id"]), str(search_id))
+    redirect_url = build_redirect_url(submission["source_url"], result_hash, submission["highlighted_text"], "search")
+    submission["redirect_url"] = redirect_url
+
+    # hydrate with hashtags
+    submission = hydrate_with_hashtags([submission])[0]
+
+    # delete unnecessary info
+    del submission["source_url"]
+    del submission["ip"]
+    del submission["type"]
+    del submission["_id"]
+
+    submission["type"] = "user_submission"
+
+
+    return submission
+
+def find_connections(submission_id, user_communities, current_user, search_id):
+    """
+	Helper method for getting the connections given a submission from mongodb.
+	A bit of work because we need to make sure that we only return connections that are
+	in the communities accessible by the user requesting the connections.
+	Arguments:
+		submission_id : ObjectID : the ObjectID of the source submission.
+		user_communities : list : a list of ObjectIDs, ids of communities accessible by user.
+		current_user : the User object of the current user
+		search_id : ObjectID : the id of the view submission log (for tracking clicks).
+
+	Returns:
+		filtered_connections : list : a list of submissions formatted according to format_submission_for_display
+			each submission also contains a "connection_description" field
+	"""
+
+    cdl_connections = Connections()
+    all_connections = cdl_connections.find({"source_id": submission_id})
+    filtered_connections = []
+    for connection in all_connections:
+        cdl_logs = Logs()
+        # todo: check this
+        target_connection = cdl_logs.find_one({"_id": connection.target_id})
+
+        if not target_connection or target_connection.deleted == True:
+            continue
+        connection_communities = {}
+
+        # gets all communities that a submission is a part of
+        for uid in target_connection.communities:
+            for community in target_connection.communities[uid]:
+                connection_communities[str(community)] = True
+        # checks user's communities and only adds connection if user is in connection's community
+        for community in user_communities:
+            community = str(community)
+            if community in connection_communities:
+                formatted_connection = format_submission_for_display(target_connection, current_user, search_id)
+                formatted_connection["connection_description"] = connection.description
+                filtered_connections.append(formatted_connection)
+                break
+    return filtered_connections
