@@ -3,6 +3,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 from pymongo import MongoClient
+import traceback
 import validators
 
 
@@ -57,7 +58,7 @@ class ElasticManager:
             # don't remove hashtags for now
             if len(word) > 1 and word[0] == "#":
                 query_obj["hashtags"].append(word)
-            if word not in self.stopwords:
+            if word.lower() not in self.stopwords:
                 new_query.append(word)
         new_query = " ".join(new_query)
 
@@ -90,8 +91,8 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
-        hits = json.loads(r.text)["hits"]
-        return hits["total"]["value"], hits["hits"]
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
 
     def get_submissions(self, user_id, page=0, page_size=10):
         """
@@ -117,8 +118,8 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
-        hits = json.loads(r.text)["hits"]
-        return hits["total"]["value"], hits["hits"]
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
 
     def search(self, query, communities, page=0, page_size=10):
         """
@@ -139,7 +140,8 @@ class ElasticManager:
         print("is url?", query_obj["isURL"])
 
         if self.index_name == os.environ["elastic_webpages_index_name"]:
-            fields = ["webpage.metadata.title", "webpage.metadata.h1", "webpage.metadata.description", "webpage.all_paragraphs"]
+            fields = ["webpage.metadata.title", "webpage.metadata.h1", "webpage.metadata.description",
+                      "webpage.all_paragraphs"]
         elif self.index_name == os.environ["elastic_index_name"]:
             if query_obj["isURL"]:
                 fields = ["source_url"]
@@ -148,67 +150,71 @@ class ElasticManager:
         else:
             fields = []
 
-
         query_comm = {
             "query": {
                 "bool": {
                     "should": [
                         {
                             "multi_match": {
-                                "query": query,
+                                "query": query_obj["query"],
                                 "fields": fields
                             }
                         },
                     ]
                 }
             },
+            "highlight": {
+                "tags_schema": "styled",
+                "fields": {}
+            },
             "from": page * page_size,
             "size": page_size,
             "min_score": 0.1
         }
+
+        # <mark>
+        # </mark>
 
         if self.index_name != os.environ["elastic_webpages_index_name"]:
-            filter =  {
-                        "bool": {
-                            "must": [
-                                {"terms": {"communities": communities}}
-                            ]
-                        }
-                    }
-            if query_obj["hashtags"]:
-                filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
-                
-            query_comm["query"]["bool"]["filter"] = filter
-
-        """
-        # now with hashtag
-        query_comm = {
-            "query": {
+            filter = {
                 "bool": {
-                    "filter": {
-                        "bool": {
-                            "must": must_terms
-                        }
-                    },
-                    "should": [
-                        {
-                            "multi_match": {
-                                "query": query,
-                                "fields": fields
-                            }
-                        },
+                    "must": [
+                        {"terms": {"communities": communities}}
                     ]
                 }
-            },
-            "from": page * page_size,
-            "size": page_size,
-            "min_score": 0.1
-        }
-        """
-        print(query_comm)
+            }
+            if query_obj["hashtags"]:
+                filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
+
+            query_comm["query"]["bool"]["filter"] = filter
+            query_comm["highlight"]["fields"] = {
+                "highlighted_text": {
+                    "pre_tags": [''],
+                    "post_tags": ['']
+                }
+            }
+        else:
+            # Exclude paragraphs to test latency
+            query_comm["_source"] = {"exclude": ["webpage.all_paragraphs"]}
+            query_comm["highlight"]["fields"] = {
+                "webpage.metadata.h1": {
+                    "pre_tags": [''],
+                    "post_tags": ['']
+                },
+                "webpage.metadata.description": {
+                    "pre_tags": [''],
+                    "post_tags": ['']
+                },
+                "webpage.all_paragraphs": {
+                    "pre_tags": [''],
+                    "post_tags": ['']
+                },
+            }
+
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
-        hits = json.loads(r.text)["hits"]
-        return hits["total"]["value"], hits["hits"]
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
+
 
     def add_to_index(self, doc):
         """
@@ -358,9 +364,8 @@ class ElasticManager:
         }
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
-        print(json.loads(r.text))
-        hits = json.loads(r.text)["hits"]
-        return hits["total"]["value"], hits["hits"]
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
 
     def flatten_communities(self, communities) -> list:
         flat_communities = []
@@ -369,3 +374,26 @@ class ElasticManager:
                 flat_communities.append(str(community_id))
 
         return flat_communities
+
+
+    def postprocess(self, text):
+
+        try:
+            text = text.encode("latin1", errors="strict").decode("utf8", errors="strict")
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            text = text.encode("utf8", errors="ignore").decode("utf8", errors="ignore")
+        
+        try:
+            hits = json.loads(text)["hits"]
+            resp = json.loads(text)
+            hits = resp["hits"]
+            print("\tTook: ", resp["took"])
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            print(text)
+            return 0, []
+
+        return hits["total"]["value"], hits["hits"]

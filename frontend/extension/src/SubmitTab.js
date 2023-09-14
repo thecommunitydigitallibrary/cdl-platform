@@ -26,7 +26,7 @@ export default function ImgMediaCard({ setUrlState }) {
   const [open, setOpen] = React.useState(false);
   const [sever, setSever] = React.useState("");
   const [message, setMessage] = React.useState("");
-  const baseURL = process.env.REACT_APP_URL + "api/";
+  const baseURL = localStorage.getItem('backendSource') + "api/";
 
   const handleClick = () => {
     setOpen(true);

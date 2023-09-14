@@ -1,19 +1,19 @@
 import json
 import os
 import re
-from collections import defaultdict
 
 from bson import ObjectId
 from flask import Blueprint, request, redirect
 from flask_cors import CORS
-import validators
 from textblob import TextBlob
 import traceback
-from sentence_transformers import CrossEncoder
+import time
+import random
+import requests
 
-from app.db import get_redis
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
-    format_time_for_display
+    format_time_for_display, validate_submission, hydrate_with_hash_url, create_page, hydrate_with_hashtags, \
+    deduplicate, combine_pages
 from app.helpers import response
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
@@ -50,12 +50,6 @@ webpages_elastic_manager = ElasticManager(
     os.environ["elastic_webpages_index_name"],
     None,
     "webpages")
-
-# Set up neural reranking model
-try:
-    rerank_model = CrossEncoder('cross-encoder/ms-marco-TinyBERT-L-2', max_length=512)
-except:
-    rerank_model = False
 
 
 @functional.route("/api/connect/", methods=["POST"])
@@ -100,34 +94,6 @@ def create_connection(current_user):
         traceback.print_exc()
         return response.error("Failed to create connection, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
-
-def validate_submission(highlighted_text, explanation, source_url=None):
-    # checks to make sure submitted text is not a URL!
-    if validators.url(highlighted_text) or validators.url(explanation):
-        return False, "Error: The highlighted text or explanation should not be a URL"
-
-    # check to make sure source url is not on wrong page
-    if source_url != None:
-        if not validators.url(source_url):
-            return False, "Error: The URL is invalid: " + source_url
-        forbidden_URLs = ["chrome://"]
-        for url in forbidden_URLs:
-            if url in source_url:
-                return False, "Error: You cannot submit content on URL " + source_url
-
-    char_max_desc = 10000
-    word_max_desc = 1000
-
-    char_max_title = 1000
-    word_max_title = 100
-
-    # cap highlighted text, explanation length
-    if highlighted_text and (len(highlighted_text) > char_max_desc or len(highlighted_text.split()) > word_max_desc):
-        return False, "Highlighted text is too long. Please limit to 1000 words or 10,000 characters"
-    if explanation and (len(explanation) > char_max_title or len(explanation.split()) > word_max_title):
-        return False, "Title is too long. Please limit to 100 words or 1000 characters"
-
-    return True, "Validation successful"
 
 
 @functional.route("/api/submission/", methods=["POST"])
@@ -186,28 +152,31 @@ def create_submission(current_user):
             index_status = elastic_manager.add_to_index(doc)
             
             print("SUBMISSION_INDEX_STATUS", index_status)
+            webpages = Webpages()
+            scraper = ScrapeWorker(webpages.collection)
 
-            scraper = ScrapeWorker()
             if not scraper.is_scraped_before(source_url):
                 data = scraper.scrape(source_url)  # Triggering Scraper
 
-                # Check if the scrape was not successful
-                if data["scrape_status"]["code"] != 1:
-                    data["webpage"] = {}
+                # Check if the URL was already scraped
+                if data['scrape_status']['code'] != -1:
+                    # Check if the scrape was not successful
+                    if data["scrape_status"]["code"] != 1:
+                        data["webpage"] = {}
 
-                # insert in MongoDB
-                insert_status, webpage = log_webpage(data["url"],
-                                                     data["webpage"],
-                                                     data["scrape_status"],
-                                                     data["scrape_time"]
-                                                     )
-                if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                    # index in OpenSearch
-                    index_status = webpages_elastic_manager.add_to_index(webpage)
-                    print("WEBPAGE_INDEX_STATUS", index_status)
+                    # insert in MongoDB
+                    insert_status, webpage = log_webpage(data["url"],
+                                                         data["webpage"],
+                                                         data["scrape_status"],
+                                                         data["scrape_time"]
+                                                         )
+                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                        # index in OpenSearch
+                        index_status = webpages_elastic_manager.add_to_index(webpage)
+                        print("WEBPAGE_INDEX_STATUS", index_status)
 
-                else:
-                    print("Unable to insert webpage data in database.")
+                    else:
+                        print("Unable to insert webpage data in database.")
 
             return response.success({
                 "message": "Context successfully submitted and indexed.",
@@ -239,9 +208,9 @@ def create_batch_submission(current_user):
 		In all cases, a status code and a list containing the status/error message (if any) for each attempted submission.
 		This is so that errors can be assessed individually and so you can re-send the submissions that failed.
 	"""
-    requests = request.get_json()
-    data = requests['data']
-    community = requests['community']
+    r = request.get_json()
+    data = r['data']
+    community = r['community']
     results = {}
     errors = []
     for i, submission in enumerate(data):
@@ -296,27 +265,30 @@ def create_batch_submission(current_user):
             if status.acknowledged:
                 doc.id = status.inserted_id
                 index_status = elastic_manager.add_to_index(doc)
+                webpages = Webpages()
+                scraper = ScrapeWorker(webpages.collection)
 
-                scraper = ScrapeWorker()
                 if not scraper.is_scraped_before(source_url):
                     data = scraper.scrape(source_url)  # Triggering Scraper
 
-                    # Check if the scrape was success or not
-                    if data["scrape_status"]["code"] != 1:
-                        data["webpage"] = {}
-                        data["scrape_time"] = None
+                    # Check if the URL was already scraped
+                    if data['scrape_status']['code'] != -1:
+                        # Check if the scrape was success or not
+                        if data["scrape_status"]["code"] != 1:
+                            data["webpage"] = {}
+                            data["scrape_time"] = None
 
-                    # insert in MongoDB
-                    insert_status, webpage = log_webpage(data["url"],
-                                                         data["webpage"],
-                                                         data["scrape_status"],
-                                                         data["scrape_time"]
-                                                         )
-                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                        # index in Opensearch
-                        webpages_elastic_manager.add_to_index(webpage)
-                    else:
-                        print("Unable to insert webpage data in database.")
+                        # insert in MongoDB
+                        insert_status, webpage = log_webpage(data["url"],
+                                                             data["webpage"],
+                                                             data["scrape_status"],
+                                                             data["scrape_time"]
+                                                             )
+                        if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                            # index in Opensearch
+                            webpages_elastic_manager.add_to_index(webpage)
+                        else:
+                            print("Unable to insert webpage data in database.")
 
                 results[f'Submission {i}'] = {
                     "message": "Context successfully submitted and indexed.",
@@ -613,7 +585,476 @@ def submission(current_user, id):
         print(e)
         traceback.print_exc()
         return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
-    
+
+
+@functional.route("/api/search", methods=["GET"])
+@token_required
+def search(current_user):
+    """
+	Endpoint for the webpage search functionality.
+	Arguments:
+		current_user : (dictionary): the user recovered from the JWT token.
+		request args with:
+			query : (string) : the typed query of the user.
+			community: (string) : the community currently being searched.
+			page : (int) : the page number of be returned (if not included, sets to 0)
+	Returns:
+		200 : output of search_helper, results and metadata.
+
+	TODO: add error handling.
+	"""
+    try:
+        return_obj = {
+            "search_id": None,
+            "query": None,
+            "total_num_results": None,
+            "current_page": None,
+            "search_results_page": []
+        }
+
+        ip = request.remote_addr
+        user_id = current_user.id
+        user_communities = current_user.communities
+
+        # flag for searching over webpage index
+        toggle_webpage_results = True
+
+        query = request.args.get("query", "")
+        source = request.args.get("source", "webpage_search")
+
+        # for when source == "extension_open" or source == "extension_search"
+        highlighted_text = request.args.get("highlighted_text", "")
+        url = request.args.get("url", "")
+
+        # limit highlighted text and query to a reasonable length
+        highlighted_text = highlighted_text[:1000]
+        query = query[:1000]
+
+        # for now, on extension_open, set the query to be the URL or highlighted text
+        # also for note_automatic, no query passed in this case either
+        if (not query and source == "extension_open") or (source == "note_automatic"):
+
+            # remove any hashtags
+            highlighted_text_nohash = re.sub("#", " ", highlighted_text)
+
+            if not highlighted_text:
+                query = url
+            elif len(highlighted_text.split()) < 10:
+                query = highlighted_text_nohash
+            else:
+                # here
+                blob = TextBlob(highlighted_text_nohash)
+                new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
+                query = new_terms
+
+        requested_communities = request.args.get("community")
+
+        own_submissions = request.args.get("own_submissions", False)
+
+        page = request.args.get("page", 0)
+        if page == "undefined":
+            page = 0
+        # handle if page is negative
+        page = max(0, int(page))
+
+        search_id = request.args.get("search_id", None)
+
+        # if the search_id is not included, then user is requesting a new search
+        if not search_id:
+            if requested_communities == "all":
+                # search over all communities of the user
+                requested_communities = user_communities
+            else:
+                # Turn off webpages for single, specific community search
+                toggle_webpage_results = False
+                try:
+                    requested_communities = [ObjectId(requested_communities)]  # assume only one for now
+                except:
+                    # need to return community_info for search bar option render
+                    return response.error("Community ID is invalid.", Status.INTERNAL_SERVER_ERROR)
+                if requested_communities[0] not in user_communities:
+                    return response.error("You do not have access to this community.", Status.FORBIDDEN)
+            # convert communities to str for elastic
+            requested_communities = [str(x) for x in requested_communities]
+
+            # Create a new search_id (as it is the first search by the user)
+            search_id, _ = log_search(ip, user_id, source, query, requested_communities, own_submissions, url=url,
+                                      highlighted_text=highlighted_text)
+            search_id = str(search_id)  # for return
+
+            # also scrape the webpage if there is a url
+            # update 9/11/2023: this is a bit too slow to do on extension search, removing for now
+            """
+            if url:
+                webpages = Webpages()
+                scraper = ScrapeWorker(webpages.collection)
+
+                if not scraper.is_scraped_before(url):
+                    data = scraper.scrape(url)  # Triggering Scraper
+
+                    # Check if the URL was already scraped
+                    if data['scrape_status']['code'] != -1:
+                        # Check if the scrape was not successful
+                        if data["scrape_status"]["code"] != 1:
+                            data["webpage"] = {}
+
+                        # insert in MongoDB
+                        insert_status, webpage = log_webpage(data["url"],
+                                                            data["webpage"],
+                                                            data["scrape_status"],
+                                                            data["scrape_time"]
+                                                            )
+                        if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                            # index in OpenSearch
+                            index_status = webpages_elastic_manager.add_to_index(webpage)
+                            print("WEBPAGE_INDEX_STATUS", index_status)
+
+                        else:
+                            print("Unable to insert webpage data in database.")
+            """
+
+        # if the search_id is included, then the user is looking for a specific page of a previous search
+        else:
+            cdl_searches_clicks = SearchesClicks()
+            prior_search = cdl_searches_clicks.find_one({"_id": ObjectId(search_id)})
+            if prior_search:
+                query = prior_search.query
+                own_submissions = prior_search.own_submissions
+                requested_communities = [str(x) for x in prior_search.community]
+            else:
+                return response.error("Cannot find search to page.", Status.NOT_FOUND)
+
+        # make requested communities a dict containing the name too, for display
+        communities = get_communities_helper(current_user, return_dict=True)["community_info"]
+        rc_dict = {}
+        for community_id in requested_communities:
+            try:
+                rc_dict[community_id] = communities[community_id]["name"]
+            except Exception as e:
+                print(e)
+                print(f"Could not find community for community id: {community_id}")
+
+        # issue: in the case where we get subsequent pages in a search (1+), we cannot tell whether a single community has been requested
+        # or the user only has a single community
+        if len(rc_dict) == 1 and len(user_communities) > 1:
+            toggle_webpage_results = False
+
+
+        return_obj["query"] = query
+        return_obj["search_id"] = search_id
+        return_obj["current_page"] = page
+
+        user_id_str = str(user_id)
+
+        total_num_results, search_results_page = cache_search(query, search_id, page, rc_dict, user_id=user_id_str,
+                                                              own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results)
+
+        return_obj["total_num_results"] = total_num_results
+        return_obj["search_results_page"] = search_results_page
+
+        return response.success(return_obj, Status.OK)
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return response.error("Failed to search, please try again later.", Status.INTERNAL_SERVER_ERROR)
+
+
+
+# recommender
+@functional.route("/api/recommend", methods=["GET"])
+@token_required
+def get_recommendations(current_user, toggle_webpage_results = True):
+    """
+	Endpoint for the webpage recommendation functionality.
+	Arguments:
+		current_user: (dictionary) : the user recovered from the JWT token.
+        toggle_webpage_results: To add webpage index results in recommendation feed
+		request args with:
+			method : (string) : the typed query of the user.
+				'recent' --> most recent submissions to user's communities
+				'explore_user_submissions' --> similar to three most recent user submissions
+			page: (int) : the page number of be returned (if not included, sets to 0)
+			recommendation_id : (string) : the ID of the recommendation session, used for efficient paging.
+	Returns:
+		200 : return_obj : (dictionary) : recommendations for user
+	"""
+    try:
+        # should contain similar return obj as search
+        return_obj = {
+            "recommendation_id": None,
+            "total_num_results": None,
+            "current_page": None,
+            "recommendation_results_page": []
+        }
+
+        ip = request.remote_addr
+        user_id = current_user.id
+        user_communities = current_user.communities
+        CDLweb_community_id = "63a4c21aee3be6ac5c533a55"
+
+        # setting default method to 'explore_similar_extension'
+        method = request.args.get("method", "explore_similar_extension")
+
+        # paging
+        page_number = request.args.get("page", 0)
+        if page_number == "undefined":
+            page_number = 0
+        page_number = max(0, int(page_number))
+
+        recommendation_id = request.args.get("recommendation_id", None)
+
+        # convert communities to str for elastic
+        requested_communities = [str(x) for x in user_communities]
+        if CDLweb_community_id in requested_communities:
+            requested_communities.remove(CDLweb_community_id)
+
+        # set up cache
+        try:
+            cache = Cache()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            return response.error("Cannot provide recommendations, please try again later.",
+                                  Status.INTERNAL_SERVER_ERROR)
+
+        user_id_str = str(user_id)
+
+        communities = get_communities_helper(current_user, return_dict=True)["community_info"]
+        rc_dict = {}
+        for community_id in requested_communities:
+            try:
+                rc_dict[community_id] = communities[community_id]["name"]
+            except Exception as e:
+                print(e)
+                print(f"Could not find community for community id: {community_id}")
+
+        # if the recommendation_id is not included, then this is first page/fresh request
+        if not recommendation_id:
+
+            # Create a new recommendation_id (first request by the user)
+            recommendation_id, _ = log_recommendation_request(ip, user_id, requested_communities, method)
+
+            recommendation_id = str(recommendation_id)  # for returning
+
+            if method == "recent":
+                number_of_hits, hits = elastic_manager.get_most_recent_submissions(user_id_str, requested_communities)
+                pages = create_page(hits, rc_dict, toggle_display="preview")
+                # no score for recommendation?
+                # pages = deduplicate(pages)
+                pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
+                pages = hydrate_with_hashtags(pages)
+                page = cache.insert(user_id_str, recommendation_id, pages, page_number)
+
+
+            elif method == "explore_similar_extension":
+                """
+				Combines three most recent submissions with the three most recent extension opens
+				"""
+
+                # Combining user's latest 3 submissions with all 'extension open' searches
+                search_text = ""
+                full_text = ""
+
+                # explore: user's submission data
+                try:
+                    cdl_logs = Logs()
+                    user_latest_submissions = cdl_logs.find({"user_id": ObjectId(user_id_str)})
+                    user_latest_submissions = sorted(user_latest_submissions, reverse=True, key=lambda x: x.time)[:3]
+                    source_urls = {str(x.source_url) for x in user_latest_submissions} # potential change to urls
+                except Exception as e:
+                    user_latest_submissions = []
+                    source_urls = {}
+                    print(e)
+                    traceback.print_exc()
+
+                for submission in user_latest_submissions:
+                    highlighted_text_nohash = re.sub("#", " ", submission.highlighted_text)
+                    title_text_nohash = re.sub("#", " ", submission.explanation)
+
+                    full_text += " " + highlighted_text_nohash + " " + title_text_nohash
+
+                # explore user's extension opens data
+                try:
+                    cdl_searches_clicks = SearchesClicks()
+                    users_extension_opens = cdl_searches_clicks.find(
+                        {"type": "extension_open", "user_id": ObjectId(user_id_str)})
+                    users_extension_opens = sorted(users_extension_opens, reverse=True, key=lambda x: x.time)[:3]
+
+                except Exception as e:
+                    users_extension_opens = []
+                    traceback.print_exc()
+                    print(e)
+
+                for extension_open in users_extension_opens:
+                    if extension_open and extension_open.highlighted_text:
+                        highlighted_text_nohash = re.sub("#", " ", extension_open.highlighted_text)
+                        full_text += " " + highlighted_text_nohash
+
+                if len(full_text) > 3:
+                    blob = TextBlob(full_text)
+                    new_terms = " ".join(list(set([x for x in blob.noun_phrases if len(x) > 3])))
+                    search_text += " " + new_terms
+
+                # if empty, assign random
+                if search_text == "":
+                    search_text = "transformer natural language processing illinois machine learning startup neural network hack hacker technology future explanation application building coding search engine computer vision recurrent classification generation chatgpt gpt3 data"
+
+
+                # randomize the search text to 10 query terms
+                split_text = search_text.split()
+                if len(split_text) > 10:
+                    random.shuffle(split_text)
+                    search_text = " ".join(split_text[:10])
+
+                
+                number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
+                                                              page_size=50)
+                submissions_pages = create_page(submissions_hits, rc_dict, toggle_display="preview")
+
+                if toggle_webpage_results:
+                    # Searching for recommendations from the webpages index
+                    _, webpages_hits = webpages_elastic_manager.search(search_text, [], page=0, page_size=50)
+                    webpages_index_pages = create_page(webpages_hits, rc_dict, toggle_display="preview")
+
+                    submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
+
+                # Sorting pages based on score, high to low
+                pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
+                pages = deduplicate(pages)
+                pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
+                pages = hydrate_with_hashtags(pages)
+                page = cache.insert(user_id_str, recommendation_id, pages, page_number)
+
+
+        # if the recommendation_id is included, then the user is looking for a specific page of a previous request
+        else:
+            number_of_hits, page = cache.search(user_id_str, recommendation_id, page_number)
+
+        return_obj["recommendation_id"] = recommendation_id
+        return_obj["current_page"] = page_number
+        return_obj["total_num_results"] = number_of_hits
+        return_obj["recommendation_results_page"] = page
+
+        return json.dumps(return_obj), 200
+
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
+
+### HELPERS ###
+
+def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True):
+    """
+	Helper function for pulling search results.
+	Arguments:
+		query : (string): raw user query
+		search_id : (string) : the id of the current search
+		index : (int) : the page
+		communities : (dict) : the communities of the user
+		user_id : (str) : the user id
+		own_submissions: (boolean) : true if user is viewing their own submissions, false otherwise
+        toggle_webpage_results: (boolean) : to include webpage results with submissions or not
+	Returns:
+		return_obj : (list) : a list of formatted submissions for frontned display
+							Note that result_hash and redirect_url will be empty (need to hydrate)
+	"""
+
+    print("Search metrics")
+    start_time = time.time()
+
+    print("\tSearch start time: ", start_time)
+
+    # Use elastic cache when we don't need to do any reranking or dedup
+    if own_submissions or query == "":
+        if own_submissions:
+            # for getting own submissions (currently can't search them)
+            number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
+        else:
+            # assuming that there will be only one
+            number_of_hits, hits = elastic_manager.get_community(list(communities.keys())[0], page=index)
+
+        results = create_page(hits, communities)
+        results = hydrate_with_hash_url(results, search_id, page=index)
+        results = hydrate_with_hashtags(results)
+        return number_of_hits, results
+    else:
+        page = []
+        number_of_hits = 0
+        try:
+            cache = Cache()
+        except Exception as e:
+            print(e)
+            cache = None
+        print("\tcache start time: ", time.time() - start_time)
+
+        if cache:
+            number_of_hits, page = cache.search(user_id, search_id, index)
+            
+        print("\tcache end time: ", time.time() - start_time)
+
+
+        # If we cannot find cache page, (re)do the search
+        if not page:
+            
+
+            _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
+
+            print("\tSubmission search: ", time.time() - start_time)
+
+            submissions_pages = create_page(submissions_hits, communities)
+
+            print("\tSubmission pages: ", time.time() - start_time)
+
+
+            if toggle_webpage_results:
+
+                # Searching exactly a user's community from the webpages index
+                _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
+                print("\tWebpage search: ", time.time() - start_time)
+
+                webpages_index_pages = create_page(webpages_hits, communities)
+
+                print("\tWebpage pages: ", time.time() - start_time)
+
+                submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
+
+                print("\tCombined search: ", time.time() - start_time)
+
+
+            pages = deduplicate(submissions_pages)
+            print("\tDedup: ", time.time() - start_time)
+
+            if "neural_api" in os.environ:
+                try:
+                    resp = requests.post(os.environ["neural_api"] + "neural/rerank/", json = {"pages": pages, "query": query})
+                    if resp.status_code == 200:
+                        resp_json = resp.json()
+                        pages = resp_json["pages"]
+                except Exception as e:
+                    print(e)
+                    traceback.print_exc()
+                    print("Removing Neural API from environment")
+                    del os.environ["neural_api"]
+
+                print("\tNeural Rerank: ", time.time() - start_time)
+            else:
+                print("\t Neural Rerank not available")
+
+
+           
+            pages = hydrate_with_hash_url(pages, search_id, page=index)
+            print("\tURL: ", time.time() - start_time)
+            pages = hydrate_with_hashtags(pages)
+            print("\tHash: ", time.time() - start_time)
+            number_of_hits = len(pages)
+            page = cache.insert(user_id, search_id, pages, index)
+            print("\tCache: ", time.time() - start_time)
+
+
+    return number_of_hits, page
+
+
 def format_webpage_for_display(webpage, search_id):
     webpage = webpage.to_dict()
     submission = {}
@@ -664,7 +1105,6 @@ def format_webpage_for_display(webpage, search_id):
     submission["type"] = "webpage"
 
     return submission
-
 
 def format_submission_for_display(submission, current_user, search_id):
     """
@@ -771,7 +1211,6 @@ def format_submission_for_display(submission, current_user, search_id):
 
     return submission
 
-
 def find_connections(submission_id, user_communities, current_user, search_id):
     """
 	Helper method for getting the connections given a submission from mongodb.
@@ -813,574 +1252,3 @@ def find_connections(submission_id, user_communities, current_user, search_id):
                 filtered_connections.append(formatted_connection)
                 break
     return filtered_connections
-
-
-@functional.route("/api/search", methods=["GET"])
-@token_required
-def search(current_user):
-    """
-	Endpoint for the webpage search functionality.
-	Arguments:
-		current_user : (dictionary): the user recovered from the JWT token.
-		request args with:
-			query : (string) : the typed query of the user.
-			community: (string) : the community currently being searched.
-			page : (int) : the page number of be returned (if not included, sets to 0)
-	Returns:
-		200 : output of search_helper, results and metadata.
-
-	TODO: add error handling.
-	"""
-    try:
-        return_obj = {
-            "search_id": None,
-            "query": None,
-            "total_num_results": None,
-            "current_page": None,
-            "search_results_page": []
-        }
-
-        ip = request.remote_addr
-        user_id = current_user.id
-        user_communities = current_user.communities
-
-        # flag for searching over webpage index
-        toggle_webpage_results = True
-
-        query = request.args.get("query", "")
-        source = request.args.get("source", "webpage_search")
-
-        # for when source == "extension_open" or source == "extension_search"
-        highlighted_text = request.args.get("highlighted_text", "")
-        url = request.args.get("url", "")
-
-        # limit highlighted text and query to a reasonable length
-        highlighted_text = highlighted_text[:1000]
-        query = query[:1000]
-
-        # for now, on extension_open, set the query to be the URL or highlighted text
-        # also for note_automatic, no query passed in this case either
-        if (not query and source == "extension_open") or (source == "note_automatic"):
-
-            # remove any hashtags
-            highlighted_text_nohash = re.sub("#", " ", highlighted_text)
-
-            if not highlighted_text:
-                query = url
-            elif len(highlighted_text.split()) < 10:
-                query = highlighted_text_nohash
-            else:
-                # here
-                blob = TextBlob(highlighted_text_nohash)
-                new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
-                query = new_terms
-
-        requested_communities = request.args.get("community")
-
-        own_submissions = request.args.get("own_submissions", False)
-
-        page = request.args.get("page", 0)
-        if page == "undefined":
-            page = 0
-        # handle if page is negative
-        page = max(0, int(page))
-
-        search_id = request.args.get("search_id", None)
-
-        # if the search_id is not included, then user is requesting a new search
-        if not search_id:
-            if requested_communities == "all":
-                # search over all communities of the user
-                requested_communities = user_communities
-            else:
-                # Turn off webpages for single, specific community search
-                toggle_webpage_results = False
-                try:
-                    requested_communities = [ObjectId(requested_communities)]  # assume only one for now
-                except:
-                    # need to return community_info for search bar option render
-                    return response.error("Community ID is invalid.", Status.INTERNAL_SERVER_ERROR)
-                if requested_communities[0] not in user_communities:
-                    return response.error("You do not have access to this community.", Status.FORBIDDEN)
-            # convert communities to str for elastic
-            requested_communities = [str(x) for x in requested_communities]
-
-            # Create a new search_id (as it is the first search by the user)
-            search_id, _ = log_search(ip, user_id, source, query, requested_communities, own_submissions, url=url,
-                                      highlighted_text=highlighted_text)
-            search_id = str(search_id)  # for return
-
-
-            # also scrape the webpage if there is a url
-            if url:
-                scraper = ScrapeWorker()
-                if not scraper.is_scraped_before(url):
-                    data = scraper.scrape(url)  # Triggering Scraper
-
-                    # Check if the scrape was not successful
-                    if data["scrape_status"]["code"] != 1:
-                        data["webpage"] = {}
-
-                    # insert in MongoDB
-                    insert_status, webpage = log_webpage(data["url"],
-                                                        data["webpage"],
-                                                        data["scrape_status"],
-                                                        data["scrape_time"]
-                                                        )
-                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                        # index in OpenSearch
-                        index_status = webpages_elastic_manager.add_to_index(webpage)
-                        print("WEBPAGE_INDEX_STATUS", index_status)
-
-                    else:
-                        print("Unable to insert webpage data in database.")
-
-        # if the search_id is included, then the user is looking for a specific page of a previous search
-        else:
-            cdl_searches_clicks = SearchesClicks()
-            prior_search = cdl_searches_clicks.find_one({"_id": ObjectId(search_id)})
-            if prior_search:
-                query = prior_search.query
-                own_submissions = prior_search.own_submissions
-                requested_communities = [str(x) for x in prior_search.community]
-            else:
-                return response.error("Cannot find search to page.", Status.NOT_FOUND)
-
-        # make requested communities a dict containing the name too, for display
-        communities = get_communities_helper(current_user, return_dict=True)["community_info"]
-        rc_dict = {}
-        for community_id in requested_communities:
-            try:
-                rc_dict[community_id] = communities[community_id]["name"]
-            except Exception as e:
-                print(e)
-                print(f"Could not find community for community id: {community_id}")
-
-        return_obj["query"] = query
-        return_obj["search_id"] = search_id
-        return_obj["current_page"] = page
-
-        user_id_str = str(user_id)
-
-        total_num_results, search_results_page = cache_search(query, search_id, page, rc_dict, user_id=user_id_str,
-                                                              own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results)
-
-        return_obj["total_num_results"] = total_num_results
-        return_obj["search_results_page"] = search_results_page
-
-        return response.success(return_obj, Status.OK)
-    except Exception as e:
-        print(e)
-        traceback.print_exc()
-        return response.error("Failed to search, please try again later.", Status.INTERNAL_SERVER_ERROR)
-
-
-def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True):
-    """
-	Helper function for pulling search results.
-	Arguments:
-		query : (string): raw user query
-		search_id : (string) : the id of the current search
-		index : (int) : the page
-		communities : (dict) : the communities of the user
-		user_id : (str) : the user id
-		own_submissions: (boolean) : true if user is viewing their own submissions, false otherwise
-	Returns:
-		return_obj : (list) : a list of formatted submissions for frontned display
-							Note that result_hash and redirect_url will be empty (need to hydrate)
-	"""
-
-    # Use elastic cache when we don't need to do any reranking or dedup
-    if own_submissions or query == "":
-        if own_submissions:
-            # for getting own submissions (currently can't search them)
-            number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
-        else:
-            # assuming that there will be only one
-            number_of_hits, hits = elastic_manager.get_community(list(communities.keys())[0], page=index)
-
-        results = create_page(hits, communities)
-        results = hydrate_with_hash_url(results, search_id, page=index)
-        results = hydrate_with_hashtags(results)
-        return number_of_hits, results
-
-    else:
-        page = []
-        number_of_hits = 0
-        try:
-            cache = Cache()
-        except Exception as e:
-            print(e)
-            cache = None
-        if cache:
-            number_of_hits, page = cache.search(user_id, search_id, index)
-
-        # If we cannot find cache page, (re)do the search
-        if not page:
-            _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
-
-            submissions_pages = create_page(submissions_hits, communities)
-
-            if toggle_webpage_results:
-
-                # Searching exactly a user's community from the webpages index
-                _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
-                webpages_index_pages = create_page(webpages_hits, communities)
-
-                submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
-
-            pages = deduplicate(submissions_pages)
-            pages = neural_rerank(query, pages)
-            pages = hydrate_with_hash_url(pages, search_id, page=index)
-            pages = hydrate_with_hashtags(pages)
-            number_of_hits = len(pages)
-            page = cache.insert(user_id, search_id, pages, index)
-
-    return number_of_hits, page
-
-
-def create_page(hits, communities):
-    """
-	Helper function for formatting raw elastic results.
-	Arguments:
-		hits : (dict): json raw output from elastic
-		communities : (dict) : the user's communities
-	Returns:
-		return_obj : (list) : a list of formatted submissions for frontend display
-							Note that result_hash and redirect_url will be empty (need to hydrate)
-	"""
-
-    return_obj = []
-    for i, hit in enumerate(hits):
-        result = {
-            "redirect_url": None,
-            "display_url": None,
-            "orig_url": None,
-            "submission_id": None,
-            "result_hash": None,
-            "highlighted_text": None,
-            "explanation": None,
-            "score": hit.get("_score", 0),
-            "time": "",
-            "communities_part_of": []
-        }
-
-        if "webpage" in hit["_source"]:
-            result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
-            description = hit["_source"]["webpage"]["metadata"].get("description", None)
-
-            # Handling special cases where there is `http` in the description and the webpage has paragraphs from which
-            # we can pull description
-            if (not description or len(description) <= 10 or "http" in description) and len(hit["_source"]["webpage"]["all_paragraphs"]) >= 10:
-                paragraph_list = hit["_source"]["webpage"]["all_paragraphs"].split("\n")
-
-                # To handle the case when there is `\n` at the beginning of `all_paragraphs`
-                for paragraph in paragraph_list:
-                    if len(paragraph) >= 5:
-                        description = paragraph
-                        break
-            if not description:
-                description = hit["_source"]["webpage"]["metadata"].get("h1", None)
-            if not description:
-                description = "No Preview Available"
-            result["highlighted_text"] = description
-
-        else:
-            result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-            description = hit["_source"].get("highlighted_text", None)
-            if not description:
-                description ="No Preview Available"
-            result["highlighted_text"] = description
-
-        # possible that returns additional communities?
-        result["communities_part_of"] = {community_id: communities[community_id] for community_id in
-                                         hit["_source"].get("communities", []) if community_id in communities}
-
-        result["submission_id"] = str(hit["_id"])
-
-        if "time" in hit["_source"]:
-            formatted_time = "Submitted " + format_time_for_display(hit["_source"]["time"])
-            result["time"] = formatted_time
-        elif "scrape_time" in hit["_source"]:
-            formatted_time = "Indexed " + format_time_for_display(hit["_source"]["scrape_time"])
-            result["time"] = formatted_time
-
-
-        # Display URL
-        url = hit["_source"].get("source_url", "")
-        display_url = build_display_url(url)
-        result["display_url"] = display_url
-        result["orig_url"] = url
-
-        return_obj.append(result)
-    return return_obj
-
-
-def neural_rerank(query, pages, topn=50):
-    """
-	Helper function for neural reranking.
-	Arguments:
-		query : (string): the original user query
-		pages : (list) : an array of processed submissions
-		topn : (int, default=50) : the number of results to rerank 
-	Returns:
-		pages : (list) : a reranked pages	
-	"""
-    if rerank_model and len(query.split()) > 2:
-        model_input = []
-        for hit in pages[:topn]:
-            # limit of 200 words or 500 characters
-            trunc_exp = " ".join(hit["explanation"].split()[:200])[:500]
-            trunc_high = " ".join(hit["highlighted_text"].split()[:200])[:500]
-            trunc_query = " ".join(query.split()[:200])[:500]
-            model_input.append((trunc_query, trunc_exp + " | " + trunc_high))
-        if model_input:
-            scores = rerank_model.predict(model_input)
-            for i, score in enumerate(scores):
-                pages[i]["score"] = pages[i]["score"] + 10 * score
-            pages = sorted(pages, reverse=True, key=lambda x: x["score"])
-    return pages
-
-
-def hydrate_with_hash_url(results, search_id, page=0, page_size=10, method="search"):
-    """
-	Helper function hydrating with result hash and url.
-	This is separate from create_page because neural reranking happens in between.
-	Arguments:
-		results : (list): output of create_pages
-		search_id : (string) : the id of the search
-		page : (int, default=0) : current page
-		page_size : (int, default=10) : the size of each page
-	Returns:
-		pages : (list) : a reranked pages	
-	"""
-    for i, result in enumerate(results):
-        # result hash
-        result_hash = build_result_hash(str((page * page_size) + i), str(result["submission_id"]), str(search_id))
-
-        result["result_hash"] = result_hash
-
-        # build the redirect URL for clicks
-        redirect_url = build_redirect_url(result["orig_url"], result_hash, result["highlighted_text"], method)
-        result["redirect_url"] = redirect_url
-    return results
-
-
-def hydrate_with_hashtags(results):
-    for result in results:
-        # add the hashtags
-        result["hashtags"] = []
-        hashtags_explanation = [x for x in result["explanation"].split() if len(x) > 1 and x[0] == "#"]
-        hashtags_ht = [x for x in result["highlighted_text"].split() if len(x) > 1 and x[0] == "#"]
-        hashtags = list(set(hashtags_explanation + hashtags_ht))
-        result["hashtags"] = hashtags
-    return results
-
-
-def deduplicate_by_ids(pages, id_dict):
-    pages_dedup = []
-    for page in pages:
-        if page["submission_id"] not in id_dict:
-            pages_dedup.append(page)
-    return pages_dedup
-
-
-def deduplicate(pages):
-    map_pages = defaultdict(list)
-
-    for page in pages:
-        url = page["orig_url"].split("#")[0]
-        map_pages[url].append(page)
-
-    for key in map_pages.keys():
-        # map_pages[key].sort(reverse=True, key=lambda x: x["score"])
-        map_pages[key][0]["children"] = map_pages[key][1:11] if len(map_pages[key]) > 10 else map_pages[key][1:]
-
-    return [p[0] for p in map_pages.values()]
-
-def combine_pages(submissions_pages, webpages_index_pages):
-
-    # Building an inverted index to map orig_url to index using the submissions_pages list
-    subpgs_url_to_id = {}
-    for i, submission_page in enumerate(submissions_pages):
-        subpgs_url_to_id[submission_page["orig_url"]] = i
-
-    # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
-    for webpage in webpages_index_pages:
-        if subpgs_url_to_id.get(webpage["orig_url"]):
-            i = subpgs_url_to_id.get(webpage["orig_url"])
-            submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
-    
-    return submissions_pages + webpages_index_pages
-
-
-# recommender
-@functional.route("/api/recommend", methods=["GET"])
-@token_required
-def get_recommendations(current_user, toggle_webpage_results = True):
-    """
-	Endpoint for the webpage recommendation functionality.
-	Arguments:
-		current_user: (dictionary) : the user recovered from the JWT token.
-        toggle_webpage_results: To add webpage index results in recommendation feed
-		request args with:
-			method : (string) : the typed query of the user.
-				'recent' --> most recent submissions to user's communities
-				'explore_user_submissions' --> similar to three most recent user submissions
-			page: (int) : the page number of be returned (if not included, sets to 0)
-			recommendation_id : (string) : the ID of the recommendation session, used for efficient paging.
-	Returns:
-		200 : return_obj : (dictionary) : recommendations for user
-	"""
-    try:
-        # should contain similar return obj as search
-        return_obj = {
-            "recommendation_id": None,
-            "total_num_results": None,
-            "current_page": None,
-            "recommendation_results_page": []
-        }
-
-        ip = request.remote_addr
-        user_id = current_user.id
-        user_communities = current_user.communities
-        CDLweb_community_id = "63a4c21aee3be6ac5c533a55"
-
-        # setting default method to 'explore_similar_extension'
-        method = request.args.get("method", "explore_similar_extension")
-
-        # paging
-        page_number = request.args.get("page", 0)
-        if page_number == "undefined":
-            page_number = 0
-        page_number = max(0, int(page_number))
-
-        recommendation_id = request.args.get("recommendation_id", None)
-
-        # convert communities to str for elastic
-        requested_communities = [str(x) for x in user_communities]
-        if CDLweb_community_id in requested_communities:
-            requested_communities.remove(CDLweb_community_id)
-
-        # set up cache
-        try:
-            cache = Cache()
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            return response.error("Cannot provide recommendations, please try again later.",
-                                  Status.INTERNAL_SERVER_ERROR)
-
-        user_id_str = str(user_id)
-
-        communities = get_communities_helper(current_user, return_dict=True)["community_info"]
-        rc_dict = {}
-        for community_id in requested_communities:
-            try:
-                rc_dict[community_id] = communities[community_id]["name"]
-            except Exception as e:
-                print(e)
-                print(f"Could not find community for community id: {community_id}")
-
-        # if the recommendation_id is not included, then this is first page/fresh request
-        if not recommendation_id:
-
-            # Create a new recommendation_id (first request by the user)
-            recommendation_id, _ = log_recommendation_request(ip, user_id, requested_communities, method)
-
-            recommendation_id = str(recommendation_id)  # for returning
-
-            if method == "recent":
-                number_of_hits, hits = elastic_manager.get_most_recent_submissions(user_id_str, requested_communities)
-                pages = create_page(hits, rc_dict)
-                # no score for recommendation?
-                # pages = deduplicate(pages)
-                pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
-                pages = hydrate_with_hashtags(pages)
-                page = cache.insert(user_id_str, recommendation_id, pages, page_number)
-
-
-            elif method == "explore_similar_extension":
-                """
-				Combines three most recent submissions with the three most recent extension opens
-				"""
-
-                # Combining user's latest 3 submissions with all 'extension open' searches
-                search_text = ""
-                full_text = ""
-
-                # explore: user's submission data
-                try:
-                    cdl_logs = Logs()
-                    user_latest_submissions = cdl_logs.find({"user_id": ObjectId(user_id_str)})
-                    user_latest_submissions = sorted(user_latest_submissions, reverse=True, key=lambda x: x.time)[:3]
-                    query_ids = {str(x.id) for x in user_latest_submissions}
-                except Exception as e:
-                    user_latest_submissions = []
-                    query_ids = {}
-                    print(e)
-                    traceback.print_exc()
-
-                for submission in user_latest_submissions:
-                    highlighted_text_nohash = re.sub("#", " ", submission.highlighted_text)
-                    title_text_nohash = re.sub("#", " ", submission.explanation)
-
-                    full_text += " " + highlighted_text_nohash + " " + title_text_nohash
-
-                # explore user's extension opens data
-                try:
-                    cdl_searches_clicks = SearchesClicks()
-                    users_extension_opens = cdl_searches_clicks.find(
-                        {"type": "extension_open", "user_id": ObjectId(user_id_str)})
-                    users_extension_opens = sorted(users_extension_opens, reverse=True, key=lambda x: x.time)[:3]
-
-                except Exception as e:
-                    users_extension_opens = []
-                    traceback.print_exc()
-                    print(e)
-
-                for extension_open in users_extension_opens:
-                    if extension_open and extension_open.highlighted_text:
-                        highlighted_text_nohash = re.sub("#", " ", extension_open.highlighted_text)
-                        full_text += " " + highlighted_text_nohash
-
-                if len(full_text) > 3:
-                    blob = TextBlob(full_text)
-                    new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
-                    search_text += " " + new_terms
-                
-                number_of_hits, submissions_hits = elastic_manager.search(search_text, list(communities.keys()), page=0,
-                                                              page_size=1000)
-                submissions_pages = create_page(submissions_hits, rc_dict)
-
-                if toggle_webpage_results:
-                    # Searching for recommendations from the webpages index
-                    _, webpages_hits = webpages_elastic_manager.search(search_text, [], page=0, page_size=50)
-                    webpages_index_pages = create_page(webpages_hits, rc_dict)
-
-                    submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
-
-                # Sorting pages based on score, high to low
-                pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
-                pages = deduplicate_by_ids(pages, query_ids)
-
-                pages = hydrate_with_hash_url(pages, recommendation_id, method=method)
-                pages = hydrate_with_hashtags(pages)
-                page = cache.insert(user_id_str, recommendation_id, pages, page_number)
-
-
-        # if the recommendation_id is included, then the user is looking for a specific page of a previous request
-        else:
-            number_of_hits, page = cache.search(user_id_str, recommendation_id, page_number)
-
-        return_obj["recommendation_id"] = recommendation_id
-        return_obj["current_page"] = page_number
-        return_obj["total_num_results"] = number_of_hits
-        return_obj["recommendation_results_page"] = page
-
-        return json.dumps(return_obj), 200
-
-    except Exception as e:
-        print(e)
-        traceback.print_exc()
-        return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)

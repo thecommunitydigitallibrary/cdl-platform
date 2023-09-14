@@ -308,14 +308,13 @@ function SearchResult(props) {
         <div style={{ margin: "0px 0px 0px 0px" }}>
           <Tooltip title={props.explanation}>
             <a
-              style={{ fontSize: "20px" }}
+              style={{ fontSize: "20px", maxWidth: '100%', display: '-webkit-box', WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: '1', overflow: 'hidden', textOverflow: 'ellipsis'}}
               href={props.redirect_url}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {props.explanation.length > 70
-                ? props.explanation.slice(0, 70) + "..."
-                : props.explanation}
+              {props.explanation}
             </a>
           </Tooltip>
         </div>
@@ -438,7 +437,12 @@ function SearchResult(props) {
       </p>
       {/* restricting text to only 500 characters per result to make it more uniform */}
       <p style={{fontSize: '15px', marginTop: '1%', textAlign: 'justify', maxWidth: '100%',
-        display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: '5', overflow: 'hidden', textOverflow: 'ellipsis'}}>{props.highlighted_text}</p>
+        display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: '5', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+          {props.highlighted_text && props.highlighted_text.length > 0 && (
+            props.highlighted_text
+          //<span dangerouslySetInnerHTML={{ __html: props.highlighted_text }}></span>
+        )}
+        </p>
 
       {props.hashtags !== undefined && props.hashtags.length !== 0 &&
       <div style={{ display:"flex", width:"100%"}}>

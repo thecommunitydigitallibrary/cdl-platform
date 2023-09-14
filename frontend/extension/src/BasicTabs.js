@@ -6,15 +6,14 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import SubmitTab from './SubmitTab';
 import SearchTab from './SearchTab';
+import SettingsTab from './SettingsTab';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
+import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Button from '@mui/material/Button';
 import Login from './Login'
 import { useNavigate } from 'react-router-dom'
 import FindInPageIcon from '@mui/icons-material/FindInPage';
-
-const websiteURL = process.env.REACT_APP_WEBSITE;
-
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -50,7 +49,7 @@ function a11yProps(index) {
 }
 
 export default function BasicTabs() {
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(localStorage.getItem('defaultTab') === "submit" ? 1 : 0);
   const [url, setUrl]=React.useState();
   const [highlightedText, setHighlightedText]=React.useState();
 
@@ -78,7 +77,7 @@ export default function BasicTabs() {
       
       <Box sx={{ width: '100%' }}>
         <Box style={{ float: "center", marginTop: "12px" }}>
-            <a href={websiteURL} style={{ fontSize: 20 }} target="_blank" rel="noopener noreferrer">
+            <a href={localStorage.getItem('backendSource')} style={{ fontSize: 20 }} target="_blank" rel="noopener noreferrer">
               The Community Digital Library
             </a>
             <Button onClick={logout}><LogoutIcon/></Button>
@@ -86,8 +85,9 @@ export default function BasicTabs() {
 
         <Box sx={{ borderBottom: 1, borderColor: 'divider', float: "center" }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" style={{ textAlign: "center" }}>
-            <Tab style = {{width: "50%", float:"left"}} label={<div><FindInPageIcon style={{ verticalAlign: 'middle' }} /> Search </div>} {...a11yProps(2)} />
-            <Tab style = {{width: "50%", float:"right"}} label={<div><UploadFileOutlinedIcon style={{ verticalAlign: 'middle' }} /> Submit </div>} {...a11yProps(1)} />
+            <Tab style = {{width: "40%", float:"left"}} label={<div><FindInPageIcon style={{ verticalAlign: 'middle' }} /> Search </div>} {...a11yProps(2)} />
+            <Tab style = {{width: "40%", float:"center"}} label={<div><UploadFileOutlinedIcon style={{ verticalAlign: 'middle' }} /> Submit </div>} {...a11yProps(1)} />
+            <Tab style = {{width: "20%", float:"left"}} label={<div><SettingsIcon style={{ verticalAlign: 'middle' }} /></div>} {...a11yProps(3)} />
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
@@ -95,6 +95,9 @@ export default function BasicTabs() {
         </TabPanel>
         <TabPanel value={value} index={1}>
           <SubmitTab setUrlState={setUrlState}/>
+        </TabPanel>
+        <TabPanel value={value} index={2}>
+          <SettingsTab setUrlState={setUrlState}/>
         </TabPanel>
       </Box>)}
     </div>

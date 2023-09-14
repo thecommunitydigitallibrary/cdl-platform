@@ -82,7 +82,7 @@ services:
     reverseproxy:
         image: reverseproxy
         build:
-            context: .\reverseproxy
+            context: ./reverseproxy
             dockerfile: Dockerfile-local
         ports:
             - 8080:8080
@@ -91,9 +91,9 @@ services:
     mongodb:
         image: mongo
         ports:
-        - 27017:27017
+            - 27017:27017
         restart: always
-        command: mongod --bind_ip 0.0.0.0 # This is to enable connecting to container from outside
+        command: mongod --bind_ip 0.0.0.0
 
     opensearch-node1:
         image: opensearchproject/opensearch:latest
@@ -120,8 +120,8 @@ services:
         depends_on:
             - reverseproxy
         image: website
-        build: .\frontend\website
-        env_file: .\frontend\website\.env.local
+        build: ./frontend/website
+        env_file: ./frontend/website/.env.local
         restart: always
         extra_hosts:
             - "host.docker.internal:host-gateway"
@@ -133,10 +133,29 @@ services:
             - mongodb
             - opensearch-node1
         image: api
-        build: .\backend
+        build: ./backend
         restart: always
-        env_file: .\backend\env_local.ini
+        env_file: ./backend/env_local.ini
 
+```
+
+If you would like to add the neural reranking, add the following to the ``docker-compose.yml`` file:
+
+```
+    neural:
+        depends_on:
+            - api
+        image: neural
+        build: ./neural
+        restart: always
+        ports:
+            - 9300:80
+```
+
+And add the following to ``backend\env_local.ini``:
+
+```
+neural_api=http://host.docker.internal:9300/
 ```
 
 Note that the slashes need to be reversed if running on Mac/Linux (above is written for windows).
@@ -160,9 +179,11 @@ pytest .\tests\test_server.py
 Note: Local Docker containers must be up and running before you run below commands
 ```
 cd <project-directory>\backend
-python .\app\helpers\backfill.py
+python .\app\helpers\backfill.py [--env_path] [--type=<"submissions" or "webpages">]
 ```
+Here, `--env_path` is an optional argument that takes the path to the environment file, and the default file considered is `backend\env_local.ini`.
 
+The `--type` is another optional argument that takes two values: `submissions` or `webpages`, and the default value is `submissions`.
 </details>
 
 <details>
@@ -171,48 +192,6 @@ python .\app\helpers\backfill.py
 
 ## Building on Top of the Hosted CDL
 See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend). Please be courteous regarding the amount of API calls so that the backend servers do not get overwhelmed.
-
-</details>
-
-<details>
-<summary>Roadmap</summary>
-<br>
-
-
-## Development Roadmap
-- [ ] UNIT TESTING / AUTOMATIC BUILDS. Can do this all locally since data is not persisted, no need to worry about cleanups.
-### Frontend
-#### Search Results
-- [ ] Don't cut off words, split at spaces
-- [ ] Extend title length to match width
-#### Notes Page
-- [ ] Extend length of notes (dynamic per window size?)
-- [ ] Notes scroll goes over header, should go under header
-### Backend
-#### General
-- [ ] Add traceback.print_exc() for all print(e) calls for more helpful debugging
-#### User Accounts API
-- [ ] Place account API endpoints under common structure.
-- [ ] Rename "token" to "hash" in password change request to avoid confusion with JWT.
-- [ ] Extract username/password validation and move to helpers to avoid duplication.
-- [ ] Change 202 status to 200 under password change request
-#### Submissions API
-- [ ] Pull out from functional to separate file (like users, notes) --> search, submission, and misc
-- [ ] Change highlighted to description and explanation to title (requires front-end API change)
-- [ ] Add error handling for not indexing doc successfully in elastic (get, patch, delete)
-- [ ] Change highlighted text and explanation in return object to description and title
-- [ ] Double-check if user id is needed in submission get return. If not, remove it.
-- [ ] Move validate_submission to helpers
-- [ ] Change batch call to loop over existing POST endpoint
-#### Notes API
-- [ ] On PATCH, make title and content optional, just like submission PATCH
-#### Communities API
-- [ ] Place get_communities_helper in try-catch block
-- [ ] Remove "message" from success (need to update frontend community page + components)
-- [ ] Move out relevance judgments to separate view
-- [ ] Rename createCommunity endpoint to reflect that it can also be edited using this endpoint
-#### Recommendations API
-- [x] Merge new recommendation method from old repo, remove old method
 
 </details>
 
