@@ -31,8 +31,10 @@ const Benefits = (props) => {
               </h3>
 
               <p className="max-w-2xl py-4 text-lg leading-normal text-gray-500 lg:text-xl xl:text-xl dark:text-gray-300">
-                {data.desc}
+                {data.desc + " "}
+                <a href="/">Learn how {data.link} </a>
               </p>
+
             </div>
 
             <div className="w-full">

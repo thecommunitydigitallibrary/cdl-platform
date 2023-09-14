@@ -488,33 +488,46 @@ function Header(props) {
                 )}
               </Grid>
 
-
-
-              {!isMedium && settings.map((setting) => (
+              {isMedium ? (
+                <Grid item>
+                  <DrawerComp
+                    settings={settings}
+                    handleUserClickMenu={handleUserClickMenu}
+                    handleClickSubmission={handleClickSubmission}
+                    username={dropdowndata.username}
+                    style={{ position: 'sticky', top: '0', right: '0' }}
+                  />
+                </Grid>
+              ) : (
                 <>
+                  {settings.map((setting) => (
+                    <>
 
-                  {setting.value == 'indexSubmission' ?
-                    <Grid item sx={{ flexGrow: 0 }}>
-                      <MenuItem onClick={handleClickSubmission}>
-                        <Tooltip title="Index a submission">
-                          <Add />
-                        </Tooltip>
-                      </MenuItem>
-                    </Grid>
-                    :
-                    <Grid item sx={{ flexGrow: 0 }}>
-                      <MenuItem
-                        key={setting.value}
-                        value={setting.value}
-                        variant="outline"
-                        onClick={(event) =>
-                          handleUserClickMenu(event, setting.value)
-                        }
-                      >
-                        {setting.label}
-                      </MenuItem>
-                    </Grid>
-                  }
+                      {setting.value == 'indexSubmission' ?
+                        <Grid item sx={{ flexGrow: 0 }}>
+                          <MenuItem onClick={handleClickSubmission}>
+                            <Tooltip title="Index a submission">
+                              <Add />
+                            </Tooltip>
+                          </MenuItem>
+                        </Grid>
+                        :
+                        <Grid item sx={{ flexGrow: 0 }}>
+                          <MenuItem
+                            key={setting.value}
+                            value={setting.value}
+                            variant="outline"
+                            onClick={(event) =>
+                              handleUserClickMenu(event, setting.value)
+                            }
+                          >
+                            {setting.label}
+                          </MenuItem>
+                        </Grid>
+                      }
+                    </>
+                  ))}
+
                   <Grid item sx={{ flexGrow: 0, ml: "1%" }}>
                     <Tooltip title="Account Information">
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -522,77 +535,61 @@ function Header(props) {
                       </IconButton>
                     </Tooltip>
                   </Grid>
-                </>
-              ))}
-
-
-              <Box>
-                <Menu
-                  sx={{ mt: "45px", flexGrow: 0 }}
-                  id="menu-appbar"
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={handleCloseUserMenu}
-                >
-                  <MenuItem>
-                    <Typography noWrap>
-                      Hello, {dropdowndata.username}
-                    </Typography>
-                  </MenuItem>
-
-                  <Divider sx={{ borderColor: "black" }} />
-                  <MenuItem variant="outline" onClick={() => {
-                    Router.push("/about");
-                  }}>
-                    <Typography>About</Typography>
-                  </MenuItem>
-
-                  <MenuItem variant="outline" onClick={() => {
-                    Router.push("/documentation");
-                  }}>
-                    <Typography>How to use</Typography>
-                  </MenuItem>
-                  <Divider sx={{ borderColor: "black", mx: "5%" }} />
-
-                  <MenuItem>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      color="error"
-                      onClick={(event) =>
-                        handleUserClickMenu(event, "logout")
-                      }
-                      className="text-white bg-red-500 rounded-md no-underline"
+                  <Box>
+                    <Menu
+                      sx={{ mt: "45px", flexGrow: 0 }}
+                      id="menu-appbar"
+                      anchorEl={anchorElUser}
+                      anchorOrigin={{
+                        vertical: "top",
+                        horizontal: "right",
+                      }}
+                      keepMounted
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "right",
+                      }}
+                      open={Boolean(anchorElUser)}
+                      onClose={handleCloseUserMenu}
                     >
-                      Logout
-                    </Button>
-                  </MenuItem>
-                </Menu>
-              </Box>
+                      <MenuItem>
+                        <Typography noWrap>
+                          Hello, {dropdowndata.username}
+                        </Typography>
+                      </MenuItem>
 
+                      <Divider sx={{ borderColor: "black" }} />
+                      <MenuItem variant="outline" onClick={() => {
+                        Router.push("/about");
+                      }}>
+                        <Typography>About</Typography>
+                      </MenuItem>
 
+                      <MenuItem variant="outline" onClick={() => {
+                        Router.push("/documentation");
+                      }}>
+                        <Typography>How to use</Typography>
+                      </MenuItem>
+                      <Divider sx={{ borderColor: "black", mx: "5%" }} />
+
+                      <MenuItem>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="error"
+                          onClick={(event) =>
+                            handleUserClickMenu(event, "logout")
+                          }
+                          className="text-white bg-red-500 rounded-md no-underline"
+                        >
+                          Logout
+                        </Button>
+                      </MenuItem>
+                    </Menu>
+                  </Box>
+                </>
+              )}
             </Grid>
-
-            {isMedium &&
-              <Grid item>
-                <DrawerComp
-                  settings={settings}
-                  handleUserClickMenu={handleUserClickMenu}
-                  handleClickSubmission={handleClickSubmission}
-                  username={dropdowndata.username}
-                  style={{ position: 'sticky', top: '0', right: '0' }}
-                />
-              </Grid>
-            }
           </Toolbar>
           <Dialog open={openSubmission} onClose={handleCloseSubmission}>
             <DialogTitle style={{ width: "500px" }}>
