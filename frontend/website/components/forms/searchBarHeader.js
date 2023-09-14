@@ -1,12 +1,20 @@
-import React from 'react';
+import React, {useState} from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FormControl, MenuItem, Select, Tooltip } from "@mui/material";
-import Router from 'next/router';
+import Router, {useRouter} from 'next/router';
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import TextField from "@mui/material/TextField";
 
 function searchBarHeader(props) {
+    let initQuery = "";
+    const router = useRouter();
+    const obj = router.query;
+
+    if (obj != undefined || obj != null || obj != "") {
+        initQuery = obj["query"];
+    }
+    const [query, setQuery] = useState(initQuery)
 
     const handleSearch = async (event) => {
         // Stop the form from submitting and refreshing the page.
@@ -33,6 +41,8 @@ function searchBarHeader(props) {
                     type="text"
                     id="query_input"
                     name="query"
+                    onChange={ e => { setQuery(e.currentTarget.value); } }
+                    value={query}
                     placeholder="Search your communities"
                     required
                     InputProps={{
