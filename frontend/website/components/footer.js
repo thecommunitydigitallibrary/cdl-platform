@@ -57,7 +57,8 @@ export default function Footer(props) {
   const navigationCol2 = {
     Setup: { label: "Setup Instructions", value: "/setup" },
     PrivacyPolicy: { label: "Privacy Policy", value: "/privacy" },
-    ReleaseLog: { label: "Release Log", value: "/releaselog" }
+    ReleaseLog: { label: "Release Log", value: "/releaselog" },
+    ReleaseLog: { label: "Documentation", value: "/documentation" }
   };
 
   // Necessary States for Alert Message
@@ -142,7 +143,7 @@ export default function Footer(props) {
   }
   return (
     <>
-      <Container>
+      <Container sx={{ position: 'absolute', bottom: 0 }}>
         <div className="grid max-w-screen-xl grid-cols-1 gap-10 pt-10 mx-auto mt-5 border-t border-gray-100 dark:border-trueGray-700 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <div>
