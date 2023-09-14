@@ -1,5 +1,5 @@
 // Documentation
-import React, { useState } from "react";
+import React, { useState, useRef, createRef } from "react";
 import Paper from "@mui/material/Paper";
 import Header from "../components/header";
 import Footer from "../components/footer";
@@ -8,7 +8,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 // import gifExample from "../../public/images/gif-eg.png";
 
-import { List, ListItem, ListItemText, Typography } from "@mui/material"
+import { IconButton, List, ListItem, ListItemText, Typography } from "@mui/material"
 
 const topics = [
     {
@@ -16,6 +16,7 @@ const topics = [
         items: [
             {
                 title: "Using the Community Digital Library",
+                link: "home",
                 content: (
                     <>
                         <p>
@@ -32,6 +33,7 @@ const topics = [
             },
             {
                 title: "Creating a Submission",
+                link: "how-to-submit",
                 content: (
                     <>
                         <p>
@@ -56,6 +58,7 @@ const topics = [
 
         items: [{
             title: "Searching the CDL",
+            link: "how-to-search",
             content: (
                 <>
                     <p>
@@ -76,6 +79,7 @@ const topics = [
         items: [
             {
                 title: "Taking Notes",
+                link: "how-to-notes",
                 content: (
                     <>
                         <p>
@@ -95,6 +99,7 @@ const topics = [
         items: [
             {
                 title: "More about Submissions",
+                link: "how-to-discover",
                 content: (
                     <>
                         <p>
@@ -110,6 +115,7 @@ const topics = [
             },
             {
                 title: "Joining, Creating, and Viewing Communities",
+                link: "how-to-community",
                 content: (
                     <>
                         <p>
@@ -128,19 +134,24 @@ const topics = [
     },
 ];
 
-function ContentSection({ title, content }) {
+function ContentSection({ title, content, link }) {
     return (
-        <Paper elevation={0} sx={{ padding: "10px 20px 5px 20px" }}>
-            <Typography variant="h4" gutterBottom>
-                {title}
-            </Typography>
-            <Typography variant="body1">{content}</Typography>
-        </Paper>
+        <section id={link}>
+            <Paper elevation={0} sx={{ padding: "10px 20px 5px 20px" }}>
+                <Typography variant="h4" gutterBottom>
+                    {title}
+                </Typography>
+                <Typography variant="body1">{content}</Typography>
+            </Paper>
+        </section>
     );
 }
 
 export default function Documentation() {
     const [openDropdown, setOpenDropdown] = useState(null);
+    // Inside your Documentation component
+    const topicRefs = useRef(topics.map(() => createRef()));
+
 
     const testGIF = (
         <iframe
@@ -166,25 +177,26 @@ export default function Documentation() {
             <Header />
             <div className="allResults flex">
                 <div className="w-1/5 bg-gray-200 p-4">
-                    <h3 className="text-xl font-semibold mb-4">Topics</h3>
+                    <h3 className="text-xl font-semibold mb-2">Quick Links</h3>
                     <Sidebar
                         topics={topics}
                         openDropdown={openDropdown}
                         setOpenDropdown={setOpenDropdown}
-                    // scrollToSection={scrollToSection}
+                        topicRefs={topicRefs}
                     />
                 </div>
 
                 <div className="w-4/5 p-4 h-full">
                     <Paper elevation={0}>
+
                         {topics.map((category, index) => (
-                            <div key={index}>
+                            <div key={index} ref={topicRefs.current[index]}>
                                 <h2 className="text-lg font-semibold mb-2">{category.category}</h2>
                                 {category.items.map((item, itemIndex) => (
                                     <div key={itemIndex} className="mb-4">
                                         <h3 className="text-md font-semibold mb-2">{item.title}</h3>
                                         <Paper elevation={0}>
-                                            <ContentSection content={item.content} />
+                                            <ContentSection content={item.content} link={item.link} />
                                             {testGIF}
                                             {/* <img src={gifExample} alt="loading..." /> */}
 
@@ -202,16 +214,24 @@ export default function Documentation() {
 
 }
 
-function Sidebar({ topics, openDropdown, setOpenDropdown, scrollToSection }) {
+function Sidebar({ topics, openDropdown, setOpenDropdown, topicRefs }) {
+    const scrollToTopic = (index) => {
+        if (topicRefs.current[index].current) {
+            topicRefs.current[index].current.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }
+    };
     return (
         <>
-
             <List component="nav" dense>
                 {topics.map((category, index) => (
                     <div key={index}>
                         <ListItem
-                            button
-                            onClick={() => setOpenDropdown(index === openDropdown ? null : index)}
+                            onClick={() => {
+                                scrollToTopic(index);
+                            }}
                         >
                             <ListItemText
                                 primary={
@@ -220,6 +240,7 @@ function Sidebar({ topics, openDropdown, setOpenDropdown, scrollToSection }) {
                                             display: "flex",
                                             justifyContent: "space-between",
                                             alignItems: "center",
+                                            cursor: 'pointer'
                                         }}
                                     >
                                         <Typography
@@ -229,11 +250,17 @@ function Sidebar({ topics, openDropdown, setOpenDropdown, scrollToSection }) {
                                         >
                                             {category.category}
                                         </Typography>
-                                        {index === openDropdown ? (
-                                            <ArrowDropUpIcon />
-                                        ) : (
-                                            <ArrowDropDownIcon />
-                                        )}
+                                        <IconButton onClick={(e) => {
+
+                                            e.stopPropagation();
+                                            setOpenDropdown(index === openDropdown ? null : index)
+                                        }}>
+                                            {index === openDropdown ? (
+                                                <ArrowDropUpIcon />
+                                            ) : (
+                                                <ArrowDropDownIcon />
+                                            )}
+                                        </IconButton>
                                     </div>
                                 }
                             />
@@ -242,10 +269,12 @@ function Sidebar({ topics, openDropdown, setOpenDropdown, scrollToSection }) {
                             <List component="div" disablePadding>
                                 {category.items.map((item, itemIndex) => (
                                     <ListItem
-                                        button
                                         key={itemIndex}
-                                        // onClick={() => scrollToSection(item.title)}
-                                        sx={{ paddingLeft: 4 }}
+                                        onClick={() => {
+
+                                            scrollToTopic(index);
+                                        }}
+                                        sx={{ paddingLeft: 4, cursor: 'pointer' }}
                                     >
                                         <ListItemText
                                             primary={

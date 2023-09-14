@@ -57,9 +57,27 @@ function DrawerComp(props) {
                   </ListItemButton>
                 </ListItem>
               }
-
             </>
           ))}
+
+          <Divider sx={{ borderColor: 'black', mx: '5%', my: '5%' }} />
+          <ListItem disablePadding>
+            <ListItemButton
+              value={'usage'} variant="outline" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, 'usage') }}>
+              <ListItemIcon>
+              </ListItemIcon>
+              <ListItemText primary={"Usage"} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              value={'about'} variant="outline" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, 'about') }}>
+              <ListItemIcon>
+              </ListItemIcon>
+              <ListItemText primary={"About"} />
+            </ListItemButton>
+          </ListItem>
+
           <Divider sx={{ borderColor: 'black', mx: '5%', my: '5%' }} />
           <ListItem>
             <ListItemIcon>

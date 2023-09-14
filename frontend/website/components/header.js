@@ -445,6 +445,10 @@ function Header(props) {
       Router.push("/search?own_submissions=True&community=all");
     } else if (option == "notes") {
       Router.push("/notes");
+    } else if (option == "about") {
+      Router.push("/about");
+    } else if (option == "usage") {
+      Router.push("/documentation");
     } else if (option != "logout") {
       Router.push("/logout");
     } else {
@@ -568,7 +572,7 @@ function Header(props) {
                       <MenuItem variant="outline" onClick={() => {
                         Router.push("/documentation");
                       }}>
-                        <Typography>How to use</Typography>
+                        <Typography>Usage</Typography>
                       </MenuItem>
                       <Divider sx={{ borderColor: "black", mx: "5%" }} />
 
