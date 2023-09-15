@@ -1,5 +1,5 @@
 # The Community Digital Library 
-The Community Digital Library (CDL) is an open-source platform for users to save, search, and discover online content. Our long-term vision is to anticipate the information needs of a user and proactively provide them with helpful information while minimizing user effort.
+The Community Digital Library (CDL) is an online and open-source social bookmarking platform that allows you to collaboratively describe and save, search for, and discover webpages related to your interests. We offer a stand-alone website and a Chrome extension, all for free.
 
 
 To use the CDL, you have three options:

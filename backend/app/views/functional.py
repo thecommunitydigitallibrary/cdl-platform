@@ -13,10 +13,11 @@ import requests
 
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
     format_time_for_display, validate_submission, hydrate_with_hash_url, create_page, hydrate_with_hashtags, \
-    deduplicate, combine_pages
+    deduplicate, combine_pages, standardize_url, extract_hashtags
 from app.helpers import response
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
+from app.models.community_core import CommunityCores
 from app.models.cache import Cache
 from app.models.communities import Communities
 from app.models.connections import Connections
@@ -116,74 +117,24 @@ def create_submission(current_user):
     try:
         ip = request.remote_addr
         user_id = current_user.id
+        user_communities = current_user.communities
         highlighted_text = request.form.get("highlighted_text", "")
         source_url = request.form.get("source_url")
         explanation = request.form.get("explanation")
         community = request.form.get("community", "")
 
-        # assumed string, so check to make sure is not none
-        if highlighted_text == None:
-            highlighted_text = ""
+        message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
+                                 source_url=source_url, explanation=explanation, community=community)
 
-        # hard-coded to prevent submissions to the web community
-        if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
-            return response.error("You cannot submit to this community.", Status.FORBIDDEN)
-
-        if community == "":
-            return response.error("Error: A community must be selected.", Status.BAD_REQUEST)
-        if not Communities().find_one({"_id": ObjectId(community)}):
-            return response.error("Error: Cannot find community.", Status.BAD_REQUEST)
-        if ObjectId(community) not in current_user.communities:
-            return response.error("Error: You do not have access to this community.", Status.FORBIDDEN)
-
-        # for some reason, in the case that there is no explanation or URL
-        if not explanation or not source_url:
-            return response.error("Missing explanation or source url.", Status.BAD_REQUEST)
-
-        validated, message = validate_submission(highlighted_text, explanation, source_url=source_url)
-        if not validated:
-            return response.error(message, Status.BAD_REQUEST)
-
-        # for logging a top-level submission
-        status, doc = log_submission(ip, user_id, highlighted_text, source_url, explanation, community)
-
-        if status.acknowledged:
-            doc.id = status.inserted_id
-            index_status = elastic_manager.add_to_index(doc)
-            
-            print("SUBMISSION_INDEX_STATUS", index_status)
-            webpages = Webpages()
-            scraper = ScrapeWorker(webpages.collection)
-
-            if not scraper.is_scraped_before(source_url):
-                data = scraper.scrape(source_url)  # Triggering Scraper
-
-                # Check if the URL was already scraped
-                if data['scrape_status']['code'] != -1:
-                    # Check if the scrape was not successful
-                    if data["scrape_status"]["code"] != 1:
-                        data["webpage"] = {}
-
-                    # insert in MongoDB
-                    insert_status, webpage = log_webpage(data["url"],
-                                                         data["webpage"],
-                                                         data["scrape_status"],
-                                                         data["scrape_time"]
-                                                         )
-                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                        # index in OpenSearch
-                        index_status = webpages_elastic_manager.add_to_index(webpage)
-                        print("WEBPAGE_INDEX_STATUS", index_status)
-
-                    else:
-                        print("Unable to insert webpage data in database.")
-
+        if status == Status.OK:
             return response.success({
-                "message": "Context successfully submitted and indexed.",
-                "submission_id": str(status.inserted_id)
-            }, Status.OK)
+            "message": message,
+            "submission_id": str(submission_id)
+        }, status)
+            
         else:
-            return response.error("Unable to make submission. Please try again later.", Status.INTERNAL_SERVER_ERROR)
+            return response.error(message, status)
+        
     except Exception as e:
         print(e)
         traceback.print_exc()
@@ -217,90 +168,24 @@ def create_batch_submission(current_user):
         try:
             ip = request.remote_addr
             user_id = current_user.id
+            user_communities = current_user.communities
             highlighted_text = submission["highlighted_text"]
             source_url = submission["source_url"]
             explanation = submission["explanation"]
-            # hard-coded to prevent submissions to the web community
-            if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
-                error_message = "You cannot submit to this community."
-                error_status = Status.BAD_REQUEST
-                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-                errors.append(i)
-                continue
-            if community == "":
-                error_message = "Error: A community must be selected."
-                error_status = Status.BAD_REQUEST
-                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-                errors.append(i)
-                continue
-            if not Communities().find_one({"_id": ObjectId(community)}):
-                error_message = "Error: Cannot find community."
-                error_status = Status.BAD_REQUEST
-                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-                continue
-            if ObjectId(community) not in current_user.communities:
-                error_message = "Error: You do not have access to this community."
-                error_status = Status.FORBIDDEN
-                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-                errors.append(i)
-                continue
-            # for some reason, in the case that there is no explanation or URL
-            if not explanation or not source_url:
-                error_message = "Missing explanation or source url."
-                error_status = Status.BAD_REQUEST
-                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
-                errors.append(i)
-                continue
 
-            validated, message = validate_submission(highlighted_text, explanation, source_url=source_url)
-            if not validated:
-                error_status = Status.BAD_REQUEST
-                results[f'Submission {i}'] = {'message': message, 'status': error_status}
-                errors.append(i)
-                continue
-
-            # for logging a top-level submission
-            status, doc = log_submission(ip, user_id, highlighted_text, source_url, explanation, community)
-
-            if status.acknowledged:
-                doc.id = status.inserted_id
-                index_status = elastic_manager.add_to_index(doc)
-                webpages = Webpages()
-                scraper = ScrapeWorker(webpages.collection)
-
-                if not scraper.is_scraped_before(source_url):
-                    data = scraper.scrape(source_url)  # Triggering Scraper
-
-                    # Check if the URL was already scraped
-                    if data['scrape_status']['code'] != -1:
-                        # Check if the scrape was success or not
-                        if data["scrape_status"]["code"] != 1:
-                            data["webpage"] = {}
-                            data["scrape_time"] = None
-
-                        # insert in MongoDB
-                        insert_status, webpage = log_webpage(data["url"],
-                                                             data["webpage"],
-                                                             data["scrape_status"],
-                                                             data["scrape_time"]
-                                                             )
-                        if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                            # index in Opensearch
-                            webpages_elastic_manager.add_to_index(webpage)
-                        else:
-                            print("Unable to insert webpage data in database.")
-
+            message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
+                                source_url=source_url, explanation=explanation, community=community)
+            
+            if status == Status.OK:
                 results[f'Submission {i}'] = {
-                    "message": "Context successfully submitted and indexed.",
-                    "submission_id": str(status.inserted_id),
-                    "status": Status.OK
+                    "message": message,
+                    "submission_id": str(submission_id),
+                    "status": status
                 }
-
             else:
-                error_message = "Unable to make submission. Please try again later."
-                error_status = Status.INTERNAL_SERVER_ERROR
-                results[f'Submission {i}'] = {'message': error_message, 'status': error_status }
+                results[f'Submission {i}'] = {'message': message, 'status': status }
                 errors.append(i)
+
         except Exception as e:
             print(e)
             error_message = "Failed to create submission, please try again later."
@@ -437,16 +322,32 @@ def submission(current_user, id):
                                              {"$set": {"deleted": True}}, upsert=False)
                 if update.acknowledged:
                     index_update = elastic_manager.delete_document(id)
+
+                    # if delete successful, remove it from community core if necessary
+                    old_record = cdl_logs.find_one({"_id": ObjectId(id)})
+                    if "#core" in list(set(extract_hashtags(old_record.explanation) + extract_hashtags(old_record.highlighted_text))):
+                        community_core = CommunityCores()
+                        hashtags = []
+                        standardized_url = standardize_url(old_record.source_url)
+                        for community in old_record.communities[str(user_id)]:
+                            community_core.update(community, standardized_url, hashtags, ObjectId(id))
+                            
+
+
                     return response.success({"message": "Deletion successful."}, Status.OK)
                 else:
                     return response.error("Deletion not successful. Please try again later.",
                                           Status.INTERNAL_SERVER_ERROR)
+                
+
+
             else:
                 community_id = ObjectId(community_id)
                 # removing from a community (NOT THREAD SAFE)
                 current_submission = cdl_logs.find_one({"_id": ObjectId(id)})
                 submission_communities = current_submission.communities
                 user_id = str(user_id)
+
                 if user_id in submission_communities:
                     submission_communities[user_id] = [x for x in submission_communities[user_id] if x != community_id]
                 if submission_communities[user_id] == []:
@@ -455,8 +356,20 @@ def submission(current_user, id):
                 if update.acknowledged:
                     current_submission.communities = submission_communities
                     deleted_index_status = elastic_manager.delete_document(id)
-                    added_index_status = elastic_manager.add_to_index(current_submission)
+                    added_index_status, _ = elastic_manager.add_to_index(current_submission)
                     log_community_action(ip, user_id, community_id, "DELETE", submission_id=current_submission.id)
+
+
+                    # if delete successful, remove it from community core if necessary
+                    # removal from community, so hashtags set to empty
+                    if "#core" in list(set(extract_hashtags(current_submission.explanation) + extract_hashtags(current_submission.highlighted_text))):
+                        community_core = CommunityCores()
+                        hashtags = []
+                        standardized_url = standardize_url(current_submission.source_url)
+                        community_core.update(community_id, standardized_url, hashtags, ObjectId(id))
+
+
+
                     return response.success({"message": "Removed from community."}, Status.OK)
                 else:
                     return response.error("Unable to remove from community.", Status.NOT_FOUND)
@@ -477,15 +390,28 @@ def submission(current_user, id):
             if not community_id and not highlighted_text and not explanation:
                 return response.error("Missing either community_id, highlighted_text, or explanation",
                                       Status.BAD_REQUEST)
+            
+
+            try:
+                submission = cdl_logs.find_one({"_id": ObjectId(id)})
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+                return response.error("Invalid submission ID", Status.NOT_FOUND)
+            
+            if not submission:
+                return response.error("Submission not found.", Status.NOT_FOUND)
+
+            if str(submission.user_id) != user_id:
+                return response.error("You do not have permission to edit this submission.", Status.FORBIDDEN)
+
 
             # updating a submission's communities
             if community_id:
-                # return response.error("Must include a community_id.", Status.NOT_FOUND)
 
                 community_id = ObjectId(community_id)
                 # adding to a community (NOT THREAD SAFE)
-                current_submission = cdl_logs.find_one({"_id": ObjectId(id)})
-                submission_communities = current_submission.communities
+                submission_communities = submission.communities
 
                 # need to check that user is a member of the community
                 user_communities = current_user.communities
@@ -505,11 +431,6 @@ def submission(current_user, id):
 
             if highlighted_text != None or explanation != None or source_url != None:
 
-                # check to make sure user is owner
-                submission = cdl_logs.find_one({"_id": ObjectId(id)})
-                if str(submission.user_id) != user_id:
-                    return response.error("You do not have permission to edit this submission.", Status.FORBIDDEN)
-
                 # check highlighted text, explanation, and url to make sure proper formatting
                 validated, message = validate_submission(highlighted_text, explanation, source_url=source_url)
                 if not validated:
@@ -517,21 +438,91 @@ def submission(current_user, id):
 
                 if highlighted_text != None:
                     insert_obj["highlighted_text"] = highlighted_text
-                    current_submission.highlighted_text = highlighted_text
                 if explanation != None:
                     insert_obj["explanation"] = explanation
-                    current_submission.explanation = explanation
                 if source_url != None:
                     insert_obj["source_url"] = source_url
-                    current_submission.source_url = source_url
+
 
             update = cdl_logs.update_one({"_id": ObjectId(id)}, {"$set": insert_obj})
+
             if update.acknowledged:
-                current_submission.communities = submission_communities
+
+
+
+                # a submission is added to a new community
+                if community_id:
+                    hashtags = list(set(extract_hashtags(submission.highlighted_text) + extract_hashtags(submission.explanation)))
+                    if "#core" in hashtags:
+                        community_core = CommunityCores()
+                        hashtags = [x for x in hashtags if x != "#core"]
+                        standardized_url = standardize_url(submission.source_url)
+                        community_core.update(ObjectId(community_id), standardized_url, hashtags, ObjectId(id))
+
+                # the url/text of a submission is changed
+                    # the submission has the exact same hashtags
+                    # the submission has different hashtags
+                        # core was removed
+                        # core was added
+                        # others changed
+
+                old_source_url = submission.source_url
+                
+                hashtags = []
+                OLD_CORE_FLAG = False
+
+                if "highlighted_text" in insert_obj: 
+                    hashtags += extract_hashtags(highlighted_text)
+                    old_hashtags = extract_hashtags(submission.highlighted_text)
+                    submission.highlighted_text = highlighted_text
+                    if "#core" in old_hashtags:
+                        OLD_CORE_FLAG = True
+                else:
+                    hashtags += extract_hashtags(submission.highlighted_text)
+
+                if "explanation" in insert_obj:
+                    hashtags += extract_hashtags(explanation)
+                    old_hashtags = extract_hashtags(submission.explanation)
+                    submission.explanation = explanation
+                    if "#core" in old_hashtags:
+                        OLD_CORE_FLAG = True
+                else:
+                     hashtags += extract_hashtags(submission.explanation)
+
+
+                if "source_url" in insert_obj:
+                    submission.source_url = source_url
+
                 deleted_index_status = elastic_manager.delete_document(id)
-                added_index_status = elastic_manager.add_to_index(current_submission)
+                added_index_status, hashtags = elastic_manager.add_to_index(submission)
+
+
+                # update community core content if necessary
+
+                UPDATE_FLAG = False
+                if OLD_CORE_FLAG and "#core" not in hashtags:
+                    hashtags = []
+                    UPDATE_FLAG = True
+                if "#core" in hashtags:
+                    hashtags = [x for x in hashtags if x != "#core"]
+                    UPDATE_FLAG = True
+
+                if UPDATE_FLAG:
+                    community_core = CommunityCores()
+                    all_communities = [x for user_id in submission.communities for x in submission.communities[user_id]]
+
+                    standardized_new_url = standardize_url(submission.source_url)
+                    standardized_old_url = standardize_url(old_source_url)
+
+                    # need to update across all communities
+                    for community_id in all_communities:
+                        if standardized_new_url != standardized_old_url:
+                            community_core.update(community_id, standardized_old_url, [], ObjectId(id))
+                        community_core.update(community_id, standardized_new_url, hashtags, ObjectId(id))
+                
+
                 if "communities" in insert_obj:
-                    log_community_action(ip, user_id, community_id, "ADD", submission_id=current_submission.id)
+                    log_community_action(ip, user_id, community_id, "ADD", submission_id=submission.id)
                 return response.success({"message": "Submission successfully edited."}, Status.OK)
             else:
                 return response.error("Unable to edit submission.", Status.INTERNAL_SERVER_ERROR)
@@ -579,8 +570,9 @@ def submission(current_user, id):
                     print(e)
                     traceback.print_exc()
                     pass
-
                 return response.error("Cannot find submission.", Status.NOT_FOUND)
+            else:
+                 return response.error("Cannot find submission.", Status.NOT_FOUND)
     except Exception as e:
         print(e)
         traceback.print_exc()
@@ -630,9 +622,15 @@ def search(current_user):
         highlighted_text = highlighted_text[:1000]
         query = query[:1000]
 
+        # create a flag for URL core retrieval
+        URL_CORE_RETRIEVE = None
+
         # for now, on extension_open, set the query to be the URL or highlighted text
         # also for note_automatic, no query passed in this case either
         if (not query and source == "extension_open") or (source == "note_automatic"):
+
+            if not query and source == "extension_open":
+                URL_CORE_RETRIEVE = url
 
             # remove any hashtags
             highlighted_text_nohash = re.sub("#", " ", highlighted_text)
@@ -747,7 +745,8 @@ def search(current_user):
         user_id_str = str(user_id)
 
         total_num_results, search_results_page = cache_search(query, search_id, page, rc_dict, user_id=user_id_str,
-                                                              own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results)
+                                                              own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results,
+                                                              url_core_retrieve=URL_CORE_RETRIEVE)
 
         return_obj["total_num_results"] = total_num_results
         return_obj["search_results_page"] = search_results_page
@@ -942,9 +941,84 @@ def get_recommendations(current_user, toggle_webpage_results = True):
         traceback.print_exc()
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
-### HELPERS ###
+### HELPERS that cannot be removed (yet)###
 
-def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True):
+def create_submission_helper(ip=None, user_id=None, user_communities=None, highlighted_text=None, source_url=None, explanation=None, community=None):
+    # assumed string, so check to make sure is not none
+    if highlighted_text == None:
+        highlighted_text = ""
+
+    # hard-coded to prevent submissions to the web community
+    if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
+        return "You cannot submit to this community.", Status.FORBIDDEN, None
+
+    if community == "":
+        return "Error: A community must be selected.", Status.BAD_REQUEST, None
+    if not Communities().find_one({"_id": ObjectId(community)}):
+        return "Error: Cannot find community.", Status.BAD_REQUEST, None
+    if ObjectId(community) not in user_communities:
+        return "Error: You do not have access to this community.", Status.FORBIDDEN, None
+
+    # for some reason, in the case that there is no explanation or URL
+    if not explanation or not source_url:
+        return "Missing explanation or source url.", Status.BAD_REQUEST, None
+
+    validated, message = validate_submission(highlighted_text, explanation, source_url=source_url)
+    if not validated:
+        return message, Status.BAD_REQUEST, None
+
+    # for logging a top-level submission
+    status, doc = log_submission(ip, user_id, highlighted_text, source_url, explanation, community)
+
+    if status.acknowledged:
+        doc.id = status.inserted_id
+        index_status, hashtags = elastic_manager.add_to_index(doc)
+
+        # update community core content if necessary
+        try:
+            if "#core" in hashtags:
+                hashtags = [x for x in hashtags if x != "#core"]
+                standardized_url = standardize_url(source_url)
+                community_core = CommunityCores()
+                community_core.update(ObjectId(community), standardized_url, hashtags, ObjectId(doc.id))
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            print("Failed to update Community Core Content")
+        
+        print("SUBMISSION_INDEX_STATUS", index_status)
+        webpages = Webpages()
+        scraper = ScrapeWorker(webpages.collection)
+
+        if not scraper.is_scraped_before(source_url):
+            data = scraper.scrape(source_url)  # Triggering Scraper
+
+            # Check if the URL was already scraped
+            if data['scrape_status']['code'] != -1:
+                # Check if the scrape was not successful
+                if data["scrape_status"]["code"] != 1:
+                    data["webpage"] = {}
+
+                # insert in MongoDB
+                insert_status, webpage = log_webpage(data["url"],
+                                                        data["webpage"],
+                                                        data["scrape_status"],
+                                                        data["scrape_time"]
+                                                        )
+                if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                    # index in OpenSearch
+                    index_status, _ = webpages_elastic_manager.add_to_index(webpage)
+                    print("WEBPAGE_INDEX_STATUS", index_status)
+
+                else:
+                    print("Unable to insert webpage data in database.")
+
+        return "Context successfully submitted and indexed.", Status.OK, status.inserted_id
+        
+    else:
+        return "Unable to make submission. Please try again later.", Status.INTERNAL_SERVER_ERROR, None
+
+def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True, url_core_retrieve=None):
     """
 	Helper function for pulling search results.
 	Arguments:
@@ -955,6 +1029,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 		user_id : (str) : the user id
 		own_submissions: (boolean) : true if user is viewing their own submissions, false otherwise
         toggle_webpage_results: (boolean) : to include webpage results with submissions or not
+        url_core_retrieve : (None or URL str) : to include core results in a search (when extension is opened)
 	Returns:
 		return_obj : (list) : a list of formatted submissions for frontned display
 							Note that result_hash and redirect_url will be empty (need to hydrate)
@@ -996,16 +1071,31 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
         # If we cannot find cache page, (re)do the search
         if not page:
-            
 
             _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
+
+            if url_core_retrieve != None:
+                url = standardize_url(url_core_retrieve)
+                all_core_content = CommunityCores()
+                for community_id in communities.keys():
+                    community_core = all_core_content.find_one({"community_id": ObjectId(community_id)})
+                    if community_core:
+                        if url in community_core.core_content:
+                            core_hashtags = list(community_core.core_content[url].keys())
+                            core_hashtags = list(set(core_hashtags))
+                            _, core_hits = elastic_manager.search(" ".join(core_hashtags), [community_id], page=0, page_size=1000)
+
+                            # to put on top
+                            for hit in core_hits:
+                                hit["_score"] += 100
+                            submissions_hits += core_hits
+
 
             print("\tSubmission search: ", time.time() - start_time)
 
             submissions_pages = create_page(submissions_hits, communities)
 
-            print("\tSubmission pages: ", time.time() - start_time)
-
+            print("\tSubmission pages: ", time.time() - start_time)            
 
             if toggle_webpage_results:
 
@@ -1183,7 +1273,7 @@ def format_submission_for_display(submission, current_user, search_id):
     submission["submission_id"] = str(submission["_id"])
     submission["user_id"] = str(submission["user_id"])
 
-    display_time = "Submitted" + format_time_for_display(submission["time"])
+    display_time = "Submitted " + format_time_for_display(submission["time"])
 
     submission["time"] = display_time
 

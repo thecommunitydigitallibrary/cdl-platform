@@ -6,6 +6,10 @@ from pymongo import MongoClient
 import traceback
 import validators
 
+import sys
+sys.path.append("..")
+from app.helpers.helpers import extract_hashtags
+
 
 # TODO: added better error handling
 
@@ -54,10 +58,11 @@ class ElasticManager:
 
         query_split = query.split()
         new_query = []
+
+        hashtags = extract_hashtags(query)
+        query_obj["hashtags"] = hashtags
+
         for word in query_split:
-            # don't remove hashtags for now
-            if len(word) > 1 and word[0] == "#":
-                query_obj["hashtags"].append(word)
             if word.lower() not in self.stopwords:
                 new_query.append(word)
         new_query = " ".join(new_query)
@@ -225,7 +230,7 @@ class ElasticManager:
             doc : (dictionary) : user submission with highlighted_text, communities, explanation, and source_url.
 
         Returns:
-            The response string from elastic.
+            The response string from elastic, and the hashtags, if any
         """
 
         if self.index_name == os.environ["elastic_index_name"]:
@@ -248,9 +253,10 @@ class ElasticManager:
             source_url = doc.source_url
 
             # extract hashtags for elastic from both fields
-            hashtags_explanation = [x for x in explanation.split() if len(x) > 1 and x[0] == "#"]
-            hashtags_ht = [x for x in highlighted_text.split() if len(x) > 1 and x[0] == "#"]
+            hashtags_explanation = extract_hashtags(explanation)
+            hashtags_ht = extract_hashtags(highlighted_text)
             hashtags = list(set(hashtags_explanation + hashtags_ht))
+
 
             inserted_doc = {
                 "source_url": source_url,
@@ -274,9 +280,10 @@ class ElasticManager:
                     "all_paragraphs": " ".join(paragraphs) if paragraphs is not None else ""
                 }
             }
+            hashtags = []
 
         r = requests.put(self.domain + self.index_name + "/_doc/" + doc_id, json=inserted_doc, auth=self.auth)
-        return r.text
+        return r.text, hashtags
 
     def backfill(self):
         """

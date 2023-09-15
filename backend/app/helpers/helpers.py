@@ -290,6 +290,16 @@ def diversify(pages, topn=10):
     """
     pass
 
+def standardize_url(url):
+    # remove fragment from query
+    if "#" in url:
+        url = url.split("#")[0]
+    return url
+
+def extract_hashtags(text):
+      hashtags = [x for x in text.split() if len(x) > 1 and x[0] == "#"]
+      return hashtags
+
 
 def deduplicate(pages):
     """
