@@ -149,7 +149,7 @@ function ContentSection({ title, content, link }) {
 
 export default function Documentation() {
     const [openDropdown, setOpenDropdown] = useState(null);
-    // Inside your Documentation component
+
     const topicRefs = useRef(topics.map(() => createRef()));
 
 
@@ -174,45 +174,49 @@ export default function Documentation() {
                 />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <Header />
-            <div className="allResults flex">
-                <div className="w-1/5 bg-gray-200 p-4">
-                    <h3 className="text-xl font-semibold mb-2">Quick Links</h3>
-                    <Sidebar
-                        topics={topics}
-                        openDropdown={openDropdown}
-                        setOpenDropdown={setOpenDropdown}
-                        topicRefs={topicRefs}
-                    />
+            <div className="flex flex-col space-y-14">
+                <Header />
+                <div className="flex">
+                    <div className="w-1/5 bg-gray-100 p-4 sidebar-container">
+                        <h3 className="text-xl font-semibold mb-2">Quick Links</h3>
+                        <Sidebar
+                            topics={topics}
+                            openDropdown={openDropdown}
+                            setOpenDropdown={setOpenDropdown}
+                            topicRefs={topicRefs}
+                        />
+                    </div>
+
+                    <div className="w-4/5 p-4 h-full">
+                        <Paper elevation={0}>
+
+                            {topics.map((category, index) => (
+                                <div key={index} ref={topicRefs.current[index]} className="category-container">
+                                    <h2 className="category-title">{category.category}</h2>
+                                    {category.items.map((item, itemIndex) => (
+                                        <div key={itemIndex} className="item-container">
+                                            <h3 className="item-title">{item.title}</h3>
+                                            <Paper elevation={0} className="paper-container">
+                                                <ContentSection content={item.content} link={item.link} />
+                                                {testGIF}
+                                            </Paper>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+
+
+                        </Paper>
+                    </div>
                 </div>
-
-                <div className="w-4/5 p-4 h-full">
-                    <Paper elevation={0}>
-
-                        {topics.map((category, index) => (
-                            <div key={index} ref={topicRefs.current[index]}>
-                                <h2 className="text-lg font-semibold mb-2">{category.category}</h2>
-                                {category.items.map((item, itemIndex) => (
-                                    <div key={itemIndex} className="mb-4">
-                                        <h3 className="text-md font-semibold mb-2">{item.title}</h3>
-                                        <Paper elevation={0}>
-                                            <ContentSection content={item.content} link={item.link} />
-                                            {testGIF}
-                                            {/* <img src={gifExample} alt="loading..." /> */}
-
-                                        </Paper>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </Paper>
-                </div>
+                <Footer />
             </div>
-            <Footer />
         </>
     );
 
 }
+
+
 
 function Sidebar({ topics, openDropdown, setOpenDropdown, topicRefs }) {
     const scrollToTopic = (index) => {
@@ -224,10 +228,10 @@ function Sidebar({ topics, openDropdown, setOpenDropdown, topicRefs }) {
         }
     };
     return (
-        <>
-            <List component="nav" dense>
+        <div >
+            <List component="nav" dense >
                 {topics.map((category, index) => (
-                    <div key={index}>
+                    <div key={index} >
                         <ListItem
                             onClick={() => {
                                 scrollToTopic(index);
@@ -244,7 +248,7 @@ function Sidebar({ topics, openDropdown, setOpenDropdown, topicRefs }) {
                                         }}
                                     >
                                         <Typography
-                                            variant="h6"
+                                            variant="body1"
                                             color="primary"
                                             className={`${index === 0 ? "font-bold" : ""}`}
                                         >
@@ -278,7 +282,7 @@ function Sidebar({ topics, openDropdown, setOpenDropdown, topicRefs }) {
                                     >
                                         <ListItemText
                                             primary={
-                                                <Typography variant="body1" color="primary">
+                                                <Typography variant="body2" color="primary">
                                                     {item.title}
                                                 </Typography>
                                             }
@@ -290,7 +294,7 @@ function Sidebar({ topics, openDropdown, setOpenDropdown, topicRefs }) {
                     </div>
                 ))}
             </List>
-        </>
+        </div>
     );
 }
 
