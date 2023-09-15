@@ -21,6 +21,7 @@ const benefitOne = {
   title: "Form Communities",
   desc: "A community is where bookmarks are saved. A community consists of any number of CDL users, all generally interested in a similar topic.",
   image: communityImg,
+  link: "how-to-community",
   bullets: [
     {
       title: "Create a Community",
@@ -44,6 +45,7 @@ const benefitTwo = {
   title: "Bookmark Webpages",
   desc: "Describe and save webpages to any of your joined communities.",
   image: submitImg,
+  link: "how-to-bookmark",
   bullets: [
     {
       title: "Describe the Webpage",
@@ -67,6 +69,8 @@ const benefitThree = {
   title: "Take Notes",
   desc: "Take markdown-style hierarchical, private notes.",
   image: noteImg,
+  link: "how-to-bookmark",
+
   bullets: [
     {
       title: "Create a Note Page",
@@ -90,6 +94,7 @@ const benefitFour = {
   title: "Discover Information",
   desc: "Search and view recommendations from the content submitted to your communities.",
   image: searchRecImg,
+  link: "how-to-discover",
   bullets: [
     {
       title: "Search Your Communities",

@@ -1,4 +1,4 @@
-.infinite-scroll-component__outerdiv{
+.infinite-scroll-component__outerdiv {
   width: 100%;
 }
 
@@ -102,8 +102,8 @@ header {
   max-width: 800px;
   margin-top: 3rem;
   } */
-  
-  .card {
+
+.card {
   margin: 1rem;
   flex-basis: 45%;
   padding: 1.5rem;
@@ -113,38 +113,38 @@ header {
   border: 1px solid #eaeaea;
   border-radius: 10px;
   transition: color 0.15s ease, border-color 0.15s ease;
-  }
-  
-  .card:hover,
-  .card:focus,
-  .card:active {
+}
+
+.card:hover,
+.card:focus,
+.card:active {
   color: #0070f3;
   border-color: #0070f3;
-  }
-  
-  .card h3 {
+}
+
+.card h3 {
   margin: 0 0 1rem 0;
   font-size: 1.5rem;
-  }
-  
-  .card p {
+}
+
+.card p {
   margin: 0;
   font-size: 1.25rem;
   line-height: 1.5;
-  }
-  
-  .logo {
+}
+
+.logo {
   height: 1em;
-  }
-  
-  @media (max-width: 600px) {
+}
+
+@media (max-width: 600px) {
   .grid {
-  width: 100%;
-  flex-direction: column;
+    width: 100%;
+    flex-direction: column;
   }
-  }
-  
-  /* html,
+}
+
+/* html,
   body {
   padding: 0;
   margin: 0px;
@@ -153,165 +153,206 @@ header {
   sans-serif;
   }
    */
-  * {
+* {
   box-sizing: border-box;
-  }
-  
-  p.context {
+}
+
+p.context {
   text-indent: 30px;
-  }
-  
-  div.allResults {
+}
+
+div.allResults {
   padding: 0 0.3rem;
   margin-top: 4.8rem;
   min-width: 500px;
-  }
-  
-  div.result {
-  padding: 0.5rem 1rem;
-  }
-  .Auth-form-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
-  height: 100vh;
-  padding: 10px;
-  }
-  
-  .Auth-form {
-  width: 420px;
-  box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-  padding-top: 30px;
-  padding-bottom: 20px;
-  border-radius: 8px;
-  background-color: white;
-  }
-  
-  .Auth-form-content {
-  padding-left: 12%;
-  padding-right: 12%;
-  }
-  
-  .Auth-form-title {
-  text-align: center;
-  margin-bottom: 1em;
-  font-size: 24px;
-  color: rgb(34, 34, 34);
-  font-weight: 800;
-  }
-  
-  label {
-  font-size: 14px;
-  font-weight: 600;
-  color: rgb(34, 34, 34);
-  }
-  .Auth-form-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
-  height: 100vh;
-  padding: 10px;
-  }
-  
-  .Auth-form {
-  width: 420px;
-  box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-  padding-top: 30px;
-  padding-bottom: 20px;
-  border-radius: 8px;
-  background-color: white;
-  }
-  
-  .Auth-form-content {
-  padding-left: 12%;
-  padding-right: 12%;
-  }
-  
-  .Auth-form-title {
-  text-align: center;
-  margin-bottom: 1em;
-  font-size: 24px;
-  color: rgb(34, 34, 34);
-  font-weight: 800;
-  }
-  
-  label {
-  font-size: 14px;
-  font-weight: 600;
-  color: rgb(34, 34, 34);
-  }
-  
-  
-  .logo_temp {
-      color: #fff;
-      font-size: 1.5em;
-      margin-right: 10px;
-    }
-    
-    .logo_temp {
-      text-align: center;
-    }
-  
-    .logo_temp_body{
-      border: #aaa;
-    }
-  
-  /* notes page and resizable sidebar start */
-  
-  .app-container {
-    padding: 0.5em 0.5em;
-    display: flex;
-    flex-direction: row;
-    height:auto;
-    min-height: 80vh ;
-  }
-  
-  .app-sidebar {
-    flex-grow: 0;
-    flex-shrink: 0;
-    min-width: 200px;
-    max-width: 500px;
-    height: auto;
-    max-height: 80vh;
-    display: flex;
-    border-right: #e9e9e9 1px solid;
-    flex-direction: row;
-    background: #ffffff;
-    box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
-    border-radius: 10px 0px 0px 10px;
-    z-index: 2;
-    overflow: scroll;
-    overflow-x: hidden;
-  }
-  
-  .app-frame {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: white;
-    min-height: 80vh;
-    max-height: 100%;
-    background: #ffffff;
-    box-shadow: 8px 2px 32px -2px rgba(0, 0, 0, 0.25);
-    border-radius: 0px 10px 10px 0px;
-    z-index: 1;
-  }
-  
-  .app-sidebar .app-sidebar-content {
-    flex: 1;
-  }
-  
-  .app-sidebar .app-sidebar-resizer {
-    flex-grow: 0;
-    flex-shrink: 0;
-    flex-basis: 6px;
-    justify-self: flex-end;
-    cursor: col-resize;
-    resize: horizontal;
-  }
-  
-  /* notes page and resizable sidebar end */
+}
 
- 
+div.result {
+  padding: 0.5rem 1rem;
+}
+
+.Auth-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 10px;
+}
+
+.Auth-form {
+  width: 420px;
+  box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+  padding-top: 30px;
+  padding-bottom: 20px;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.Auth-form-content {
+  padding-left: 12%;
+  padding-right: 12%;
+}
+
+.Auth-form-title {
+  text-align: center;
+  margin-bottom: 1em;
+  font-size: 24px;
+  color: rgb(34, 34, 34);
+  font-weight: 800;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgb(34, 34, 34);
+}
+
+.Auth-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 10px;
+}
+
+.Auth-form {
+  width: 420px;
+  box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+  padding-top: 30px;
+  padding-bottom: 20px;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.Auth-form-content {
+  padding-left: 12%;
+  padding-right: 12%;
+}
+
+.Auth-form-title {
+  text-align: center;
+  margin-bottom: 1em;
+  font-size: 24px;
+  color: rgb(34, 34, 34);
+  font-weight: 800;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgb(34, 34, 34);
+}
+
+
+.logo_temp {
+  color: #fff;
+  font-size: 1.5em;
+  margin-right: 10px;
+}
+
+.logo_temp {
+  text-align: center;
+}
+
+.logo_temp_body {
+  border: #aaa;
+}
+
+/* notes page and resizable sidebar start */
+
+.app-container {
+  padding: 0.5em 0.5em;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  min-height: 80vh;
+}
+
+.app-sidebar {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-width: 200px;
+  max-width: 500px;
+  height: auto;
+  max-height: 80vh;
+  display: flex;
+  border-right: #e9e9e9 1px solid;
+  flex-direction: row;
+  background: #ffffff;
+  box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
+  border-radius: 10px 0px 0px 10px;
+  z-index: 2;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+.app-frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  min-height: 80vh;
+  max-height: 100%;
+  background: #ffffff;
+  box-shadow: 8px 2px 32px -2px rgba(0, 0, 0, 0.25);
+  border-radius: 0px 10px 10px 0px;
+  z-index: 1;
+}
+
+.app-sidebar .app-sidebar-content {
+  flex: 1;
+}
+
+.app-sidebar .app-sidebar-resizer {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 6px;
+  justify-self: flex-end;
+  cursor: col-resize;
+  resize: horizontal;
+}
+
+/* notes page and resizable sidebar end */
+
+/* Sidebar.css (or Sidebar.module.css if you're using CSS modules) */
+.sidebar-container {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  /* Adjust the height as needed */
+  overflow-y: auto;
+  /* Add vertical scroll if needed */
+  width: 250px;
+  /* Adjust the width as needed */
+  background-color: #fff;
+  /* Background color of the sidebar */
+  border-right: 1px solid #ddd;
+}
+
+.category-container {
+  margin-bottom: 20px;
+}
+
+.category-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.item-container {
+  margin-bottom: 20px;
+}
+
+.item-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.paper-container {
+  padding: 20px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}

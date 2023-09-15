@@ -24,19 +24,14 @@ function DrawerComp(props) {
         onClose={() => setOpenDrawer(false)}
       >
         <List sx={{ maxWidth: '300px', maxHeight: '50px', overflowWrap: 'break-word', textAlign: 'center' }}>
-          
-          
-        {props.username? <>
-        
-        <h4 sx={{ marginBottom: '2%' }} >
-        "Hello, "+{props.username }
-          </h4>
-          <Divider sx={{ borderColor: 'black', my: '5%', mx: '5%' }} />
-        </>
-        
-        : <></>}
-        
+          {props.username ? <>
 
+            <h4 sx={{ marginBottom: '2%' }} >
+              Hello, {props.username}
+            </h4>
+            <Divider sx={{ borderColor: 'black', my: '5%', mx: '5%' }} />
+          </>
+            : <></>}
           {props.settings.map((setting, index) => (
 
             <>
@@ -55,35 +50,53 @@ function DrawerComp(props) {
                 :
                 <ListItem key={index} disablePadding>
                   <ListItemButton key={index}
-                    value={setting.value} variant="outline" onClick={(event) => {setOpenDrawer(false); props.handleUserClickMenu(event, setting.value)}}>
+                    value={setting.value} variant="outline" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, setting.value) }}>
                     <ListItemIcon>
                     </ListItemIcon>
                     <ListItemText primary={"My " + setting.label} />
                   </ListItemButton>
                 </ListItem>
               }
-
             </>
           ))}
+
+          <Divider sx={{ borderColor: 'black', mx: '5%', my: '5%' }} />
+          <ListItem disablePadding>
+            <ListItemButton
+              value={'usage'} variant="outline" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, 'usage') }}>
+              <ListItemIcon>
+              </ListItemIcon>
+              <ListItemText primary={"Usage"} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              value={'about'} variant="outline" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, 'about') }}>
+              <ListItemIcon>
+              </ListItemIcon>
+              <ListItemText primary={"About"} />
+            </ListItemButton>
+          </ListItem>
+
           <Divider sx={{ borderColor: 'black', mx: '5%', my: '5%' }} />
           <ListItem>
             <ListItemIcon>
             </ListItemIcon>
-            {props.username?
-            <>
-            <Button variant="contained" color="error" onClick={(event) => {setOpenDrawer(false); props.handleUserClickMenu(event, 'logout')}}>
-              <ListItemText>
-                Logout
-              </ListItemText>
-            </Button></>
-          :
-          <>
-           <Button variant="contained" color="info" onClick={(event) => {setOpenDrawer(false); props.handleUserClickMenu(event, '/auth')}}>
-              <ListItemText>
-                Home
-              </ListItemText>
-            </Button>
-          </>}
+            {props.username ?
+              <>
+                <Button variant="contained" color="error" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, 'logout') }}>
+                  <ListItemText>
+                    Logout
+                  </ListItemText>
+                </Button></>
+              :
+              <>
+                <Button variant="contained" color="info" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, '/auth') }}>
+                  <ListItemText>
+                    Home
+                  </ListItemText>
+                </Button>
+              </>}
             <ListItemIcon>
 
             </ListItemIcon>
