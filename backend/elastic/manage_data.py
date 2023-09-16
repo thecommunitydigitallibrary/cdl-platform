@@ -194,8 +194,8 @@ class ElasticManager:
             query_comm["query"]["bool"]["filter"] = filter
             query_comm["highlight"]["fields"] = {
                 "highlighted_text": {
-                    "pre_tags": [''],
-                    "post_tags": ['']
+                    "pre_tags": ['<mark>'],
+                    "post_tags": ['</mark>']
                 }
             }
         else:
@@ -203,16 +203,16 @@ class ElasticManager:
             query_comm["_source"] = {"exclude": ["webpage.all_paragraphs"]}
             query_comm["highlight"]["fields"] = {
                 "webpage.metadata.h1": {
-                    "pre_tags": [''],
-                    "post_tags": ['']
+                    "pre_tags": ['<mark>'],
+                    "post_tags": ['</mark>']
                 },
                 "webpage.metadata.description": {
-                    "pre_tags": [''],
-                    "post_tags": ['']
+                    "pre_tags": ['<mark>'],
+                    "post_tags": ['</mark>']
                 },
                 "webpage.all_paragraphs": {
-                    "pre_tags": [''],
-                    "post_tags": ['']
+                    "pre_tags": ['<mark>'],
+                    "post_tags": ['</mark>']
                 },
             }
 

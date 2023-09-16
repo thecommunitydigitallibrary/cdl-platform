@@ -14,6 +14,7 @@ from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE
 import sys
 import traceback
 from app.models.webpages import Webpages
+from app.helpers.helpers import sanitize_input
 
 
 class ScrapeWorker:
@@ -238,6 +239,7 @@ class ScrapeWorker:
         text = text.replace("\\t", " ")
         text = text.replace("<p>", "")
         text = " ".join(text.split())
+        text = sanitize_input(text)
 
         return text
 
