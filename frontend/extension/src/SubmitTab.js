@@ -7,7 +7,6 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import axios from "axios";
 import FormData from "form-data";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
@@ -16,7 +15,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-export default function ImgMediaCard({ setUrlState }) {
+export default function ImgMediaCard({setUrlState}) {
   const [community, setCommunity] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [allCommunities, setAllCommunities] = React.useState([]);
@@ -45,7 +44,7 @@ export default function ImgMediaCard({ setUrlState }) {
   };
 
   let getSelectionText = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       var url = tabs[0].url;
       window.source_url = url;
       var hasHttp = url.includes("http") || url.includes("https");
@@ -57,7 +56,7 @@ export default function ImgMediaCard({ setUrlState }) {
       }
       chrome.scripting.executeScript(
         {
-          target: { tabId: tabs[0].id },
+          target: {tabId: tabs[0].id},
           function: () => getSelection().toString(),
         },
         (result) => {
@@ -84,18 +83,18 @@ export default function ImgMediaCard({ setUrlState }) {
       });
 
       let response = await config.json();
-      if(response.status === "ok"){
+      if (response.status === "ok") {
         setAllCommunities(response.community_info);
-      }else{
+      } else {
         setSever("error")
         setMessage(response.message);
         handleClick();
       }
     } catch (error) {
-        setSever("error");
-        setMessage("Unable to fetch your communities, Please try again.");
-        handleClick();    
-      }
+      setSever("error");
+      setMessage("Unable to fetch your communities, Please try again.");
+      handleClick();
+    }
   };
 
 
@@ -107,6 +106,12 @@ export default function ImgMediaCard({ setUrlState }) {
   const onChangeDescription = (e) => setDesciption(e.target.value);
 
   const onChangeTitle = (e) => setTitle(e.target.value);
+
+  const onClear = () => {
+    setTitle("");
+    setDesciption("");
+    setCommunity("");
+  }
 
   const onSubmit = async () => {
     try {
@@ -137,7 +142,7 @@ export default function ImgMediaCard({ setUrlState }) {
       data.append("highlighted_text", description);
       data.append("community", community);
 
-      let res = await fetch (baseURL + "submission/",{
+      let res = await fetch(baseURL + "submission/", {
         method: "post",
         headers: {
           Authorization: localStorage.getItem("authToken"),
@@ -173,7 +178,7 @@ export default function ImgMediaCard({ setUrlState }) {
       <Box
         component="form"
         sx={{
-          "& .MuiTextField-root": { width: "100%" },
+          "& .MuiTextField-root": {width: "100%"},
           marginTop: "10px",
         }}
         noValidate
@@ -189,20 +194,20 @@ export default function ImgMediaCard({ setUrlState }) {
         />
       </Box>
       <Box
-      component="form"
-      sx={{
-        "& .MuiTextField-root": { width: "100%" },
-        marginTop: "20px",
-        marginBottom: "20px"
+        component="form"
+        sx={{
+          "& .MuiTextField-root": {width: "100%"},
+          marginTop: "20px",
+          marginBottom: "20px"
         }}>
-          <TextField
-            id="outlined-multiline-static"
-            multiline
-            rows={5}
-            value={description}
-            onChange={onChangeDescription}
-            placeholder="Highlighted text and/or description"
-          />
+        <TextField
+          id="outlined-multiline-static"
+          multiline
+          rows={5}
+          value={description}
+          onChange={onChangeDescription}
+          placeholder="Highlighted text and/or description"
+        />
       </Box>
       <Box
         display="flex"
@@ -210,12 +215,13 @@ export default function ImgMediaCard({ setUrlState }) {
         alignItems="center"
         minHeight="2vh"
       >
-        <FormControl style={{ minWidth: 200, maxHeight: 100}}>
+        <FormControl style={{width: "100%", maxHeight: 100}}>
           <InputLabel id="demo-simple-select-label">Community</InputLabel>
           <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
             value={community}
+            style={{textAlign: "left"}}
             label="Community"
             onChange={handleChange}
           >
@@ -230,15 +236,19 @@ export default function ImgMediaCard({ setUrlState }) {
               ))}
           </Select>
         </FormControl>
-        </Box>
-        <h1>
-        <Button variant="contained" style={{ padding: 14 }} onClick={onSubmit}>
+      </Box>
+      <div style={{display: "flex", marginTop: "20px"}}>
+        <Button variant="contained" style={{padding: 14, width: "48%", marginRight: "20px"}}
+                onClick={onClear}>
+          CLEAR
+        </Button>
+        <Button variant="contained" style={{padding: 14, width: "48%"}} onClick={onSubmit}>
           SUBMIT
         </Button>
-        </h1>
- 
+      </div>
+
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity={sever} sx={{ width: "100%" }}>
+        <Alert onClose={handleClose} severity={sever} sx={{width: "100%"}}>
           {message}
         </Alert>
       </Snackbar>

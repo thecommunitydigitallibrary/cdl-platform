@@ -1,7 +1,7 @@
 import './App.css';
 import BasicTabs from './BasicTabs';
-import Login from './Login'
-import { MemoryRouter as Router, Route, Routes } from 'react-router-dom'
+import {MemoryRouter as Router, Route, Routes} from 'react-router-dom'
+import HomeTabs from "./HomeTabs";
 
 
 function App() {
@@ -18,10 +18,10 @@ function App() {
   return (
     <div className="App">
       <Router>
-      <Routes>
-            <Route path='/' element={<BasicTabs />} />
-            <Route path='/login' element={<Login />}/>      
-      </Routes>
+        <Routes>
+          <Route path='/' element={<BasicTabs/>}/>
+          <Route path='/login' element={<HomeTabs/>}/>
+        </Routes>
       </Router>
     </div>
   );
