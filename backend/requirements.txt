@@ -11,3 +11,4 @@ textblob==0.17.1
 redis==4.5.0
 sendgrid==6.10.0
 beautifulsoup4==4.11.1
+bleach==6.0.0

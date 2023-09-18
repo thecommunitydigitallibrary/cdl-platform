@@ -13,7 +13,7 @@ import requests
 
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
     format_time_for_display, validate_submission, hydrate_with_hash_url, create_page, hydrate_with_hashtags, \
-    deduplicate, combine_pages, standardize_url, extract_hashtags
+    deduplicate, combine_pages, standardize_url, extract_hashtags, sanitize_input
 from app.helpers import response
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
@@ -118,7 +118,7 @@ def create_submission(current_user):
         ip = request.remote_addr
         user_id = current_user.id
         user_communities = current_user.communities
-        highlighted_text = request.form.get("highlighted_text", "")
+        highlighted_text = sanitize_input(request.form.get("highlighted_text", ""))
         source_url = request.form.get("source_url")
         explanation = request.form.get("explanation")
         community = request.form.get("community", "")
@@ -169,7 +169,7 @@ def create_batch_submission(current_user):
             ip = request.remote_addr
             user_id = current_user.id
             user_communities = current_user.communities
-            highlighted_text = submission["highlighted_text"]
+            highlighted_text = sanitize_input(submission["highlighted_text"])
             source_url = submission["source_url"]
             explanation = submission["explanation"]
 
@@ -379,7 +379,7 @@ def submission(current_user, id):
             request_json = request.get_json()
 
             community_id = request_json.get("community_id", None)
-            highlighted_text = request_json.get("highlighted_text", None)
+            highlighted_text = sanitize_input(request_json.get("highlighted_text", None))
             explanation = request_json.get("explanation", None)
             source_url = request_json.get("url", None)
 

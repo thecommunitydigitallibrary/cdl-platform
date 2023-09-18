@@ -442,7 +442,9 @@ const [open, setOpen] = React.useState(false);
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           }}>
-            {props.highlighted_text}
+          {props.highlighted_text && props.highlighted_text.length > 0 && (
+            <span dangerouslySetInnerHTML={{ __html: props.highlighted_text }}></span>
+          )}
       </p>
 
 

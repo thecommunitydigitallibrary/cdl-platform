@@ -6,8 +6,8 @@ from functools import wraps
 from urllib.parse import urlparse, urldefrag, quote
 from collections import defaultdict
 
-
 import jwt
+import bleach
 from bson import ObjectId
 from flask import request, current_app
 
@@ -330,3 +330,24 @@ def combine_pages(submissions_pages, webpages_index_pages):
             submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
     
     return submissions_pages + webpages_index_pages
+
+def sanitize_input(input_data):
+	"""
+	Function to sanitize input data and remove any malicious code string to prevent from security threats
+	like XSS attacks.
+	
+	return: Sanitized input data
+	"""
+	if input_data and type(input_data)==str:
+		try:
+			# Define a list of allowed HTML tags and attributes
+			allowed_tags = ['mark']
+			sanitized_data = bleach.clean(input_data, tags=allowed_tags)
+			return sanitized_data
+
+		except Exception as e :
+			print(f"Error occured while sanitizing input data {input_data}: ", e)
+	else:
+		print(f"Cannot Sanitize input data {input_data}")
+
+	return input_data
