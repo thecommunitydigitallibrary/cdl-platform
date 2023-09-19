@@ -281,6 +281,11 @@ def hydrate_with_hashtags(results):
         hashtags_explanation = [x for x in result["explanation"].split() if len(x) > 1 and x[0] == "#"]
         hashtags_ht = [x for x in result["highlighted_text"].split() if len(x) > 1 and x[0] == "#"]
         hashtags = list(set(hashtags_explanation + hashtags_ht))
+        # remove mark in case hashtag is in body
+
+        hashtags = [re.sub("<mark>", "", x) for x in hashtags]
+        hashtags = [re.sub("</mark>", "", x) for x in hashtags]
+
         result["hashtags"] = hashtags
     return results
 
