@@ -4,14 +4,49 @@ import re
 import time
 from functools import wraps
 from urllib.parse import urlparse, urldefrag, quote
+from collections import defaultdict
 
 import jwt
+import bleach
 from bson import ObjectId
 from flask import request, current_app
 
 from app.helpers import response
 from app.helpers.status import Status
 from app.models.users import Users
+
+import validators
+
+
+def validate_submission(highlighted_text, explanation, source_url=None):
+    """
+    Checks to make sure submitted text is not a URL!
+    """
+    if validators.url(highlighted_text) or validators.url(explanation):
+        return False, "Error: The highlighted text or explanation should not be a URL"
+
+    # check to make sure source url is not on wrong page
+    if source_url != None:
+        if not validators.url(source_url):
+            return False, "Error: The URL is invalid: " + source_url
+        forbidden_URLs = ["chrome://"]
+        for url in forbidden_URLs:
+            if url in source_url:
+                return False, "Error: You cannot submit content on URL " + source_url
+
+    char_max_desc = 10000
+    word_max_desc = 1000
+
+    char_max_title = 1000
+    word_max_title = 100
+
+    # cap highlighted text, explanation length
+    if highlighted_text and (len(highlighted_text) > char_max_desc or len(highlighted_text.split()) > word_max_desc):
+        return False, "Highlighted text is too long. Please limit to 1000 words or 10,000 characters"
+    if explanation and (len(explanation) > char_max_title or len(explanation.split()) > word_max_title):
+        return False, "Title is too long. Please limit to 100 words or 1000 characters"
+
+    return True, "Validation successful"
 
 
 def format_time_for_display(timestamp):
@@ -128,3 +163,196 @@ def build_redirect_url(url, result_hash, highlighted_text, method="search"):
 		redirect_url += "&redirect_url=" + url
 
 	return redirect_url
+
+
+def create_page(hits, communities, toggle_display="highlight"):
+    """
+	Helper function for formatting raw elastic results.
+	Arguments:
+		hits : (dict): json raw output from elastic
+		communities : (dict) : the user's communities
+        toggle_display : (str) : highlight to show matched highlighted text, preview to show best preview
+	Returns:
+		return_obj : (list) : a list of formatted submissions for frontend display
+							Note that result_hash and redirect_url will be empty (need to hydrate)
+	"""
+
+    return_obj = []
+    for i, hit in enumerate(hits):
+        result = {
+            "redirect_url": None,
+            "display_url": None,
+            "orig_url": None,
+            "submission_id": None,
+            "result_hash": None,
+            "highlighted_text": None,
+            "explanation": None,
+            "score": hit.get("_score", 0),
+            "time": "",
+            "communities_part_of": []
+        }
+
+        if "webpage" in hit["_source"]:
+            result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
+
+            possible_matches = []
+            if "highlight" in hit and toggle_display == "highlight":
+                possible_matches = hit["highlight"].get("webpage.metadata.description", [])
+                if not possible_matches:
+                     possible_matches = hit["highlight"].get("webpage.metadata.h1", [])
+                if not possible_matches:
+                    # in case there are a lot of paragraphs
+                    possible_matches = hit["highlight"].get("webpage.all_paragraphs", [])[:10]
+
+                description = " .... ".join(possible_matches)
+            else:
+                description = None
+
+            if not description:
+                description = hit["_source"]["webpage"]["metadata"].get("description", None)
+            if not description:
+                description = hit["_source"]["webpage"]["metadata"].get("h1", None)
+            if not description:
+                description = "No Preview Available"
+            result["highlighted_text"] = description
+
+        else:
+            result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
+
+
+
+
+            description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) and toggle_display == "highlight" else hit["_source"].get("highlighted_text", None)
+            if not description:
+                description ="No Preview Available"
+            result["highlighted_text"] = description
+
+        # possible that returns additional communities?
+        result["communities_part_of"] = {community_id: communities[community_id] for community_id in
+                                         hit["_source"].get("communities", []) if community_id in communities}
+
+        result["submission_id"] = str(hit["_id"])
+
+        if "time" in hit["_source"]:
+            formatted_time = "Submitted " + format_time_for_display(hit["_source"]["time"])
+            result["time"] = formatted_time
+        elif "scrape_time" in hit["_source"]:
+            formatted_time = "Indexed " + format_time_for_display(hit["_source"]["scrape_time"])
+            result["time"] = formatted_time
+
+
+        # Display URL
+        url = hit["_source"].get("source_url", "")
+        display_url = build_display_url(url)
+        result["display_url"] = display_url
+        result["orig_url"] = url
+
+        return_obj.append(result)
+    return return_obj
+
+def hydrate_with_hash_url(results, search_id, page=0, page_size=10, method="search"):
+    """
+	Helper function hydrating with result hash and url.
+	This is separate from create_page because neural reranking happens in between.
+	Arguments:
+		results : (list): output of create_pages
+		search_id : (string) : the id of the search
+		page : (int, default=0) : current page
+		page_size : (int, default=10) : the size of each page
+	Returns:
+		pages : (list) : a reranked pages	
+	"""
+    for i, result in enumerate(results):
+        # result hash
+        result_hash = build_result_hash(str((page * page_size) + i), str(result["submission_id"]), str(search_id))
+
+        result["result_hash"] = result_hash
+
+        # build the redirect URL for clicks
+        redirect_url = build_redirect_url(result["orig_url"], result_hash, result["highlighted_text"], method)
+        result["redirect_url"] = redirect_url
+    return results
+
+
+def hydrate_with_hashtags(results):
+    for result in results:
+        # add the hashtags
+        result["hashtags"] = []
+        hashtags_explanation = [x for x in result["explanation"].split() if len(x) > 1 and x[0] == "#"]
+        hashtags_ht = [x for x in result["highlighted_text"].split() if len(x) > 1 and x[0] == "#"]
+        hashtags = list(set(hashtags_explanation + hashtags_ht))
+        # remove mark in case hashtag is in body
+
+        hashtags = [re.sub("<mark>", "", x) for x in hashtags]
+        hashtags = [re.sub("</mark>", "", x) for x in hashtags]
+
+        result["hashtags"] = hashtags
+    return results
+
+def diversify(pages, topn=10):
+    """
+    Slightly reorders pages to make top n domain-diverse.
+    """
+    pass
+
+def standardize_url(url):
+    # remove fragment from query
+    if "#" in url:
+        url = url.split("#")[0]
+    return url
+
+def extract_hashtags(text):
+      hashtags = [x for x in text.split() if len(x) > 1 and x[0] == "#"]
+      return hashtags
+
+
+def deduplicate(pages):
+    """
+    Helper function to remove all duplicate pages. Saves them as "children" in top-rated page.
+    """
+    map_pages = defaultdict(list)
+
+    for page in pages:
+        url = page["orig_url"].split("#")[0]
+        map_pages[url].append(page)
+
+    for key in map_pages.keys():
+        map_pages[key][0]["children"] = map_pages[key][1:11] if len(map_pages[key]) > 10 else map_pages[key][1:]
+
+    return [p[0] for p in map_pages.values()]
+
+def combine_pages(submissions_pages, webpages_index_pages):
+
+    # Building an inverted index to map orig_url to index using the submissions_pages list
+    subpgs_url_to_id = {}
+    for i, submission_page in enumerate(submissions_pages):
+        subpgs_url_to_id[submission_page["orig_url"]] = i
+
+    # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
+    for webpage in webpages_index_pages:
+        if subpgs_url_to_id.get(webpage["orig_url"]):
+            i = subpgs_url_to_id.get(webpage["orig_url"])
+            submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
+    
+    return submissions_pages + webpages_index_pages
+
+def sanitize_input(input_data):
+	"""
+	Function to sanitize input data and remove any malicious code string to prevent from security threats
+	like XSS attacks.
+	
+	return: Sanitized input data
+	"""
+	if input_data and type(input_data)==str:
+		try:
+			# Define a list of allowed HTML tags and attributes
+			allowed_tags = ['mark']
+			sanitized_data = bleach.clean(input_data, tags=allowed_tags)
+			return sanitized_data
+
+		except Exception as e :
+			print(f"Error occured while sanitizing input data {input_data}: ", e)
+	else:
+		print(f"Cannot Sanitize input data {input_data}")
+
+	return input_data

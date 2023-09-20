@@ -6,6 +6,10 @@ from pymongo import MongoClient
 import traceback
 import validators
 
+import sys
+sys.path.append("..")
+from app.helpers.helpers import extract_hashtags
+
 
 # TODO: added better error handling
 
@@ -54,10 +58,11 @@ class ElasticManager:
 
         query_split = query.split()
         new_query = []
+
+        hashtags = extract_hashtags(query)
+        query_obj["hashtags"] = hashtags
+
         for word in query_split:
-            # don't remove hashtags for now
-            if len(word) > 1 and word[0] == "#":
-                query_obj["hashtags"].append(word)
             if word.lower() not in self.stopwords:
                 new_query.append(word)
         new_query = " ".join(new_query)
@@ -189,8 +194,8 @@ class ElasticManager:
             query_comm["query"]["bool"]["filter"] = filter
             query_comm["highlight"]["fields"] = {
                 "highlighted_text": {
-                    "pre_tags": [''],
-                    "post_tags": ['']
+                    "pre_tags": ['<mark>'],
+                    "post_tags": ['</mark>']
                 }
             }
         else:
@@ -198,16 +203,16 @@ class ElasticManager:
             query_comm["_source"] = {"exclude": ["webpage.all_paragraphs"]}
             query_comm["highlight"]["fields"] = {
                 "webpage.metadata.h1": {
-                    "pre_tags": [''],
-                    "post_tags": ['']
+                    "pre_tags": ['<mark>'],
+                    "post_tags": ['</mark>']
                 },
                 "webpage.metadata.description": {
-                    "pre_tags": [''],
-                    "post_tags": ['']
+                    "pre_tags": ['<mark>'],
+                    "post_tags": ['</mark>']
                 },
                 "webpage.all_paragraphs": {
-                    "pre_tags": [''],
-                    "post_tags": ['']
+                    "pre_tags": ['<mark>'],
+                    "post_tags": ['</mark>']
                 },
             }
 
@@ -225,7 +230,7 @@ class ElasticManager:
             doc : (dictionary) : user submission with highlighted_text, communities, explanation, and source_url.
 
         Returns:
-            The response string from elastic.
+            The response string from elastic, and the hashtags, if any
         """
 
         if self.index_name == os.environ["elastic_index_name"]:
@@ -248,9 +253,10 @@ class ElasticManager:
             source_url = doc.source_url
 
             # extract hashtags for elastic from both fields
-            hashtags_explanation = [x for x in explanation.split() if len(x) > 1 and x[0] == "#"]
-            hashtags_ht = [x for x in highlighted_text.split() if len(x) > 1 and x[0] == "#"]
+            hashtags_explanation = extract_hashtags(explanation)
+            hashtags_ht = extract_hashtags(highlighted_text)
             hashtags = list(set(hashtags_explanation + hashtags_ht))
+
 
             inserted_doc = {
                 "source_url": source_url,
@@ -274,9 +280,10 @@ class ElasticManager:
                     "all_paragraphs": " ".join(paragraphs) if paragraphs is not None else ""
                 }
             }
+            hashtags = []
 
         r = requests.put(self.domain + self.index_name + "/_doc/" + doc_id, json=inserted_doc, auth=self.auth)
-        return r.text
+        return r.text, hashtags
 
     def backfill(self):
         """
@@ -379,10 +386,11 @@ class ElasticManager:
     def postprocess(self, text):
 
         try:
-            text = text.encode("latin1", errors="ignore").decode("utf8", errors="ignore")
+            text = text.encode("latin1", errors="strict").decode("utf8", errors="strict")
         except Exception as e:
             print(e)
             traceback.print_exc()
+            text = text.encode("utf8", errors="ignore").decode("utf8", errors="ignore")
         
         try:
             hits = json.loads(text)["hits"]

@@ -51,6 +51,5 @@ def neural_rerank():
             scores = rerank_model.predict(model_input)
             for i, score in enumerate(scores):
                 pages[i]["score"] = pages[i]["score"] + 10 * score
-            pages = sorted(pages, reverse=True, key=lambda x: x["score"])
 
     return {"pages": pages}, 200

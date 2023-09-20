@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
-import axios from "axios";
 import Snackbar from "@mui/material/Snackbar";
 import {useNavigate} from "react-router-dom";
 import MuiAlert from "@mui/material/Alert";
@@ -17,7 +16,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-export default function SignIn() {
+export default function SignIn({setUrlState}) {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
@@ -96,14 +95,6 @@ export default function SignIn() {
             alignItems: "center",
           }}
         >
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{fontSize: 20}}
-            href={localStorage.getItem('backendSource')}
-          >
-            The Community Digital Library
-          </a>
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
@@ -138,6 +129,7 @@ export default function SignIn() {
               fullWidth
               variant="contained"
               sx={{mt: 3, mb: 2}}
+              style={{padding: "14px"}}
             >
               Sign In
             </Button>
