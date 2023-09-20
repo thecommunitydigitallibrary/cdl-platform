@@ -16,8 +16,6 @@ To use the CDL, you have three options:
 Note that the local version is still under development:
 
 - No data is persisted; once the Docker containers stops, all data is lost.
-- The Chrome extension (from the Web store) is not compatible with the local version (yet).
-- However, you can build and load the extension locally.
 - "Reset Password" will not work due to no access to SendGrid.
 
 ### Requirements for running locally
