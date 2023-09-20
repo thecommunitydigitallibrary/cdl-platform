@@ -1124,7 +1124,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
             if "neural_api" in os.environ:
                 try:
-                    resp = requests.post(os.environ["neural_api"] + "neural/rerank/", json = {"pages": pages, "query": query})
+                    resp = requests.post(os.environ["neural_api"] + "neural/rerank/", json = {"pages": submissions_pages, "query": query})
                     if resp.status_code == 200:
                         resp_json = resp.json()
                         pages = resp_json["pages"]
