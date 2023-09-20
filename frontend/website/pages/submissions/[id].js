@@ -1006,7 +1006,7 @@ export default function SubmissionResult({ errorCode, data }) {
                   autoFocus
                   margin="dense"
                   id="editHighlightedText"
-                  label="Highlighted Text"
+                  label="Description"
                   fullWidth
                   variant="standard"
                   multiline

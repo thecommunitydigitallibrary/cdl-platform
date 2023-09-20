@@ -625,6 +625,10 @@ def search(current_user):
         # create a flag for URL core retrieval
         URL_CORE_RETRIEVE = None
 
+        # turn off webpages for searching via hashtag
+        if query and "#" in query:
+            toggle_webpage_results = False
+
         # for now, on extension_open, set the query to be the URL or highlighted text
         # also for note_automatic, no query passed in this case either
         if (not query and source == "extension_open") or (source == "note_automatic"):
@@ -1073,6 +1077,8 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
         if not page:
 
             _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
+            
+
 
             if url_core_retrieve != None:
                 url = standardize_url(url_core_retrieve)
@@ -1085,15 +1091,19 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                             core_hashtags = list(set(core_hashtags))
                             _, core_hits = elastic_manager.search(" ".join(core_hashtags), [community_id], page=0, page_size=1000)
 
+
                             # to put on top
                             for hit in core_hits:
                                 hit["_score"] += 100
-                            submissions_hits += core_hits
+
+                            submissions_hits = submissions_hits + core_hits
 
 
             print("\tSubmission search: ", time.time() - start_time)
 
             submissions_pages = create_page(submissions_hits, communities)
+
+            print(submissions_pages)
 
             print("\tSubmission pages: ", time.time() - start_time)            
 
@@ -1112,8 +1122,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                 print("\tCombined search: ", time.time() - start_time)
 
 
-            pages = deduplicate(submissions_pages)
-            print("\tDedup: ", time.time() - start_time)
+           
 
             if "neural_api" in os.environ:
                 try:
@@ -1132,7 +1141,10 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                 print("\t Neural Rerank not available")
 
 
-           
+            pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
+
+            pages = deduplicate(pages)
+            print("\tDedup: ", time.time() - start_time)
             pages = hydrate_with_hash_url(pages, search_id, page=index)
             print("\tURL: ", time.time() - start_time)
             pages = hydrate_with_hashtags(pages)

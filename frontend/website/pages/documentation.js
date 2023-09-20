@@ -20,12 +20,11 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            The Community Digital Library (CDL) is a website and Chrome extension
-                            with the goal of helping the scaling and efficiency of online learning.
+                            The Community Digital Library (CDL) is an online and open-source social bookmarking platform that allows you to collaboratively describe and save, search for, and discover webpages related to your interests. We offer a stand-alone website and a Chrome extension, all for free.
                         </p>
                         <p>
-                            CDL provides various features and functionalities to enhance your online learning experience.
-                            In this section, we will explore the core features of the CDL platform.
+                            The CDL provides various features and functionalities to enhance your online learning experience.
+                            On this page, we outline the main features of the CDL, and how to best use these features to achieve your goals.
                         </p>
                         {/* Add content for this section */}
                     </>
@@ -38,15 +37,13 @@ const topics = [
                     <>
                         <p>
                             You can create a submission by using the Chrome extension's "Submit"
-                            tab. A submission consists of the current URL (i.e., the page that you
-                            opened the extension on), the highlighted text present in the field,
-                            and a short user explanation of why this page is interesting or
-                            useful. Upon clicking "Submit," all of this will be saved to the
+                            tab, or by clicking the "+" on the CDL website header.                           
+                            A submission consists of the current URL (i.e., the page that you
+                            opened the extension on), a title, and a description.
+                            After clicking "Submit," all of this will be saved to the
                             selected community.
                         </p>
-                        <p>
-                            In this section, we will guide you through the process of creating and submitting content to the CDL.
-                        </p>
+                        
                         {/* Add content for this section */}
                     </>
                 ),
@@ -64,10 +61,8 @@ const topics = [
                     <p>
                         Searching within the Community Digital Library (CDL) is a straightforward process.
                         Whether you are looking for specific content or exploring new resources,
-                        our search functionality can assist you in finding what you need.
-                    </p>
-                    <p>
-                        In this section, we will show you how to effectively search for content within the CDL.
+                        our search functionality can assist you in finding what you need. You can enter a search
+                        query into the search bar in either the website or the extension.
                     </p>
                     {/* Add content for this section */}
                 </>
@@ -84,10 +79,8 @@ const topics = [
                     <>
                         <p>
                             Note-taking is an essential part of the learning process, and the CDL provides a dedicated
-                            feature to help you organize and manage your notes efficiently.
-                        </p>
-                        <p>
-                            In this section, we will explain how to create, edit, and utilize notes within the CDL.
+                            feature to help you organize and manage your notes efficiently. You can create, edit, and delete
+                            markdown-style notes by clicking the "Notes" in the website header. These notes are private to you.
                         </p>
                         {/* Add content for this section */}
                     </>
@@ -105,8 +98,6 @@ const topics = [
                         <p>
                             Beyond the core features, the CDL offers additional functionality to enhance your user experience.
                             These features include submission management, community interactions, and more.
-                        </p>
-                        <p>
                             In this section, we will explore the various options and capabilities provided by the CDL.
                         </p>
                         {/* Add content for this section */}
@@ -119,11 +110,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            Beyond the core features, the CDL offers additional functionality to enhance your user experience.
-                            These features include submission management, community interactions, and more.
-                        </p>
-                        <p>
-                            In this section, we will explore the various options and capabilities provided by the CDL.
+                            Coming soon!
                         </p>
                         {/* Add content for this section */}
                     </>
@@ -198,7 +185,6 @@ export default function Documentation() {
                                             <h3 className="item-title">{item.title}</h3>
                                             <Paper elevation={0} className="paper-container">
                                                 <ContentSection content={item.content} link={item.link} />
-                                                {testGIF}
                                             </Paper>
                                         </div>
                                     ))}
