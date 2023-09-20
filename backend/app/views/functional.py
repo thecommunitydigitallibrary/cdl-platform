@@ -1103,8 +1103,6 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
             submissions_pages = create_page(submissions_hits, communities)
 
-            print(submissions_pages)
-
             print("\tSubmission pages: ", time.time() - start_time)            
 
             if toggle_webpage_results:
