@@ -1,9 +1,10 @@
 import { useRouter } from "next/router";
 import jsCookie from "js-cookie";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import SearchResult from "../../components/searchresult";
 import Footer from "../../components/footer";
 import Error from "next/error";
+import dynamic from 'next/dynamic'
 import {
   FormControl,
   Grid,
@@ -45,11 +46,18 @@ import Launch from "@mui/icons-material/Launch";
 import Save from "@mui/icons-material/Save";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
+import ReactDOMServer from 'react-dom/server';
 
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
+import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
+import SpriteText from 'three-spritetext';
 
 import Box from "@mui/system/Box";
 import Head from "next/head";
+
+const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), {
+  loading: () => <p>Loading...</p>, ssr: false
+})
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
@@ -65,6 +73,119 @@ export default function SubmissionResult({ errorCode, data }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState("error");
+  const [width, setWidth] = useState(900);
+  const [height, setHeight] = useState(800);
+
+  const [graph, setGraph] = useState({"nodes": [], "links": []})
+
+  const drawNormalNode = useCallback((node) => {
+        const sprite = new SpriteText(node.label ? node.label : node.id, 5);
+        sprite.color = "#fff";
+        sprite.backgroundColor = colorNodeBackground(node.type);
+        sprite.padding = [8, 4];
+        sprite.textHeight = 2;
+        sprite.borderRadius = 10;
+        sprite.fontWeight = 700;
+
+        return sprite;
+    }, []);
+
+    const colorNodeBackground = (type) => {
+        switch (type) {
+            case "current": return "#154f83";
+            case "nearby" : return "#26bdab";
+            default: return "#f1f2f3";
+        }
+    }
+
+    const fgRef = useRef();
+
+    const handleNodeClick = useCallback(
+        async (node) => {
+          console.log(node);
+          console.log(submissionDataResponse);
+
+          const res = await fetch( baseURL_client + "submission/" + node.id, {
+            method: "GET",
+            headers: new Headers({
+              Authorization: jsCookie.get("token"),
+              "Content-Type": "application/json",
+            }),
+          });
+          const response = await res.json();
+          if (response.status === "ok") {
+            console.log(response);
+            setSubmissionDataResponse(response);
+          } else {
+            console.log(response);
+          }
+
+          // d3.selectAll("#node-info-container").remove();
+          // // Aim at node from outside it
+          // const distance = 200;
+          // const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+          // fgRef.current.cameraPosition(
+          //     { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
+          //     node, // lookAt ({ x, y, z })
+          //     3000 // ms transition duration
+          // );
+        },
+        []
+    );
+
+    const handleBackgroundClick = useCallback(
+        (node) => {
+            console.log(node);
+            // d3.selectAll("#node-info-container").remove();
+            // // Aim at node from outside it
+            // const distance = 200;
+            // const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+            // fgRef.current.cameraPosition(
+            //     { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
+            //     node, // lookAt ({ x, y, z })
+            //     3000 // ms transition duration
+            // );
+        },
+        []
+    );
+
+    const handleNodeHover = useCallback(
+        (node) => {
+            // console.log(node);
+            // d3.selectAll("#node-info-container").remove();
+            // // Aim at node from outside it
+            // const distance = 200;
+            // const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+            // fgRef.current.cameraPosition(
+            //     { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
+            //     node, // lookAt ({ x, y, z })
+            //     3000 // ms transition duration
+            // );
+        },
+        []
+    );
+
+    const handleNodeLabel = useCallback(
+        (node) => {
+            console.log("NODE", node);
+            // d3.selectAll("#node-info-container").remove();
+            // // Aim at node from outside it
+            // const distance = 200;
+            // const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+            // fgRef.current.cameraPosition(
+            //     { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
+            //     node, // lookAt ({ x, y, z })
+            //     3000 // ms transition duration
+            // );
+          let desc = node.desc ? <p>{node.desc}</p> : null;
+          let tooltip = <div style={{background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px"}}>
+            <h6>{node.label}</h6>
+            {desc}
+          </div>;
+          return ReactDOMServer.renderToString(tooltip, {});
+        },
+        []
+    );
 
   const handleClick = () => {
     setOpen(true);
@@ -427,6 +548,24 @@ export default function SubmissionResult({ errorCode, data }) {
     return idNameMap;
   };
 
+  const getGraphData = async () => {
+    console.log("ABC", data);
+    const res = await fetch(baseURL_client + "graph/" + data.submission.submission_id, {
+      method: "GET",
+      headers: new Headers({
+        Authorization: jsCookie.get("token"),
+        "Content-Type": "application/json",
+      }),
+    });
+    const response = await res.json();
+    if (response.status === "ok") {
+      console.log(response.data);
+      setGraph(response.data);
+    } else {
+      console.log(response);
+    }
+  }
+
   const getSubmissionData = () => {
     if (data.status == "ok") {
       setSubmissionDataResponse(data);
@@ -480,7 +619,10 @@ export default function SubmissionResult({ errorCode, data }) {
   };
 
   useEffect(() => {
+    setHeight(window.innerHeight - 88.6)
+    setWidth((window.innerWidth / 2) - 40)
     getSubmissionData();
+    getGraphData();
   }, []);
 
 
@@ -536,14 +678,13 @@ export default function SubmissionResult({ errorCode, data }) {
         <link rel="icon" href="/images/tree32.png" />
       </Head>
       <Header />
-      <div className="allResults">
+      <div className="allResults" style={{display: "flex"}}>
         {submissionDataResponse.submission && (
           <Paper
             elevation={0}
             sx={{
               marginLeft: "10px",
-              marginTop: "75px",
-              width: "1000px",
+              width: "50%",
               padding: "0px 20px 0px 10px",
             }}
           >
@@ -691,6 +832,42 @@ export default function SubmissionResult({ errorCode, data }) {
                     ? communityNamesList.map((link, i) => [i > 0, link])
                     : "None"}
                 </div>
+
+          <div style={{display: "flex", width: "85%"}}>
+        <div style={{ marginRight: '5px'}}>
+          <Tooltip title="Submitted Time">
+            <ScheduleRounded
+              style={{ height:'20px', color: "#1976d2" }}
+            />
+          </Tooltip>
+        </div>
+
+        <div style={{float: "left", overflowX: "auto" }}>
+          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+            <Tooltip title={data.submission.time}>
+            <a
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+              fontWeight: "500",
+              fontSize: "0.8125rem",
+              lineHeight: "1.75",
+              letterSpacing: "0.02857em",
+              textTransform: "uppercase",
+              color: "#1976d2",
+              padding: "3px 7px",
+              marginRight: "5px",
+              textDecoration: "none",
+              background: "aliceblue",
+            }}
+          >{data.submission.time}
+          </a>
+          </Tooltip>
+
+          </p>
+        </div>
+          </div>
                 
               </div>
 
@@ -1053,6 +1230,30 @@ export default function SubmissionResult({ errorCode, data }) {
             </Snackbar>
           </Paper>
         )}
+        <Paper
+          elevation={0}
+          sx={{
+            marginLeft: "10px",
+            width: "50%",
+            padding: 0
+          }}>
+          <ForceGraph3D
+            ref={fgRef}
+            graphData={graph}
+            width={width}
+            height={height}
+            backgroundColor={'#e5e5e5'}
+            onNodeClick={handleNodeClick}
+            onBackgroundClick={handleBackgroundClick}
+            //nodeThreeObject={drawNormalNode}
+            nodeAutoColorBy="type"
+            linkAutoColorBy="source"
+            nodeLabel={handleNodeLabel}
+            linkColor={() => 'rgba(0,0,0,0.7)'}
+            onNodeHover={handleNodeHover}
+            linkDirectionalParticles={1}
+        />
+          </Paper>
       </div>
       <Footer />
     </>

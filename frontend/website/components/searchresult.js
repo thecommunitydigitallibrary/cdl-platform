@@ -17,6 +17,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import ThumbDownRoundedIcon from "@mui/icons-material/ThumbDownRounded";
 import ThumbUpRoundedIcon from "@mui/icons-material/ThumbUpRounded";
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
+import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
 import MoreVert from "@mui/icons-material/MoreVert";
 import TagIcon from '@mui/icons-material/Tag';
 import FeedbackIcon from "@mui/icons-material/Feedback";
@@ -273,6 +274,7 @@ function SearchResult(props) {
   }
 
   return (
+    <a href={websiteURL + "submissions/" + props.submission_id} style={{textDecoration: "none"}}>
     <Paper
       elevation={0}
       id={"card_id" + props.search_idx}
@@ -291,7 +293,7 @@ function SearchResult(props) {
           style={{
             marginRight: "7px",
             alignSelf: "center",
-            paddingTop: "4px",
+            paddingTop: "0"
           }}
         >
           <div>
@@ -470,7 +472,7 @@ function SearchResult(props) {
           </Tooltip>
         </div>
 
-        <div style={{ width: "85%", float: "left", overflowX: "auto" }}>
+        <div style={{ float: "left", overflowX: "auto" }}>
         {communityNamesList && communityNamesList.length !== 0 ? (
           <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
             {communityNamesList}
@@ -481,6 +483,46 @@ function SearchResult(props) {
           </p>
         )}
         </div>
+
+        {props.time ? (
+          <div style={{display: "flex", width: "85%"}}>
+        <div style={{ marginRight: '5px'}}>
+          <Tooltip title="Submitted Time">
+            <ScheduleRounded
+              style={{ height:'20px', color: "#1976d2" }}
+            />
+          </Tooltip>
+        </div>
+
+        <div style={{float: "left", overflowX: "auto" }}>
+          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+            <Tooltip title={props.time}>
+            <a
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+              fontWeight: "500",
+              fontSize: "0.8125rem",
+              lineHeight: "1.75",
+              letterSpacing: "0.02857em",
+              textTransform: "uppercase",
+              color: "#1976d2",
+              padding: "3px 7px",
+              marginRight: "5px",
+              textDecoration: "none",
+              background: "aliceblue",
+            }}
+          >{props.time}
+          </a>
+          </Tooltip>
+
+          </p>
+        </div>
+          </div>
+      ) : null}
+
+
 
         {props.show_relevant ? (
           <div style={{ float: "right", display: "flex" }}>
@@ -516,14 +558,6 @@ function SearchResult(props) {
           </div>
         ) : null}
       </div>
-      
-      {props.time ? (
-        <div style={{ display: "inline", float: "right", paddingRight: "4px", fontSize: "13px",
-        color: "#808080",
-        }}>
-          <div><em>{props.time}</em></div>          
-        </div>
-      ) : null}
 
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
@@ -531,6 +565,7 @@ function SearchResult(props) {
         </Alert>
       </Snackbar>
     </Paper>
+    </a>
   );
 }
 
