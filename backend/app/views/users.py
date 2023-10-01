@@ -167,7 +167,7 @@ def forgot_password():
 				traceback.print_exc()
 				return response.error("Internal server error.", Status.INTERNAL_SERVER_ERROR)
 
-		return response.success("Password reset request sent.", Status.OK)
+		return response.success({"message": "Password reset request sent."}, Status.OK)
 	except Exception as e:
 		print(e)
 		traceback.print_exc()

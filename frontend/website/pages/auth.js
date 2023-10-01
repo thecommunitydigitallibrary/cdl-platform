@@ -447,9 +447,8 @@ export default function ({ data }) {
               {pwdResetReqSent ? (
                 <p>
                   {" "}
-                  Success! To receive your password reset link, please email{" "}
-                  <a href={tempEmail}>kjros2@illinois.edu</a> from the same
-                  email entered in the previous step.
+                  Success! You will shortly receive an email from no-reply@textdata.org containing the password reset link.
+                  Note that the link will expire in 72 hours.
                 </p>
               ) : (
                 <p>
