@@ -18,61 +18,62 @@ def get_graph(current_user, id):
 	print(current_user, id)
 
 	submission, search_results = graph_search(current_user, id)
-	print(search_results)
+	# print(search_results)
 
 	nodes = [
 		{
 			"id": id,
 			"label": submission.explanation,
-			"desc": submission.highlighted_text if len(submission.highlighted_text) < 100 else f"{submission.highlighted_text[:100]}...",
+			"desc": submission.highlighted_text if len(
+				submission.highlighted_text) < 200 else f"{submission.highlighted_text[:200]}...",
 			"type": "current",
 		}
 	]
 	links = []
+	h = set()
+	h.add(id)
 	for result in search_results:
 		if result["_id"] == id:
 			continue
 		node = {
 			"id": result["_id"],
 			"label": result["_source"]["explanation"],
-			"type": "nearby",
+			"type": "first",
 		}
 		link = {
 			"source": id,
 			"target": result["_id"]
 		}
+		h.add(result["_id"])
 		nodes.append(node)
 		links.append(link)
+
+	for result in search_results:
+		source = result["_id"]
+		sub, second_level_results = graph_search(current_user, source)
+
+		for new in second_level_results:
+			if new["_id"] == source:
+				continue
+			if new["_id"] not in h:
+				node = {
+					"id": new["_id"],
+					"label": new["_source"]["explanation"],
+					"type": "second",
+				}
+				h.add(new["_id"])
+				nodes.append(node)
+				link = {
+					"source": source,
+					"target": new["_id"]
+				}
+
+				links.append(link)
 
 	data = {
 		"nodes": nodes,
 		"links": links
 	}
-	# return {
-	# 	"status": "ok",
-	# 	"data": {"nodes": [{
-	# 		"id": "6412242ba16775cc9de298c6",
-	# 		"type": "current",
-	# 		"title": "AA"
-	# 	},
-	# 		{
-	# 			"id": "6400479525bd2feef310aaa8",
-	# 			"type": "nearby",
-	# 			"title": "BB"
-	# 		},
-	# 		{
-	# 			"id": "64004acfd96c18cbe2fa1a83",
-	# 			"type": "nearby",
-	# 			"title": "CC"
-	# 		}],
-	# 		"links": [{
-	# 			"source": "6412242ba16775cc9de298c6",
-	# 			"target": "6400479525bd2feef310aaa8"
-	# 		},
-	# 			{
-	# 				"source": "6412242ba16775cc9de298c6",
-	# 				"target": "64004acfd96c18cbe2fa1a83"
-	# 			}]
-	# 	}}
+
 	print("Data", data)
 	return response.success({"data": data}, Status.OK)

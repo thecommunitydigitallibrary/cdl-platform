@@ -580,10 +580,6 @@ def submission(current_user, id, submission_id=None):
 
 
 def graph_search(current_user, submission_id):
-    return_obj = {
-
-    }
-
     try:
         cdl_logs = Logs()
         submission_data = cdl_logs.find_one({"_id": ObjectId(submission_id)})
@@ -593,24 +589,17 @@ def graph_search(current_user, submission_id):
         return response.error("Invalid submission ID", Status.NOT_FOUND)
 
     ip = request.remote_addr
-    user_id = current_user.id
     communities = current_user.communities
     explanation = submission_data.explanation
     highlighted_text = submission_data.highlighted_text
-    own_submission = False
 
     query = f"{explanation} {highlighted_text}"[:1000]
     print(ip, query)
-    source = "graph_search"
 
-    # search_id, _ = log_search(ip, user_id, source, query, communities, own_submissions, url=url,
-    #                           highlighted_text=highlighted_text)
-    # search_id = str(search_id)
     communities = [str(x) for x in communities]
     _, submissions_hits = elastic_manager.search(query, communities, page=0, page_size=50)
     print(len(submissions_hits), submissions_hits)
     return submission_data, submissions_hits
-
 
 
 @functional.route("/api/search", methods=["GET"])
