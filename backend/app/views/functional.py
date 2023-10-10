@@ -1092,9 +1092,10 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                             _, core_hits = elastic_manager.search(" ".join(core_hashtags), [community_id], page=0, page_size=1000)
 
 
-                            # to put on top
+                            # to put on top (in slightly random order)
                             for hit in core_hits:
-                                hit["_score"] += 100
+                                rand_int = random.randint(0,10)
+                                hit["_score"] += 100 + rand_int
 
                             submissions_hits = submissions_hits + core_hits
 
