@@ -687,9 +687,10 @@ export default function SubmissionResult({ errorCode, data }) {
                       style={{ height: "21px", color: "#1976d2" }}
                     />
                   </Tooltip>{" "}
-                  {communityNamesList.length > 0
+                  {communityNamesList.length > 0 && data.submission.type === "user_submission"
                     ? communityNamesList.map((link, i) => [i > 0, link])
                     : "None"}
+                  {data.submission.type === "webpage" && "Webpage"}
                 </div>
                 
               </div>
