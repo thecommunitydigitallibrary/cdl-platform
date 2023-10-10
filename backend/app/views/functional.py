@@ -583,23 +583,34 @@ def graph_search(current_user, submission_id):
     try:
         cdl_logs = Logs()
         submission_data = cdl_logs.find_one({"_id": ObjectId(submission_id)})
+
+        is_webpage = False
+        if not submission_data:
+            webpages = Webpages()
+            submission_data = webpages.find_one({"_id": ObjectId(submission_id)})
+            is_webpage = True
+
     except Exception as e:
         print(e)
         traceback.print_exc()
         return response.error("Invalid submission ID", Status.NOT_FOUND)
 
-    ip = request.remote_addr
+    if not submission_data:
+        return response.error("Invalid submission ID", Status.NOT_FOUND)
+
     communities = current_user.communities
-    explanation = submission_data.explanation
-    highlighted_text = submission_data.highlighted_text
+    explanation = submission_data.webpage.get("metadata", {}).get("title", "") if is_webpage else submission_data.explanation
+    highlighted_text = submission_data.webpage.get("metadata", {}).get("description", "") if is_webpage else submission_data.highlighted_text
 
     query = f"{explanation} {highlighted_text}"[:1000]
-    print(ip, query)
 
     communities = [str(x) for x in communities]
     _, submissions_hits = elastic_manager.search(query, communities, page=0, page_size=50)
-    print(len(submissions_hits), submissions_hits)
-    return submission_data, submissions_hits
+    node = {
+        "explanation": explanation,
+        "highlighted_text": highlighted_text
+    }
+    return node, submissions_hits
 
 
 @functional.route("/api/search", methods=["GET"])

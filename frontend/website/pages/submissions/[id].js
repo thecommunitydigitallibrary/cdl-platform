@@ -1,17 +1,11 @@
 import { useRouter } from "next/router";
 import jsCookie from "js-cookie";
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import SearchResult from "../../components/searchresult";
 import Footer from "../../components/footer";
 import Error from "next/error";
 import dynamic from 'next/dynamic'
-import {
-  FormControl,
-  Grid,
-  InputLabel,
-  OutlinedInput,
-  Select,
-} from "@mui/material";
+import { FormControl, Grid, InputLabel, OutlinedInput, Select } from "@mui/material";
 
 import Header from "../../components/header";
 
@@ -35,11 +29,11 @@ import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
 
 import Delete from "@mui/icons-material/Delete";
+import DeleteIcon from "@mui/icons-material/Delete";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import AddLinkIcon from "@mui/icons-material/AddLink";
 import ShareIcon from "@mui/icons-material/Share";
 import ActionButton from "../../components/buttons/actionbutton";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import Close from "@mui/icons-material/Close";
 import Launch from "@mui/icons-material/Launch";
@@ -50,7 +44,6 @@ import ReactDOMServer from 'react-dom/server';
 
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
 import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
-import SpriteText from 'three-spritetext';
 
 import Box from "@mui/system/Box";
 import Head from "next/head";
@@ -66,7 +59,7 @@ const websiteURL = process.env.NEXT_PUBLIC_FROM_CLIENT;
 const getSubmissionEndpoint = "submission/";
 const searchEndpoint = "search";
 
-export default function SubmissionResult({ errorCode, data }) {
+export default function SubmissionResult({ errorCode, data, id, target }) {
   if (errorCode) {
     return <Error statusCode={errorCode} />;
   }
@@ -76,77 +69,23 @@ export default function SubmissionResult({ errorCode, data }) {
   const [width, setWidth] = useState(900);
   const [height, setHeight] = useState(800);
   const [source, setSource] =  useState("");
-  const [graph, setGraph] = useState({"nodes": [], "links": []})
+  const [graph, setGraph] = useState({"nodes": [], "links": []});
+  const [graphSet, setGraphSet] = useState(new Set());
   const graphRef = useRef(graph);
   const sourceRef = useRef(source);
 
-  const drawNormalNode = useCallback((node) => {
-        const sprite = new SpriteText(node.label ? node.label : node.id, 5);
-        sprite.color = "#fff";
-        sprite.backgroundColor = colorNodeBackground(node.type);
-        sprite.padding = [8, 4];
-        sprite.textHeight = 2;
-        sprite.borderRadius = 10;
-        sprite.fontWeight = 700;
-
-        return sprite;
-    }, []);
-
-    const colorNodeBackground = (type) => {
-        switch (type) {
-            case "current": return "#154f83";
-            case "nearby" : return "#26bdab";
-            case "visited": return "#d38327";
-            default: return "#f1f2f3";
+    const colorNodeBackground = (node) => {
+        switch (node.type) {
+            case "current": return "#2c7dcc";
+            case "first" : return "#75a936";
+            case "second": return "#ad922b";
+            case "visited": return "#7d51af";
+            default: return "#ad3b3b";
         }
     }
 
-
-
-    const handleBackgroundClick = useCallback(
-        (node) => {
-            // console.log(node);
-            // d3.selectAll("#node-info-container").remove();
-            // // Aim at node from outside it
-            // const distance = 200;
-            // const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-            // fgRef.current.cameraPosition(
-            //     { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
-            //     node, // lookAt ({ x, y, z })
-            //     3000 // ms transition duration
-            // );
-        },
-        []
-    );
-
-    const handleNodeHover = useCallback(
-        (node) => {
-            // console.log(node);
-            // d3.selectAll("#node-info-container").remove();
-            // // Aim at node from outside it
-            // const distance = 200;
-            // const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-            // fgRef.current.cameraPosition(
-            //     { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
-            //     node, // lookAt ({ x, y, z })
-            //     3000 // ms transition duration
-            // );
-        },
-        []
-    );
-
     const handleNodeLabel = useCallback(
         (node) => {
-            // console.log("NODE", node);
-            // d3.selectAll("#node-info-container").remove();
-            // // Aim at node from outside it
-            // const distance = 200;
-            // const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-            // fgRef.current.cameraPosition(
-            //     { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
-            //     node, // lookAt ({ x, y, z })
-            //     3000 // ms transition duration
-            // );
           let desc = node.desc ? <p>{node.desc}</p> : null;
           let tooltip = <div style={{background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px"}}>
             <h6>{node.label}</h6>
@@ -520,27 +459,75 @@ export default function SubmissionResult({ errorCode, data }) {
     return idNameMap;
   };
 
-  const getGraphData = async () => {
-    console.log("ABC", data);
-    setSource(data.submission.submission_id);
-    const res = await fetch(baseURL_client + "graph/" + data.submission.submission_id, {
+  const callGraphAPI = async (submission_id) => {
+    const res = await fetch(baseURL_client + "graph/" + submission_id, {
       method: "GET",
       headers: new Headers({
         Authorization: jsCookie.get("token"),
         "Content-Type": "application/json",
       }),
     });
-    const response = await res.json();
-    if (response.status === "ok") {
-      // console.log(response.data);
-      setGraph(response.data);
+    return await res.json();
+  }
 
+  const getGraphData = async () => {
+    setSource(id);
+    const response = await callGraphAPI(id);
+    if (response.status === "ok") {
+      setGraph(response.data);
+      for (let i = 0; i < response.data.nodes.length; ++i) {
+        graphSet.add(response.data.nodes[i].id);
+      }
+      setGraphSet(graphSet);
     } else {
       console.log(response);
+    }
+    if (target != null) {
+      handleNodeVisit({id: target});
     }
   }
 
     const fgRef = useRef();
+
+    const handleNodeVisit = useCallback((node) => {
+      let newGraph = graphRef.current;
+      for (let i = 0; i < newGraph.nodes.length; ++i) {
+        if (newGraph.nodes[i].id === node.id) {
+            newGraph.nodes[i]["type"] = "visited";
+        }
+      }
+      setGraph(newGraph);
+    }, [graph, setGraph]);
+
+    const handleNodeAdd = useCallback((node, data) => {
+      console.log("DATA", data);
+      let newGraph = graph;
+      console.log("OLD", newGraph);
+
+      console.log("OLD Set", graphSet);
+      for (let i = 0; i < data.nodes.length; ++i) {
+        if (!graphSet.has(data.nodes[i].id)) {
+            let nde = data.nodes[i];
+            nde["index"] = data.nodes.length;
+            newGraph.nodes.push(nde);
+        }
+      }
+
+      for (let i = 0; i < data.links.length; ++i) {
+        if (!graphSet.has(data.links[i].target)) {
+            let lnk = data.links[i];
+            lnk["index"] = data.links.length;
+            lnk["source"] = node;
+            lnk["target"] = data.nodes[data.nodes.length-1];
+            newGraph.links.push(lnk);
+            graphSet.add(data.links[i].target);
+        }
+      }
+      setGraphSet(graphSet);
+      console.log("NEW  Set", graphSet);
+      console.log("NEW", newGraph);
+      setGraph(newGraph);
+    }, [graph, setGraph]);
 
     const handleNodeClick = useCallback(
         async (node) => {
@@ -552,35 +539,27 @@ export default function SubmissionResult({ errorCode, data }) {
               "Content-Type": "application/json",
             }),
           });
-          let newGraph = graphRef.current;
-          for (let i = 0; i < newGraph.nodes.length; ++i) {
-            if (newGraph.nodes[i].id === node.id) {
-                console.log("node", node.id);
-                newGraph.nodes[i]["type"] = "visited";
-            }
-          }
-          console.log(newGraph);
-          setGraph(newGraph);
+          handleNodeVisit(node);
           const response = await res.json();
           if (response.status === "ok") {
-            // console.log(response);
             setSubmissionDataResponse(response);
           } else {
             console.log(response);
           }
+
+          // Add New Nodes and Links
+          // const graph_response = await callGraphAPI(id);
+          // if (graph_response.status === "ok") {
+          //   handleNodeAdd(node, graph_response.data);
+          // } else {
+          //   console.log(graph_response);
+          // }
+
+          // Complete Loading and Change URL
+
           setLoading(false);
           const nextURL = websiteURL + 'submissions/' + sourceRef.current + "?target=" + node.id;
           window.history.replaceState(null, "", nextURL);
-
-          // d3.selectAll("#node-info-container").remove();
-          // // Aim at node from outside it
-          // const distance = 200;
-          // const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-          // fgRef.current.cameraPosition(
-          //     { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
-          //     node, // lookAt ({ x, y, z })
-          //     3000 // ms transition duration
-          // );
         },
         [graph, setGraph]
     );
@@ -1011,12 +990,12 @@ export default function SubmissionResult({ errorCode, data }) {
                         <Grid item>
                           <div>
                             <FormControl
-                              sx={{ maxWidth: 225, minWidth: 225 }}
+                              sx={{ maxWidth: 185, minWidth: 185 }}
                               size="small"
                             >
                               <InputLabel
                                 id="demo-multiple-checkbox-label"
-                                sx={{ width: 225 }}
+                                sx={{ width: 185 }}
                               >
                                 Save to Community
                               </InputLabel>
@@ -1279,13 +1258,9 @@ export default function SubmissionResult({ errorCode, data }) {
             height={height}
             backgroundColor={'#e5e5e5'}
             onNodeClick={handleNodeClick}
-            onBackgroundClick={handleBackgroundClick}
-            //nodeThreeObject={drawNormalNode}
-            nodeAutoColorBy="type"
-            linkAutoColorBy="source"
+            nodeColor={colorNodeBackground}
             nodeLabel={handleNodeLabel}
             linkColor={() => 'rgba(0,0,0,0.7)'}
-            onNodeHover={handleNodeHover}
             linkDirectionalParticles={1}
         />
           </Paper>
@@ -1309,7 +1284,9 @@ export async function getServerSideProps(context) {
       },
     };
   } else {
-    var URL = baseURL_server + getSubmissionEndpoint + context.query.id;
+    const id = context.query.id;
+    const target = context.query.target;
+    let URL = baseURL_server + getSubmissionEndpoint + ((target == null) ? id : target);
     const res = await fetch(URL, {
       headers: new Headers({
         Authorization: context.req.cookies.token,
@@ -1319,7 +1296,7 @@ export async function getServerSideProps(context) {
     const errorCode = res.ok ? false : res.status;
 
     return {
-      props: { errorCode, data },
+      props: { errorCode, data, id, target},
     };
   }
 }

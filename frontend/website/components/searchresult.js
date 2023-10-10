@@ -435,7 +435,7 @@ function SearchResult(props) {
           margin: "0px 0px 1px 0px",
         }}
       >
-        {props.display_url}
+        {props.display_url} | {props.time}
       </p>
       {/* restricting text to only 500 characters per result to make it more uniform */}
       <p style={{fontSize: '15px', marginTop: '1%', textAlign: 'justify', maxWidth: '100%',
@@ -472,7 +472,7 @@ function SearchResult(props) {
           </Tooltip>
         </div>
 
-        <div style={{ float: "left", overflowX: "auto" }}>
+        <div style={{ float: "left", overflowX: "auto", width: "100%" }}>
         {communityNamesList && communityNamesList.length !== 0 ? (
           <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
             {communityNamesList}
@@ -483,46 +483,6 @@ function SearchResult(props) {
           </p>
         )}
         </div>
-
-        {props.time ? (
-          <div style={{display: "flex", width: "85%"}}>
-        <div style={{ marginRight: '5px'}}>
-          <Tooltip title="Submitted Time">
-            <ScheduleRounded
-              style={{ height:'20px', color: "#1976d2" }}
-            />
-          </Tooltip>
-        </div>
-
-        <div style={{float: "left", overflowX: "auto" }}>
-          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
-            <Tooltip title={props.time}>
-            <a
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-              fontWeight: "500",
-              fontSize: "0.8125rem",
-              lineHeight: "1.75",
-              letterSpacing: "0.02857em",
-              textTransform: "uppercase",
-              color: "#1976d2",
-              padding: "3px 7px",
-              marginRight: "5px",
-              textDecoration: "none",
-              background: "aliceblue",
-            }}
-          >{props.time}
-          </a>
-          </Tooltip>
-
-          </p>
-        </div>
-          </div>
-      ) : null}
-
-
 
         {props.show_relevant ? (
           <div style={{ float: "right", display: "flex" }}>
