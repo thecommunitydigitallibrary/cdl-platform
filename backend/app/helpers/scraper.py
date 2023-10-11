@@ -211,12 +211,11 @@ class ScrapeWorker:
 
             j = 0
             for paragraph in all_paragraphs:
-                paragraph_text = self.clean_text(paragraph.text)
                 if self.measure_string_quality(paragraph_text):
+                    paragraph_text = self.clean_text(paragraph.text)
                     all_paragraphs_text.append(paragraph.text)
                     all_hyperlinks = paragraph.find_all("a")
                     for h in all_hyperlinks:
-                        hyperlink_text = self.clean_text(h.text)
                         hyperlink_url = h.get("href", "")
 
                         isValidURL, hyperlink_url = self.test_fix_relative_url(
