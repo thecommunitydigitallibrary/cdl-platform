@@ -80,6 +80,7 @@ function SearchResult(props) {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   const handleOpenOptionsMenu = (event) => {
+    event.preventDefault();
     setAnchorElUser(event.currentTarget);
   };
 

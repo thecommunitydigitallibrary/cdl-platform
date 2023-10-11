@@ -805,7 +805,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   margin: "0px 0px 0px 0px",
                 }}
               >
-                {submissionDataResponse.submission.display_url}
+                {submissionDataResponse.submission.display_url} | {data.submission.time}
               </p>
             </div>
 
@@ -840,42 +840,6 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     ? communityNamesList.map((link, i) => [i > 0, link])
                     : "None"}
                 </div>
-
-          <div style={{display: "flex", width: "85%"}}>
-        <div style={{ marginRight: '5px'}}>
-          <Tooltip title="Submitted Time">
-            <ScheduleRounded
-              style={{ height:'20px', color: "#1976d2" }}
-            />
-          </Tooltip>
-        </div>
-
-        <div style={{float: "left", overflowX: "auto" }}>
-          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
-            <Tooltip title={data.submission.time}>
-            <a
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-              fontWeight: "500",
-              fontSize: "0.8125rem",
-              lineHeight: "1.75",
-              letterSpacing: "0.02857em",
-              textTransform: "uppercase",
-              color: "#1976d2",
-              padding: "3px 7px",
-              marginRight: "5px",
-              textDecoration: "none",
-              background: "aliceblue",
-            }}
-          >{data.submission.time}
-          </a>
-          </Tooltip>
-
-          </p>
-        </div>
-          </div>
                 
               </div>
 
@@ -925,18 +889,18 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
 
               {data.submission.type === "user_submission" &&
                 <Grid item sx={{width: "66%"}}>
-                  <Grid container>
-                    <Grid item>
+                  <Grid container sx={{flexFlow: "nowrap"}}>
+                    <Grid item sx={{width: "50%"}}>
                       {(
-                        <Grid container alignItems="center">
-                          <Grid item>
+                        <Grid container alignItems="center" sx={{flexFlow: "nowrap"}}>
+                          <Grid item sx={{width: "80%"}}>
                             <div>
                               <FormControl
-                                sx={{maxWidth: 225, minWidth: 225}}
+                                sx={{width: "100%"}}
                                 size="small"
                               >
                                 <InputLabel id="demo-multiple-checkbox-label">
-                                  Remove from Community
+                                  Remove Community
                                 </InputLabel>
                                 <Select
                                   labelId="demo-multiple-checkbox-label"
@@ -944,7 +908,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                                   value={removeCommunityIDList}
                                   onChange={handleRemoveDropdownChange}
                                   input={
-                                    <OutlinedInput label="Remove from Community"/>
+                                    <OutlinedInput label="Remove Community"/>
                                   }
                                   sx={{borderRadius: "4px 0 0 4px"}}
                                   renderValue={(selected) =>
@@ -984,20 +948,20 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                         </Grid>
                       )}
                     </Grid>
-                    <Grid item>
-                      <Grid container alignItems="center">
-                        {/* save */}
-                        <Grid item>
-                          <div>
+                    <Grid item sx={{width: "50%"}}>
+                      {}
+                        <Grid container alignItems="center" sx={{flexFlow: "nowrap"}}>
+                          <Grid item sx={{width: "80%"}}>
+                            <div>
                             <FormControl
-                              sx={{ maxWidth: 185, minWidth: 185 }}
+                              sx={{ width: "100%" }}
                               size="small"
                             >
                               <InputLabel
                                 id="demo-multiple-checkbox-label"
                                 sx={{ width: 185 }}
                               >
-                                Save to Community
+                                Add Community
                               </InputLabel>
                               <Select
                                 labelId="demo-multiple-checkbox-label"
@@ -1006,7 +970,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                                 onChange={handleSaveDropdownChange}
                                 sx={{borderRadius: "4px 0 0 4px"}}
                                 input={
-                                  <OutlinedInput label="Save to Community" />
+                                  <OutlinedInput label="Add Community" />
                                 }
                                 renderValue={(selected) =>
                                   selected
