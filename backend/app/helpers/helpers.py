@@ -352,7 +352,5 @@ def sanitize_input(input_data):
 
 		except Exception as e :
 			print(f"Error occured while sanitizing input data {input_data}: ", e)
-	else:
-		print(f"Cannot Sanitize input data {input_data}")
 
 	return input_data
