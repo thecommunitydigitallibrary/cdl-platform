@@ -579,6 +579,54 @@ def submission(current_user, id):
         return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
+def graph_search(current_user, submission_id):
+    try:
+        cdl_logs = Logs()
+        submission_data = cdl_logs.find_one({"_id": ObjectId(submission_id)})
+        communities = current_user.communities
+        accessible = False
+        if submission_data:
+            if not submission_data.deleted:
+                community_submissions = {str(cid) for uid in submission_data.communities for cid in
+                                         submission_data.communities[uid]}
+                for community in communities:
+                    if str(community) in community_submissions:
+                        accessible = True
+
+                if str(submission_data.user_id) == str(current_user.id):
+                    accessible = True
+
+            is_webpage = False
+        else:
+            webpages = Webpages()
+            submission_data = webpages.find_one({"_id": ObjectId(submission_id)})
+            is_webpage = True
+
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return response.error("Invalid submission ID", Status.NOT_FOUND)
+
+    if not submission_data:
+        return response.error("Invalid submission ID", Status.NOT_FOUND)
+    elif not accessible:
+        return response.error("Access Forbidden", Status.FORBIDDEN)
+
+    communities = current_user.communities
+    explanation = submission_data.webpage.get("metadata", {}).get("title", "") if is_webpage else submission_data.explanation
+    highlighted_text = submission_data.webpage.get("metadata", {}).get("description", "") if is_webpage else submission_data.highlighted_text
+
+    query = f"{explanation} {highlighted_text}"[:1000]
+
+    communities = [str(x) for x in communities]
+    _, submissions_hits = elastic_manager.search(query, communities, page=0, page_size=50)
+    node = {
+        "explanation": explanation,
+        "highlighted_text": highlighted_text
+    }
+    return node, submissions_hits
+
+
 @functional.route("/api/search", methods=["GET"])
 @token_required
 def search(current_user):

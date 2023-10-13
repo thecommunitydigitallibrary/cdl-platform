@@ -19,10 +19,10 @@ class Mongo(ABC):
 		return self.collection.update_one(query, user, upsert=upsert)
 
 	def exists(self, query):
-		return self.collection.find(query).limit(1).count(with_limit_and_skip=True) >= 1
+		return self.collection.count_documents(query) >= 1
 
 	def count(self, query):
-		return self.collection.find(query).count()
+		return self.collection.count_documents(query)
 
 	def delete_one(self, query):
 		return self.collection.delete_one(query)

@@ -4,7 +4,6 @@ import React from "react";
 class ActionButton extends React.Component {
   render() {
     return (
-      <div>
         <Button
           color={this.props.color ? this.props.color : "primary"}
           name={this.props.name ? this.props.name : ''}
@@ -17,7 +16,6 @@ class ActionButton extends React.Component {
         >
           {this.props.children}
         </Button>
-      </div>
     );
   }
 }

@@ -1,16 +1,11 @@
 import { useRouter } from "next/router";
 import jsCookie from "js-cookie";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import SearchResult from "../../components/searchresult";
 import Footer from "../../components/footer";
 import Error from "next/error";
-import {
-  FormControl,
-  Grid,
-  InputLabel,
-  OutlinedInput,
-  Select,
-} from "@mui/material";
+import dynamic from 'next/dynamic'
+import { FormControl, Grid, InputLabel, OutlinedInput, Select } from "@mui/material";
 
 import Header from "../../components/header";
 
@@ -34,22 +29,28 @@ import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
 
 import Delete from "@mui/icons-material/Delete";
+import DeleteIcon from "@mui/icons-material/Delete";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import AddLinkIcon from "@mui/icons-material/AddLink";
 import ShareIcon from "@mui/icons-material/Share";
 import ActionButton from "../../components/buttons/actionbutton";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import Close from "@mui/icons-material/Close";
 import Launch from "@mui/icons-material/Launch";
 import Save from "@mui/icons-material/Save";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
+import ReactDOMServer from 'react-dom/server';
 
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
+import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
 
 import Box from "@mui/system/Box";
 import Head from "next/head";
+
+const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), {
+  loading: () => <p>Loading...</p>, ssr: false
+})
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
@@ -58,13 +59,42 @@ const websiteURL = process.env.NEXT_PUBLIC_FROM_CLIENT;
 const getSubmissionEndpoint = "submission/";
 const searchEndpoint = "search";
 
-export default function SubmissionResult({ errorCode, data }) {
+export default function SubmissionResult({ errorCode, data, id, target }) {
   if (errorCode) {
     return <Error statusCode={errorCode} />;
   }
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState("error");
+  const [width, setWidth] = useState(900);
+  const [height, setHeight] = useState(800);
+  const [source, setSource] =  useState("");
+  const [graph, setGraph] = useState({"nodes": [], "links": []});
+  const [graphSet, setGraphSet] = useState(new Set());
+  const graphRef = useRef(graph);
+  const sourceRef = useRef(source);
+
+    const colorNodeBackground = (node) => {
+        switch (node.type) {
+            case "current": return "#2c7dcc";
+            case "first" : return "#75a936";
+            case "second": return "#ad922b";
+            case "visited": return "#7d51af";
+            default: return "#ad3b3b";
+        }
+    }
+
+    const handleNodeLabel = useCallback(
+        (node) => {
+          let desc = node.desc ? <p>{node.desc}</p> : null;
+          let tooltip = <div style={{background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px"}}>
+            <h6>{node.label}</h6>
+            {desc}
+          </div>;
+          return ReactDOMServer.renderToString(tooltip, {});
+        },
+        []
+    );
 
   const handleClick = () => {
     setOpen(true);
@@ -362,6 +392,7 @@ export default function SubmissionResult({ errorCode, data }) {
 
   const handleCloseSnackbar = (event, reason) => {
     setOpenShareUrlSuccess(false);
+    setLoading(false);
   };
 
   const action = (
@@ -378,6 +409,7 @@ export default function SubmissionResult({ errorCode, data }) {
   );
 
   const [openShareUrlSuccess, setOpenShareUrlSuccess] = React.useState(false);
+  const [isLoading, setLoading] = React.useState(false);
 
   async function copyPageUrl(linkToCopy) {
     try {
@@ -426,6 +458,111 @@ export default function SubmissionResult({ errorCode, data }) {
     }
     return idNameMap;
   };
+
+  const callGraphAPI = async (submission_id) => {
+    const res = await fetch(baseURL_client + "graph/" + submission_id, {
+      method: "GET",
+      headers: new Headers({
+        Authorization: jsCookie.get("token"),
+        "Content-Type": "application/json",
+      }),
+    });
+    return await res.json();
+  }
+
+  const getGraphData = async () => {
+    setSource(id);
+    const response = await callGraphAPI(id);
+    if (response.status === "ok") {
+      setGraph(response.data);
+      for (let i = 0; i < response.data.nodes.length; ++i) {
+        graphSet.add(response.data.nodes[i].id);
+      }
+      setGraphSet(graphSet);
+    } else {
+      console.log(response);
+    }
+    if (target != null) {
+      handleNodeVisit({id: target});
+    }
+  }
+
+    const fgRef = useRef();
+
+    const handleNodeVisit = useCallback((node) => {
+      let newGraph = graphRef.current;
+      for (let i = 0; i < newGraph.nodes.length; ++i) {
+        if (newGraph.nodes[i].id === node.id) {
+            newGraph.nodes[i]["type"] = "visited";
+        }
+      }
+      setGraph(newGraph);
+    }, [graph, setGraph]);
+
+    const handleNodeAdd = useCallback((node, data) => {
+      console.log("DATA", data);
+      let newGraph = graph;
+      console.log("OLD", newGraph);
+
+      console.log("OLD Set", graphSet);
+      for (let i = 0; i < data.nodes.length; ++i) {
+        if (!graphSet.has(data.nodes[i].id)) {
+            let nde = data.nodes[i];
+            nde["index"] = data.nodes.length;
+            newGraph.nodes.push(nde);
+        }
+      }
+
+      for (let i = 0; i < data.links.length; ++i) {
+        if (!graphSet.has(data.links[i].target)) {
+            let lnk = data.links[i];
+            lnk["index"] = data.links.length;
+            lnk["source"] = node;
+            lnk["target"] = data.nodes[data.nodes.length-1];
+            newGraph.links.push(lnk);
+            graphSet.add(data.links[i].target);
+        }
+      }
+      setGraphSet(graphSet);
+      console.log("NEW  Set", graphSet);
+      console.log("NEW", newGraph);
+      setGraph(newGraph);
+    }, [graph, setGraph]);
+
+    const handleNodeClick = useCallback(
+        async (node) => {
+          setLoading(true);
+          const res = await fetch( baseURL_client + "submission/" + node.id, {
+            method: "GET",
+            headers: new Headers({
+              Authorization: jsCookie.get("token"),
+              "Content-Type": "application/json",
+            }),
+          });
+          handleNodeVisit(node);
+          const response = await res.json();
+          if (response.status === "ok") {
+            setSubmissionDataResponse(response);
+          } else {
+            console.log(response);
+          }
+
+          // Add New Nodes and Links
+          // const graph_response = await callGraphAPI(id);
+          // if (graph_response.status === "ok") {
+          //   handleNodeAdd(node, graph_response.data);
+          // } else {
+          //   console.log(graph_response);
+          // }
+
+          // Complete Loading and Change URL
+
+          setLoading(false);
+          const nextURL = websiteURL + 'submissions/' + sourceRef.current + "?target=" + node.id;
+          window.history.replaceState(null, "", nextURL);
+        },
+        [graph, setGraph]
+    );
 
   const getSubmissionData = () => {
     if (data.status == "ok") {
@@ -480,7 +617,15 @@ export default function SubmissionResult({ errorCode, data }) {
   };
 
   useEffect(() => {
-    getSubmissionData();
+    sourceRef.current = source;
+    graphRef.current = graph;
+  }, [graph, source]);
+
+  useEffect(() => {
+      setHeight(window.innerHeight - 88.6)
+      setWidth((window.innerWidth / 2) - 40)
+      getSubmissionData();
+      getGraphData();
   }, []);
 
 
@@ -536,14 +681,13 @@ export default function SubmissionResult({ errorCode, data }) {
         <link rel="icon" href="/images/tree32.png" />
       </Head>
       <Header />
-      <div className="allResults">
+      <div className="allResults" style={{display: "flex"}}>
         {submissionDataResponse.submission && (
           <Paper
             elevation={0}
             sx={{
               marginLeft: "10px",
-              marginTop: "75px",
-              width: "1000px",
+              width: "50%",
               padding: "0px 20px 0px 10px",
             }}
           >
@@ -641,6 +785,15 @@ export default function SubmissionResult({ errorCode, data }) {
                 onClose={() => setOpenShareUrlSuccess(false)}
               />
 
+              <Snackbar
+                open={isLoading}
+                autoHideDuration={2000}
+                onClick={handleCloseSnackbar}
+                message={"Loading Submission. Please Wait."}
+                action={action}
+                onClose={() => setOpenShareUrlSuccess(false)}
+              />
+
               <br />
             </div>
 
@@ -652,13 +805,9 @@ export default function SubmissionResult({ errorCode, data }) {
                   margin: "0px 0px 0px 0px",
                 }}
               >
-                {submissionDataResponse.submission.display_url}
+                {submissionDataResponse.submission.display_url} | {data.submission.time}
               </p>
             </div>
-
-            <Typography sx={{ fontSize: 16 }}>
-              {data.submission.time}
-            </Typography>
 
             
             
@@ -676,12 +825,12 @@ export default function SubmissionResult({ errorCode, data }) {
 
               <div
                 style={{
-                  display: "inline",
+                  display: "flex",
                   margin: "10px 0px 0px -5px",
                   width: "100%",
                 }}
               >
-                <div style={{ float: "left" }}>
+                <div style={{ float: "left", minWidth: "fit-content" }}>
                   <Tooltip title="Communities">
                     <LocalLibraryRoundedIcon
                       style={{ height: "21px", color: "#1976d2" }}
@@ -704,17 +853,17 @@ export default function SubmissionResult({ errorCode, data }) {
               justifyContent="space-between"
               sx={{ my: 1 }}
             >
-              <Grid item>
+              <Grid item sx={{width: "33%"}}>
                 <Box
                   sx={{
                     my: 1,
                     px: 2,
                     display: "flex",
-                    width: 350,
+                    width: "100%",
                     justifyContent: "space-evenly",
                     alignItems: "center",
                     border: "1px solid rgba(0, 0, 0, 0.25)",
-                    borderRadius: 5,
+                    borderRadius: "4px",
                     "& svg": {
                       m: 1.5,
                     },
@@ -729,7 +878,7 @@ export default function SubmissionResult({ errorCode, data }) {
                     orientation="vertical"
                     variant="middle"
                     flexItem
-                    sx={{ height: 30 }}
+                    sx={{ height: 22 }}
                   />
                   <Typography>Clicks:</Typography>
                   {submissionDataResponse.submission.stats["clicks"]}
@@ -739,20 +888,20 @@ export default function SubmissionResult({ errorCode, data }) {
                 </Box>
               </Grid>
 
-              {data.submission.type == "user_submission" && 
-                <Grid item>
-                  <Grid container>
-                    <Grid item>
-                      {true && (
-                        <Grid container alignItems="center">
-                          <Grid item>
+              {data.submission.type === "user_submission" &&
+                <Grid item sx={{width: "66%"}}>
+                  <Grid container sx={{flexFlow: "nowrap"}}>
+                    <Grid item sx={{width: "50%"}}>
+                      {(
+                        <Grid container alignItems="center" sx={{flexFlow: "nowrap"}}>
+                          <Grid item sx={{width: "80%"}}>
                             <div>
                               <FormControl
-                                sx={{ maxWidth: 225, minWidth: 225 }}
+                                sx={{width: "100%"}}
                                 size="small"
                               >
                                 <InputLabel id="demo-multiple-checkbox-label">
-                                  Remove from Community
+                                  Remove Community
                                 </InputLabel>
                                 <Select
                                   labelId="demo-multiple-checkbox-label"
@@ -760,8 +909,9 @@ export default function SubmissionResult({ errorCode, data }) {
                                   value={removeCommunityIDList}
                                   onChange={handleRemoveDropdownChange}
                                   input={
-                                    <OutlinedInput label="Remove from Community" />
+                                    <OutlinedInput label="Remove Community"/>
                                   }
+                                  sx={{borderRadius: "4px 0 0 4px"}}
                                   renderValue={(selected) =>
                                     selected
                                       .map((x) => communityNameMap[x])
@@ -785,42 +935,43 @@ export default function SubmissionResult({ errorCode, data }) {
                               </FormControl>
                             </div>
                           </Grid>
-                          <Grid item>
+                          <Grid item sx={{marginRight: "10px"}}>
                             <Tooltip title="Remove">
                               <IconButton
                                 size="small"
+                                sx={{background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px"}}
                                 onClick={deleteSubmissionfromCommunity}
                               >
-                                <Delete />
+                                <Delete/>
                               </IconButton>
                             </Tooltip>
                           </Grid>
                         </Grid>
                       )}
                     </Grid>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Grid item>
-                      <Grid container alignItems="center">
-                        {/* save */}
-                        <Grid item>
-                          <div>
+                    <Grid item sx={{width: "50%"}}>
+                      {}
+                        <Grid container alignItems="center" sx={{flexFlow: "nowrap"}}>
+                          <Grid item sx={{width: "80%"}}>
+                            <div>
                             <FormControl
-                              sx={{ maxWidth: 225, minWidth: 225 }}
+                              sx={{ width: "100%" }}
                               size="small"
                             >
                               <InputLabel
                                 id="demo-multiple-checkbox-label"
-                                sx={{ width: 225 }}
+                                sx={{ width: 185 }}
                               >
-                                Save to Community
+                                Add Community
                               </InputLabel>
                               <Select
                                 labelId="demo-multiple-checkbox-label"
                                 id="demo-multiple-checkbox"
                                 value={saveCommunityIDList}
                                 onChange={handleSaveDropdownChange}
+                                sx={{borderRadius: "4px 0 0 4px"}}
                                 input={
-                                  <OutlinedInput label="Save to Community" />
+                                  <OutlinedInput label="Add Community" />
                                 }
                                 renderValue={(selected) =>
                                   selected
@@ -845,9 +996,12 @@ export default function SubmissionResult({ errorCode, data }) {
                             </FormControl>
                           </div>
                         </Grid>
-                        <Grid item>
+                        <Grid item sx={{marginRight: "0px"}}>
                           <Tooltip title="Save">
-                            <IconButton size="small" onClick={saveSubmission}>
+                            <IconButton
+                              size="small"
+                              sx={{background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px"}}
+                              onClick={saveSubmission}>
                               <Save />
                             </IconButton>
                           </Tooltip>
@@ -859,11 +1013,12 @@ export default function SubmissionResult({ errorCode, data }) {
               }
             </Grid>
             <div style={{ display: "flex" }}>
-              <div>
+              <div style={{width: "20%"}}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="connect"
+                  style={{width: "95%", padding: "8px"}}
                   action={(event) =>
                     handleClickOptionsMenu(
                       event,
@@ -875,12 +1030,12 @@ export default function SubmissionResult({ errorCode, data }) {
                   <AddLinkIcon /> &nbsp; Connect
                 </ActionButton>
               </div>
-              &nbsp;&nbsp;
-              <div>
+              <div style={{width: "20%"}}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="shareurl"
+                  style={{width: "95%", padding: "8px"}}
                   value={submissionDataResponse.submission.submission_id}
                   action={(event) =>
                     handleClickOptionsMenu(
@@ -894,23 +1049,23 @@ export default function SubmissionResult({ errorCode, data }) {
                   &nbsp;Share URL
                 </ActionButton>
               </div>
-              &nbsp;&nbsp;
-              <div>
+              <div style={{width: "20%"}}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="feedback"
+                  style={{width: "95%", padding: "8px"}}
                   action={(event) => handleClickOptionsMenu(event, "feedback")}
                 >
                   <FeedbackIcon />
                   &nbsp;Feedback
                 </ActionButton>
               </div>
-              &nbsp;&nbsp;
               {submissionDataResponse.submission.can_delete && (
-                <div>
+                <div style={{width: "20%"}}>
                   <ActionButton
                     type="filled"
+                    style={{width: "95%", padding: "8px"}}
                     variant="contained"
                     action={handleClickEdit}
                   >
@@ -919,12 +1074,12 @@ export default function SubmissionResult({ errorCode, data }) {
                   </ActionButton>
                 </div>
               )}
-              &nbsp;&nbsp;
               {submissionDataResponse.submission.can_delete && (
-                <div>
+                <div style={{width: "20%"}}>
                   <ActionButton
                     color="error"
                     type="filled"
+                    style={{width: "95%", padding: "8px"}}
                     variant="contained"
                     action={handleClickDelete}
                   >
@@ -1054,6 +1209,26 @@ export default function SubmissionResult({ errorCode, data }) {
             </Snackbar>
           </Paper>
         )}
+        <Paper
+          elevation={0}
+          sx={{
+            marginLeft: "10px",
+            width: "50%",
+            padding: 0
+          }}>
+          <ForceGraph3D
+            ref={fgRef}
+            graphData={graph}
+            width={width}
+            height={height}
+            backgroundColor={'#e5e5e5'}
+            onNodeClick={handleNodeClick}
+            nodeColor={colorNodeBackground}
+            nodeLabel={handleNodeLabel}
+            linkColor={() => 'rgba(0,0,0,0.7)'}
+            linkDirectionalParticles={1}
+        />
+          </Paper>
       </div>
       <Footer />
     </>
@@ -1074,7 +1249,9 @@ export async function getServerSideProps(context) {
       },
     };
   } else {
-    var URL = baseURL_server + getSubmissionEndpoint + context.query.id;
+    const id = context.query.id;
+    const target = context.query.target;
+    let URL = baseURL_server + getSubmissionEndpoint + ((target == null) ? id : target);
     const res = await fetch(URL, {
       headers: new Headers({
         Authorization: context.req.cookies.token,
@@ -1084,7 +1261,7 @@ export async function getServerSideProps(context) {
     const errorCode = res.ok ? false : res.status;
 
     return {
-      props: { errorCode, data },
+      props: { errorCode, data, id, target},
     };
   }
 }

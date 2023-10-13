@@ -26,7 +26,10 @@
     "react-client-session": "0.0.8",
     "react-infinite-scroll-component": "^6.1.0",
     "rehype-sanitize": "^5.0.1",
-    "save": "^2.5.0"
+    "save": "^2.5.0",
+    "react-force-graph-3d": "^1.23.1",
+    "three": "^0.156.1",
+    "three-spritetext": "^1.8.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",

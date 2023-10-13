@@ -211,8 +211,8 @@ class ScrapeWorker:
 
             j = 0
             for paragraph in all_paragraphs:
+                paragraph_text = self.clean_text(paragraph.text)
                 if self.measure_string_quality(paragraph_text):
-                    paragraph_text = self.clean_text(paragraph.text)
                     all_paragraphs_text.append(paragraph.text)
                     all_hyperlinks = paragraph.find_all("a")
                     for h in all_hyperlinks:
@@ -238,6 +238,7 @@ class ScrapeWorker:
         text = text.replace("\\t", " ")
         text = text.replace("<p>", "")
         text = " ".join(text.split())
+        print("TEXT: ", text, ":")
         text = sanitize_input(text)
 
         return text
