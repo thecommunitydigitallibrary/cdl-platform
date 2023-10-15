@@ -31,7 +31,7 @@ function Notesidebar(props) {
 
     //adding new page to backend
     const createNewPage = async (event, notePath) => {
-    
+
         const res = await fetch(baseURL_server + notesEndpoint, {
             method: "POST",
             body: JSON.stringify({
@@ -49,9 +49,9 @@ function Notesidebar(props) {
             // triggers useEffect() each time newPageCreated var changes
             setNewPageCreated("/notes/" + response.id)
         } else {
-            try{
+            try {
                 alert(response.message)
-            } catch(error) {
+            } catch (error) {
                 alert("Something went wrong. Please try again later")
             }
         }
@@ -90,7 +90,7 @@ function Notesidebar(props) {
     const [open, setOpen] = React.useState(false);
     const [parentPage, setParentPage] = React.useState("this page")
 
-    const handleClickSnackbar = (pageName="this note") => {
+    const handleClickSnackbar = (pageName = "this note") => {
         setOpen(true);
         setParentPage(pageName)
     };
@@ -103,42 +103,50 @@ function Notesidebar(props) {
     return (
         <>
             <ThemeProvider theme={theme}>
-                <List
-                    sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
-                    component="nav"
-                    aria-labelledby="nested-list-subheader"
-                    subheader={
-                        <ListSubheader component="div" id="nested-list-subheader">
-                            <form style={{ margin: '5px' }}>
-                                <label>
-                                    <h3>
-                                        <a href={"/notes"}  >Notes</a>
-                                    </h3>
-                                </label>
-                                <Tooltip title='Create'>
-                                    <IconButton style={{ marginBottom: '5px' }} onClick={createNewPage}>
-                                        <AddCircle />
-                                    </IconButton>
-                                </Tooltip>
-                            </form>
-                        </ListSubheader>
-                    }
-                >
-                </List>
-                <Notelistitem 
-                    key={props.notesData.id} 
-                    data={props.notesData.titles} 
+                <div style={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
+                    <List
+                        sx={{
+                            width: '100%',
+                            maxWidth: 360,
+                            backgroundColor: theme.palette.background.paper,
+                        }}
+                        component="nav"
+                        aria-labelledby="nested-list-subheader"
+                        subheader={
+                            <ListSubheader component="div" id="nested-list-subheader">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px' }}>
+                                    <label style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+                                        <a href="/notes" style={{ textDecoration: 'none', color: theme.palette.primary.main }}>
+                                            Notes
+                                        </a>
+                                    </label>
+                                    <Tooltip title="Create">
+                                        <IconButton style={{ color: theme.palette.primary.main }} onClick={createNewPage}>
+                                            <AddCircle />
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                            </ListSubheader>
+                        }
+                    >
+                    </List>
+                </div>
+
+
+                <Notelistitem
+                    key={props.notesData.id}
+                    data={props.notesData.titles}
                     indent={4}
-                    createNewPageChild={createNewPageChild} 
-                    currentNote={props.currentNote} 
-                    cIG = {"-1"}
-                    />
+                    createNewPageChild={createNewPageChild}
+                    currentNote={props.currentNote}
+                    cIG={"-1"}
+                />
 
                 <Snackbar open={open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-                        <Alert onClose={handleCloseSnackbar} severity="warning" sx={{ width: '100%' }}>
+                    <Alert onClose={handleCloseSnackbar} severity="warning" sx={{ width: '100%' }}>
                         Currently cannot add more notes under {parentPage}
-                        </Alert>
-                    </Snackbar>
+                    </Alert>
+                </Snackbar>
             </ThemeProvider>
         </>
     )
