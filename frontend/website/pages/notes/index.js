@@ -39,7 +39,7 @@ function Notes({ data }) {
       if (isResizing) {
         setSidebarWidth(
           mouseMoveEvent.clientX -
-            sidebarRef.current.getBoundingClientRect().left
+          sidebarRef.current.getBoundingClientRect().left
         );
       }
     },
@@ -65,7 +65,7 @@ function Notes({ data }) {
     const res = await fetch(baseURL_server + notesEndpoint, {
       method: "POST",
       body: JSON.stringify({
-        title: title,
+        title: title.length < 1 ? "Untitled" : title,
       }),
       headers: new Headers({
         Authorization: jsCookie.get("token"),
