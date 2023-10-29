@@ -9,7 +9,7 @@ module.exports = {
     extend: {
       colors: {
         trueGray: colors.neutral,
-      },
+      }
     },
     fontFamily: {
       sans: ["Inter", ...defaultTheme.fontFamily.sans],
@@ -19,5 +19,5 @@ module.exports = {
   variants: {
     extend: {},
   },
-  plugins: [require("@tailwindcss/aspect-ratio")],
+  plugins: [require("@tailwindcss/aspect-ratio"), require('./tailwind-unlist.js')],
 };
