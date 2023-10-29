@@ -818,11 +818,8 @@ def search(current_user):
             tm.extract_metadesc_per_topic_keywords()
             tm.sequence()
             graphData = tm.generate_graph_data()
-            print(f"graphData = {graphData}")
-            # {
-            #                 "nodes": [{"id": "1", "title": "Title1"}, {"id": "2", "title": "Title2"}],
-            #                 "links": [{"source": "1", "target": "2"}]
-            #             }
+            # print(f"graphData = {graphData}")
+
             return response.success(graphData, Status.OK)
         return response.success(return_obj, Status.OK)
     except Exception as e:
