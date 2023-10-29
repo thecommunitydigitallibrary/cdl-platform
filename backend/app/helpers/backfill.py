@@ -219,7 +219,7 @@ class BackFill:
 
 # python ./app/helpers/backfill.py --env_path="<PATH_TO_ENV_FILE>" --type=<"submissions" or "webpages">
 if __name__ == "__main__":
-    env_file_path = os.path.join(os.path.dirname(__file__), "..", "..", "env_local.ini")
+    env_file_path = os.path.join(os.path.dirname(__file__), "..", "..", "env_local-dev.ini")
 
     if env_file_path:
         with open(env_file_path, "r") as f:
@@ -230,7 +230,7 @@ if __name__ == "__main__":
                 os.environ[name] = value
 
     try:
-        # From env_local.ini file fetch cdl_test_uri and elastic_domain_backfill if present
+        # From env_local-dev.ini file fetch cdl_test_uri and elastic_domain_backfill if present
         # else fetch cdl_uri and elastic_domain
         cdl_uri = None
         elastic_domain = None
@@ -301,4 +301,4 @@ if __name__ == "__main__":
         traceback.print_exc()
 
 # python .\app\helpers\backfill.py --env_path ..\..\cdl-secrets\production\env_prod.ini > tmp.json
-# python .\app\helpers\backfill.py --env_path ..\..\cdl-secrets\local_cloud_opensearch_mongodb\env_local.ini > tmp.json
+# python .\app\helpers\backfill.py --env_path ..\..\cdl-secrets\local_cloud_opensearch_mongodb\env_local-dev.ini > tmp.json

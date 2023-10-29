@@ -380,3 +380,17 @@ def submit_rel_judgments(current_user):
 		traceback.print_exc()
 		return response.error("Failed to submit relevant judgement, please try again later.",
 		                      Status.INTERNAL_SERVER_ERROR)
+
+
+def get_community_submissions(community_id):
+	"""
+	This function returns a list of submissions present in a community
+
+	Parameters:
+		community_id(str): UID of the community
+
+	Returns:
+		submissions (List(Dict)): List of submissions made to a community
+	"""
+
+	

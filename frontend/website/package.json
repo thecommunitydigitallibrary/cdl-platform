@@ -29,7 +29,11 @@
     "save": "^2.5.0",
     "react-force-graph-3d": "^1.23.1",
     "three": "^0.156.1",
-    "three-spritetext": "^1.8.1"
+    "three-spritetext": "^1.8.1",
+    "react-force-graph-2d": "^1.23.1",
+    "dat.gui": "^0.7.9",
+    "d3": "^7.8.5",
+    "d3-force": "^3.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",

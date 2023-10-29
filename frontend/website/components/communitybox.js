@@ -18,6 +18,8 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useState } from "react";
 import jsCookie from "js-cookie";
+import Router, {useRouter} from 'next/router';
+import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 
 // API Endpoints
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -120,6 +122,16 @@ export default function CommunityBox(props) {
   const handleClickLeave = () => {
     setOpenLeave(true);
   };
+
+  const handleVisualizeCommunity = () => {
+    Router.push({
+      pathname: "/visualizemap",
+      query: {
+        communityId: props.communityId,
+        communityName: props.name
+      }
+    });
+  }
 
   const handleCloseLeave = (event, reason) => {
     if (reason === "clickaway") {
@@ -247,6 +259,16 @@ export default function CommunityBox(props) {
             />
           </Tooltip>
         )}
+        {
+          <Tooltip title={<Typography>Visualize Community</Typography>}>
+            <BubbleChartIcon
+                style={{marginLeft: "5px", marginRight: "5px"}}
+                size="medium"
+                onClick={handleVisualizeCommunity}
+            >
+            </BubbleChartIcon>
+          </Tooltip>
+        }
         {
           <Tooltip title={<Typography>Leave Community</Typography>}>
             <IconButton
