@@ -45,7 +45,7 @@ function Notes({ data }) {
       if (isResizing) {
         setSidebarWidth(
           mouseMoveEvent.clientX -
-            sidebarRef.current.getBoundingClientRect().left
+          sidebarRef.current.getBoundingClientRect().left
         );
       }
     },
@@ -180,8 +180,6 @@ function Notes({ data }) {
 
   return (
     <div className="allResults">
-      {console.log(data)}
-
       <Head>
         <title>{originalTitle} - The CDL</title>
         <link rel="icon" href="/images/tree32.png" />
@@ -218,7 +216,7 @@ function Notes({ data }) {
               alignItems="center"
             >
               <Grid item>
-                <Grid container direction="row">
+                <Grid container direction="row" spacing={2}>
                   <Grid item>
                     <TextField
                       hiddenLabel
@@ -233,12 +231,16 @@ function Notes({ data }) {
                   </Grid>
                   <Grid item>
                     {mode == "view" && (
-                      <ActionButton variant="text" action={changeMode}>
+                      <ActionButton variant="contained"
+                        color=""
+                        type="filled" action={changeMode}>
                         <EditIcon />
                       </ActionButton>
                     )}
                     {mode == "edit" && (
-                      <ActionButton variant="text" action={changeMode}>
+                      <ActionButton variant="contained"
+                        color=""
+                        type="filled" action={changeMode}>
                         <SaveIcon />
                       </ActionButton>
                     )}
