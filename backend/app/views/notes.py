@@ -184,7 +184,7 @@ def handle_notes(current_user, subpath):
 				full_note_path = ".notes.".join(note_path)
 				ack = cdl_notes.update_one({"user_id": user_id}, {"$unset": {"notes." + full_note_path: ""}})
 				if ack.acknowledged:
-					return response.success("Note successfully deleted.", Status.OK)
+					return response.success({"message": "Note successfully deleted."}, Status.OK)
 				else:
 					return response.error("Could not delete note page.", Status.INTERNAL_SERVER_ERROR)
 			except Exception as e:
