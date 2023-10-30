@@ -238,7 +238,6 @@ class ScrapeWorker:
         text = text.replace("\\t", " ")
         text = text.replace("<p>", "")
         text = " ".join(text.split())
-        print("TEXT: ", text, ":")
         text = sanitize_input(text)
 
         return text

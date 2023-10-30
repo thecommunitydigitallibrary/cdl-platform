@@ -244,7 +244,7 @@ class TopicMap:
         op = ""
         # Remove hashtags
         s = re.sub(RE_LECTURE_TAG, "", s)
-        s = re.sub(RE_LECTURE_WITHOUT_TAG, "", s)
+        #s = re.sub(RE_LECTURE_WITHOUT_TAG, "", s)
         # Remove meta-descriptors
         tokens = word_tokenize(s)
         for token in tokens:
@@ -276,8 +276,13 @@ class TopicMap:
 
                 expl = self.post_process_explanation(expl)
 
+                print(expl)
+
                 blob = TextBlob(expl)
                 keywords = [x for x in blob.noun_phrases]
+                
+                print(keywords)
+
 
                 # keywords = self.kb.extract_keywords(
                 #    expl, keyphrase_ngram_range=(1, 3), top_n=8, use_mmr=True, nr_candidates=5, diversity=0.4, use_maxsum=True)
