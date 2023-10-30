@@ -12,3 +12,5 @@ redis===5.0.1
 sendgrid===6.10.0
 beautifulsoup4===4.12.2
 bleach===6.0.0
+nltk==3.8.1
+pandas==2.0.3

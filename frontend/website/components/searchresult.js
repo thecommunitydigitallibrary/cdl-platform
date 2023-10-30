@@ -24,7 +24,7 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import ShareIcon from "@mui/icons-material/Share";
 
 import { Snackbar, Alert, Box } from "@mui/material";
-import React, { useState, useContext } from "react";
+import React, {useState, useContext, useEffect} from "react";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { Bookmark, BookmarkAddOutlined, Close, Launch } from "@mui/icons-material";
 
@@ -40,6 +40,20 @@ function SearchResult(props) {
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [severity, setSeverity] = React.useState("");
+  const [paperWidth, setPaperWidth] = React.useState("60%");
+  const [paperMargin, setPaperMargin] = React.useState("15px 10px");
+  const [paperMarginX, setPaperMarginX] = React.useState("20%");
+
+  useEffect(() => {
+    setPaperWidth("60%");
+    setPaperMargin("15px 10px");
+    if(props.paperWidth != undefined && props.paperWidth != "" && props.paperWidth != null)
+      setPaperWidth(props.paperWidth);
+    if(props.paperMargin != undefined && props.paperMargin != "" && props.paperMargin != null)
+      setPaperMargin(props.paperMargin);
+    if(props.paperMarginX != undefined && props.paperMarginX != null)
+      setPaperMarginX(props.paperMarginX);
+  }, []);
 
   const handleClick = () => {
     setOpen(true);
@@ -280,11 +294,11 @@ function SearchResult(props) {
       elevation={0}
       id={"card_id" + props.search_idx}
       sx={{
-        width: "60%",
+        width: paperWidth,
         padding: "20px",
         border: "1px solid #ddd",
-        margin: "15px 10px",
-        marginX: '20%',
+        margin: paperMargin,
+        marginX: paperMarginX,
         wordBreak: 'break-word'
       }}
     >

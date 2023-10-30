@@ -17,6 +17,7 @@ from app.helpers.helpers import token_required, build_display_url, build_result_
 from app.helpers import response
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
+from app.helpers.topic_map import TopicMap
 from app.models.community_core import CommunityCores
 from app.models.cache import Cache
 from app.models.communities import Communities
@@ -803,6 +804,23 @@ def search(current_user):
         return_obj["total_num_results"] = total_num_results
         return_obj["search_results_page"] = search_results_page
 
+        # Return nodes and links for visualisation
+        if source == "visualize":
+            community_name = communities[community_id]['name']
+            print(f"Called visualize!")
+
+            # Call TopicMap
+            data_ip = json.dumps(search_results_page)
+            tm = TopicMap(data_ip, community_name)
+            print(f"Initialised TopicMap -> {community_name}")
+            tm.pre_process()
+            tm.extract_keywords()
+            tm.extract_metadesc_per_topic_keywords()
+            tm.sequence()
+            graphData = tm.generate_graph_data()
+            # print(f"graphData = {graphData}")
+
+            return response.success(graphData, Status.OK)
         return response.success(return_obj, Status.OK)
     except Exception as e:
         print(e)

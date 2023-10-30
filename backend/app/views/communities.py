@@ -380,3 +380,4 @@ def submit_rel_judgments(current_user):
 		traceback.print_exc()
 		return response.error("Failed to submit relevant judgement, please try again later.",
 		                      Status.INTERNAL_SERVER_ERROR)
+	
