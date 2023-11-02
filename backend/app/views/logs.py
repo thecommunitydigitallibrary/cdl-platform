@@ -81,7 +81,7 @@ def log_search(ip, user_id, source, query, communities, own_submissions, highlig
 	Arguments:
 		ip : (string) : the IP address of the request sent by the user.
 		user_id : (ObjectID) : the ID of the user making the search.
-		source : (string) : either "webpage_search", "extension_search", or "extension_open"
+		source : (string) : either "webpage_search", "extension_search", "extension_open", "visualize", or "community_forum"
 		query : (string) : the raw query entered by the user.
 		communities : (list) : the community scope of the user search.
 	Returns:

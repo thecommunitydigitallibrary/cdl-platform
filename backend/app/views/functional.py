@@ -170,9 +170,9 @@ def create_batch_submission(current_user):
             ip = request.remote_addr
             user_id = current_user.id
             user_communities = current_user.communities
-            highlighted_text = sanitize_input(submission["highlighted_text"])
+            highlighted_text = sanitize_input(submission["description"])
             source_url = submission["source_url"]
-            explanation = submission["explanation"]
+            explanation = submission["title"]
 
             message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
                                 source_url=source_url, explanation=explanation, community=community)

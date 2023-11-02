@@ -838,7 +838,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   </Tooltip>{" "}
                   {communityNamesList.length > 0 && data.submission.type === "user_submission"
                     ? communityNamesList.map((link, i) => [i > 0, link])
-                    : "None"}
+                    : ""}
                   {data.submission.type === "webpage" && "Webpage"}
                 </div>
                 
