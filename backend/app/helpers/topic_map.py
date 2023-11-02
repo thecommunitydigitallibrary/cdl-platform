@@ -1,7 +1,5 @@
 import json
 import re
-from app.helpers.helper_constants import RE_LECTURE_TAG, RE_LECTURE_NUM, RE_LECTURE_WITHOUT_TAG, TOP_N_SUBMISSIONS, META_DESCRIPTOR, \
-    KEYWORDS_IGNORE
 import pandas as pd
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
@@ -12,7 +10,9 @@ from collections import OrderedDict
 import time
 from textblob import TextBlob
 from typing import List, Dict
-
+from app.helpers.helper_constants import RE_LECTURE_TAG, RE_LECTURE_NUM, RE_LECTURE_WITHOUT_TAG, TOP_N_SUBMISSIONS, META_DESCRIPTOR, \
+    KEYWORDS_IGNORE
+from app.helpers.helpers import extract_hashtags
 
 class TopicMap:
     '''
@@ -102,37 +102,6 @@ class TopicMap:
         Returns:
             None.
         '''
-        print(f">>> Preprocessing the submissions")
-        # Get the obj_id outside
-        # self.submission_df['_id'] = self.submission_df['_id'].apply(
-        #     lambda x: x['$oid'])
-
-        # Get user_id outside
-        # self.submission_df['user_id'] = self.submission_df['user_id'].apply(
-        #     lambda x: x['$oid'])
-
-        # Build Object ID to Object map for future use
-        # for idx, row in self.submission_df.iterrows():
-        #     self.objid_to_obj[row['_id']] = row
-
-        # Create new column for explanation + highlighted_text
-        # cols = ['explanation', 'highlighted_text']
-        # self.submission_df['expl_hightxt'] = self.submission_df[cols].apply(
-        #     lambda row: '. '.join(row.str.lower().values.astype(str)), axis=1)
-
-        # Stop words removal
-        # eng_stopwords = stopwords.words('english')
-        # eng_stopwords.extend(["page", "vs", "\[l]\d*"])
-        # self.submission_df['expl_hightxt'] = self.submission_df['expl_hightxt'].apply(
-        #     word_tokenize)
-        # self.submission_df['expl_hightxt'] = self.submission_df['expl_hightxt'].apply(
-        #     lambda words: [word for word in words if word not in eng_stopwords])
-        # self.submission_df['expl_hightxt'] = self.submission_df['expl_hightxt'].str.join(
-        #     " ")
-
-        # Drop columns- 'time', 'type'
-        # self.submission_df.drop(columns=['time', 'type'], inplace=True)
-
         # Stem the meta descriptors
         self.stem_metadescriptor()
 
@@ -188,21 +157,14 @@ class TopicMap:
         Returns:
             None.
         '''
-        print(f">>> Parsing the lecture explanations to create a map")
         for idx, row in self.submission_df.iterrows():
             expl = row['explanation']
             meta_descriptors = self.get_meta_descriptor(expl)
-            # Using the regex RE_LECTURE_TAG to extract substring that match #L1.1 or #l3.3 or #Lecture 4.2
-            tags_from_re = re.findall(RE_LECTURE_TAG, expl)
-            if not tags_from_re:
-                # Using the regex RE_LECTURE_WITHOUT_TAG to extract substring that match L1.1 or l3. or Lecture 4.2
-                tags_from_re = re.findall(RE_LECTURE_WITHOUT_TAG, expl)
+            tags_from_re = extract_hashtags(expl)
             if tags_from_re:
-                lectures = re.findall(RE_LECTURE_NUM, tags_from_re[0])
-                if len(lectures) > 0:
-                    for lec in lectures:
-                        lec = lec.strip('.')
-                        self.add_to_lec_to_obj_map(lec, idx, meta_descriptors)
+                if len(tags_from_re) > 0:
+                    for tag in tags_from_re:
+                        self.add_to_lec_to_obj_map(tag, idx, meta_descriptors)
                 else:
                     self.add_to_lec_to_obj_map("-1", idx, meta_descriptors)
             else:
@@ -273,19 +235,10 @@ class TopicMap:
             for obj in objid_lst:
                 row = self.submission_df.iloc[obj]
                 expl = row['explanation']
-
                 expl = self.post_process_explanation(expl)
-
-                print(expl)
 
                 blob = TextBlob(expl)
                 keywords = [x for x in blob.noun_phrases]
-                
-                print(keywords)
-
-
-                # keywords = self.kb.extract_keywords(
-                #    expl, keyphrase_ngram_range=(1, 3), top_n=8, use_mmr=True, nr_candidates=5, diversity=0.4, use_maxsum=True)
 
                 # Using the keyword frequency to determine the most important keyword
                 for key in keywords:
@@ -306,7 +259,6 @@ class TopicMap:
                 if f == 0:
                     filtered_keywords.append(k)
             m["possible_topics"] = filtered_keywords
-            print(f'{lec} || Possible topics: {m["possible_topics"]}')
 
     def extract_metadesc_per_topic_keywords(self) -> None:
         '''
@@ -460,11 +412,13 @@ class TopicMap:
             if lec == "-1":
                 lec = "Misc"
             else:
-                lec = "#L"+lec
+                lec = lec
             path = root + "/" + lec
-            node = self.create_node(path, "lecture", lec, path, lec, "null", root)
-            nodes.append(node)
-            links.append(self.create_link(root, path, node))
+
+            if len(m["topics"]) > 0:
+                node = self.create_node(path, "lecture", lec, path, lec, "null", root)
+                nodes.append(node)
+                links.append(self.create_link(root, path, node))
             for topic in m["topics"]:
                 parent = root + "/" + lec
                 if len(topic["name"]) < 5:
@@ -472,10 +426,11 @@ class TopicMap:
                 else:
                     topic["name"] = topic["name"].title()
                 path = root + "/" + lec + "/" + topic["name"]
-                node = self.create_node(path, "topic", topic["name"], path, topic["name"], topic["name"], parent)
-                nodes.append(node)
-                links.append(self.create_link(parent, path, node))
 
+                if len(topic["meta_descriptors"]) > 0:
+                    node = self.create_node(path, "topic", topic["name"], path, topic["name"], topic["name"], parent)
+                    nodes.append(node)
+                    links.append(self.create_link(parent, path, node))
                 for md_name, md_lst in topic["meta_descriptors"].items():
                     parent = root + "/" + lec + "/" + topic["name"]
                     path = root + "/" + lec + "/" + topic["name"] + "/" + md_name
