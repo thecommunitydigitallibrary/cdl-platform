@@ -40,7 +40,7 @@ const steps = [
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
         Once you are logged in to the Chrome extension and to the website, you are ready to go! More details about submission, connections, and communities
-        can be found on the next tab titled "Usage".
+        can be found on the <a target="_blank" and rel="noopener noreferrer" href="/documentation">Documentation</a> page.
       </p>
     ),
   },
