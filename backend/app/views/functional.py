@@ -601,6 +601,7 @@ def graph_search(current_user, submission_id):
         else:
             webpages = Webpages()
             submission_data = webpages.find_one({"_id": ObjectId(submission_id)})
+            accessible = True
             is_webpage = True
 
     except Exception as e:
