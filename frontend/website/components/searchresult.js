@@ -289,7 +289,7 @@ function SearchResult(props) {
   }
 
   return (
-    <a href={websiteURL + "submissions/" + props.submission_id} style={{textDecoration: "none"}}>
+    <a href={websiteURL + "submissions/" + props.submission_id} style={{textDecoration: "none"}} target="_blank" rel="noopener noreferrer">
     <Paper
       elevation={0}
       id={"card_id" + props.search_idx}

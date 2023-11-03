@@ -4,6 +4,8 @@ import * as React from "react";
 import VerticalLinearStepper from "../components/verticalstepper";
 import Footer from "../components/footer";
 import Header from "../components/header";
+import Head from "next/head";
+
 
 const steps = [
   {
@@ -49,7 +51,11 @@ const steps = [
 export default function Setup() {
   return (
    <>
-   <Header/>
+    <Head>
+        <title>Setup - The CDL</title>
+        <link rel="icon" href="/images/tree32.png" />
+    </Head>
+    <Header/>
     <Paper
       elevation={0}
       sx={{

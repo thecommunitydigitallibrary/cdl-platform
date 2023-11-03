@@ -104,7 +104,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            You must make an account before you can begin using the CDL. An account can be created <a target="_blank" and rel="noopener noreferrer" href="/auth">here</a>. Note that accounts made on the website will not work when running the the service locally through localhost, so you will need to create separate accounts. 
+                            You must make an account before you can begin using the CDL. An account can be created <a target="_blank" rel="noopener noreferrer" href="/auth">here</a>. Note that accounts made on the website will not work when running the the service locally through localhost, so you will need to create separate accounts. 
                         </p>
                     </>
                 ),
@@ -115,7 +115,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                             The Chrome extension is available in the Chrome web store and can be installed from <a target="_blank" and rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0">here</a>. After installing, you will be able to log into your CDL account that you created using the CDL website. The extension defaults to logging in users via the hosted version of the CDL, so if you wish to use the extension with your local CDL instance, then you will need to change the extension "Backend Source" setting.
+                             The Chrome extension is available in the Chrome web store and can be installed from <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0">here</a>. After installing, you will be able to log into your CDL account that you created using the CDL website. The extension defaults to logging in users via the hosted version of the CDL, so if you wish to use the extension with your local CDL instance, then you will need to change the extension "Backend Source" setting.
                         </p>                
                     </>
                 ),
