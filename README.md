@@ -27,7 +27,7 @@ open powershell
 wsl -d docker-desktop
 sysctl -w vm.max_map_count=262144
 ```
-- With all of the Docker containers, packages, and models, the total size is ~10GB.
+- With all of the Docker containers, packages, and models, the total size is ~10GB. Without Neural, it is ~3GB.
 
 ### Configuring the env files
 Copy the following to ``backend\env_local.ini``:
