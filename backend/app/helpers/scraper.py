@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import os
 from urllib.parse import urljoin
-from app.helpers.scrapecode_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, \
+from app.helpers.helper_constants import CODE_SCRAPE_ALREADY_ATTEMPTED, CODE_SUCCESS, \
     CODE_INVALID_FILE_ENDING_FOR_URL, CODE_TIMEOUT, CODE_INVALID_STATUS_CODE, CODE_UNABLE_TO_PARSE, \
     CODE_URL_NAME_TOO_LONG, CODE_URL_NOT_PUBLICILY_ACCESSIBLE, \
     CONNECTION_READ_TIMEOUT, RESPONSE_TIMEOUT, HEADERS, SCRAPECODE_TO_MESSAGE_MAP
@@ -216,7 +216,6 @@ class ScrapeWorker:
                     all_paragraphs_text.append(paragraph.text)
                     all_hyperlinks = paragraph.find_all("a")
                     for h in all_hyperlinks:
-                        hyperlink_text = self.clean_text(h.text)
                         hyperlink_url = h.get("href", "")
 
                         isValidURL, hyperlink_url = self.test_fix_relative_url(

@@ -16,7 +16,8 @@ import Footer from "../components/footer";
 
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/"
+const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
+const websiteURL = process.env.NEXT_PUBLIC_FROM_CLIENT;
 const searchEndpoint = "search?";
 var searchURL = baseURL_client + searchEndpoint;
 

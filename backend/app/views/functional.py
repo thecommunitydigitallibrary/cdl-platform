@@ -17,6 +17,7 @@ from app.helpers.helpers import token_required, build_display_url, build_result_
 from app.helpers import response
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
+from app.helpers.topic_map import TopicMap
 from app.models.community_core import CommunityCores
 from app.models.cache import Cache
 from app.models.communities import Communities
@@ -169,9 +170,9 @@ def create_batch_submission(current_user):
             ip = request.remote_addr
             user_id = current_user.id
             user_communities = current_user.communities
-            highlighted_text = sanitize_input(submission["highlighted_text"])
+            highlighted_text = sanitize_input(submission["description"])
             source_url = submission["source_url"]
-            explanation = submission["explanation"]
+            explanation = submission["title"]
 
             message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
                                 source_url=source_url, explanation=explanation, community=community)
@@ -579,6 +580,55 @@ def submission(current_user, id):
         return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
+def graph_search(current_user, submission_id):
+    try:
+        cdl_logs = Logs()
+        submission_data = cdl_logs.find_one({"_id": ObjectId(submission_id)})
+        communities = current_user.communities
+        accessible = False
+        if submission_data:
+            if not submission_data.deleted:
+                community_submissions = {str(cid) for uid in submission_data.communities for cid in
+                                         submission_data.communities[uid]}
+                for community in communities:
+                    if str(community) in community_submissions:
+                        accessible = True
+
+                if str(submission_data.user_id) == str(current_user.id):
+                    accessible = True
+
+            is_webpage = False
+        else:
+            webpages = Webpages()
+            submission_data = webpages.find_one({"_id": ObjectId(submission_id)})
+            accessible = True
+            is_webpage = True
+
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return response.error("Invalid submission ID", Status.NOT_FOUND)
+
+    if not submission_data:
+        return response.error("Invalid submission ID", Status.NOT_FOUND)
+    elif not accessible:
+        return response.error("Access Forbidden", Status.FORBIDDEN)
+
+    communities = current_user.communities
+    explanation = submission_data.webpage.get("metadata", {}).get("title", "") if is_webpage else submission_data.explanation
+    highlighted_text = submission_data.webpage.get("metadata", {}).get("description", "") if is_webpage else submission_data.highlighted_text
+
+    query = f"{explanation} {highlighted_text}"[:1000]
+
+    communities = [str(x) for x in communities]
+    _, submissions_hits = elastic_manager.search(query, communities, page=0, page_size=50)
+    node = {
+        "explanation": explanation,
+        "highlighted_text": highlighted_text
+    }
+    return node, submissions_hits
+
+
 @functional.route("/api/search", methods=["GET"])
 @token_required
 def search(current_user):
@@ -755,6 +805,19 @@ def search(current_user):
         return_obj["total_num_results"] = total_num_results
         return_obj["search_results_page"] = search_results_page
 
+        # Return nodes and links for community visualisation
+        if source == "visualize":
+            community_name = communities[community_id]['name']
+
+            # Call TopicMap
+            data_ip = json.dumps(search_results_page)
+            tm = TopicMap(data_ip, community_name)
+            tm.pre_process()
+            tm.extract_keywords()
+            tm.extract_metadesc_per_topic_keywords()
+            graphData = tm.generate_graph_data()
+
+            return response.success(graphData, Status.OK)
         return response.success(return_obj, Status.OK)
     except Exception as e:
         print(e)
@@ -1092,9 +1155,10 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                             _, core_hits = elastic_manager.search(" ".join(core_hashtags), [community_id], page=0, page_size=1000)
 
 
-                            # to put on top
+                            # to put on top (in slightly random order)
                             for hit in core_hits:
-                                hit["_score"] += 100
+                                rand_int = random.randint(0,10)
+                                hit["_score"] += 100 + rand_int
 
                             submissions_hits = submissions_hits + core_hits
 

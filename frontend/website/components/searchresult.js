@@ -17,13 +17,14 @@ import DialogTitle from "@mui/material/DialogTitle";
 import ThumbDownRoundedIcon from "@mui/icons-material/ThumbDownRounded";
 import ThumbUpRoundedIcon from "@mui/icons-material/ThumbUpRounded";
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
+import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
 import MoreVert from "@mui/icons-material/MoreVert";
 import TagIcon from '@mui/icons-material/Tag';
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import ShareIcon from "@mui/icons-material/Share";
 
 import { Snackbar, Alert, Box } from "@mui/material";
-import React, { useState, useContext } from "react";
+import React, {useState, useContext, useEffect} from "react";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { Bookmark, BookmarkAddOutlined, Close, Launch } from "@mui/icons-material";
 
@@ -39,6 +40,20 @@ function SearchResult(props) {
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [severity, setSeverity] = React.useState("");
+  const [paperWidth, setPaperWidth] = React.useState("60%");
+  const [paperMargin, setPaperMargin] = React.useState("15px 10px");
+  const [paperMarginX, setPaperMarginX] = React.useState("20%");
+
+  useEffect(() => {
+    setPaperWidth("60%");
+    setPaperMargin("15px 10px");
+    if(props.paperWidth != undefined && props.paperWidth != "" && props.paperWidth != null)
+      setPaperWidth(props.paperWidth);
+    if(props.paperMargin != undefined && props.paperMargin != "" && props.paperMargin != null)
+      setPaperMargin(props.paperMargin);
+    if(props.paperMarginX != undefined && props.paperMarginX != null)
+      setPaperMarginX(props.paperMarginX);
+  }, []);
 
   const handleClick = () => {
     setOpen(true);
@@ -79,6 +94,7 @@ function SearchResult(props) {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   const handleOpenOptionsMenu = (event) => {
+    event.preventDefault();
     setAnchorElUser(event.currentTarget);
   };
 
@@ -273,15 +289,16 @@ function SearchResult(props) {
   }
 
   return (
+    <a href={websiteURL + "submissions/" + props.submission_id} style={{textDecoration: "none"}} target="_blank" rel="noopener noreferrer">
     <Paper
       elevation={0}
       id={"card_id" + props.search_idx}
       sx={{
-        width: "60%",
+        width: paperWidth,
         padding: "20px",
         border: "1px solid #ddd",
-        margin: "15px 10px",
-        marginX: '20%',
+        margin: paperMargin,
+        marginX: paperMarginX,
         wordBreak: 'break-word'
       }}
     >
@@ -291,7 +308,7 @@ function SearchResult(props) {
           style={{
             marginRight: "7px",
             alignSelf: "center",
-            paddingTop: "4px",
+            paddingTop: "0"
           }}
         >
           <div>
@@ -433,7 +450,7 @@ function SearchResult(props) {
           margin: "0px 0px 1px 0px",
         }}
       >
-        {props.display_url}
+        {props.display_url} | {props.time}
       </p>
       {/* restricting text to only 500 characters per result to make it more uniform */}
       <p style={{fontSize: '15px', marginTop: '1%', textAlign: 'justify', maxWidth: '100%',
@@ -470,7 +487,7 @@ function SearchResult(props) {
           </Tooltip>
         </div>
 
-        <div style={{ width: "85%", float: "left", overflowX: "auto" }}>
+        <div style={{ float: "left", overflowX: "auto", width: "100%" }}>
         {communityNamesList && communityNamesList.length !== 0 ? (
           <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
             {communityNamesList}
@@ -516,14 +533,6 @@ function SearchResult(props) {
           </div>
         ) : null}
       </div>
-      
-      {props.time ? (
-        <div style={{ display: "inline", float: "right", paddingRight: "4px", fontSize: "13px",
-        color: "#808080",
-        }}>
-          <div><em>{props.time}</em></div>          
-        </div>
-      ) : null}
 
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
@@ -531,6 +540,7 @@ function SearchResult(props) {
         </Alert>
       </Snackbar>
     </Paper>
+    </a>
   );
 }
 

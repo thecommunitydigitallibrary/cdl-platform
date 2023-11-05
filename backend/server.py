@@ -8,6 +8,7 @@ from app.views.users import users
 from app.views.communities import communities
 from app.views.notes import notes
 from app.views.functional import functional
+from app.views.graph import graph
 from app.views.logs import *
 from app.db import get_db, get_redis
 
@@ -18,6 +19,7 @@ app.register_blueprint(users)
 app.register_blueprint(communities)
 app.register_blueprint(notes)
 app.register_blueprint(functional)
+app.register_blueprint(graph)
 
 parser = argparse.ArgumentParser()
 

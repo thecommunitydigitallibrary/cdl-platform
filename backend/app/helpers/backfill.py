@@ -301,4 +301,4 @@ if __name__ == "__main__":
         traceback.print_exc()
 
 # python .\app\helpers\backfill.py --env_path ..\..\cdl-secrets\production\env_prod.ini > tmp.json
-# python .\app\helpers\backfill.py --env_path ..\..\cdl-secrets\local_cloud_opensearch_mongodb\env_local.ini > tmp.json
+# python .\app\helpers\backfill.py --env_path ..\..\cdl-secrets\local_cloud_opensearch_mongodb\env_local-dev.ini > tmp.json

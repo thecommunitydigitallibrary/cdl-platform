@@ -23,6 +23,33 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        November 5th, 2023
+      </h2>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Community meta-descriptor visualization</li>
+            <li className="list-item">Similar submission visualization</li>
+            <li className="list-item">Complete documentation</li>
+            <li className="list-item">Core content recommendation</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Batch upload field name fix</li>
+            <li className="list-item">Ordered and unordered bullet now render properly</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+      Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Search result whitespace click now navigates to submission's CDL page</li>
+            <li className="list-item">Submission time on search result made smaller</li>
+        </ul>
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         August 9th, 2023
       </h2>
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>

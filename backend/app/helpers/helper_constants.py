@@ -1,3 +1,4 @@
+# Scraper Constants
 CONNECTION_READ_TIMEOUT = 1
 RESPONSE_TIMEOUT = 3
 HEADERS = {
@@ -24,3 +25,21 @@ SCRAPECODE_TO_MESSAGE_MAP = {
     CODE_URL_NAME_TOO_LONG: "The given URL name is too long to store",
     CODE_URL_NOT_PUBLICILY_ACCESSIBLE: "The given URL is not publicly accessible",
 }
+
+# Visualize Map Constants
+RE_LECTURE_TAG = "[#][\w]*[\d.\d]*[,]*[1-9]*[.\d]*"
+RE_LECTURE_WITHOUT_TAG = "[Ll][\w ]*[1-9][\d.\d]*[,]*[1-9]*[.\d]*"
+RE_LECTURE_NUM = "[1-9][\d.]*\d*"
+TOP_N_SUBMISSIONS = 5
+META_DESCRIPTOR = {
+    "Description": ["describe", "overview", "explanation", "introduce", "discuss", "explain", "introduction", "description"],
+    "Comparison": ["difference", "comparison", "vs", "versus", "between"],
+    "Articles/Papers": ["paper", "conference", "research", "survey", "reading", "article"],
+    "Examples": ["examples", "applications", "exemplar", "instance", "case study", "application"],
+    "Intuition": ["intuitive", "understanding"],
+    "Tutorial": ["tutorial", "class", "lesson", "demo", "demonstration", "guide", "implementataion"],
+    "Theory": ["theorem", "proof", "theory"],
+    "Videos": ["video"],
+    "Miscellaneous" : ["miscellaneous"]
+}
+KEYWORDS_IGNORE = ["related", "gives", "towards", "deep", ]

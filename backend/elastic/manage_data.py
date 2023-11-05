@@ -388,8 +388,8 @@ class ElasticManager:
         try:
             text = text.encode("latin1", errors="strict").decode("utf8", errors="strict")
         except Exception as e:
-            print(e)
-            traceback.print_exc()
+            #print(e)
+            #traceback.print_exc()
             text = text.encode("utf8", errors="ignore").decode("utf8", errors="ignore")
         
         try:
