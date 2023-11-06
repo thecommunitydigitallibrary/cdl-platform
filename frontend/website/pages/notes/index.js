@@ -20,6 +20,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
+const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const notesEndpoint = "notes/";
 
 function Notes({ data }) {
@@ -62,7 +63,7 @@ function Notes({ data }) {
   const [title, setTitle] = useState("");
 
   const createNewPage = async (event) => {
-    const res = await fetch(baseURL_server + notesEndpoint, {
+    const res = await fetch(baseURL_client + notesEndpoint, {
       method: "POST",
       body: JSON.stringify({
         title: title.length < 1 ? "Untitled" : title,
