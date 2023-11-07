@@ -54,13 +54,18 @@ const json_example = `{
   "data": [
     {
       "source_url": "https://textdata.org/about",
-      "description": "About the CDL",
-      "title": "This page contains information about the CDL."
+      "title": "About the CDL",
+      "description": "This page contains information about the CDL."
     },
     {
       "source_url": "https://www.google.com/",
-      "description": "Google Search",
-      "title": "The classic home page for Google."
+      "title": "Google Search",
+      "description": "The classic home page for Google."
+    },
+    {
+      "source_url": "",
+      "title": "What are some good resources to better understand BM25?",
+      "description": "#question #L1.1"
     }
   ]
 }
@@ -294,7 +299,7 @@ function Header(props) {
         ))
       ) {
         setSeverity("error");
-        setMessage(`"highlighted_text" field is invalid.`);
+        setMessage(`"Description" field is invalid.`);
         handleClick();
         return;
       } else if (
@@ -304,7 +309,7 @@ function Header(props) {
         ))
       ) {
         setSeverity("error");
-        setMessage(`"explantion" field is invalid.`);
+        setMessage(`"Title" field is invalid.`);
         handleClick();
         return;
       }
@@ -510,7 +515,7 @@ function Header(props) {
                       {setting.value == 'indexSubmission' ?
                         <Grid item sx={{ flexGrow: 0 }}>
                           <MenuItem onClick={handleClickSubmission}>
-                            <Tooltip title="Index a submission">
+                            <Tooltip title="Create a submission">
                               <Add />
                             </Tooltip>
                           </MenuItem>
@@ -602,9 +607,7 @@ function Header(props) {
             </DialogTitle>
             <DialogContent>
               <DialogContentText>
-                To index a submission, you'll need to have the URL for the
-                website, a title for your submission, and a description that
-                explains the topic.
+                Use the form below to create a new submission for a selected community. Each submission should have a title and a description. The Submission URL is optional, will default to the submission's CDL URL if not specified. 
               </DialogContentText>
               {!batch ? null : (
                 <DialogContentText>
@@ -617,7 +620,7 @@ function Header(props) {
                     autoFocus
                     margin="dense"
                     id="submissionURL"
-                    label="Submission URL"
+                    label="Submission URL (optional)"
                     fullWidth
                     variant="standard"
                     defaultValue=""

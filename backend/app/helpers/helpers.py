@@ -23,7 +23,7 @@ def validate_submission(highlighted_text, explanation, source_url=None):
     Checks to make sure submitted text is not a URL!
     """
     if validators.url(highlighted_text) or validators.url(explanation):
-        return False, "Error: The highlighted text or explanation should not be a URL"
+        return False, "Error: The title or description should not be a URL"
 
     # check to make sure source url is not on wrong page
     if source_url != None:
@@ -42,9 +42,9 @@ def validate_submission(highlighted_text, explanation, source_url=None):
 
     # cap highlighted text, explanation length
     if highlighted_text and (len(highlighted_text) > char_max_desc or len(highlighted_text.split()) > word_max_desc):
-        return False, "Highlighted text is too long. Please limit to 1000 words or 10,000 characters"
+        return False, "The description is too long. Please limit to 1000 words or 10,000 characters"
     if explanation and (len(explanation) > char_max_title or len(explanation.split()) > word_max_title):
-        return False, "Title is too long. Please limit to 100 words or 1000 characters"
+        return False, "The title is too long. Please limit to 100 words or 1000 characters"
 
     return True, "Validation successful"
 
@@ -243,6 +243,10 @@ def create_page(hits, communities, toggle_display="highlight"):
 
         # Display URL
         url = hit["_source"].get("source_url", "")
+
+        # TODO: check if source_url is empty. if so, set to ID
+
+
         display_url = build_display_url(url)
         result["display_url"] = display_url
         result["orig_url"] = url

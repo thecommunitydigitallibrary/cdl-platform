@@ -545,6 +545,7 @@ def submission(current_user, id):
             if submission and not is_deleted:
                 community_submissions = {str(cid) for uid in submission.communities for cid in
                                          submission.communities[uid]}
+            
                 for community in communities:
                     if str(community) in community_submissions:
                         search_id = log_submission_view(ip, user_id, submission.id).inserted_id
@@ -1026,9 +1027,9 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     if ObjectId(community) not in user_communities:
         return "Error: You do not have access to this community.", Status.FORBIDDEN, None
 
-    # for some reason, in the case that there is no explanation or URL
-    if not explanation or not source_url:
-        return "Missing explanation or source url.", Status.BAD_REQUEST, None
+    # for some reason, in the case that there is no explanation
+    if not explanation:
+        return "Missing submission title.", Status.BAD_REQUEST, None
 
     validated, message = validate_submission(highlighted_text, explanation, source_url=source_url)
     if not validated:
@@ -1042,8 +1043,9 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
         index_status, hashtags = elastic_manager.add_to_index(doc)
 
         # update community core content if necessary
+        # only consider when source url is included
         try:
-            if "#core" in hashtags:
+            if "#core" in hashtags and source_url:
                 hashtags = [x for x in hashtags if x != "#core"]
                 standardized_url = standardize_url(source_url)
                 community_core = CommunityCores()
@@ -1057,7 +1059,7 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
         webpages = Webpages()
         scraper = ScrapeWorker(webpages.collection)
 
-        if not scraper.is_scraped_before(source_url):
+        if source_url and not scraper.is_scraped_before(source_url):
             data = scraper.scrape(source_url)  # Triggering Scraper
 
             # Check if the URL was already scraped
@@ -1283,8 +1285,10 @@ def format_submission_for_display(submission, current_user, search_id):
 		submission : dict : a slightly-modified submission object.
 	"""
     # get some stats
-
     submission = submission.to_dict()
+
+    # TODO: check if source_url is empty. if so, set to
+
 
     user_id = current_user.id
 
