@@ -580,7 +580,7 @@ def submission(current_user, id):
         return response.error("Failed to create submission, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-def graph_search(current_user, submission_id):
+def graph_search(current_user, submission_id, toggle_webpage_results=True):
     try:
         cdl_logs = Logs()
         submission_data = cdl_logs.find_one({"_id": ObjectId(submission_id)})
@@ -620,13 +620,21 @@ def graph_search(current_user, submission_id):
 
     query = f"{explanation} {highlighted_text}"[:1000]
 
-    communities = [str(x) for x in communities]
-    _, submissions_hits = elastic_manager.search(query, communities, page=0, page_size=50)
+    communities_list = [str(x) for x in communities]
+    _, submissions_hits = elastic_manager.search(query, communities_list, page=0, page_size=50)
+    submissions_pages = create_page(submissions_hits, communities)
+
+    if toggle_webpage_results:
+        # Searching exactly a user's community from the webpages index
+        _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
+        webpages_index_pages = create_page(webpages_hits, communities)
+        submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
+
     node = {
         "explanation": explanation,
         "highlighted_text": highlighted_text
     }
-    return node, submissions_hits
+    return node, submissions_pages
 
 
 @functional.route("/api/search", methods=["GET"])

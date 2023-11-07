@@ -77,8 +77,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     const colorNodeBackground = (node) => {
         switch (node.type) {
             case "current": return "#2c7dcc";
-            case "first" : return "#75a936";
-            case "second": return "#ad922b";
+            case "submission" : return "#75a936";
+            case "webpage": return "#FDD835";
             case "visited": return "#7d51af";
             default: return "#ad3b3b";
         }
@@ -565,7 +565,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     );
 
   const getSubmissionData = () => {
-    if (data.status == "ok") {
+    if (data.status === "ok") {
       setSubmissionDataResponse(data);
       setCommunityNameMap(mapCommunitiesToNames(data.submission.communities));
 
@@ -629,8 +629,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   }, []);
 
 
-  if(data.submission.hashtags){
-    var hashtag_results = data.submission.hashtags.map(function(item){
+  if(submissionDataResponse.submission && submissionDataResponse.submission.hashtags){
+    var hashtag_results = submissionDataResponse.submission.hashtags.map(function(item){
       return(
         <a 
         href={ "/search?query=" + encodeURIComponent(item) + "&community=all&page=0" } 
@@ -643,9 +643,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     });
   }
 
-  if (data.submission.communities_part_of) {
+  if (submissionDataResponse.submission && submissionDataResponse.submission.communities_part_of) {
     var communityNamesList = Object.keys(
-      data.submission.communities_part_of
+      submissionDataResponse.submission.communities_part_of
     ).map(function (key) {
       return (
         <a
@@ -666,7 +666,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
             background: "aliceblue",
           }}
         >
-          {data.submission.communities_part_of[key]}
+          {submissionDataResponse.submission.communities_part_of[key]}
         </a>
       );
     });
@@ -716,7 +716,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   Feedback for{" "}
                   <a
                     style={{ fontSize: "18px" }}
-                    href={data.submission.redirect_url}
+                    href={submissionDataResponse.submission.redirect_url}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -805,13 +805,13 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   margin: "0px 0px 0px 0px",
                 }}
               >
-                {submissionDataResponse.submission.display_url} | {data.submission.time}
+                {submissionDataResponse.submission.display_url} | {submissionDataResponse.submission.time}
               </p>
             </div>
 
             
             
-              {data.submission.hashtags !== undefined && data.submission.hashtags.length !== 0 &&
+              { submissionDataResponse.submission && submissionDataResponse.submission.hashtags !== undefined && submissionDataResponse.submission.hashtags.length !== 0 &&
               <div style={{ display:"flex", width:"100%"}}>
                   <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
                   <Tooltip title="HashTags">
@@ -836,10 +836,10 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                       style={{ height: "21px", color: "#1976d2" }}
                     />
                   </Tooltip>{" "}
-                  {communityNamesList.length > 0 && data.submission.type === "user_submission"
+                  {communityNamesList.length > 0 && submissionDataResponse.submission.type === "user_submission"
                     ? communityNamesList.map((link, i) => [i > 0, link])
                     : ""}
-                  {data.submission.type === "webpage" && "Webpage"}
+                  {submissionDataResponse.submission.type === "webpage" && "Webpage"}
                 </div>
                 
               </div>
@@ -888,7 +888,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 </Box>
               </Grid>
 
-              {data.submission.type === "user_submission" &&
+              {submissionDataResponse.submission && submissionDataResponse.submission.type === "user_submission" &&
                 <Grid item sx={{width: "66%"}}>
                   <Grid container sx={{flexFlow: "nowrap"}}>
                     <Grid item sx={{width: "50%"}}>
@@ -1061,7 +1061,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   &nbsp;Feedback
                 </ActionButton>
               </div>
-              {submissionDataResponse.submission.can_delete && (
+              {submissionDataResponse.submission && submissionDataResponse.submission.can_delete && (
                 <div style={{width: "20%"}}>
                   <ActionButton
                     type="filled"
@@ -1074,7 +1074,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   </ActionButton>
                 </div>
               )}
-              {submissionDataResponse.submission.can_delete && (
+              {submissionDataResponse.submission && submissionDataResponse.submission.can_delete && (
                 <div style={{width: "20%"}}>
                   <ActionButton
                     color="error"
