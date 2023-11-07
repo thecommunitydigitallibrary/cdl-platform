@@ -159,11 +159,15 @@ class TopicMap:
         '''
         for idx, row in self.submission_df.iterrows():
             expl = row['explanation']
+            hgh_txt = row["highlighted_text"]
             meta_descriptors = self.get_meta_descriptor(expl)
-            tags_from_re = extract_hashtags(expl)
-            if tags_from_re:
-                if len(tags_from_re) > 0:
-                    for tag in tags_from_re:
+            tags_from_expl = extract_hashtags(expl)
+            tags_from_hgh_txt = extract_hashtags(hgh_txt)
+            tags_from_expl.extend(tags_from_hgh_txt)
+            tags = set(tags_from_expl)
+            if tags:
+                if len(tags) > 0:
+                    for tag in tags:
                         self.add_to_lec_to_obj_map(tag, idx, meta_descriptors)
                 else:
                     self.add_to_lec_to_obj_map("-1", idx, meta_descriptors)
