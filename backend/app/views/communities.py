@@ -7,12 +7,11 @@ import traceback
 from app.db import *
 from app.helpers.status import Status
 from app.helpers import response
-from app.helpers.helpers import token_required, format_time_for_display, sanitize_input
+from app.helpers.helpers import token_required, format_time_for_display
 from app.models.communities import Communities, Community
 from app.models.community_logs import CommunityLogs
 from app.models.users import Users
 from app.models.judgment import *
-from app.models.logs import Logs
 from app.views.logs import log_community_action
 
 communities = Blueprint('communities', __name__)
