@@ -21,7 +21,7 @@ def get_graph(current_user, id):
 		if len(resp) == 1:
 			return resp
 		submission, search_results = resp
-		print(submission)
+		print(search_results)
 		nodes = [
 			{
 				"id": id,
@@ -33,16 +33,16 @@ def get_graph(current_user, id):
 		]
 		links = []
 		for result in search_results:
-			if result["_id"] == id:
+			if result["submission_id"] == id:
 				continue
 			node = {
-				"id": result["_id"],
-				"label": result["_source"]["explanation"],
-				"type": "first",
+				"id": result["submission_id"],
+				"label": result["explanation"],
+				"type": "webpage" if result["type"] == "webpage" else "submission",
 			}
 			link = {
 				"source": id,
-				"target": result["_id"]
+				"target": result["submission_id"]
 			}
 			nodes.append(node)
 			links.append(link)

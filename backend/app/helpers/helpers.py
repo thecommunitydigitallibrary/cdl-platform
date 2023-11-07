@@ -189,12 +189,13 @@ def create_page(hits, communities, toggle_display="highlight"):
             "explanation": None,
             "score": hit.get("_score", 0),
             "time": "",
+            "type": "submission",
             "communities_part_of": []
         }
 
         if "webpage" in hit["_source"]:
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
-
+            result["type"] = "webpage"
             possible_matches = []
             if "highlight" in hit and toggle_display == "highlight":
                 possible_matches = hit["highlight"].get("webpage.metadata.description", [])
