@@ -284,15 +284,16 @@ function Header(props) {
       );
       // Check inputs to determine whether they are valid
       // Use the validateSubmissionField function to check values
+      //if (
+      //  !(await validateSubmissionField("source_url", getSubmissionURL.value))
+      //) {
+      //  console.log("source url invalid");
+      //  setSeverity("error");
+      //  setMessage(`"source_url" field is invalid.`);
+      //  handleClick();
+      //  return;
+      //} 
       if (
-        !(await validateSubmissionField("source_url", getSubmissionURL.value))
-      ) {
-        console.log("source url invalid");
-        setSeverity("error");
-        setMessage(`"source_url" field is invalid.`);
-        handleClick();
-        return;
-      } else if (
         !(await validateSubmissionField(
           "highlighted_text",
           getSubmissionDescription.value

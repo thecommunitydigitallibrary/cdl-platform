@@ -21,7 +21,6 @@ def get_graph(current_user, id):
 		if len(resp) == 1:
 			return resp
 		submission, search_results = resp
-		print(search_results)
 		nodes = [
 			{
 				"id": id,

@@ -68,33 +68,33 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   const [severity, setSeverity] = useState("error");
   const [width, setWidth] = useState(900);
   const [height, setHeight] = useState(800);
-  const [source, setSource] =  useState("");
-  const [graph, setGraph] = useState({"nodes": [], "links": []});
+  const [source, setSource] = useState("");
+  const [graph, setGraph] = useState({ "nodes": [], "links": [] });
   const [graphSet, setGraphSet] = useState(new Set());
   const graphRef = useRef(graph);
   const sourceRef = useRef(source);
 
-    const colorNodeBackground = (node) => {
-        switch (node.type) {
-            case "current": return "#2c7dcc";
-            case "submission" : return "#75a936";
-            case "webpage": return "#FDD835";
-            case "visited": return "#7d51af";
-            default: return "#ad3b3b";
-        }
+  const colorNodeBackground = (node) => {
+    switch (node.type) {
+      case "current": return "#2c7dcc";
+      case "submission": return "#75a936";
+      case "webpage": return "#FDD835";
+      case "visited": return "#7d51af";
+      default: return "#ad3b3b";
     }
+  }
 
-    const handleNodeLabel = useCallback(
-        (node) => {
-          let desc = node.desc ? <p>{node.desc}</p> : null;
-          let tooltip = <div style={{background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px"}}>
-            <h6>{node.label}</h6>
-            {desc}
-          </div>;
-          return ReactDOMServer.renderToString(tooltip, {});
-        },
-        []
-    );
+  const handleNodeLabel = useCallback(
+    (node) => {
+      let desc = node.desc ? <p>{node.desc}</p> : null;
+      let tooltip = <div style={{ background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px" }}>
+        <h6>{node.label}</h6>
+        {desc}
+      </div>;
+      return ReactDOMServer.renderToString(tooltip, {});
+    },
+    []
+  );
 
   const handleClick = () => {
     setOpen(true);
@@ -333,7 +333,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
 
   const [shareUrlLink, setShareUrlLink] = React.useState("");
 
-  const [connectUrl, setConnectUrl] = React.useState("");
+  const [connection_id, setConnectionID] = React.useState("");
+  const [sub_title, setSubTitle] = React.useState("");
+  const [sub_description, setSubDescription] = React.useState("");
+  const [sub_url, setSubURL] = React.useState("");
+  const [selected_community, setSelectedCommunity] = React.useState("")
+
 
   const [openConnectForm, setOpenConnectForm] = React.useState(false);
 
@@ -342,22 +347,40 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   };
 
   const handleCancelConnectForm = () => {
-    setConnectUrl("");
+    setConnectionID("");
     setOpenConnectForm(false);
     handleCloseOptionsMenu();
   };
 
-  const handleConnectUrlType = (event) => {
-    setConnectUrl(event.target.value);
+  const handleConnectionIDType = (event) => {
+    setConnectionID(event.target.value);
   };
+  const handleSubTitle = (event) => {
+    setSubTitle(event.target.value);
+  };
+  const handleSubDescription = (event) => {
+    setSubDescription(event.target.value);
+  };
+  const handleSubURL = (event) => {
+    setSubURL(event.target.value);
+  };
+  const handleSelectCommunity = (event) => {
+    setSelectedCommunity(event.target.value);
+  }
+
 
   const handleCreateConnectForm = async (event) => {
     var URL = baseURL_client + "connect/";
+
     const res = await fetch(URL, {
       method: "POST",
       body: JSON.stringify({
         connection_source: submissionDataResponse.submission.submission_id,
-        connection_target: connectUrl,
+        connection_target: connection_id,
+        submission_url: sub_url,
+        submission_title: sub_title,
+        submission_description: sub_description,
+        community: selected_community
       }),
       headers: new Headers({
         Authorization: jsCookie.get("token"),
@@ -365,11 +388,17 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
       }),
     });
     const response = await res.json();
-    console.log(response, connectUrl);
-    setOpenConnectForm(false);
-    setConnectUrl("");
-    handleCloseOptionsMenu();
-    window.location.reload();
+    if (res.status == 200) {
+      setSeverity("success");
+      setMessage(response.message);
+      handleClick();
+      handleCloseOptionsMenu();
+      window.location.reload();
+    } else {
+      setSeverity("error");
+      setMessage(response.message);
+      handleClick();
+    }
   };
 
   const handleClickOptionsMenu = (event, option, param) => {
@@ -483,86 +512,86 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
       console.log(response);
     }
     if (target != null) {
-      handleNodeVisit({id: target});
+      handleNodeVisit({ id: target });
     }
   }
 
-    const fgRef = useRef();
+  const fgRef = useRef();
 
-    const handleNodeVisit = useCallback((node) => {
-      let newGraph = graphRef.current;
-      for (let i = 0; i < newGraph.nodes.length; ++i) {
-        if (newGraph.nodes[i].id === node.id) {
-            newGraph.nodes[i]["type"] = "visited";
-        }
+  const handleNodeVisit = useCallback((node) => {
+    let newGraph = graphRef.current;
+    for (let i = 0; i < newGraph.nodes.length; ++i) {
+      if (newGraph.nodes[i].id === node.id) {
+        newGraph.nodes[i]["type"] = "visited";
       }
-      setGraph(newGraph);
-    }, [graph, setGraph]);
+    }
+    setGraph(newGraph);
+  }, [graph, setGraph]);
 
-    const handleNodeAdd = useCallback((node, data) => {
-      console.log("DATA", data);
-      let newGraph = graph;
-      console.log("OLD", newGraph);
+  const handleNodeAdd = useCallback((node, data) => {
+    console.log("DATA", data);
+    let newGraph = graph;
+    console.log("OLD", newGraph);
 
-      console.log("OLD Set", graphSet);
-      for (let i = 0; i < data.nodes.length; ++i) {
-        if (!graphSet.has(data.nodes[i].id)) {
-            let nde = data.nodes[i];
-            nde["index"] = data.nodes.length;
-            newGraph.nodes.push(nde);
-        }
+    console.log("OLD Set", graphSet);
+    for (let i = 0; i < data.nodes.length; ++i) {
+      if (!graphSet.has(data.nodes[i].id)) {
+        let nde = data.nodes[i];
+        nde["index"] = data.nodes.length;
+        newGraph.nodes.push(nde);
+      }
+    }
+
+    for (let i = 0; i < data.links.length; ++i) {
+      if (!graphSet.has(data.links[i].target)) {
+        let lnk = data.links[i];
+        lnk["index"] = data.links.length;
+        lnk["source"] = node;
+        lnk["target"] = data.nodes[data.nodes.length - 1];
+        newGraph.links.push(lnk);
+        graphSet.add(data.links[i].target);
+      }
+    }
+    setGraphSet(graphSet);
+    console.log("NEW  Set", graphSet);
+    console.log("NEW", newGraph);
+    setGraph(newGraph);
+  }, [graph, setGraph]);
+
+  const handleNodeClick = useCallback(
+    async (node) => {
+      setLoading(true);
+      const res = await fetch(baseURL_client + "submission/" + node.id, {
+        method: "GET",
+        headers: new Headers({
+          Authorization: jsCookie.get("token"),
+          "Content-Type": "application/json",
+        }),
+      });
+      handleNodeVisit(node);
+      const response = await res.json();
+      if (response.status === "ok") {
+        setSubmissionDataResponse(response);
+      } else {
+        console.log(response);
       }
 
-      for (let i = 0; i < data.links.length; ++i) {
-        if (!graphSet.has(data.links[i].target)) {
-            let lnk = data.links[i];
-            lnk["index"] = data.links.length;
-            lnk["source"] = node;
-            lnk["target"] = data.nodes[data.nodes.length-1];
-            newGraph.links.push(lnk);
-            graphSet.add(data.links[i].target);
-        }
-      }
-      setGraphSet(graphSet);
-      console.log("NEW  Set", graphSet);
-      console.log("NEW", newGraph);
-      setGraph(newGraph);
-    }, [graph, setGraph]);
+      // Add New Nodes and Links
+      // const graph_response = await callGraphAPI(id);
+      // if (graph_response.status === "ok") {
+      //   handleNodeAdd(node, graph_response.data);
+      // } else {
+      //   console.log(graph_response);
+      // }
 
-    const handleNodeClick = useCallback(
-        async (node) => {
-          setLoading(true);
-          const res = await fetch( baseURL_client + "submission/" + node.id, {
-            method: "GET",
-            headers: new Headers({
-              Authorization: jsCookie.get("token"),
-              "Content-Type": "application/json",
-            }),
-          });
-          handleNodeVisit(node);
-          const response = await res.json();
-          if (response.status === "ok") {
-            setSubmissionDataResponse(response);
-          } else {
-            console.log(response);
-          }
+      // Complete Loading and Change URL
 
-          // Add New Nodes and Links
-          // const graph_response = await callGraphAPI(id);
-          // if (graph_response.status === "ok") {
-          //   handleNodeAdd(node, graph_response.data);
-          // } else {
-          //   console.log(graph_response);
-          // }
-
-          // Complete Loading and Change URL
-
-          setLoading(false);
-          const nextURL = websiteURL + 'submissions/' + sourceRef.current + "?target=" + node.id;
-          window.history.replaceState(null, "", nextURL);
-        },
-        [graph, setGraph]
-    );
+      setLoading(false);
+      const nextURL = websiteURL + 'submissions/' + sourceRef.current + "?target=" + node.id;
+      window.history.replaceState(null, "", nextURL);
+    },
+    [graph, setGraph]
+  );
 
   const getSubmissionData = () => {
     if (data.status === "ok") {
@@ -622,22 +651,24 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   }, [graph, source]);
 
   useEffect(() => {
-      setHeight(window.innerHeight - 88.6)
-      setWidth((window.innerWidth / 2) - 40)
-      getSubmissionData();
-      getGraphData();
+    setHeight(window.innerHeight - 88.6)
+    setWidth((window.innerWidth / 2) - 40)
+    getSubmissionData();
+    getGraphData();
   }, []);
 
 
-  if(submissionDataResponse.submission && submissionDataResponse.submission.hashtags){
-    var hashtag_results = submissionDataResponse.submission.hashtags.map(function(item){
-      return(
-        <a 
-        href={ "/search?query=" + encodeURIComponent(item) + "&community=all&page=0" } 
-        target="_blank"
-        rel="noopener noreferrer" 
-        style = {{ fontSize:"15px",
-          display: "inline", paddingRight : "15px"}}
+  if (submissionDataResponse.submission && submissionDataResponse.submission.hashtags) {
+    var hashtag_results = submissionDataResponse.submission.hashtags.map(function (item) {
+      return (
+        <a
+          href={"/search?query=" + encodeURIComponent(item) + "&community=all&page=0"}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontSize: "15px",
+            display: "inline", paddingRight: "15px"
+          }}
         >{item}</a>
       );
     });
@@ -681,7 +712,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
         <link rel="icon" href="/images/tree32.png" />
       </Head>
       <Header />
-      <div className="allResults" style={{display: "flex"}}>
+      <div className="allResults" style={{ display: "flex" }}>
         {submissionDataResponse.submission && (
           <Paper
             elevation={0}
@@ -746,34 +777,107 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               <Dialog open={openConnectForm}>
                 <DialogTitle>
                   {" "}
-                  Add connection for{" "}
-                  <a
-                    style={{ fontSize: "20px" }}
-                    href={submissionDataResponse.submission.redirect_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {submissionDataResponse.submission.explanation}
-                  </a>
+                  Post a reply...
                 </DialogTitle>
+
                 <DialogContent>
-                  <DialogContentText></DialogContentText>
+
+
+                  <DialogContentText>
+                    {" "} By creating a new submission:
+                  </DialogContentText>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    id="submissionURL"
+                    label="Submission URL (optional)"
+                    fullWidth
+                    variant="standard"
+                    defaultValue=""
+                    value={sub_url}
+                    onChange={handleSubURL}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="submissionTitle"
+                    label="Submission Title"
+                    fullWidth
+                    variant="standard"
+                    defaultValue=""
+                    value={sub_title}
+                    onChange={handleSubTitle}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="submissionDescription"
+                    label="Submission Description"
+                    fullWidth
+                    multiline
+                    variant="standard"
+                    defaultValue=""
+                    value={sub_description}
+                    onChange={handleSubDescription}
+                  />{" "}
+
+                  <FormControl
+                    sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
+                  >
+                    <InputLabel id="demo-simple-select-label">
+                      Select Community
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      style={{ backgroundColor: "white" }}
+                      label="Select Community"
+                      value={selected_community}
+                      onChange={handleSelectCommunity}
+                    >
+                      {Object.keys(communityNameMap).map(function (key, index) {
+                        return (
+                          <MenuItem key={index} value={key}>
+                            {communityNameMap[key]}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+
+                  <br />
+                  <br />
+
+                  <DialogContentText>
+                    {" "} Or by connecting an existing submission:
+                  </DialogContentText>
                   <TextField
                     autoFocus
                     margin="dense"
                     id="message"
                     name="message"
-                    value={connectUrl}
-                    onChange={handleConnectUrlType}
+                    value={connection_id}
+                    onChange={handleConnectionIDType}
                     label="Paste Connection ID"
                     fullWidth
                     variant="standard"
                   />
+
                 </DialogContent>
+
                 <DialogActions>
                   <Button onClick={handleCancelConnectForm}>Cancel</Button>
-                  <Button onClick={handleCreateConnectForm}>Add</Button>
+                  <Button onClick={handleCreateConnectForm}>Post</Button>
                 </DialogActions>
+
+                <Snackbar 
+                  open={open}
+                  autoHideDuration={6000} 
+                  onClose={handleClose}
+                  onClick={handleCloseSnackbar}
+                  message={message}
+                  severity={severity}
+
+               />
+
               </Dialog>
 
               <Snackbar
@@ -809,42 +913,41 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               </p>
             </div>
 
-            
-            
-              { submissionDataResponse.submission && submissionDataResponse.submission.hashtags !== undefined && submissionDataResponse.submission.hashtags.length !== 0 &&
-              <div style={{ display:"flex", width:"100%"}}>
-                  <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
-                  <Tooltip title="HashTags">
-                    <TagIcon style={{ height: "22px", color: "#1976d2" }}/>
-                  </Tooltip> 
-                  </div>
-                  <div>
-                  <p>{hashtag_results}</p>
-                  </div>
+
+
+            {submissionDataResponse.submission && submissionDataResponse.submission.hashtags !== undefined && submissionDataResponse.submission.hashtags.length !== 0 &&
+              <div style={{ display: "flex", width: "100%" }}>
+                <div style={{ marginRight: '5px' }}>
+                  <Tooltip title="Hashtags">
+                    <TagIcon style={{ height: "20px", color: "#1976d2" }} />
+                  </Tooltip>
+                </div>
+                <div style={{ overflowX: "auto" }}>
+                  <p margin-bottom='auto'>{hashtag_results}</p>
+                </div>
               </div>}
 
-              <div
-                style={{
-                  display: "flex",
-                  margin: "10px 0px 0px -5px",
-                  width: "100%",
-                }}
-              >
-                <div style={{ float: "left", minWidth: "fit-content" }}>
-                  <Tooltip title="Communities">
-                    <LocalLibraryRoundedIcon
-                      style={{ height: "21px", color: "#1976d2" }}
-                    />
-                  </Tooltip>{" "}
-                  {communityNamesList.length > 0 && submissionDataResponse.submission.type === "user_submission"
-                    ? communityNamesList.map((link, i) => [i > 0, link])
-                    : ""}
-                  {submissionDataResponse.submission.type === "webpage" && "Webpage"}
-                </div>
-                
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+              }}
+            >
+              <div style={{ float: "left", minWidth: "fit-content" }}>
+                <Tooltip title="Communities">
+                  <LocalLibraryRoundedIcon
+                    style={{ height: "21px", color: "#1976d2" }}
+                  />
+                </Tooltip>{" "}
+                {communityNamesList.length > 0 && submissionDataResponse.submission.type === "user_submission"
+                  ? communityNamesList.map((link, i) => [i > 0, link])
+                  : ""}
+                {submissionDataResponse.submission.type === "webpage" && "Webpage"}
               </div>
 
-              
+            </div>
+
+
 
             <Grid
               container
@@ -853,7 +956,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               justifyContent="space-between"
               sx={{ my: 1 }}
             >
-              <Grid item sx={{width: "33%"}}>
+              <Grid item sx={{ width: "33%" }}>
                 <Box
                   sx={{
                     my: 1,
@@ -889,15 +992,15 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               </Grid>
 
               {submissionDataResponse.submission && submissionDataResponse.submission.type === "user_submission" &&
-                <Grid item sx={{width: "66%"}}>
-                  <Grid container sx={{flexFlow: "nowrap"}}>
-                    <Grid item sx={{width: "50%"}}>
+                <Grid item sx={{ width: "66%" }}>
+                  <Grid container sx={{ flexFlow: "nowrap" }}>
+                    <Grid item sx={{ width: "50%" }}>
                       {(
-                        <Grid container alignItems="center" sx={{flexFlow: "nowrap"}}>
-                          <Grid item sx={{width: "80%"}}>
+                        <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
+                          <Grid item sx={{ width: "80%" }}>
                             <div>
                               <FormControl
-                                sx={{width: "100%"}}
+                                sx={{ width: "100%" }}
                                 size="small"
                               >
                                 <InputLabel id="demo-multiple-checkbox-label">
@@ -909,9 +1012,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                                   value={removeCommunityIDList}
                                   onChange={handleRemoveDropdownChange}
                                   input={
-                                    <OutlinedInput label="Remove Community"/>
+                                    <OutlinedInput label="Remove Community" />
                                   }
-                                  sx={{borderRadius: "4px 0 0 4px"}}
+                                  sx={{ borderRadius: "4px 0 0 4px" }}
                                   renderValue={(selected) =>
                                     selected
                                       .map((x) => communityNameMap[x])
@@ -935,25 +1038,25 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                               </FormControl>
                             </div>
                           </Grid>
-                          <Grid item sx={{marginRight: "10px"}}>
+                          <Grid item sx={{ marginRight: "10px" }}>
                             <Tooltip title="Remove">
                               <IconButton
                                 size="small"
-                                sx={{background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px"}}
+                                sx={{ background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px" }}
                                 onClick={deleteSubmissionfromCommunity}
                               >
-                                <Delete/>
+                                <Delete />
                               </IconButton>
                             </Tooltip>
                           </Grid>
                         </Grid>
                       )}
                     </Grid>
-                    <Grid item sx={{width: "50%"}}>
-                      {}
-                        <Grid container alignItems="center" sx={{flexFlow: "nowrap"}}>
-                          <Grid item sx={{width: "80%"}}>
-                            <div>
+                    <Grid item sx={{ width: "50%" }}>
+                      { }
+                      <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
+                        <Grid item sx={{ width: "80%" }}>
+                          <div>
                             <FormControl
                               sx={{ width: "100%" }}
                               size="small"
@@ -969,7 +1072,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                                 id="demo-multiple-checkbox"
                                 value={saveCommunityIDList}
                                 onChange={handleSaveDropdownChange}
-                                sx={{borderRadius: "4px 0 0 4px"}}
+                                sx={{ borderRadius: "4px 0 0 4px" }}
                                 input={
                                   <OutlinedInput label="Add Community" />
                                 }
@@ -996,11 +1099,11 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                             </FormControl>
                           </div>
                         </Grid>
-                        <Grid item sx={{marginRight: "0px"}}>
+                        <Grid item sx={{ marginRight: "0px" }}>
                           <Tooltip title="Save">
                             <IconButton
                               size="small"
-                              sx={{background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px"}}
+                              sx={{ background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px" }}
                               onClick={saveSubmission}>
                               <Save />
                             </IconButton>
@@ -1013,12 +1116,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               }
             </Grid>
             <div style={{ display: "flex" }}>
-              <div style={{width: "20%"}}>
+              <div style={{ width: "20%" }}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="connect"
-                  style={{width: "95%", padding: "8px"}}
+                  style={{ width: "95%", padding: "8px" }}
                   action={(event) =>
                     handleClickOptionsMenu(
                       event,
@@ -1027,15 +1130,15 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     )
                   }
                 >
-                  <AddLinkIcon /> &nbsp; Connect
+                  <AddLinkIcon /> &nbsp; Reply
                 </ActionButton>
               </div>
-              <div style={{width: "20%"}}>
+              <div style={{ width: "20%" }}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="shareurl"
-                  style={{width: "95%", padding: "8px"}}
+                  style={{ width: "95%", padding: "8px" }}
                   value={submissionDataResponse.submission.submission_id}
                   action={(event) =>
                     handleClickOptionsMenu(
@@ -1049,12 +1152,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   &nbsp;Share URL
                 </ActionButton>
               </div>
-              <div style={{width: "20%"}}>
+              <div style={{ width: "20%" }}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="feedback"
-                  style={{width: "95%", padding: "8px"}}
+                  style={{ width: "95%", padding: "8px" }}
                   action={(event) => handleClickOptionsMenu(event, "feedback")}
                 >
                   <FeedbackIcon />
@@ -1062,10 +1165,10 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 </ActionButton>
               </div>
               {submissionDataResponse.submission && submissionDataResponse.submission.can_delete && (
-                <div style={{width: "20%"}}>
+                <div style={{ width: "20%" }}>
                   <ActionButton
                     type="filled"
-                    style={{width: "95%", padding: "8px"}}
+                    style={{ width: "95%", padding: "8px" }}
                     variant="contained"
                     action={handleClickEdit}
                   >
@@ -1075,11 +1178,11 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 </div>
               )}
               {submissionDataResponse.submission && submissionDataResponse.submission.can_delete && (
-                <div style={{width: "20%"}}>
+                <div style={{ width: "20%" }}>
                   <ActionButton
                     color="error"
                     type="filled"
-                    style={{width: "95%", padding: "8px"}}
+                    style={{ width: "95%", padding: "8px" }}
                     variant="contained"
                     action={handleClickDelete}
                   >
@@ -1100,33 +1203,41 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               justifyContent={"flex-start"}
               spacing={4}
             ></Grid>
-            <div>
-              <Typography sx={{ fontSize: 18, marginTop: 2 }}>
-                Connections:
-              </Typography>
+            <hr />
+            <div className="allResults">
               {submissionDataResponse.submission.connections.length > 0 ? (
                 <>
                   {submissionDataResponse.submission.connections.map(
                     (d, index) => (
                       <>
-                        <SearchResult
-                          search_idx={index}
-                          redirect_url={d.redirect_url}
-                          display_url={d.display_url}
-                          submission_id={d.submission_id}
-                          result_hash={d.result_hash}
-                          highlighted_text={d.highlighted_text}
-                          explanation={d.explanation}
-                          auth_token={jsCookie.get("token")}
-                          show_relevant={true}
-                        ></SearchResult>
+                        <div key={index}>
+                          <SearchResult
+                            search_idx={index}
+                            redirect_url={d.redirect_url}
+                            display_url={d.display_url}
+                            submission_id={d.submission_id}
+                            result_hash={d.result_hash}
+                            highlighted_text={d.highlighted_text}
+                            explanation={d.explanation}
+                            hashtags={d.hashtags}
+                            time={d.time}
+                            communities_part_of={d.communities_part_of}
+                            auth_token={jsCookie.get("token")}
+                            show_relevant={true}
+                            paperWidth={"100%"}
+                            paperMarginX={"0%"}
+                          ></SearchResult>
+                        </div>
                       </>
                     )
-                  )}
+                  )
+                  }
+
                 </>
               ) : (
-                <Typography sx={{ fontSize: 14, color: "grey", marginLeft: 2 }}>
-                  None available
+
+                <Typography sx={{ fontSize: 14, color: "grey" }}>
+                  There are no replies.
                 </Typography>
               )}
             </div>
@@ -1227,8 +1338,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
             nodeLabel={handleNodeLabel}
             linkColor={() => 'rgba(0,0,0,0.7)'}
             linkDirectionalParticles={1}
-        />
-          </Paper>
+          />
+        </Paper>
       </div>
       <Footer />
     </>
@@ -1261,7 +1372,7 @@ export async function getServerSideProps(context) {
     const errorCode = res.ok ? false : res.status;
 
     return {
-      props: { errorCode, data, id, target},
+      props: { errorCode, data, id, target },
     };
   }
 }

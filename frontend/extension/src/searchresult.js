@@ -451,7 +451,7 @@ const [open, setOpen] = React.useState(false);
       {props.hashtags !== undefined && props.hashtags.length !== 0 &&
       <div style={{ display:"flex", marginTop:"-20px", width:"100%"}}>
           <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
-          <Tooltip title="HashTags">
+          <Tooltip title="Hashtags">
             <TagIcon style={{ paddingTop:"19px", verticalAlign: "middle", height: "22px", color: "#1976d2" }}/>
           </Tooltip> 
           </div>

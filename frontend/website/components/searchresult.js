@@ -464,7 +464,7 @@ function SearchResult(props) {
       {props.hashtags !== undefined && props.hashtags.length !== 0 &&
       <div style={{ display:"flex", width:"100%"}}>
           <div style={{ marginRight:'5px'}}>
-          <Tooltip title="HashTags">
+          <Tooltip title="Hashtags">
             <TagIcon style={{ height: "20px", color: "#1976d2" }}/>
           </Tooltip> 
           </div>

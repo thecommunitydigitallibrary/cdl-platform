@@ -26,7 +26,8 @@ def validate_submission(highlighted_text, explanation, source_url=None):
         return False, "Error: The title or description should not be a URL"
 
     # check to make sure source url is not on wrong page
-    if source_url != None:
+    # Empty string when text-only submission
+    if source_url != None and source_url != "":
         if not validators.url(source_url):
             return False, "Error: The URL is invalid: " + source_url
         forbidden_URLs = ["chrome://"]
@@ -45,6 +46,10 @@ def validate_submission(highlighted_text, explanation, source_url=None):
         return False, "The description is too long. Please limit to 1000 words or 10,000 characters"
     if explanation and (len(explanation) > char_max_title or len(explanation.split()) > word_max_title):
         return False, "The title is too long. Please limit to 100 words or 1000 characters"
+    
+    if explanation == "":
+        return False, "The title cannot be empty"
+
 
     return True, "Validation successful"
 
@@ -245,8 +250,11 @@ def create_page(hits, communities, toggle_display="highlight"):
         # Display URL
         url = hit["_source"].get("source_url", "")
 
-        # TODO: check if source_url is empty. if so, set to ID
-
+        if url == "":
+            if "localhost" in os.environ["api_url"]:
+                url = os.environ["api_url"] + ":" + os.environ["api_port"] + "/submissions/" + result["submission_id"]
+            else:
+                url = os.environ["api_url"] + "/submissions/" + result["submission_id"]
 
         display_url = build_display_url(url)
         result["display_url"] = display_url
@@ -285,13 +293,17 @@ def hydrate_with_hashtags(results):
         result["hashtags"] = []
         hashtags_explanation = [x for x in result["explanation"].split() if len(x) > 1 and x[0] == "#"]
         hashtags_ht = [x for x in result["highlighted_text"].split() if len(x) > 1 and x[0] == "#"]
-        hashtags = list(set(hashtags_explanation + hashtags_ht))
-        # remove mark in case hashtag is in body
 
+        hashtags = hashtags_explanation + hashtags_ht
+
+        # remove mark in case hashtag is in body
         hashtags = [re.sub("<mark>", "", x) for x in hashtags]
         hashtags = [re.sub("</mark>", "", x) for x in hashtags]
 
+        hashtags = list(set(hashtags))
+
         result["hashtags"] = hashtags
+
     return results
 
 def diversify(pages, topn=10):
