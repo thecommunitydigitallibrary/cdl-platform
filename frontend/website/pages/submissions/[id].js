@@ -48,6 +48,17 @@ import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
 import Box from "@mui/system/Box";
 import Head from "next/head";
 
+import katex from "katex";
+import "katex/dist/katex.css";
+
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+
+import rehypeSanitize from "rehype-sanitize";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
+
+
 const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), {
   loading: () => <p>Loading...</p>, ssr: false
 })
@@ -73,6 +84,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   const [graphSet, setGraphSet] = useState(new Set());
   const graphRef = useRef(graph);
   const sourceRef = useRef(source);
+
+  const [editDescription, setEditDescription] = useState("")
+
 
   const colorNodeBackground = (node) => {
     switch (node.type) {
@@ -145,7 +159,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
         "submission/" +
         submissionDataResponse.submission.submission_id;
       var getExplanation = document.getElementById("editExplanation");
-      var getHighlightedText = document.getElementById("editHighlightedText");
+      var getHighlightedText = editDescription
       var getURL = document.getElementById("editURL");
       var error = false;
       const res = await fetch(URL, {
@@ -153,7 +167,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
         body: JSON.stringify({
           community_id: submissionCommunities[i],
           explanation: getExplanation.value,
-          highlighted_text: getHighlightedText.value,
+          highlighted_text: editDescription,
           url: getURL.value,
         }),
         headers: new Headers({
@@ -180,6 +194,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   const [submissionDataResponse, setSubmissionDataResponse] = React.useState(
     []
   );
+
 
   const deleteSubmissionEntirely = async (event) => {
     // Get the searchId required for POST request
@@ -596,6 +611,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   const getSubmissionData = () => {
     if (data.status === "ok") {
       setSubmissionDataResponse(data);
+      setEditDescription(data.submission.highlighted_text)
       setCommunityNameMap(mapCommunitiesToNames(data.submission.communities));
 
       let sharableCommunityIds = [];
@@ -807,17 +823,68 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     value={sub_title}
                     onChange={handleSubTitle}
                   />
-                  <TextField
-                    margin="dense"
+                  
+                  <MDEditor
+                    autoFocus
                     id="submissionDescription"
                     label="Submission Description"
-                    fullWidth
-                    multiline
                     variant="standard"
-                    defaultValue=""
                     value={sub_description}
-                    onChange={handleSubDescription}
-                  />{" "}
+                    onChange={(value) => setSubDescription(value)}
+                    highlightEnable={false}
+                    preview="live"
+                    height="200px"
+                    previewOptions={{
+                      rehypePlugins: [[rehypeSanitize]],
+                      components: {
+                        code: ({ inline, children = [], className, ...props }) => {
+                          const txt = children[0] || "";
+                          if (inline) {
+                            if (
+                              typeof txt === "string" &&
+                              /^\$\$(.*)\$\$/.test(txt)
+                            ) {
+                              const html = katex.renderToString(
+                                txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                                {
+                                  throwOnError: false,
+                                }
+                              );
+                              return (
+                                <code dangerouslySetInnerHTML={{ __html: html }} />
+                              );
+                            }
+                            return <code>{txt}</code>;
+                          }
+                          const code =
+                            props.node && props.node.children
+                              ? getCodeString(props.node.children)
+                              : txt;
+                          if (
+                            typeof code === "string" &&
+                            typeof className === "string" &&
+                            /^language-katex/.test(className.toLocaleLowerCase())
+                          ) {
+                            const html = katex.renderToString(code, {
+                              throwOnError: false,
+                            });
+                            return (
+                              <code
+                                style={{ fontSize: "150%" }}
+                                dangerouslySetInnerHTML={{ __html: html }}
+                              />
+                            );
+                          }
+                          return <code className={String(className)}>{txt}</code>;
+                        },
+                      },
+                    }}
+                  />
+
+
+
+
+                  {" "}
 
                   <FormControl
                     sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
@@ -868,15 +935,15 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   <Button onClick={handleCreateConnectForm}>Post</Button>
                 </DialogActions>
 
-                <Snackbar 
+                <Snackbar
                   open={open}
-                  autoHideDuration={6000} 
+                  autoHideDuration={6000}
                   onClose={handleClose}
                   onClick={handleCloseSnackbar}
                   message={message}
                   severity={severity}
 
-               />
+                />
 
               </Dialog>
 
@@ -1193,9 +1260,59 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               )}
             </div>
             <br></br>
-            <Typography sx={{ fontSize: 16 }}>
-              {submissionDataResponse.submission.highlighted_text}
-            </Typography>
+            <div>
+              <MDEditor
+                value={submissionDataResponse.submission.highlighted_text}
+                preview="preview"
+                height="200px"
+                hideToolbar={true}
+                previewOptions={{
+                  rehypePlugins: [[rehypeSanitize]],
+                  components: {
+                    code: ({ inline, children = [], className, ...props }) => {
+                      const txt = children[0] || "";
+                      if (inline) {
+                        if (
+                          typeof txt === "string" &&
+                          /^\$\$(.*)\$\$/.test(txt)
+                        ) {
+                          const html = katex.renderToString(
+                            txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                            {
+                              throwOnError: false,
+                            }
+                          );
+                          return (
+                            <code dangerouslySetInnerHTML={{ __html: html }} />
+                          );
+                        }
+                        return <code>{txt}</code>;
+                      }
+                      const code =
+                        props.node && props.node.children
+                          ? getCodeString(props.node.children)
+                          : txt;
+                      if (
+                        typeof code === "string" &&
+                        typeof className === "string" &&
+                        /^language-katex/.test(className.toLocaleLowerCase())
+                      ) {
+                        const html = katex.renderToString(code, {
+                          throwOnError: false,
+                        });
+                        return (
+                          <code
+                            style={{ fontSize: "150%" }}
+                            dangerouslySetInnerHTML={{ __html: html }}
+                          />
+                        );
+                      }
+                      return <code className={String(className)}>{txt}</code>;
+                    },
+                  },
+                }}
+              />
+            </div>
             <Grid
               container
               width={1}
@@ -1269,18 +1386,63 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   variant="standard"
                   defaultValue={submissionDataResponse.submission.explanation}
                 />
-                <TextField
+                <MDEditor
                   autoFocus
-                  margin="dense"
                   id="editHighlightedText"
                   label="Description"
-                  fullWidth
                   variant="standard"
-                  multiline
-                  defaultValue={
-                    submissionDataResponse.submission.highlighted_text
-                  }
+                  value={editDescription}
+                  onChange={(value) => setEditDescription(value)}
+                  preview="live"
+                  highlightEnable={false}
+                  height="200px"
+                  previewOptions={{
+                    rehypePlugins: [[rehypeSanitize]],
+                    components: {
+                      code: ({ inline, children = [], className, ...props }) => {
+                        const txt = children[0] || "";
+                        if (inline) {
+                          if (
+                            typeof txt === "string" &&
+                            /^\$\$(.*)\$\$/.test(txt)
+                          ) {
+                            const html = katex.renderToString(
+                              txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                              {
+                                throwOnError: false,
+                              }
+                            );
+                            return (
+                              <code dangerouslySetInnerHTML={{ __html: html }} />
+                            );
+                          }
+                          return <code>{txt}</code>;
+                        }
+                        const code =
+                          props.node && props.node.children
+                            ? getCodeString(props.node.children)
+                            : txt;
+                        if (
+                          typeof code === "string" &&
+                          typeof className === "string" &&
+                          /^language-katex/.test(className.toLocaleLowerCase())
+                        ) {
+                          const html = katex.renderToString(code, {
+                            throwOnError: false,
+                          });
+                          return (
+                            <code
+                              style={{ fontSize: "150%" }}
+                              dangerouslySetInnerHTML={{ __html: html }}
+                            />
+                          );
+                        }
+                        return <code className={String(className)}>{txt}</code>;
+                      },
+                    },
+                  }}
                 />
+
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleCloseEdit}>Cancel</Button>
@@ -1361,7 +1523,11 @@ export async function getServerSideProps(context) {
     };
   } else {
     const id = context.query.id;
-    const target = context.query.target;
+    var target = null
+    if (context.query.hasOwnProperty("target")) {
+      target = context.query.target
+    }
+    //const target = context.query.target;
     let URL = baseURL_server + getSubmissionEndpoint + ((target == null) ? id : target);
     const res = await fetch(URL, {
       headers: new Headers({
