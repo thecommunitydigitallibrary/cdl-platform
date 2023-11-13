@@ -48,6 +48,17 @@ import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
 import Box from "@mui/system/Box";
 import Head from "next/head";
 
+import katex from "katex";
+import "katex/dist/katex.css";
+
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+
+import rehypeSanitize from "rehype-sanitize";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
+
+
 const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), {
   loading: () => <p>Loading...</p>, ssr: false
 })
@@ -68,33 +79,36 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   const [severity, setSeverity] = useState("error");
   const [width, setWidth] = useState(900);
   const [height, setHeight] = useState(800);
-  const [source, setSource] =  useState("");
-  const [graph, setGraph] = useState({"nodes": [], "links": []});
+  const [source, setSource] = useState("");
+  const [graph, setGraph] = useState({ "nodes": [], "links": [] });
   const [graphSet, setGraphSet] = useState(new Set());
   const graphRef = useRef(graph);
   const sourceRef = useRef(source);
 
-    const colorNodeBackground = (node) => {
-        switch (node.type) {
-            case "current": return "#2c7dcc";
-            case "first" : return "#75a936";
-            case "second": return "#ad922b";
-            case "visited": return "#7d51af";
-            default: return "#ad3b3b";
-        }
-    }
+  const [editDescription, setEditDescription] = useState("")
 
-    const handleNodeLabel = useCallback(
-        (node) => {
-          let desc = node.desc ? <p>{node.desc}</p> : null;
-          let tooltip = <div style={{background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px"}}>
-            <h6>{node.label}</h6>
-            {desc}
-          </div>;
-          return ReactDOMServer.renderToString(tooltip, {});
-        },
-        []
-    );
+
+  const colorNodeBackground = (node) => {
+    switch (node.type) {
+      case "current": return "#2c7dcc";
+      case "submission": return "#75a936";
+      case "webpage": return "#FDD835";
+      case "visited": return "#7d51af";
+      default: return "#ad3b3b";
+    }
+  }
+
+  const handleNodeLabel = useCallback(
+    (node) => {
+      let desc = node.desc ? <p>{node.desc}</p> : null;
+      let tooltip = <div style={{ background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px" }}>
+        <h6>{node.label}</h6>
+        {desc}
+      </div>;
+      return ReactDOMServer.renderToString(tooltip, {});
+    },
+    []
+  );
 
   const handleClick = () => {
     setOpen(true);
@@ -145,7 +159,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
         "submission/" +
         submissionDataResponse.submission.submission_id;
       var getExplanation = document.getElementById("editExplanation");
-      var getHighlightedText = document.getElementById("editHighlightedText");
+      var getHighlightedText = editDescription
       var getURL = document.getElementById("editURL");
       var error = false;
       const res = await fetch(URL, {
@@ -153,7 +167,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
         body: JSON.stringify({
           community_id: submissionCommunities[i],
           explanation: getExplanation.value,
-          highlighted_text: getHighlightedText.value,
+          highlighted_text: editDescription,
           url: getURL.value,
         }),
         headers: new Headers({
@@ -180,6 +194,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   const [submissionDataResponse, setSubmissionDataResponse] = React.useState(
     []
   );
+
 
   const deleteSubmissionEntirely = async (event) => {
     // Get the searchId required for POST request
@@ -333,7 +348,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
 
   const [shareUrlLink, setShareUrlLink] = React.useState("");
 
-  const [connectUrl, setConnectUrl] = React.useState("");
+  const [connection_id, setConnectionID] = React.useState("");
+  const [sub_title, setSubTitle] = React.useState("");
+  const [sub_description, setSubDescription] = React.useState("");
+  const [sub_url, setSubURL] = React.useState("");
+  const [selected_community, setSelectedCommunity] = React.useState("")
+
 
   const [openConnectForm, setOpenConnectForm] = React.useState(false);
 
@@ -342,22 +362,40 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   };
 
   const handleCancelConnectForm = () => {
-    setConnectUrl("");
+    setConnectionID("");
     setOpenConnectForm(false);
     handleCloseOptionsMenu();
   };
 
-  const handleConnectUrlType = (event) => {
-    setConnectUrl(event.target.value);
+  const handleConnectionIDType = (event) => {
+    setConnectionID(event.target.value);
   };
+  const handleSubTitle = (event) => {
+    setSubTitle(event.target.value);
+  };
+  const handleSubDescription = (event) => {
+    setSubDescription(event.target.value);
+  };
+  const handleSubURL = (event) => {
+    setSubURL(event.target.value);
+  };
+  const handleSelectCommunity = (event) => {
+    setSelectedCommunity(event.target.value);
+  }
+
 
   const handleCreateConnectForm = async (event) => {
     var URL = baseURL_client + "connect/";
+
     const res = await fetch(URL, {
       method: "POST",
       body: JSON.stringify({
         connection_source: submissionDataResponse.submission.submission_id,
-        connection_target: connectUrl,
+        connection_target: connection_id,
+        submission_url: sub_url,
+        submission_title: sub_title,
+        submission_description: sub_description,
+        community: selected_community
       }),
       headers: new Headers({
         Authorization: jsCookie.get("token"),
@@ -365,11 +403,17 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
       }),
     });
     const response = await res.json();
-    console.log(response, connectUrl);
-    setOpenConnectForm(false);
-    setConnectUrl("");
-    handleCloseOptionsMenu();
-    window.location.reload();
+    if (res.status == 200) {
+      setSeverity("success");
+      setMessage(response.message);
+      handleClick();
+      handleCloseOptionsMenu();
+      window.location.reload();
+    } else {
+      setSeverity("error");
+      setMessage(response.message);
+      handleClick();
+    }
   };
 
   const handleClickOptionsMenu = (event, option, param) => {
@@ -483,90 +527,91 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
       console.log(response);
     }
     if (target != null) {
-      handleNodeVisit({id: target});
+      handleNodeVisit({ id: target });
     }
   }
 
-    const fgRef = useRef();
+  const fgRef = useRef();
 
-    const handleNodeVisit = useCallback((node) => {
-      let newGraph = graphRef.current;
-      for (let i = 0; i < newGraph.nodes.length; ++i) {
-        if (newGraph.nodes[i].id === node.id) {
-            newGraph.nodes[i]["type"] = "visited";
-        }
+  const handleNodeVisit = useCallback((node) => {
+    let newGraph = graphRef.current;
+    for (let i = 0; i < newGraph.nodes.length; ++i) {
+      if (newGraph.nodes[i].id === node.id) {
+        newGraph.nodes[i]["type"] = "visited";
       }
-      setGraph(newGraph);
-    }, [graph, setGraph]);
+    }
+    setGraph(newGraph);
+  }, [graph, setGraph]);
 
-    const handleNodeAdd = useCallback((node, data) => {
-      console.log("DATA", data);
-      let newGraph = graph;
-      console.log("OLD", newGraph);
+  const handleNodeAdd = useCallback((node, data) => {
+    console.log("DATA", data);
+    let newGraph = graph;
+    console.log("OLD", newGraph);
 
-      console.log("OLD Set", graphSet);
-      for (let i = 0; i < data.nodes.length; ++i) {
-        if (!graphSet.has(data.nodes[i].id)) {
-            let nde = data.nodes[i];
-            nde["index"] = data.nodes.length;
-            newGraph.nodes.push(nde);
-        }
+    console.log("OLD Set", graphSet);
+    for (let i = 0; i < data.nodes.length; ++i) {
+      if (!graphSet.has(data.nodes[i].id)) {
+        let nde = data.nodes[i];
+        nde["index"] = data.nodes.length;
+        newGraph.nodes.push(nde);
+      }
+    }
+
+    for (let i = 0; i < data.links.length; ++i) {
+      if (!graphSet.has(data.links[i].target)) {
+        let lnk = data.links[i];
+        lnk["index"] = data.links.length;
+        lnk["source"] = node;
+        lnk["target"] = data.nodes[data.nodes.length - 1];
+        newGraph.links.push(lnk);
+        graphSet.add(data.links[i].target);
+      }
+    }
+    setGraphSet(graphSet);
+    console.log("NEW  Set", graphSet);
+    console.log("NEW", newGraph);
+    setGraph(newGraph);
+  }, [graph, setGraph]);
+
+  const handleNodeClick = useCallback(
+    async (node) => {
+      setLoading(true);
+      const res = await fetch(baseURL_client + "submission/" + node.id, {
+        method: "GET",
+        headers: new Headers({
+          Authorization: jsCookie.get("token"),
+          "Content-Type": "application/json",
+        }),
+      });
+      handleNodeVisit(node);
+      const response = await res.json();
+      if (response.status === "ok") {
+        setSubmissionDataResponse(response);
+      } else {
+        console.log(response);
       }
 
-      for (let i = 0; i < data.links.length; ++i) {
-        if (!graphSet.has(data.links[i].target)) {
-            let lnk = data.links[i];
-            lnk["index"] = data.links.length;
-            lnk["source"] = node;
-            lnk["target"] = data.nodes[data.nodes.length-1];
-            newGraph.links.push(lnk);
-            graphSet.add(data.links[i].target);
-        }
-      }
-      setGraphSet(graphSet);
-      console.log("NEW  Set", graphSet);
-      console.log("NEW", newGraph);
-      setGraph(newGraph);
-    }, [graph, setGraph]);
+      // Add New Nodes and Links
+      // const graph_response = await callGraphAPI(id);
+      // if (graph_response.status === "ok") {
+      //   handleNodeAdd(node, graph_response.data);
+      // } else {
+      //   console.log(graph_response);
+      // }
 
-    const handleNodeClick = useCallback(
-        async (node) => {
-          setLoading(true);
-          const res = await fetch( baseURL_client + "submission/" + node.id, {
-            method: "GET",
-            headers: new Headers({
-              Authorization: jsCookie.get("token"),
-              "Content-Type": "application/json",
-            }),
-          });
-          handleNodeVisit(node);
-          const response = await res.json();
-          if (response.status === "ok") {
-            setSubmissionDataResponse(response);
-          } else {
-            console.log(response);
-          }
+      // Complete Loading and Change URL
 
-          // Add New Nodes and Links
-          // const graph_response = await callGraphAPI(id);
-          // if (graph_response.status === "ok") {
-          //   handleNodeAdd(node, graph_response.data);
-          // } else {
-          //   console.log(graph_response);
-          // }
-
-          // Complete Loading and Change URL
-
-          setLoading(false);
-          const nextURL = websiteURL + 'submissions/' + sourceRef.current + "?target=" + node.id;
-          window.history.replaceState(null, "", nextURL);
-        },
-        [graph, setGraph]
-    );
+      setLoading(false);
+      const nextURL = websiteURL + 'submissions/' + sourceRef.current + "?target=" + node.id;
+      window.history.replaceState(null, "", nextURL);
+    },
+    [graph, setGraph]
+  );
 
   const getSubmissionData = () => {
-    if (data.status == "ok") {
+    if (data.status === "ok") {
       setSubmissionDataResponse(data);
+      setEditDescription(data.submission.highlighted_text)
       setCommunityNameMap(mapCommunitiesToNames(data.submission.communities));
 
       let sharableCommunityIds = [];
@@ -622,30 +667,32 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   }, [graph, source]);
 
   useEffect(() => {
-      setHeight(window.innerHeight - 88.6)
-      setWidth((window.innerWidth / 2) - 40)
-      getSubmissionData();
-      getGraphData();
+    setHeight(window.innerHeight - 88.6)
+    setWidth((window.innerWidth / 2) - 40)
+    getSubmissionData();
+    getGraphData();
   }, []);
 
 
-  if(data.submission.hashtags){
-    var hashtag_results = data.submission.hashtags.map(function(item){
-      return(
-        <a 
-        href={ "/search?query=" + encodeURIComponent(item) + "&community=all&page=0" } 
-        target="_blank"
-        rel="noopener noreferrer" 
-        style = {{ fontSize:"15px",
-          display: "inline", paddingRight : "15px"}}
+  if (submissionDataResponse.submission && submissionDataResponse.submission.hashtags) {
+    var hashtag_results = submissionDataResponse.submission.hashtags.map(function (item) {
+      return (
+        <a
+          href={"/search?query=" + encodeURIComponent(item) + "&community=all&page=0"}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontSize: "15px",
+            display: "inline", paddingRight: "15px"
+          }}
         >{item}</a>
       );
     });
   }
 
-  if (data.submission.communities_part_of) {
+  if (submissionDataResponse.submission && submissionDataResponse.submission.communities_part_of) {
     var communityNamesList = Object.keys(
-      data.submission.communities_part_of
+      submissionDataResponse.submission.communities_part_of
     ).map(function (key) {
       return (
         <a
@@ -666,7 +713,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
             background: "aliceblue",
           }}
         >
-          {data.submission.communities_part_of[key]}
+          {submissionDataResponse.submission.communities_part_of[key]}
         </a>
       );
     });
@@ -681,7 +728,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
         <link rel="icon" href="/images/tree32.png" />
       </Head>
       <Header />
-      <div className="allResults" style={{display: "flex"}}>
+      <div className="allResults" style={{ display: "flex" }}>
         {submissionDataResponse.submission && (
           <Paper
             elevation={0}
@@ -716,7 +763,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   Feedback for{" "}
                   <a
                     style={{ fontSize: "18px" }}
-                    href={data.submission.redirect_url}
+                    href={submissionDataResponse.submission.redirect_url}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -746,34 +793,164 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               <Dialog open={openConnectForm}>
                 <DialogTitle>
                   {" "}
-                  Add connection for{" "}
-                  <a
-                    style={{ fontSize: "20px" }}
-                    href={submissionDataResponse.submission.redirect_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {submissionDataResponse.submission.explanation}
-                  </a>
+                  Post a reply...
                 </DialogTitle>
+
                 <DialogContent>
-                  <DialogContentText></DialogContentText>
+
+
+                  <text>
+                    By creating a new submission:
+                  </text>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    id="submissionURL"
+                    label="Submission URL (optional)"
+                    fullWidth
+                    variant="standard"
+                    defaultValue=""
+                    value={sub_url}
+                    onChange={handleSubURL}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="submissionTitle"
+                    label="Submission Title"
+                    fullWidth
+                    variant="standard"
+                    defaultValue=""
+                    value={sub_title}
+                    onChange={handleSubTitle}
+                  />
+                  <DialogContentText>
+                    {<br />}
+                  </DialogContentText>
+                  <DialogContentText>
+                    Submission Description
+                  </DialogContentText>
+
+                  <MDEditor
+                    autoFocus
+                    id="submissionDescription"
+                    label="Submission Description"
+                    variant="standard"
+                    value={sub_description}
+                    onChange={(value) => setSubDescription(value)}
+                    highlightEnable={false}
+                    preview="live"
+                    height="200px"
+                    previewOptions={{
+                      rehypePlugins: [[rehypeSanitize]],
+                      components: {
+                        code: ({ inline, children = [], className, ...props }) => {
+                          const txt = children[0] || "";
+                          if (inline) {
+                            if (
+                              typeof txt === "string" &&
+                              /^\$\$(.*)\$\$/.test(txt)
+                            ) {
+                              const html = katex.renderToString(
+                                txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                                {
+                                  throwOnError: false,
+                                }
+                              );
+                              return (
+                                <code dangerouslySetInnerHTML={{ __html: html }} />
+                              );
+                            }
+                            return <code>{txt}</code>;
+                          }
+                          const code =
+                            props.node && props.node.children
+                              ? getCodeString(props.node.children)
+                              : txt;
+                          if (
+                            typeof code === "string" &&
+                            typeof className === "string" &&
+                            /^language-katex/.test(className.toLocaleLowerCase())
+                          ) {
+                            const html = katex.renderToString(code, {
+                              throwOnError: false,
+                            });
+                            return (
+                              <code
+                                style={{ fontSize: "150%" }}
+                                dangerouslySetInnerHTML={{ __html: html }}
+                              />
+                            );
+                          }
+                          return <code className={String(className)}>{txt}</code>;
+                        },
+                      },
+                    }}
+                  />
+
+
+
+
+                  {" "}
+
+                  <FormControl
+                    sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
+                  >
+                    <InputLabel id="demo-simple-select-label">
+                      Select Community
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      style={{ backgroundColor: "white" }}
+                      label="Select Community"
+                      value={selected_community}
+                      onChange={handleSelectCommunity}
+                    >
+                      {Object.keys(communityNameMap).map(function (key, index) {
+                        return (
+                          <MenuItem key={index} value={key}>
+                            {communityNameMap[key]}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+
+                  <br />
+                  <br />
+
+                  <text>
+                    Or by connecting an existing submission:
+                  </text>
                   <TextField
                     autoFocus
                     margin="dense"
                     id="message"
                     name="message"
-                    value={connectUrl}
-                    onChange={handleConnectUrlType}
+                    value={connection_id}
+                    onChange={handleConnectionIDType}
                     label="Paste Connection ID"
                     fullWidth
                     variant="standard"
                   />
+
                 </DialogContent>
+
                 <DialogActions>
                   <Button onClick={handleCancelConnectForm}>Cancel</Button>
-                  <Button onClick={handleCreateConnectForm}>Add</Button>
+                  <Button onClick={handleCreateConnectForm}>Post</Button>
                 </DialogActions>
+
+                <Snackbar
+                  open={open}
+                  autoHideDuration={6000}
+                  onClose={handleClose}
+                  onClick={handleCloseSnackbar}
+                  message={message}
+                  severity={severity}
+
+                />
+
               </Dialog>
 
               <Snackbar
@@ -805,46 +982,45 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   margin: "0px 0px 0px 0px",
                 }}
               >
-                {submissionDataResponse.submission.display_url} | {data.submission.time}
+                {submissionDataResponse.submission.display_url} | {submissionDataResponse.submission.time}
               </p>
             </div>
 
-            
-            
-              {data.submission.hashtags !== undefined && data.submission.hashtags.length !== 0 &&
-              <div style={{ display:"flex", width:"100%"}}>
-                  <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
-                  <Tooltip title="HashTags">
-                    <TagIcon style={{ height: "22px", color: "#1976d2" }}/>
-                  </Tooltip> 
-                  </div>
-                  <div>
-                  <p>{hashtag_results}</p>
-                  </div>
+
+
+            {submissionDataResponse.submission && submissionDataResponse.submission.hashtags !== undefined && submissionDataResponse.submission.hashtags.length !== 0 &&
+              <div style={{ display: "flex", width: "100%" }}>
+                <div style={{ marginRight: '5px' }}>
+                  <Tooltip title="Hashtags">
+                    <TagIcon style={{ height: "20px", color: "#1976d2" }} />
+                  </Tooltip>
+                </div>
+                <div style={{ overflowX: "auto" }}>
+                  <p margin-bottom='auto'>{hashtag_results}</p>
+                </div>
               </div>}
 
-              <div
-                style={{
-                  display: "flex",
-                  margin: "10px 0px 0px -5px",
-                  width: "100%",
-                }}
-              >
-                <div style={{ float: "left", minWidth: "fit-content" }}>
-                  <Tooltip title="Communities">
-                    <LocalLibraryRoundedIcon
-                      style={{ height: "21px", color: "#1976d2" }}
-                    />
-                  </Tooltip>{" "}
-                  {communityNamesList.length > 0 && data.submission.type === "user_submission"
-                    ? communityNamesList.map((link, i) => [i > 0, link])
-                    : ""}
-                  {data.submission.type === "webpage" && "Webpage"}
-                </div>
-                
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+              }}
+            >
+              <div style={{ float: "left", minWidth: "fit-content" }}>
+                <Tooltip title="Communities">
+                  <LocalLibraryRoundedIcon
+                    style={{ height: "21px", color: "#1976d2" }}
+                  />
+                </Tooltip>{" "}
+                {communityNamesList.length > 0 && submissionDataResponse.submission.type === "user_submission"
+                  ? communityNamesList.map((link, i) => [i > 0, link])
+                  : ""}
+                {submissionDataResponse.submission.type === "webpage" && "Webpage"}
               </div>
 
-              
+            </div>
+
+
 
             <Grid
               container
@@ -853,7 +1029,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               justifyContent="space-between"
               sx={{ my: 1 }}
             >
-              <Grid item sx={{width: "33%"}}>
+              <Grid item sx={{ width: "33%" }}>
                 <Box
                   sx={{
                     my: 1,
@@ -888,16 +1064,16 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 </Box>
               </Grid>
 
-              {data.submission.type === "user_submission" &&
-                <Grid item sx={{width: "66%"}}>
-                  <Grid container sx={{flexFlow: "nowrap"}}>
-                    <Grid item sx={{width: "50%"}}>
+              {submissionDataResponse.submission && submissionDataResponse.submission.type === "user_submission" &&
+                <Grid item sx={{ width: "66%" }}>
+                  <Grid container sx={{ flexFlow: "nowrap" }}>
+                    <Grid item sx={{ width: "50%" }}>
                       {(
-                        <Grid container alignItems="center" sx={{flexFlow: "nowrap"}}>
-                          <Grid item sx={{width: "80%"}}>
+                        <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
+                          <Grid item sx={{ width: "80%" }}>
                             <div>
                               <FormControl
-                                sx={{width: "100%"}}
+                                sx={{ width: "100%" }}
                                 size="small"
                               >
                                 <InputLabel id="demo-multiple-checkbox-label">
@@ -909,9 +1085,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                                   value={removeCommunityIDList}
                                   onChange={handleRemoveDropdownChange}
                                   input={
-                                    <OutlinedInput label="Remove Community"/>
+                                    <OutlinedInput label="Remove Community" />
                                   }
-                                  sx={{borderRadius: "4px 0 0 4px"}}
+                                  sx={{ borderRadius: "4px 0 0 4px" }}
                                   renderValue={(selected) =>
                                     selected
                                       .map((x) => communityNameMap[x])
@@ -935,25 +1111,25 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                               </FormControl>
                             </div>
                           </Grid>
-                          <Grid item sx={{marginRight: "10px"}}>
+                          <Grid item sx={{ marginRight: "10px" }}>
                             <Tooltip title="Remove">
                               <IconButton
                                 size="small"
-                                sx={{background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px"}}
+                                sx={{ background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px" }}
                                 onClick={deleteSubmissionfromCommunity}
                               >
-                                <Delete/>
+                                <Delete />
                               </IconButton>
                             </Tooltip>
                           </Grid>
                         </Grid>
                       )}
                     </Grid>
-                    <Grid item sx={{width: "50%"}}>
-                      {}
-                        <Grid container alignItems="center" sx={{flexFlow: "nowrap"}}>
-                          <Grid item sx={{width: "80%"}}>
-                            <div>
+                    <Grid item sx={{ width: "50%" }}>
+                      { }
+                      <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
+                        <Grid item sx={{ width: "80%" }}>
+                          <div>
                             <FormControl
                               sx={{ width: "100%" }}
                               size="small"
@@ -969,7 +1145,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                                 id="demo-multiple-checkbox"
                                 value={saveCommunityIDList}
                                 onChange={handleSaveDropdownChange}
-                                sx={{borderRadius: "4px 0 0 4px"}}
+                                sx={{ borderRadius: "4px 0 0 4px" }}
                                 input={
                                   <OutlinedInput label="Add Community" />
                                 }
@@ -996,11 +1172,11 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                             </FormControl>
                           </div>
                         </Grid>
-                        <Grid item sx={{marginRight: "0px"}}>
+                        <Grid item sx={{ marginRight: "0px" }}>
                           <Tooltip title="Save">
                             <IconButton
                               size="small"
-                              sx={{background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px"}}
+                              sx={{ background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px" }}
                               onClick={saveSubmission}>
                               <Save />
                             </IconButton>
@@ -1013,12 +1189,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               }
             </Grid>
             <div style={{ display: "flex" }}>
-              <div style={{width: "20%"}}>
+              <div style={{ width: "20%" }}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="connect"
-                  style={{width: "95%", padding: "8px"}}
+                  style={{ width: "95%", padding: "8px" }}
                   action={(event) =>
                     handleClickOptionsMenu(
                       event,
@@ -1027,15 +1203,15 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     )
                   }
                 >
-                  <AddLinkIcon /> &nbsp; Connect
+                  <AddLinkIcon /> &nbsp; Reply
                 </ActionButton>
               </div>
-              <div style={{width: "20%"}}>
+              <div style={{ width: "20%" }}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="shareurl"
-                  style={{width: "95%", padding: "8px"}}
+                  style={{ width: "95%", padding: "8px" }}
                   value={submissionDataResponse.submission.submission_id}
                   action={(event) =>
                     handleClickOptionsMenu(
@@ -1049,23 +1225,23 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   &nbsp;Share URL
                 </ActionButton>
               </div>
-              <div style={{width: "20%"}}>
+              <div style={{ width: "20%" }}>
                 <ActionButton
                   type="filled"
                   variant="contained"
                   name="feedback"
-                  style={{width: "95%", padding: "8px"}}
+                  style={{ width: "95%", padding: "8px" }}
                   action={(event) => handleClickOptionsMenu(event, "feedback")}
                 >
                   <FeedbackIcon />
                   &nbsp;Feedback
                 </ActionButton>
               </div>
-              {submissionDataResponse.submission.can_delete && (
-                <div style={{width: "20%"}}>
+              {submissionDataResponse.submission && submissionDataResponse.submission.can_delete && (
+                <div style={{ width: "20%" }}>
                   <ActionButton
                     type="filled"
-                    style={{width: "95%", padding: "8px"}}
+                    style={{ width: "95%", padding: "8px" }}
                     variant="contained"
                     action={handleClickEdit}
                   >
@@ -1074,12 +1250,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   </ActionButton>
                 </div>
               )}
-              {submissionDataResponse.submission.can_delete && (
-                <div style={{width: "20%"}}>
+              {submissionDataResponse.submission && submissionDataResponse.submission.can_delete && (
+                <div style={{ width: "20%" }}>
                   <ActionButton
                     color="error"
                     type="filled"
-                    style={{width: "95%", padding: "8px"}}
+                    style={{ width: "95%", padding: "8px" }}
                     variant="contained"
                     action={handleClickDelete}
                   >
@@ -1090,9 +1266,59 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               )}
             </div>
             <br></br>
-            <Typography sx={{ fontSize: 16 }}>
-              {submissionDataResponse.submission.highlighted_text}
-            </Typography>
+            <div>
+              <MDEditor
+                value={submissionDataResponse.submission.highlighted_text}
+                preview="preview"
+                height="300px"
+                hideToolbar={true}
+                previewOptions={{
+                  rehypePlugins: [[rehypeSanitize]],
+                  components: {
+                    code: ({ inline, children = [], className, ...props }) => {
+                      const txt = children[0] || "";
+                      if (inline) {
+                        if (
+                          typeof txt === "string" &&
+                          /^\$\$(.*)\$\$/.test(txt)
+                        ) {
+                          const html = katex.renderToString(
+                            txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                            {
+                              throwOnError: false,
+                            }
+                          );
+                          return (
+                            <code dangerouslySetInnerHTML={{ __html: html }} />
+                          );
+                        }
+                        return <code>{txt}</code>;
+                      }
+                      const code =
+                        props.node && props.node.children
+                          ? getCodeString(props.node.children)
+                          : txt;
+                      if (
+                        typeof code === "string" &&
+                        typeof className === "string" &&
+                        /^language-katex/.test(className.toLocaleLowerCase())
+                      ) {
+                        const html = katex.renderToString(code, {
+                          throwOnError: false,
+                        });
+                        return (
+                          <code
+                            style={{ fontSize: "150%" }}
+                            dangerouslySetInnerHTML={{ __html: html }}
+                          />
+                        );
+                      }
+                      return <code className={String(className)}>{txt}</code>;
+                    },
+                  },
+                }}
+              />
+            </div>
             <Grid
               container
               width={1}
@@ -1100,38 +1326,46 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               justifyContent={"flex-start"}
               spacing={4}
             ></Grid>
-            <div>
-              <Typography sx={{ fontSize: 18, marginTop: 2 }}>
-                Connections:
-              </Typography>
+            <hr />
+            <div className="allResults">
               {submissionDataResponse.submission.connections.length > 0 ? (
                 <>
                   {submissionDataResponse.submission.connections.map(
                     (d, index) => (
                       <>
-                        <SearchResult
-                          search_idx={index}
-                          redirect_url={d.redirect_url}
-                          display_url={d.display_url}
-                          submission_id={d.submission_id}
-                          result_hash={d.result_hash}
-                          highlighted_text={d.highlighted_text}
-                          explanation={d.explanation}
-                          auth_token={jsCookie.get("token")}
-                          show_relevant={true}
-                        ></SearchResult>
+                        <div key={index}>
+                          <SearchResult
+                            search_idx={index}
+                            redirect_url={d.redirect_url}
+                            display_url={d.display_url}
+                            submission_id={d.submission_id}
+                            result_hash={d.result_hash}
+                            highlighted_text={d.highlighted_text}
+                            explanation={d.explanation}
+                            hashtags={d.hashtags}
+                            time={d.time}
+                            communities_part_of={d.communities_part_of}
+                            auth_token={jsCookie.get("token")}
+                            show_relevant={true}
+                            paperWidth={"100%"}
+                            paperMarginX={"0%"}
+                          ></SearchResult>
+                        </div>
                       </>
                     )
-                  )}
+                  )
+                  }
+
                 </>
               ) : (
-                <Typography sx={{ fontSize: 14, color: "grey", marginLeft: 2 }}>
-                  None available
+
+                <Typography sx={{ fontSize: 14, color: "grey" }}>
+                  There are no replies.
                 </Typography>
               )}
             </div>
             <Dialog open={openEdit} onClose={handleCloseEdit}>
-              <DialogTitle style={{ width: "500px" }}>
+              <DialogTitle style={{ width: "600px" }}>
                 {" "}
                 Edit Submission Details{" "}
               </DialogTitle>
@@ -1158,18 +1392,69 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   variant="standard"
                   defaultValue={submissionDataResponse.submission.explanation}
                 />
-                <TextField
+                <DialogContentText>
+                  {<br />}
+                </DialogContentText>
+                <DialogContentText>
+                  Submission Description
+                </DialogContentText>
+                <MDEditor
                   autoFocus
-                  margin="dense"
                   id="editHighlightedText"
                   label="Description"
-                  fullWidth
                   variant="standard"
-                  multiline
-                  defaultValue={
-                    submissionDataResponse.submission.highlighted_text
-                  }
+                  value={editDescription}
+                  onChange={(value) => setEditDescription(value)}
+                  preview="live"
+                  highlightEnable={false}
+                  height="300px"
+                  previewOptions={{
+                    rehypePlugins: [[rehypeSanitize]],
+                    components: {
+                      code: ({ inline, children = [], className, ...props }) => {
+                        const txt = children[0] || "";
+                        if (inline) {
+                          if (
+                            typeof txt === "string" &&
+                            /^\$\$(.*)\$\$/.test(txt)
+                          ) {
+                            const html = katex.renderToString(
+                              txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                              {
+                                throwOnError: false,
+                              }
+                            );
+                            return (
+                              <code dangerouslySetInnerHTML={{ __html: html }} />
+                            );
+                          }
+                          return <code>{txt}</code>;
+                        }
+                        const code =
+                          props.node && props.node.children
+                            ? getCodeString(props.node.children)
+                            : txt;
+                        if (
+                          typeof code === "string" &&
+                          typeof className === "string" &&
+                          /^language-katex/.test(className.toLocaleLowerCase())
+                        ) {
+                          const html = katex.renderToString(code, {
+                            throwOnError: false,
+                          });
+                          return (
+                            <code
+                              style={{ fontSize: "150%" }}
+                              dangerouslySetInnerHTML={{ __html: html }}
+                            />
+                          );
+                        }
+                        return <code className={String(className)}>{txt}</code>;
+                      },
+                    },
+                  }}
                 />
+
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleCloseEdit}>Cancel</Button>
@@ -1227,8 +1512,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
             nodeLabel={handleNodeLabel}
             linkColor={() => 'rgba(0,0,0,0.7)'}
             linkDirectionalParticles={1}
-        />
-          </Paper>
+          />
+        </Paper>
       </div>
       <Footer />
     </>
@@ -1250,7 +1535,11 @@ export async function getServerSideProps(context) {
     };
   } else {
     const id = context.query.id;
-    const target = context.query.target;
+    var target = null
+    if (context.query.hasOwnProperty("target")) {
+      target = context.query.target
+    }
+    //const target = context.query.target;
     let URL = baseURL_server + getSubmissionEndpoint + ((target == null) ? id : target);
     const res = await fetch(URL, {
       headers: new Headers({
@@ -1261,7 +1550,7 @@ export async function getServerSideProps(context) {
     const errorCode = res.ok ? false : res.status;
 
     return {
-      props: { errorCode, data, id, target},
+      props: { errorCode, data, id, target },
     };
   }
 }

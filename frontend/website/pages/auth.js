@@ -189,7 +189,7 @@ export default function ({ data }) {
         } else {
           setShowProgress(false)
           setSeverity("error");
-          setAuthMessage("Sorry, we were unable to process your request.");
+          setAuthMessage(resJson.message);
           handleClick();
           return;
         }

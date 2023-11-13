@@ -67,6 +67,9 @@ def create_account():
 		# manually scan since we have duplicate emails
 		if users.exists({"email": email}):
 			return response.error("Unable to create account. Email is already in use.", Status.FORBIDDEN)
+	
+		if users.exists({"username": username}):
+			return response.error("Unable to create account. Username is already in use.", Status.FORBIDDEN)
 
 		try:
 			user = User(username, email, hashed_password, [])
