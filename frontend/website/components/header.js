@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import InputLabel from "@mui/material/InputLabel";
 import jsCookie from "js-cookie";
+import dynamic from 'next/dynamic'
+
 
 import Router from "next/router";
 
@@ -47,6 +49,17 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import Image from "next/image";
+
+
+
+import katex from "katex";
+import "katex/dist/katex.css";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+import rehypeSanitize from "rehype-sanitize";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
+
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 
 // Example of JSON, this is displayed to frontend.
@@ -196,6 +209,8 @@ function Header(props) {
     setOpenSubmission(true);
   };
 
+  const [sub_description, setSubDescription] = useState("");
+
   const handleCloseSubmission = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -279,9 +294,7 @@ function Header(props) {
       var URL = baseURL_client + createSubmissionEndpoint;
       var getSubmissionTitle = document.getElementById("submissionTitle");
       var getSubmissionURL = document.getElementById("submissionURL");
-      var getSubmissionDescription = document.getElementById(
-        "submissionDescription"
-      );
+      var getSubmissionDescription = sub_description
       // Check inputs to determine whether they are valid
       // Use the validateSubmissionField function to check values
       //if (
@@ -296,7 +309,7 @@ function Header(props) {
       if (
         !(await validateSubmissionField(
           "highlighted_text",
-          getSubmissionDescription.value
+          getSubmissionDescription
         ))
       ) {
         setSeverity("error");
@@ -316,7 +329,7 @@ function Header(props) {
       }
       formData.append("community", selected_community);
       formData.append("source_url", getSubmissionURL.value);
-      formData.append("highlighted_text", getSubmissionDescription.value);
+      formData.append("highlighted_text", getSubmissionDescription);
       formData.append("explanation", getSubmissionTitle.value);
       const res = await fetch(URL, {
         method: "POST",
@@ -634,15 +647,68 @@ function Header(props) {
                     variant="standard"
                     defaultValue=""
                   />
-                  <TextField
-                    margin="dense"
+                  <br/>
+                  <br/>
+                  <DialogContentText>
+                    Submission Description
+                  </DialogContentText>
+                  <MDEditor
+                    autoFocus
                     id="submissionDescription"
                     label="Submission Description"
-                    fullWidth
-                    multiline
                     variant="standard"
-                    defaultValue=""
-                  />{" "}
+                    value={sub_description}
+                    onChange={(value) => setSubDescription(value)}
+                    highlightEnable={false}
+                    preview="live"
+                    height="200px"
+                    previewOptions={{
+                      rehypePlugins: [[rehypeSanitize]],
+                      components: {
+                        code: ({ inline, children = [], className, ...props }) => {
+                          const txt = children[0] || "";
+                          if (inline) {
+                            if (
+                              typeof txt === "string" &&
+                              /^\$\$(.*)\$\$/.test(txt)
+                            ) {
+                              const html = katex.renderToString(
+                                txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                                {
+                                  throwOnError: false,
+                                }
+                              );
+                              return (
+                                <code dangerouslySetInnerHTML={{ __html: html }} />
+                              );
+                            }
+                            return <code>{txt}</code>;
+                          }
+                          const code =
+                            props.node && props.node.children
+                              ? getCodeString(props.node.children)
+                              : txt;
+                          if (
+                            typeof code === "string" &&
+                            typeof className === "string" &&
+                            /^language-katex/.test(className.toLocaleLowerCase())
+                          ) {
+                            const html = katex.renderToString(code, {
+                              throwOnError: false,
+                            });
+                            return (
+                              <code
+                                style={{ fontSize: "150%" }}
+                                dangerouslySetInnerHTML={{ __html: html }}
+                              />
+                            );
+                          }
+                          return <code className={String(className)}>{txt}</code>;
+                        },
+                      },
+                    }}
+                  />
+                  
                 </div>
               ) : (
                 <div>

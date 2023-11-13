@@ -799,9 +799,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 <DialogContent>
 
 
-                  <DialogContentText>
-                    {" "} By creating a new submission:
-                  </DialogContentText>
+                  <text>
+                    By creating a new submission:
+                  </text>
                   <TextField
                     autoFocus
                     margin="dense"
@@ -823,7 +823,13 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     value={sub_title}
                     onChange={handleSubTitle}
                   />
-                  
+                  <DialogContentText>
+                    {<br />}
+                  </DialogContentText>
+                  <DialogContentText>
+                    Submission Description
+                  </DialogContentText>
+
                   <MDEditor
                     autoFocus
                     id="submissionDescription"
@@ -913,9 +919,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   <br />
                   <br />
 
-                  <DialogContentText>
-                    {" "} Or by connecting an existing submission:
-                  </DialogContentText>
+                  <text>
+                    Or by connecting an existing submission:
+                  </text>
                   <TextField
                     autoFocus
                     margin="dense"
@@ -1264,7 +1270,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               <MDEditor
                 value={submissionDataResponse.submission.highlighted_text}
                 preview="preview"
-                height="200px"
+                height="300px"
                 hideToolbar={true}
                 previewOptions={{
                   rehypePlugins: [[rehypeSanitize]],
@@ -1359,7 +1365,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               )}
             </div>
             <Dialog open={openEdit} onClose={handleCloseEdit}>
-              <DialogTitle style={{ width: "500px" }}>
+              <DialogTitle style={{ width: "600px" }}>
                 {" "}
                 Edit Submission Details{" "}
               </DialogTitle>
@@ -1386,6 +1392,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   variant="standard"
                   defaultValue={submissionDataResponse.submission.explanation}
                 />
+                <DialogContentText>
+                  {<br />}
+                </DialogContentText>
+                <DialogContentText>
+                  Submission Description
+                </DialogContentText>
                 <MDEditor
                   autoFocus
                   id="editHighlightedText"
@@ -1395,7 +1407,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   onChange={(value) => setEditDescription(value)}
                   preview="live"
                   highlightEnable={false}
-                  height="200px"
+                  height="300px"
                   previewOptions={{
                     rehypePlugins: [[rehypeSanitize]],
                     components: {
