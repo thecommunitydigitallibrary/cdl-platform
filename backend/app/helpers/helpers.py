@@ -291,8 +291,8 @@ def hydrate_with_hashtags(results):
     for result in results:
         # add the hashtags
         result["hashtags"] = []
-        hashtags_explanation = [x for x in result["explanation"].split() if len(x) > 1 and x[0] == "#"]
-        hashtags_ht = [x for x in result["highlighted_text"].split() if len(x) > 1 and x[0] == "#"]
+        hashtags_explanation = extract_hashtags(result["explanation"])
+        hashtags_ht = extract_hashtags(result["highlighted_text"])
 
         hashtags = hashtags_explanation + hashtags_ht
 
@@ -319,7 +319,8 @@ def standardize_url(url):
     return url
 
 def extract_hashtags(text):
-      hashtags = [x for x in text.split() if len(x) > 1 and x[0] == "#"]
+      # ignores multiple hashtags in a row (from markdown)
+      hashtags = [x for x in text.split() if len(x) > 1 and x[0] == "#" and x[1] != "#"]
       return hashtags
 
 

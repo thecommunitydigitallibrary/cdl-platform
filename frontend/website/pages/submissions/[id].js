@@ -724,7 +724,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   return (
     <>
       <Head>
-        <title>Submission - The CDL</title>
+        <title>{submissionDataResponse.submission ? submissionDataResponse.submission.explanation : "Submission"} - The CDL</title>
         <link rel="icon" href="/images/tree32.png" />
       </Head>
       <Header />
@@ -830,6 +830,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     Submission Description
                   </DialogContentText>
 
+                  <div data-color-mode="light">
+
                   <MDEditor
                     autoFocus
                     id="submissionDescription"
@@ -886,6 +888,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                       },
                     }}
                   />
+                  </div>
 
 
 
@@ -1048,7 +1051,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     },
                   }}
                 >
-                  <Typography>Views:</Typography>
+                  <Typography>Views: </Typography>
                   {submissionDataResponse.submission.stats["views"]}
                   <Divider
                     orientation="vertical"
@@ -1056,10 +1059,10 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     flexItem
                     sx={{ height: 22 }}
                   />
-                  <Typography>Clicks:</Typography>
+                  <Typography>Clicks: </Typography>
                   {submissionDataResponse.submission.stats["clicks"]}
                   <Divider orientation="vertical" variant="middle" flexItem />
-                  <Typography>Shares:</Typography>
+                  <Typography>Shares: </Typography>
                   {submissionDataResponse.submission.stats["shares"]}
                 </Box>
               </Grid>
@@ -1266,7 +1269,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               )}
             </div>
             <br></br>
-            <div>
+            <div data-color-mode="light">
               <MDEditor
                 value={submissionDataResponse.submission.highlighted_text}
                 preview="preview"
@@ -1398,6 +1401,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 <DialogContentText>
                   Submission Description
                 </DialogContentText>
+                <div data-color-mode="light">
                 <MDEditor
                   autoFocus
                   id="editHighlightedText"
@@ -1454,6 +1458,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     },
                   }}
                 />
+                </div>
 
               </DialogContent>
               <DialogActions>

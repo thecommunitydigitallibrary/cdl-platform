@@ -468,9 +468,7 @@ function Header(props) {
       Router.push("/about");
     } else if (option == "documentation") {
       Router.push("/documentation");
-    } else if (option != "logout") {
-      Router.push("/logout");
-    } else {
+    } else if (option == "logout") {
       logout(event);
     }
   };
@@ -652,6 +650,7 @@ function Header(props) {
                   <DialogContentText>
                     Submission Description
                   </DialogContentText>
+                  <div data-color-mode="light">
                   <MDEditor
                     autoFocus
                     id="submissionDescription"
@@ -708,6 +707,7 @@ function Header(props) {
                       },
                     }}
                   />
+                  </div>
                   
                 </div>
               ) : (

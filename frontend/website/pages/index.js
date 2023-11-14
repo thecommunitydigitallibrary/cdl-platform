@@ -195,7 +195,7 @@ function Home({ data }) {
             : 
               <>
               <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> <br/>
-              <a variant="outline" href={"/communities"}>{" Click here to join a new community!"}</a></h6>
+              <a variant="outline" href={"/communities"}>{" Click here to join or create a community!"}</a></h6>
               </>}
           >
             <Grid item>
