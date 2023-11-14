@@ -23,6 +23,20 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        November 14th, 2023
+      </h2>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Nested headers are no longer counted as hashtags in submissions</li>
+            <li className="list-item">Limit size of scrape to 50,000 characters</li>
+            <li className="list-item">Limit submission graph visualization to 10 websites and 10 submissions, and to only use title as query</li>
+            <li className="list-item">Fixed note box to be light mode always</li>
+            <li className="list-item">Drawer navigation on collapsed window now includes documentation</li>
+        </ul>
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         November 13th, 2023
       </h2>
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>

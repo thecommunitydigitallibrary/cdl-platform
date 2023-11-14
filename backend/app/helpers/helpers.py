@@ -43,9 +43,9 @@ def validate_submission(highlighted_text, explanation, source_url=None):
 
     # cap highlighted text, explanation length
     if highlighted_text and (len(highlighted_text) > char_max_desc or len(highlighted_text.split()) > word_max_desc):
-        return False, "The description is too long. Please limit to 1000 words or 10,000 characters"
+        return False, "The description is too long. Please limit to 1,000 words or 10,000 characters"
     if explanation and (len(explanation) > char_max_title or len(explanation.split()) > word_max_title):
-        return False, "The title is too long. Please limit to 100 words or 1000 characters"
+        return False, "The title is too long. Please limit to 100 words or 1,000 characters"
     
     if explanation == "":
         return False, "The title cannot be empty"

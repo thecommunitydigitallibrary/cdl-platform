@@ -76,9 +76,9 @@ const json_example = `{
       "description": "The classic home page for Google."
     },
     {
-      "source_url": "",
-      "title": "What are some good resources to better understand BM25?",
-      "description": "#question #L1.1"
+      "source_url": "https://en.wikipedia.org/wiki/Okapi_BM25",
+      "title": "This webpage helped me understand BM25?",
+      "description": "#L1.1"
     }
   ]
 }
