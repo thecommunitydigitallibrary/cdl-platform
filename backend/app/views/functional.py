@@ -865,9 +865,7 @@ def search(current_user):
                 
                 search_results_page = search_results_page + additional_results
                 if i > 1000: break
-                print("VIZ: ", i)
-
-
+                if i % 100 == 0: print("VIZ", i)
 
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
