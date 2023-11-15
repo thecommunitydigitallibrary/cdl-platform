@@ -858,6 +858,17 @@ def search(current_user):
         if source == "visualize":
             community_name = communities[community_id]['name']
 
+            for i in range(10, total_num_results, 10):
+                _, additional_results = cache_search(query, search_id, i/10, rc_dict, user_id=user_id_str,
+                                                    own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results,
+                                                    url_core_retrieve=URL_CORE_RETRIEVE)
+                
+                search_results_page = search_results_page + additional_results
+                if i > 1000: break
+                print("VIZ: ", i)
+
+
+
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
             tm = TopicMap(data_ip, community_name)
