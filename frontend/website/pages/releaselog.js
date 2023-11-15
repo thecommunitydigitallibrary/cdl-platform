@@ -34,6 +34,7 @@ export default function ReleaseLog() {
             <li className="list-item">Limit submission graph visualization to 10 websites and 10 submissions, and to only use title as query</li>
             <li className="list-item">Fixed note box to be light mode always</li>
             <li className="list-item">Drawer navigation on collapsed window now includes documentation</li>
+            <li className="list-item">Community visualization now contains more than just the first page of the search</li>
         </ul>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
