@@ -76,9 +76,9 @@ const json_example = `{
       "description": "The classic home page for Google."
     },
     {
-      "source_url": "",
-      "title": "What are some good resources to better understand BM25?",
-      "description": "#question #L1.1"
+      "source_url": "https://en.wikipedia.org/wiki/Okapi_BM25",
+      "title": "This webpage helped me understand BM25?",
+      "description": "#L1.1"
     }
   ]
 }
@@ -468,9 +468,7 @@ function Header(props) {
       Router.push("/about");
     } else if (option == "documentation") {
       Router.push("/documentation");
-    } else if (option != "logout") {
-      Router.push("/logout");
-    } else {
+    } else if (option == "logout") {
       logout(event);
     }
   };
@@ -652,6 +650,7 @@ function Header(props) {
                   <DialogContentText>
                     Submission Description
                   </DialogContentText>
+                  <div data-color-mode="light">
                   <MDEditor
                     autoFocus
                     id="submissionDescription"
@@ -708,6 +707,7 @@ function Header(props) {
                       },
                     }}
                   />
+                  </div>
                   
                 </div>
               ) : (

@@ -658,15 +658,15 @@ def graph_search(current_user, submission_id, toggle_webpage_results=True):
     explanation = submission_data.webpage.get("metadata", {}).get("title", "") if is_webpage else submission_data.explanation
     highlighted_text = submission_data.webpage.get("metadata", {}).get("description", "") if is_webpage else submission_data.highlighted_text
 
-    query = f"{explanation} {highlighted_text}"[:1000]
+    query = f"{explanation}" # {highlighted_text}"[:1000]
 
     communities_list = [str(x) for x in communities]
-    _, submissions_hits = elastic_manager.search(query, communities_list, page=0, page_size=50)
+    _, submissions_hits = elastic_manager.search(query, communities_list, page=0, page_size=10)
     submissions_pages = create_page(submissions_hits, communities)
 
     if toggle_webpage_results:
         # Searching exactly a user's community from the webpages index
-        _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=1000)
+        _, webpages_hits = webpages_elastic_manager.search(query, [], page=0, page_size=10)
         webpages_index_pages = create_page(webpages_hits, communities)
         submissions_pages = combine_pages(submissions_pages, webpages_index_pages)
 
@@ -722,10 +722,6 @@ def search(current_user):
 
         # create a flag for URL core retrieval
         URL_CORE_RETRIEVE = None
-
-        # turn off webpages for searching via hashtag
-        if query and "#" in query:
-            toggle_webpage_results = False
 
         # for now, on extension_open, set the query to be the URL or highlighted text
         # also for note_automatic, no query passed in this case either
@@ -824,6 +820,11 @@ def search(current_user):
             else:
                 return response.error("Cannot find search to page.", Status.NOT_FOUND)
 
+
+        # turn off webpages for searching via hashtag
+        if query and "#" in query:
+            toggle_webpage_results = False
+
         # make requested communities a dict containing the name too, for display
         communities = get_communities_helper(current_user, return_dict=True)["community_info"]
         rc_dict = {}
@@ -856,6 +857,15 @@ def search(current_user):
         # Return nodes and links for community visualisation
         if source == "visualize":
             community_name = communities[community_id]['name']
+
+            for i in range(10, total_num_results, 10):
+                _, additional_results = cache_search(query, search_id, i/10, rc_dict, user_id=user_id_str,
+                                                    own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results,
+                                                    url_core_retrieve=URL_CORE_RETRIEVE)
+                
+                search_results_page = search_results_page + additional_results
+                if i > 1000: break
+                if i % 100 == 0: print("VIZ", i)
 
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
@@ -1171,7 +1181,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
         return number_of_hits, results
     else:
         page = []
-        number_of_hits = 0
+        number_of_hits = -1
         try:
             cache = Cache()
         except Exception as e:
@@ -1180,13 +1190,18 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
         print("\tcache start time: ", time.time() - start_time)
 
         if cache:
+            print("\t\tLooking in cache...")
             number_of_hits, page = cache.search(user_id, search_id, index)
+        else:
+            print("\t\tCannot find cache")
             
         print("\tcache end time: ", time.time() - start_time)
 
+        print("\t\tCache page status: ", number_of_hits)
+
 
         # If we cannot find cache page, (re)do the search
-        if not page:
+        if number_of_hits == -1:
 
             _, submissions_hits = elastic_manager.search(query, list(communities.keys()), page=0, page_size=1000)
             

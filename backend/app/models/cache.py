@@ -19,6 +19,10 @@ class Cache(Redis):
 
 	def search(self, user_id, search_id, page):
 		key = self.get_key(user_id, search_id)
+
+		if not self.rds.exists(key):
+			return -1, []
+
 		# Subtract one to not count 'NUMBER_OF_HITS' page.
 		pages_cached = len(self.hash_keys(key)) - 1
 		# If the number of cached pages is less than the requested page number then return.
