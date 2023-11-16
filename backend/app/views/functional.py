@@ -685,7 +685,7 @@ def autocomplete(current_user):
 
     try:
         _, submissions_hits = elastic_manager.auto_complete(query, user_communities, page=0, page_size=7)
-        suggestions = [{"label": x["_source"]["explanation"], "id": i} for i,x in enumerate(submissions_hits)]
+        suggestions = [{"label": x["_source"]["explanation"], "id": x["_id"]} for x in submissions_hits]
         return response.success({"suggestions": suggestions}, Status.OK)
 
     except Exception as e:
