@@ -676,6 +676,29 @@ def graph_search(current_user, submission_id, toggle_webpage_results=True):
     }
     return node, submissions_pages
 
+@functional.route("/api/autocomplete", methods=["GET"])
+@token_required
+def autocomplete(current_user):
+    query = request.args.get("query", "")
+
+    user_communities = [str(x) for x in current_user.communities]
+
+    try:
+        _, submissions_hits = elastic_manager.auto_complete(query, user_communities, page=0, page_size=7)
+        suggestions = [{"label": x["_source"]["explanation"], "id": i} for i,x in enumerate(submissions_hits)]
+        return response.success({"suggestions": suggestions}, Status.OK)
+
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return response.error("Failed to get autocomplete, please try again later.", Status.INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
 
 @functional.route("/api/search", methods=["GET"])
 @token_required
@@ -865,7 +888,6 @@ def search(current_user):
                 
                 search_results_page = search_results_page + additional_results
                 if i > 1000: break
-                if i % 100 == 0: print("VIZ", i)
 
             # Call TopicMap
             data_ip = json.dumps(search_results_page)

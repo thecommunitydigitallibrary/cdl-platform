@@ -67,7 +67,8 @@ function SearchResult(props) {
     setOpen(false);
   };
 
-  const submitRelevanceJudgements = async function (rel) {
+  const submitRelevanceJudgements = async function (event, rel) {
+    event.preventDefault();
     let URL = baseURL_client + relJudgmentEndpoint;
     // Judgement key-value pair
     let judgement = {};
@@ -289,10 +290,10 @@ function SearchResult(props) {
   }
 
   return (
-    <a href={websiteURL + "submissions/" + props.submission_id} style={{textDecoration: "none"}} target="_blank" rel="noopener noreferrer">
     <Paper
       elevation={0}
       id={"card_id" + props.search_idx}
+      onClick={() => window.open(websiteURL + "submissions/" + props.submission_id, "_blank", "noreferrer")}
       sx={{
         width: paperWidth,
         padding: "20px",
@@ -304,6 +305,7 @@ function SearchResult(props) {
     >
 
       <div style={{ display: "flex" }}>
+
         <div
           style={{
             marginRight: "7px",
@@ -504,7 +506,7 @@ function SearchResult(props) {
             <Tooltip title="Relevant">
               <Button
                 value={1}
-                onClick={() => submitRelevanceJudgements(1)}
+                onClick={(event) => submitRelevanceJudgements(event, 1)}
                 size="small"
                 id="RelevantButton"
                 variant="text"
@@ -518,7 +520,7 @@ function SearchResult(props) {
             <Tooltip title="Not Relevant">
               <Button
                 value={0}
-                onClick={() => submitRelevanceJudgements(0)}
+                onClick={(event) => submitRelevanceJudgements(event, 0)}
                 size="small"
                 id="notRelevantButton"
                 variant="text"
@@ -540,7 +542,6 @@ function SearchResult(props) {
         </Alert>
       </Snackbar>
     </Paper>
-    </a>
   );
 }
 
