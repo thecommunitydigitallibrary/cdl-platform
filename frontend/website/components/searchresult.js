@@ -293,7 +293,6 @@ function SearchResult(props) {
     <Paper
       elevation={0}
       id={"card_id" + props.search_idx}
-      onClick={() => window.open(websiteURL + "submissions/" + props.submission_id, "_blank", "noreferrer")}
       sx={{
         width: paperWidth,
         padding: "20px",
