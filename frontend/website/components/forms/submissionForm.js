@@ -16,14 +16,18 @@ import TextField from "@mui/material/TextField";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import MenuItem from "@mui/material/MenuItem";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
+import Box from '@mui/material/Box';
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
+const AUTOCOMPLETE_ENDPOINT = baseURL_client + "autocomplete"
+
+
+const SUB_WEB_ENDPOINT = process.env.NEXT_PUBLIC_FROM_CLIENT + "submissions/";
 
 
 export default function SubmissionForm(props) {
@@ -45,12 +49,57 @@ export default function SubmissionForm(props) {
     const [title, setTitle] = useState(props.title)
     const [description, setDescription] = useState(props.description)
 
-
-
+    const [suggestions, setSuggestions] = useState(null)
 
     const [community, setCommunity] = useState("")
 
     const [connection, setConnection] = useState("")
+
+    const handleAutoSuggestClick = async (event) => {
+
+        const regex = /\[\[([^\]]+)\]\]/i;
+        var replacement_text = "[" + event.target.title + "](" + SUB_WEB_ENDPOINT + event.target.id + ")"
+        var new_desc = description.replace(regex, replacement_text)
+        setDescription(new_desc)
+    }
+
+    const getSuggestions = async (text) => {
+
+        const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + text, {
+            method: "GET",
+            headers: new Headers({
+              Authorization: jsCookie.get("token"),
+            }),
+          });
+          const response = await res.json();
+          if (res.status == 200) {
+            setSuggestions(response.suggestions.map((x) =>
+                <Button onClick={handleAutoSuggestClick} id={x.id} title={x.label}>
+                    {x.label} 
+                </Button>
+            ));
+          } else {
+            console.log(response.message)
+            setSuggestions(null)
+          }
+    }
+
+    const setDescriptionListener = async (text) => {
+        setDescription(text)
+
+        const regex = /\[\[([^\]]+)\]\]/g;
+        const matches = [];
+        let match;
+        
+        while ((match = regex.exec(description)) !== null) {
+            matches.push(match[1]);
+        }
+
+        if (matches.length == 1) {
+            var words_in_match = matches[0]
+            getSuggestions(words_in_match)
+        }
+    }
 
 
     const handleSubmit = async (event) => {
@@ -107,7 +156,7 @@ export default function SubmissionForm(props) {
 
     return (
         <div>
-            <DialogContent  width="600px">
+            <DialogContent>
                 <h6 align="center">
                     {props.dialog_title}
                 </h6>
@@ -140,7 +189,7 @@ export default function SubmissionForm(props) {
                         label="Submission Description"
                         variant="standard"
                         value={description}
-                        onChange={(value) => setDescription(value)}
+                        onChange={(value) => setDescriptionListener(value)}
                         highlightEnable={false}
                         preview="live"
                         height="200px"
@@ -191,6 +240,9 @@ export default function SubmissionForm(props) {
                         }}
                     />
                 </div>
+                <Box sx={{ bgcolor: 'background.paper' }}>
+                    {suggestions}
+                </Box>
 
                 {(props.method == "create" || props.method == "reply") ?
                     <FormControl
@@ -251,6 +303,8 @@ export default function SubmissionForm(props) {
                     </div>
                     : null}
             </DialogContent>
+            
+        
 
             <DialogActions>
                 <Button onClick={props.handle_close}>Cancel</Button>

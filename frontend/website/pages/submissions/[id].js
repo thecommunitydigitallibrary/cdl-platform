@@ -309,7 +309,6 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   };
 
   const handleCancelConnectForm = () => {
-    setConnectionID("");
     setOpenConnectForm(false);
     handleCloseOptionsMenu();
   };
