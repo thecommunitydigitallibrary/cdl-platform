@@ -346,13 +346,17 @@ def combine_pages(submissions_pages, webpages_index_pages):
     for i, submission_page in enumerate(submissions_pages):
         subpgs_url_to_id[submission_page["orig_url"]] = i
 
+    remaining_webpages = []
+
     # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
     for webpage in webpages_index_pages:
-        if subpgs_url_to_id.get(webpage["orig_url"]):
+        if webpage["orig_url"] in subpgs_url_to_id:
             i = subpgs_url_to_id.get(webpage["orig_url"])
             submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
-    
-    return submissions_pages + webpages_index_pages
+        else:
+            remaining_webpages.append(webpage)
+   
+    return submissions_pages + remaining_webpages
 
 def sanitize_input(input_data):
 	"""

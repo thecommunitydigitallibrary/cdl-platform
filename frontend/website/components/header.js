@@ -3,6 +3,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import InputLabel from "@mui/material/InputLabel";
 import jsCookie from "js-cookie";
 import dynamic from 'next/dynamic'
+import SubmissionForm from "./forms/submissionForm"
+
 
 
 import Router from "next/router";
@@ -11,37 +13,27 @@ import {
   AppBar,
   Avatar,
   Box,
-  Card,
   Button,
   createTheme,
   Divider,
   Grid,
   IconButton,
-  ListItemText,
-  makeStyles,
   ThemeProvider,
   Toolbar,
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme,
   LinearProgress,
-  ListItemIcon,
-  ListItemButton,
-  ListItem,
 } from "@mui/material";
 
 import SearchBarHeader from "./forms/searchBarHeader";
 import DrawerComp from "../components/homepage/drawer"
 import AppContext from "./appContext";
 
-import { Add, Upload } from "@mui/icons-material";
-import TextField from "@mui/material/TextField";
+import { Add } from "@mui/icons-material";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import FormControl from "@mui/material/FormControl";
@@ -51,25 +43,11 @@ import Menu from "@mui/material/Menu";
 import Image from "next/image";
 
 
-
-import katex from "katex";
-import "katex/dist/katex.css";
-import "@uiw/react-md-editor/markdown-editor.css";
-import "@uiw/react-markdown-preview/markdown.css";
-import rehypeSanitize from "rehype-sanitize";
-
-const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
-
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 
 // Example of JSON, this is displayed to frontend.
 const json_example = `{
   "data": [
-    {
-      "source_url": "https://textdata.org/about",
-      "title": "About the CDL",
-      "description": "This page contains information about the CDL."
-    },
     {
       "source_url": "https://www.google.com/",
       "title": "Google Search",
@@ -209,7 +187,6 @@ function Header(props) {
     setOpenSubmission(true);
   };
 
-  const [sub_description, setSubDescription] = useState("");
 
   const handleCloseSubmission = (event, reason) => {
     if (reason === "clickaway") {
@@ -289,66 +266,6 @@ function Header(props) {
         setShowProgress(false);
         return;
       }
-    } else {
-      let formData = new FormData();
-      var URL = baseURL_client + createSubmissionEndpoint;
-      var getSubmissionTitle = document.getElementById("submissionTitle");
-      var getSubmissionURL = document.getElementById("submissionURL");
-      var getSubmissionDescription = sub_description
-      // Check inputs to determine whether they are valid
-      // Use the validateSubmissionField function to check values
-      //if (
-      //  !(await validateSubmissionField("source_url", getSubmissionURL.value))
-      //) {
-      //  console.log("source url invalid");
-      //  setSeverity("error");
-      //  setMessage(`"source_url" field is invalid.`);
-      //  handleClick();
-      //  return;
-      //} 
-      if (
-        !(await validateSubmissionField(
-          "highlighted_text",
-          getSubmissionDescription
-        ))
-      ) {
-        setSeverity("error");
-        setMessage(`"Description" field is invalid.`);
-        handleClick();
-        return;
-      } else if (
-        !(await validateSubmissionField(
-          "explanation",
-          getSubmissionTitle.value
-        ))
-      ) {
-        setSeverity("error");
-        setMessage(`"Title" field is invalid.`);
-        handleClick();
-        return;
-      }
-      formData.append("community", selected_community);
-      formData.append("source_url", getSubmissionURL.value);
-      formData.append("highlighted_text", getSubmissionDescription);
-      formData.append("explanation", getSubmissionTitle.value);
-      const res = await fetch(URL, {
-        method: "POST",
-        body: formData,
-        headers: new Headers({
-          Authorization: jsCookie.get("token"),
-        }),
-      });
-      const response = await res.json();
-      if (res.status == 200) {
-        setSeverity("success");
-        setMessage(response.message);
-        handleClick();
-        handleCloseSubmission();
-      } else {
-        setSeverity("error");
-        setMessage(response.message);
-        handleClick();
-      }
     }
   };
 
@@ -384,8 +301,12 @@ function Header(props) {
         "Content-Type": "application/json",
       }),
     });
-    const responseComm = await resp.json();
+
+    var responseComm = await resp.json();
+
+
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
+
     setDropDownData(responseComm);
   };
 
@@ -612,106 +533,36 @@ function Header(props) {
               )}
             </Grid>
           </Toolbar>
-          <Dialog open={openSubmission} onClose={handleCloseSubmission}>
-            <DialogTitle style={{ width: "500px" }}>
-              {" "}
-              Index a Submission{" "}
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Use the form below to create a new submission for a selected community. Each submission should have a title and a description. The Submission URL is optional, will default to the submission's CDL URL if not specified. 
-              </DialogContentText>
-              {!batch ? null : (
-                <DialogContentText>
-                  Below is an example of how the JSON should be formatted.
-                </DialogContentText>
-              )}
+          <Dialog open={openSubmission} onClose={handleCloseSubmission} fullWidth maxWidth="md">
+            
               {!batch ? (
-                <div>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="submissionURL"
-                    label="Submission URL (optional)"
-                    fullWidth
-                    variant="standard"
-                    defaultValue=""
-                  />
-                  <TextField
-                    margin="dense"
-                    id="submissionTitle"
-                    label="Submission Title"
-                    fullWidth
-                    variant="standard"
-                    defaultValue=""
-                  />
-                  <br/>
-                  <br/>
-                  <DialogContentText>
-                    Submission Description
-                  </DialogContentText>
-                  <div data-color-mode="light">
-                  <MDEditor
-                    autoFocus
-                    id="submissionDescription"
-                    label="Submission Description"
-                    variant="standard"
-                    value={sub_description}
-                    onChange={(value) => setSubDescription(value)}
-                    highlightEnable={false}
-                    preview="live"
-                    height="200px"
-                    previewOptions={{
-                      rehypePlugins: [[rehypeSanitize]],
-                      components: {
-                        code: ({ inline, children = [], className, ...props }) => {
-                          const txt = children[0] || "";
-                          if (inline) {
-                            if (
-                              typeof txt === "string" &&
-                              /^\$\$(.*)\$\$/.test(txt)
-                            ) {
-                              const html = katex.renderToString(
-                                txt.replace(/^\$\$(.*)\$\$/, "$1"),
-                                {
-                                  throwOnError: false,
-                                }
-                              );
-                              return (
-                                <code dangerouslySetInnerHTML={{ __html: html }} />
-                              );
-                            }
-                            return <code>{txt}</code>;
-                          }
-                          const code =
-                            props.node && props.node.children
-                              ? getCodeString(props.node.children)
-                              : txt;
-                          if (
-                            typeof code === "string" &&
-                            typeof className === "string" &&
-                            /^language-katex/.test(className.toLocaleLowerCase())
-                          ) {
-                            const html = katex.renderToString(code, {
-                              throwOnError: false,
-                            });
-                            return (
-                              <code
-                                style={{ fontSize: "150%" }}
-                                dangerouslySetInnerHTML={{ __html: html }}
-                              />
-                            );
-                          }
-                          return <code className={String(className)}>{txt}</code>;
-                        },
-                      },
-                    }}
-                  />
-                  </div>
-                  
-                </div>
+                <SubmissionForm
+                  dialog_title="Create a New Submission"
+                  method="create"
+                  source_url=""
+                  title=""
+                  description=""
+                  submission_id=""
+                  communityNameMap={dropdowndata.community_info}
+                  handle_close={handleCloseSubmission}
+                />
               ) : (
                 <div>
+                  <DialogContent>
+                  <h6 align="center">
+                    Batch Upload - See Format Below
+                  </h6>
+                  <Button
+                      sx={{ marginLeft: "auto" }}
+                      onClick={() => {
+                        navigator.clipboard.writeText(json_example);
+                        setSeverity("success");
+                        setMessage("Copied example to clipboard!");
+                        handleClick();
+                      }}
+                    >
+                      Copy Example
+                    </Button>
                   <pre>{json_example}</pre>
                   <div style={{ display: "flex", flexDirection: "row" }}>
                     <input
@@ -748,17 +599,7 @@ function Header(props) {
                         };
                       }}
                     ></input>
-                    <Button
-                      sx={{ marginLeft: "auto" }}
-                      onClick={() => {
-                        navigator.clipboard.writeText(json_example);
-                        setSeverity("success");
-                        setMessage("Copied example to clipboard!");
-                        handleClick();
-                      }}
-                    >
-                      Copy Example
-                    </Button>
+                    
                   </div>
                   {has_uploaded ? (
                     <Alert sx={{ marginTop: "10px" }} severity={upload_status}>
@@ -798,40 +639,46 @@ function Header(props) {
                       ) : null}
                     </div>
                   ) : null}
+                  <FormControl
+                    sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
+                  >
+                    <InputLabel id="demo-simple-select-label">
+                      Select Community
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      style={{ backgroundColor: "white" }}
+                      label="Select Community"
+                      value={selected_community}
+                      onChange={handleSelectCommunity}
+                    >
+                      {dropdowndata.community_info &&
+                        dropdowndata.community_info.map(function (d, idx) {
+                          return (
+                            <MenuItem key={idx} value={d.community_id}>
+                              {d.name}
+                            </MenuItem>
+                          );
+                        })}
+                    </Select>
+                  </FormControl>
+                  <DialogActions>
+                    <Button onClick={handleCloseSubmission}>Cancel</Button>
+                    <Button onClick={createNewSubmission}>Submit</Button>
+                  </DialogActions>
+                  </DialogContent>
+
                 </div>
+                
               )}
-              <FormControl
-                sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
-              >
-                <InputLabel id="demo-simple-select-label">
-                  Select Community
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  style={{ backgroundColor: "white" }}
-                  label="Select Community"
-                  value={selected_community}
-                  onChange={handleSelectCommunity}
-                >
-                  {dropdowndata.community_info &&
-                    dropdowndata.community_info.map(function (d, idx) {
-                      return (
-                        <MenuItem key={idx} value={d.community_id}>
-                          {d.name}
-                        </MenuItem>
-                      );
-                    })}
-                </Select>
-              </FormControl>
-            </DialogContent>
+
             <DialogActions>
               <Button onClick={() => setBatchOption(!batch)}>
-                {!batch ? "Batch Upload" : "Single"}
+                {!batch ? "Batch Upload" : "Single Submission"}
               </Button>
-              <Button onClick={handleCloseSubmission}>Cancel</Button>
-              <Button onClick={createNewSubmission}>Submit</Button>
             </DialogActions>
+            
           </Dialog>
           <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
             <Alert

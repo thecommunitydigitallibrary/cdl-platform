@@ -66,10 +66,10 @@ def create_connection(current_user):
 			connection_description : string : optional text describing the connection, submitted by the user.
 
 			connection_target : string : optional id of the target of the connection.
-            submission_url: string : optional, the URL of the new submission.
-            submission_title: string : the title of the new submission.
-            submission_description: string : the description of the new submission
-            submission_community: string : the community of the new submission
+            source_url: string : optional, the URL of the new submission.
+            title: string : the title of the new submission.
+            description: string : the description of the new submission
+            community: string : the community of the new submission
 
 
 	Returns:
@@ -84,14 +84,13 @@ def create_connection(current_user):
 
         request_json =  request.get_json()
 
-
-        connection_source = request_json.get("connection_source", None)
-        connection_target = request_json.get("connection_target", None)
+        connection_source = request_json.get("connection_source", "")
+        connection_target = request_json.get("connection_target", "")
         connection_description = request_json.get("connection_description", "")
 
-        submission_url = request_json.get("submission_url", None)
-        submission_title = request_json.get("submission_title", None)
-        submission_description = request_json.get("submission_description", None)
+        submission_url = request_json.get("source_url", None)
+        submission_title = request_json.get("title", None)
+        submission_description = request_json.get("description", None)
         submission_community = request_json.get("community", None)
 
 
@@ -155,9 +154,9 @@ def create_submission(current_user):
         ip = request.remote_addr
         user_id = current_user.id
         user_communities = current_user.communities
-        highlighted_text = sanitize_input(request.form.get("highlighted_text", ""))
+        highlighted_text = request.form.get("highlighted_text", "") or request.form.get("description")
         source_url = request.form.get("source_url")
-        explanation = request.form.get("explanation")
+        explanation = request.form.get("explanation") or request.form.get("title")
         community = request.form.get("community", "")
 
         message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
@@ -206,7 +205,7 @@ def create_batch_submission(current_user):
             ip = request.remote_addr
             user_id = current_user.id
             user_communities = current_user.communities
-            highlighted_text = sanitize_input(submission["description"])
+            highlighted_text = submission["description"]
             source_url = submission["source_url"]
             explanation = submission["title"]
 
@@ -349,7 +348,7 @@ def submission(current_user, id):
         if request.method == "DELETE":
             if request.data:
                 request_data = json.loads(request.data.decode("utf-8"))
-                community_id = request_data.get("community_id", None)
+                community_id = request_data.get("community", None)
             else:
                 community_id = None
             # deleting the entire submission
@@ -359,6 +358,8 @@ def submission(current_user, id):
                                              {"$set": {"deleted": True}}, upsert=False)
                 if update.acknowledged:
                     index_update = elastic_manager.delete_document(id)
+
+                    print(index_update)
 
                     # if delete successful, remove it from community core if necessary
                     old_record = cdl_logs.find_one({"_id": ObjectId(id)})
@@ -386,7 +387,11 @@ def submission(current_user, id):
                 user_id = str(user_id)
 
                 if user_id in submission_communities:
+                    if len(submission_communities) == 1 and len(submission_communities[user_id]) == 1:
+                         return response.error("You cannot remove a submission from its last community.", Status.BAD_REQUEST)
                     submission_communities[user_id] = [x for x in submission_communities[user_id] if x != community_id]
+                else:
+                    return response.error("You are not able to remove the submission from this community.", Status.UNAUTHORIZED)
                 if submission_communities[user_id] == []:
                     del submission_communities[user_id]
                 update = cdl_logs.update_one({"_id": ObjectId(id)}, {"$set": {"communities": submission_communities}})
@@ -415,17 +420,17 @@ def submission(current_user, id):
 
             request_json = request.get_json()
 
-            community_id = request_json.get("community_id", None)
-            highlighted_text = sanitize_input(request_json.get("highlighted_text", None))
-            explanation = request_json.get("explanation", None)
-            source_url = request_json.get("url", None)
+            community_id = request_json.get("community", "")
+            highlighted_text = sanitize_input(request_json.get("description", None))
+            explanation = request_json.get("title", None)
+            source_url = request_json.get("source_url", None)
 
             user_id = str(user_id)
 
             insert_obj = {}
 
             if not community_id and not highlighted_text and not explanation:
-                return response.error("Missing either community_id, highlighted_text, or explanation",
+                return response.error("Missing either community, title, or description",
                                       Status.BAD_REQUEST)
             
 
@@ -1094,6 +1099,9 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     # assumed string, so check to make sure is not none
     if highlighted_text == None:
         highlighted_text = ""
+
+    if highlighted_text:
+        highlighted_text = sanitize_input(highlighted_text)
 
     # hard-coded to prevent submissions to the web community
     if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
