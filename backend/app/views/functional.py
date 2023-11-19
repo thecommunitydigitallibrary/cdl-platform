@@ -905,6 +905,7 @@ def search(current_user):
             tm.pre_process()
             tm.extract_keywords()
             tm.extract_metadesc_per_topic_keywords()
+            tm.sequence()
             graphData = tm.generate_graph_data()
 
             return response.success(graphData, Status.OK)

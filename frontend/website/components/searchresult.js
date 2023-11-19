@@ -60,6 +60,7 @@ function SearchResult(props) {
   };
 
   const handleClose = (event, reason) => {
+    event.preventDefault();
     if (reason === "clickaway") {
       return;
     }
@@ -302,9 +303,8 @@ function SearchResult(props) {
         wordBreak: 'break-word'
       }}
     >
-
+      <a href={websiteURL + "submissions/" + props.submission_id} style={{textDecoration: "none", color: "unset"}} target="_blank" rel="noopener noreferrer">
       <div style={{ display: "flex" }}>
-
         <div
           style={{
             marginRight: "7px",
@@ -535,11 +535,12 @@ function SearchResult(props) {
         ) : null}
       </div>
 
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} onClick={(event) => {event.preventDefault()}}>
         <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
           {message}
         </Alert>
       </Snackbar>
+      </a>
     </Paper>
   );
 }
