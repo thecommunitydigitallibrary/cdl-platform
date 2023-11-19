@@ -13,15 +13,18 @@ import SearchIcon from '@mui/icons-material/Search';
 import FeedIcon from '@mui/icons-material/Feed';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 
+import ReplyIcon from '@mui/icons-material/Reply';
+import TimelineIcon from '@mui/icons-material/Timeline';
 
-import noteImg from "../../public/images/notes.png";
+
+import submissionImg from "../../public/images/submission_page.png";
 import searchRecImg from "../../public/images/search_rec.png";
 
 const benefitOne = {
   title: "Form Communities",
-  desc: "A community is where bookmarks are saved. A community consists of any number of CDL users, all generally interested in a similar topic.",
+  desc: "A community is where submissions are saved. A community consists of any number of CDL users, all generally interested in a similar topic.",
   image: communityImg,
-  link: "how-to-community",
+  link: "community-overview",
   bullets: [
     {
       title: "Create a Community",
@@ -30,85 +33,85 @@ const benefitOne = {
     },
     {
       title: "Join a Community",
-      desc: "You can join a community by copy-pasting the community join key (accessible from clicking the 'Key' icon!)",
+      desc: "You can join a community by copy-pasting the community join key (accessible from clicking the 'Key' icon!).",
       icon: <ArrowForwardIcon />,
     },
     {
       title: "Explore with Other Members",
-      desc: "All webpages bookmarked to a community are accessible by any member of the community",
+      desc: "All submissions to a community are accessible by any member of the community.",
       icon: <PeopleIcon />,
     },
   ],
 };
 
 const benefitTwo = {
-  title: "Bookmark Webpages",
-  desc: "Describe and save webpages to any of your joined communities.",
+  title: "Make Submissions",
+  desc: "Create markdown-style notes and submit them to any of your communities",
   image: submitImg,
   link: "how-to-bookmark",
   bullets: [
     {
-      title: "Describe the Webpage",
-      desc: "Give the webpage a title and a description for helping you or your community members easily search for the bookmark.",
+      title: "Optionally Add a Webpage",
+      desc: "Adding a Submission URL will link your notes to an external webpage.",
       icon: <CreateIcon />,
     },
     {
-      title: "Save the Webpage to a Community",
-      desc: "Select a community to save your bookmark. All members of the community will now be able to search for and access the bookmark.",
+      title: "Add a Title and Description",
+      desc: "The title should briefly describe the note's purpose, and the description can be whatever you like.",
       icon: <SaveIcon />,
     },
     {
-      title: "Bookmark from Anywhere",
-      desc: "You can create a bookmark from the website and the Chrome browser extension.",
+      title: "Submit from Anywhere",
+      desc: "You can create submission from the website and from the Chrome browser extension.",
       icon: <CollectionsBookmarkIcon />,
     },
   ],
 };
 
-const benefitThree = {
-  title: "Take Notes",
-  desc: "Take markdown-style hierarchical, private notes.",
-  image: noteImg,
-  link: "how-to-bookmark",
+const benefitFour = {
+  title: "Interact with Submissions",
+  desc: "Visit a submission's CDL-specific webpage to read, reply, visualize, share.",
+  image: submissionImg,
+  link: "submission-overview",
 
   bullets: [
     {
-      title: "Create a Note Page",
-      desc: "Create a note page on any topic",
+      title: "Edit, Delete, Share",
+      desc: "You can edit a submission, add or remove it from a community, delete it entirely, or provide feedback.",
       icon: <CreateIcon />,
     },
     {
-      title: "Save the Note Page",
-      desc: "Save the note page to your private collection.",
-      icon: <SaveIcon />,
+      title: "Reply",
+      desc: "Replying to a submission will create another submission and display it beneath the description. This way, any future user who visits this submission will see your reply",
+      icon: <ReplyIcon />,
     },
     {
-      title: "Live Edit Previews",
-      desc: "While editing, see the changes to your page in real-time.",
-      icon: <ChangeCircleIcon />,
+      title: "Visualize",
+      desc: "See how similar submissions are related by interacting with the graph.",
+      icon: <TimelineIcon />,
     },
   ],
 };
 
-const benefitFour = {
+const benefitThree = {
   title: "Discover Information",
   desc: "Search and view recommendations from the content submitted to your communities.",
   image: searchRecImg,
-  link: "how-to-discover",
+  link: "search-overview",
   bullets: [
     {
       title: "Search Your Communities",
-      desc: "The webpages submitted to your communities are searchable using the website or the extension.",
+      desc: "The submissions to your joined communities are searchable using the website or the extension.",
       icon: <SearchIcon />,
     },
     {
-      title: "Get General Recommendations",
-      desc: "View your recommendation feed on the homepage or open the extension on a webpage to see contextual recommendations. Open the extension with highlighted text to see more specific contextual suggestions.",
+      title: "Get Recommendations",
+      desc: "View your recommendation feed on the homepage or open the extension on a webpage to see contextual recommendations. Open the extension with highlighted text to see submissions tailored to your selected context.",
       icon: <FeedIcon />,
     },
     {
-      title: "Get Note-based Recommendations",
-      desc: "See recommendations from your communities while you edit your notes pages in real time.",
+      title: "Automatic Suggestions",
+      desc: "See recommendations for your queries and while typing submission descriptions in real time.",
       icon: <ChangeCircleIcon />,
     },
   ],

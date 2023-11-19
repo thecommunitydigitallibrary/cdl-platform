@@ -27,8 +27,7 @@ const Hero = () => {
               The Community Digital Library
             </h1>
             <p className="py-5 text-xl leading-normal text-gray-500 lg:text-xl xl:text-xl dark:text-gray-300">
-            The Community Digital Library (CDL) is an online and open-source social bookmarking platform that allows you to collaboratively describe and save, search for, and discover webpages related to your interests. We offer a stand-alone website and a Chrome extension, all for free.
-
+            The Community Digital Library (CDL) is an online and open-source collaborative knowledge management platform. You can take markdown-style notes, connect them together, visualize them, share them across communities, and search or discover submitted and indexed content related to your interests. We offer a website and a Chrome extension, all for free.
             </p>
 
             <div className="flex flex-col m-3 items-start space-y-3 sm:space-x-4 sm:space-y-0 sm:items-center sm:flex-row">
