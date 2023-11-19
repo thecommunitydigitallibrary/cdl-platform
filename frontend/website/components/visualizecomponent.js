@@ -324,13 +324,13 @@ const VisualizeMap = () => {
                         </button>
                     </div>
                     {!!isModalOpen && (
-                        <Paper elevation={0} id="view-data-modal" style={{
+                        <Paper elevation={0} id="view-data-modal" className={"allResults"} style={{
                             width: maxWidth - width,
                             // boxShadow: "rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px"
                         }}>
                             <Grid container display={"flex"} direction={"row"} justifyContent={"center"}
                                   alignItems={"center"}>
-                                <Grid item sx={{textAlign: 'center', display: 'flex', marginTop: "77px",}}>
+                                <Grid item sx={{textAlign: 'center', display: 'flex', marginTop: "2%",}}>
                                     {
                                         submissions["md_name"].length > 0 ?
                                             (
@@ -342,9 +342,10 @@ const VisualizeMap = () => {
                                 </Grid>
                                 <Grid container display={"flex"}>
                                     <InfiniteScroll
+                                        style={{height: height}}
                                         dataLength={submissions["submission_list"].length}
                                         loader="">
-                                        <Grid item style={{padding: "1%"}}>
+                                        <Grid item style={{padding: "1%", display: "flex", flexDirection: "column", gap: "10px"}}>
                                             {submissions["submission_list"] !== undefined && submissions["submission_list"].length !== 0 &&
                                                 submissions["submission_list"].map(function (d, idx) {
                                                     return (

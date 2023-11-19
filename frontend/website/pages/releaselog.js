@@ -23,6 +23,32 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        November 19th, 2023
+      </h2>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Auto-suggest on website search bar header</li>
+            <li className="list-item">Auto-suggest on website submission create and edit</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Clicking whitespace around search result no longer redirects</li>
+            <li className="list-item">Clicking relevance judgment on search result no longer redirects</li>
+            <li className="list-item">Refactored submission form for more consistent look</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">"About" page updated to reflect recent changes</li>
+            <li className="list-item">Added release log to footer</li>
+        </ul>
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         November 14th, 2023
       </h2>
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>

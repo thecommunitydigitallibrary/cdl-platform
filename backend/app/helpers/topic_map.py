@@ -11,7 +11,7 @@ import time
 from textblob import TextBlob
 from typing import List, Dict
 from app.helpers.helper_constants import RE_LECTURE_TAG, RE_LECTURE_NUM, RE_LECTURE_WITHOUT_TAG, TOP_N_SUBMISSIONS, META_DESCRIPTOR, \
-    KEYWORDS_IGNORE
+    KEYWORDS_IGNORE, TOP_N_HASHTAGS
 from app.helpers.helpers import extract_hashtags
 
 class TopicMap:
@@ -128,10 +128,12 @@ class TopicMap:
         # Add to lec_id -> obj_idx list
         if self.lec_to_obj.get(lec_id):
             self.lec_to_obj[lec_id]["obj_idx"].append(obj_id)
+            self.lec_to_obj[lec_id]["count"] += 1
         else:
             self.lec_to_obj[lec_id] = {}
             self.lec_to_obj[lec_id]["meta_descriptors"] = {}
             self.lec_to_obj[lec_id]["obj_idx"] = [obj_id]
+            self.lec_to_obj[lec_id]["count"] = 0
 
         # Handle lec_id -> metadescriptor
         for meta_descriptor in meta_descriptor_list:
@@ -322,7 +324,7 @@ class TopicMap:
             None.
         '''
         self.lec_to_obj = OrderedDict(
-            sorted(self.lec_to_obj.items(), key=lambda kv: (float(kv[0]))))
+            sorted(self.lec_to_obj.items(), key=lambda kv: -kv[1]['count'])[:TOP_N_HASHTAGS])
 
     def create_node(self, id: str, type: str, title: str, path: str, leaf: str, module: str, parent: str, sub_list="null") -> Dict:
         """

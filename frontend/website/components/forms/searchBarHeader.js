@@ -1,27 +1,40 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FormControl, MenuItem, Select, Tooltip } from "@mui/material";
-import Router, {useRouter} from 'next/router';
+import Router, { useRouter } from 'next/router';
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import TextField from "@mui/material/TextField";
+import Autocomplete from '@mui/material/Autocomplete';
+import jsCookie from "js-cookie";
+import Stack from '@mui/material/Stack';
+
+
+
 
 function searchBarHeader(props) {
+
+
     let initQuery = "";
     const router = useRouter();
     const obj = router.query;
 
-    if (obj != undefined || obj != null || obj != "") {
+    const [suggestions, setSuggestions] = useState([]);
+
+    if ("query" in obj) {
         initQuery = obj["query"];
     }
-    const [query, setQuery] = useState(initQuery)
+
+    const [inputValue, setInputValue] = useState(initQuery);
+
+
 
     const handleSearch = async (event) => {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
         Router.push(
             "/search?query=" +
-            encodeURIComponent(event.target.query.value) +
+            encodeURIComponent(inputValue) +
             "&community=" +
             event.target.community.value +
             "&page=0"
@@ -29,51 +42,107 @@ function searchBarHeader(props) {
         );
     };
 
+    
+
+    const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
+    const AUTOCOMPLETE_ENDPOINT = baseURL_client + "autocomplete"
+
+
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + inputValue, {
+                method: "GET",
+                headers: new Headers({
+                  Authorization: jsCookie.get("token"),
+                }),
+              });
+              const response = await res.json();
+              if (res.status == 200) {
+                setSuggestions(response.suggestions);
+              } else {
+                console.log(response.message)
+                setSuggestions([])
+              }
+        };
+
+        if (inputValue !== '') {
+            if (inputValue.slice(-1) == " ") {
+                fetchSuggestions();
+            }
+        } else {
+            setSuggestions([]); // Clear suggestions when inputValue is empty
+        }
+    }, [inputValue]);
+
+
+
     return (
         <>
-            <form onSubmit={handleSearch}>
-                <TextField
-                    sx={{ m: 1 }}
-                    style={{ width: props.isSmall ? '260px' : '60%', backgroundColor: 'white', borderRadius: '5px', 
-                    position: "relative", }}
-                    variant="outlined"
-                    size="small"
-                    type="text"
-                    id="query_input"
-                    name="query"
-                    onChange={ e => { setQuery(e.currentTarget.value); } }
-                    value={query}
-                    placeholder="Search your communities"
-                    required
-                    InputProps={{
-                        endAdornment: (
-                            <IconButton type="submit"
-                                variant="contained"
-                                sx={{
-                                    border: "1px solid #efffff",
-                                    bgcolor: '#eceff1',
-                                    borderRadius: 1,
-                                    transition: "transform 0.3s ease, width 0.3s ease",
-                                    transform: "translateZ(0)",
-                                    width: '40px',
-                                    "&:hover": {
-                                        border: "1px solid #eceff1",
-                                        bgcolor: "#F5F5F5",
-                                        color: '#696969',
-                                        transform: "translateZ(30px)",
-                                        width: '60px'
+            <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center' }}>
+
+                <Stack spacing={2} 
+                    style={{
+                        width: props.isSmall ? '260px' : '60%', borderRadius: '5px',
+                        position: "relative", paddingRight: "5px"
+                    }}>
+                    <Autocomplete
+                        id="autocomplete"
+                        // calling the freeSolo prop inside the Autocomplete component
+                        freeSolo
+                        filterOptions={(x) => x}
+                        options={suggestions.map((option) => option.label)}
+                        onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
+                        value={inputValue}
+                        renderInput={(params) => 
+                            <TextField {...params}
+                                variant="outlined"
+                                sx={{ m:1 }}
+                                style={{
+                                    backgroundColor: 'white', borderRadius: '5px',
+                                    position: "relative"
+                                }}
+                                size="small"
+                                type="text"
+                                placeholder="Search your communities"
+                                id="query_input"
+                                onSubmit={handleSearch}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                        <IconButton type="submit"
+                                            variant="contained"
+                                            sx={{
+                                                border: "1px solid #efffff",
+                                                bgcolor: '#eceff1',
+                                                borderRadius: 1,
+                                                transition: "transform 0.3s ease, width 0.3s ease",
+                                                transform: "translateZ(0)",
+                                                width: '40px',
+                                                "&:hover": {
+                                                    border: "1px solid #eceff1",
+                                                    bgcolor: "#F5F5F5",
+                                                    color: '#696969',
+                                                    transform: "translateZ(30px)",
+                                                    width: '60px'
+                                                },
+                                            }}
+                                        >
+                                            <SearchIcon />
+                                        </IconButton>),
+                                    style: {
+                                        paddingRight: 0, // remove right padding
                                     },
                                 }}
-                            >
-                                <SearchIcon />
-                            </IconButton>),
-                        style: {
-                            paddingRight: 0, // remove right padding
-                        },
-                    }}
-                />
+                            />
+                        }
+                        
+                    />
+
+                </Stack>
+
+
                 <FormControl
-                    sx={{ m: 1, maxWidth: '25%', backgroundColor: 'white', borderRadius: '5px' }}
+                    sx={{ m: 1, maxWidth: '25%', backgroundColor: 'white', borderRadius: '5px', float: "left"}}
                     size="small">
                     <Select
                         style={{ backgroundColor: "white" }}

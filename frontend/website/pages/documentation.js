@@ -21,7 +21,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            The Community Digital Library (CDL) is an <a target="_blank" rel="noopener noreferrer" href="/">online</a> and <a target="_blank" rel="noopener noreferrer" href="https://github.com/thecommunitydigitallibrary/cdl-platform">open-source</a> social bookmarking platform that allows you to collaboratively describe and save, search for, and discover webpages related to your interests. We offer a stand-alone website, a fully-local version, and a Chrome extension, all for free.
+                            The Community Digital Library (CDL) is an <a target="_blank" rel="noopener noreferrer" href="/">online</a> and <a target="_blank" rel="noopener noreferrer" href="https://github.com/thecommunitydigitallibrary/cdl-platform">open-source</a> collaborative knowledge management platform. You can take markdown-style notes, connect them together, visualize them, share them across communities, and search or discover submitted and indexed content related to your interests. We offer a website and a Chrome extension, all for free.
                         </p>
                         <p>
                             The CDL provides various features and functionalities to enhance your online learning experience.
@@ -131,7 +131,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            Much like a group chat, a subreddit, or a folder, a community is a way for you and your peers to logically organize content on the CDL. You can create, join, or leave communities, and any member of a community can search for or browse all content present in the community. A community can have any number of members, ranging from just yourself (e.g., a private community to save your personal bookmarks) to hundreds of members (e.g., a large classroom). 
+                            Much like a group chat, a subreddit, or a folder, a community is a way for you and your peers to logically organize content on the CDL. You can create, join, or leave communities, and any member of a community can search for or browse all content present in the community. A community can have any number of members, ranging from just yourself (e.g., a private community to save your personal notes) to hundreds of members (e.g., a large class all taking notes together on lectures and textbooks).
                         </p>
                     </>
                 ),
@@ -164,6 +164,17 @@ const topics = [
                     </>
                 ),
             },
+            {
+                title: "Visualization",
+                link: "community-visualization",
+                content: (
+                    <>
+                        <p>
+                            The CDL supports the basic visualization of any community's content. To view a community's visualization, you can click the "Visualize Community" on the community's card. This will bring you to an interactive graph where the community's submissions are organized around hashtags, topics, and meta-descriptors.
+                        </p>
+                    </>
+                ),
+            }
         ]
     },
     {
@@ -175,7 +186,10 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            A submission is the fundamental building block of the CDL. Submissions are user-created, and consist of a URL, a title, and a description. Submissions can be added to or removed from communities, and if you are are a member of a community, then you can search over, browse, and view all submissions currently added to a community. The title and description of a submission are meant to provide you with a way to explain how the webpage is helpful for you or the other members of the community.
+                            A submission is the fundamental building block of the CDL. Submissions are user-created, and consist of an optional source URL, a title, and a description. Submissions can be added to or removed from communities, and if you are are a member of a community, then you can search over, browse, and view all submissions currently added to a community. 
+                        </p>
+                        <p>
+                            The source URL of a submission is to provide you with a way to link external content (e.g., a video, a news article, a published paper, etc.). This field is optional, and if not included, the field will default to the submission's webpage on the CDL website. The title of a submission is meant to give you and other users a brief overview of the submission. And the description is meant to provide you with the ability to create markdown-style notes for whatever you're submitting. 
                         </p>
                     </>
                 ),
@@ -186,10 +200,16 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            You can create a submission by using either Chrome extension's "Submit" tab or by clicking the "+" on the CDL website header. A submission consists of the current URL (i.e., the page that you opened the extension on), a title, and a description. With the extension, you do not need to manually enter a URL because the extension automatically captures it from the browser API. After selecting a community and clicking "Submit," all of this will be saved as a submission to the selected community. 
+                            You can create a submission by using either Chrome extension's "Submit" tab or by clicking the "+" on the CDL website header. The source URL is optional when using the CDL website header, but while using the Chrome extension, it will be the page that you open the extension on. After adding a title, a description, and selecting a community, you can click "Submit" to save the submission to the selected community. 
                         </p>
                         <p>
                             To check your submission(s), you can click the "Submissions" tab in the header at the top of the CDL website. This will bring you to a page that displays, in reverse chronological order, all of your submissions that you have made to all of your communities.
+                        </p>
+                        <p>
+                            If you included a source URL and the webpage is publicly available, then the CDL's server will also try to index the webpage. This is why you may sometimes see search results and recommendations with the community listed as "Webpage". 
+                        </p>
+                        <p>
+                            While typing the description, the CDL provides a quick way to connect notes together. By typing "[[search terms]]" followed by a space, the CDL will suggest submissions in your communities related to these search terms. Then, clicking any one of these suggestions will replace the brackets with a hyperlink to that submission. For example, typing "[[cdl demos]] " will return suggestions related to "cdl demos". 
                         </p>
                     </>
                 ),
@@ -200,10 +220,13 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            The submission card provides you with numerous ways to view and interact with the submission. Clicking the hyperlinked title at the top of the submission card will open the submitted URL in another tab. Below the hyperlinked title is the shortened submitted URL and submission time. Below this is the submission's description. And at the bottom left of the submission are the names of the communities that the submission is a part of, and the list of hashtags (if any). Hashtags are automatically extracted from the title and description, and are meant to provide you with a way to easily search for and filter submissions. More information about hashtags can be found in the Search section below. Following searches or recommendations, each submission card will contain relevance judgment buttons at the bottom left. These buttons are meant to provide you with a way to rate the submissions with respect to your query or recommendation context. 
+                            The submission card provides you with numerous ways to view and interact with the submission. Clicking the hyperlinked title at the top of the submission card will open the submitted URL in another tab. If no source URL was included, then this will take you to the CDL's submission page. Below the hyperlinked title is the shortened submitted URL and submission time. Below this is the submission's description. And at the bottom left of the submission are the names of the communities that the submission is a part of, and the list of hashtags (if any). Hashtags are automatically extracted from the title and description, and are meant to provide you with a way to easily search for and filter submissions. More information about hashtags can be found in the Search section below. Following searches or recommendations, each submission card will contain relevance judgment buttons at the bottom left. These buttons are meant to provide you with a way to rate the submissions with respect to your query or recommendation context. 
                         </p>
                         <p>
-                            Each submission card also contains three dots at the top right corner. Clicking these three dots will open a small menu with multiple options. Clicking the first option, "View Submission", will bring you to the CDL's submission page. On this page, you will be able to view the submission's full title and description, see the submissions views/clicks/shares, add or remove the submission from a community, and edit or delete the submission (if you are the submission's creator). Clicking the "Feedback" button will open a small pop-up window where you can send feedback about the submission to the CDL (e.g., if the submission is inappropriate or the link is broken). And clicking the "Share URL" will copy the URL of the page to your clipboard. This "Feedback" and "Share URL" functionality is also available as the second and third option in the three dot menu. The submission page also displays a basic visualization of the submission with respect to other submissions made to your communities.
+                            Each submission card also contains three dots at the top right corner. Clicking these three dots will open a small menu with multiple options. Clicking the first option, "View Submission", will bring you to the CDL's submission page. On this page, you will be able to view the submission's full title and description, see the submissions views/clicks/shares, add or remove the submission from a community, and edit or delete the submission (if you are the submission's creator). The submission page also displays a basic visualization of the submission with respect to other submissions and webpages. Clicking the "Feedback" button will open a small pop-up window where you can send feedback about the submission to the CDL (e.g., if the submission is inappropriate or the link is broken). And clicking the "Share URL" will copy the URL of the page to your clipboard. This "Feedback" and "Share URL" functionality is also available as the second and third option in the three dot menu. Finally, clicking "Get Connection ID" will copy the submission CDL ID to your clipboard, which is used to reply (described below)
+                        </p>
+                        <p>
+                            The CDL's submission page also supports the ability to reply to the submission. To reply, you have two options: you can connect an existing submission or create a new submission. To connect an existing submission, you only need to post the submission's connection ID in the field and click submit. And to create a new submission, you need to fill out the information in the presented form after clicking "Reply". In either case, the connected/created submission will be displayed on the source submission's page below its description. 
                         </p>
                     </>
                 ),
@@ -220,6 +243,9 @@ const topics = [
                     <>
                         <p>
                             The Community Digital Library supports a basic, hierarchical, markdown-style private notes. To access your note pages, you can click the "Notes" button in the header at the top of the CDL website. Clicking this will redirect you to a page where you can view, create, edit, and delete your notes.
+                        </p>
+                        <p>
+                            It is recommended that you instead take notes via submissions through the description's markdown capabilities. This way, your notes can be shared with others, are searchable, and can appear in recommendations.
                         </p>
                     </>
                 )
@@ -379,6 +405,17 @@ const topics = [
                     <>
                         <p>
                             One of the primary use cases of the CDL is personal bookmarking and archiving. This is best supported by creating a community (or communities) according to the type of content that you would like to save. For example, a community where you save interesting news articles could be called "News Articles", or a community where you save academic publications could be called "Papers and Demos". And, as you submit webpages to your personal community, you can add hashtags according to whatever taxonomy you would like to have (e.g., "#empirical" or "#politics"). And after creating the community, you will be its only member, meaning that all bookmarks saved by you are accessible and viewable by only you.                      
+                        </p>
+                    </>
+                )
+            },
+            {
+                title: "Collaborative Note-taking",
+                link: "collaborative-note-taking",
+                content: (
+                    <>
+                        <p>
+                            Any meeting note, lecture note, or thought can be made into a submission and added to any of your communities. You can collaborate with any sized group - from just yourself in a private community for personal thoughts to a class-wide community taking notes on lecture content. With replies, hyperlinks, searches, and recommendations, you will be able to easily organize and discover notes and external webpages related to your interests and goals. 
                         </p>
                     </>
                 )

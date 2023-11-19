@@ -58,7 +58,7 @@ export default function Footer(props) {
     Setup: { label: "Setup Instructions", value: "/setup" },
     PrivacyPolicy: { label: "Privacy Policy", value: "/privacy" },
     ReleaseLog: { label: "Release Log", value: "/releaselog" },
-    ReleaseLog: { label: "Documentation", value: "/documentation" }
+    Documentation: { label: "Documentation", value: "/documentation" }
   };
 
   // Necessary States for Alert Message

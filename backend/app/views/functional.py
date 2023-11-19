@@ -66,10 +66,10 @@ def create_connection(current_user):
 			connection_description : string : optional text describing the connection, submitted by the user.
 
 			connection_target : string : optional id of the target of the connection.
-            submission_url: string : optional, the URL of the new submission.
-            submission_title: string : the title of the new submission.
-            submission_description: string : the description of the new submission
-            submission_community: string : the community of the new submission
+            source_url: string : optional, the URL of the new submission.
+            title: string : the title of the new submission.
+            description: string : the description of the new submission
+            community: string : the community of the new submission
 
 
 	Returns:
@@ -84,14 +84,13 @@ def create_connection(current_user):
 
         request_json =  request.get_json()
 
-
-        connection_source = request_json.get("connection_source", None)
-        connection_target = request_json.get("connection_target", None)
+        connection_source = request_json.get("connection_source", "")
+        connection_target = request_json.get("connection_target", "")
         connection_description = request_json.get("connection_description", "")
 
-        submission_url = request_json.get("submission_url", None)
-        submission_title = request_json.get("submission_title", None)
-        submission_description = request_json.get("submission_description", None)
+        submission_url = request_json.get("source_url", None)
+        submission_title = request_json.get("title", None)
+        submission_description = request_json.get("description", None)
         submission_community = request_json.get("community", None)
 
 
@@ -155,10 +154,15 @@ def create_submission(current_user):
         ip = request.remote_addr
         user_id = current_user.id
         user_communities = current_user.communities
-        highlighted_text = sanitize_input(request.form.get("highlighted_text", ""))
-        source_url = request.form.get("source_url")
-        explanation = request.form.get("explanation")
-        community = request.form.get("community", "")
+
+        req = request.form
+        if not request.form:
+            req = request.get_json()
+
+        highlighted_text = req.get("highlighted_text", "") or req.get("description")
+        source_url = req.get("source_url")
+        explanation = req.get("explanation") or req.get("title")
+        community = req.get("community", "")
 
         message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
                                  source_url=source_url, explanation=explanation, community=community)
@@ -206,7 +210,7 @@ def create_batch_submission(current_user):
             ip = request.remote_addr
             user_id = current_user.id
             user_communities = current_user.communities
-            highlighted_text = sanitize_input(submission["description"])
+            highlighted_text = submission["description"]
             source_url = submission["source_url"]
             explanation = submission["title"]
 
@@ -349,7 +353,7 @@ def submission(current_user, id):
         if request.method == "DELETE":
             if request.data:
                 request_data = json.loads(request.data.decode("utf-8"))
-                community_id = request_data.get("community_id", None)
+                community_id = request_data.get("community", None)
             else:
                 community_id = None
             # deleting the entire submission
@@ -359,6 +363,8 @@ def submission(current_user, id):
                                              {"$set": {"deleted": True}}, upsert=False)
                 if update.acknowledged:
                     index_update = elastic_manager.delete_document(id)
+
+                    print(index_update)
 
                     # if delete successful, remove it from community core if necessary
                     old_record = cdl_logs.find_one({"_id": ObjectId(id)})
@@ -386,7 +392,11 @@ def submission(current_user, id):
                 user_id = str(user_id)
 
                 if user_id in submission_communities:
+                    if len(submission_communities) == 1 and len(submission_communities[user_id]) == 1:
+                         return response.error("You cannot remove a submission from its last community.", Status.BAD_REQUEST)
                     submission_communities[user_id] = [x for x in submission_communities[user_id] if x != community_id]
+                else:
+                    return response.error("You are not able to remove the submission from this community.", Status.UNAUTHORIZED)
                 if submission_communities[user_id] == []:
                     del submission_communities[user_id]
                 update = cdl_logs.update_one({"_id": ObjectId(id)}, {"$set": {"communities": submission_communities}})
@@ -415,17 +425,17 @@ def submission(current_user, id):
 
             request_json = request.get_json()
 
-            community_id = request_json.get("community_id", None)
-            highlighted_text = sanitize_input(request_json.get("highlighted_text", None))
-            explanation = request_json.get("explanation", None)
-            source_url = request_json.get("url", None)
+            community_id = request_json.get("community", "")
+            highlighted_text = sanitize_input(request_json.get("description", None))
+            explanation = request_json.get("title", None)
+            source_url = request_json.get("source_url", None)
 
             user_id = str(user_id)
 
             insert_obj = {}
 
             if not community_id and not highlighted_text and not explanation:
-                return response.error("Missing either community_id, highlighted_text, or explanation",
+                return response.error("Missing either community, title, or description",
                                       Status.BAD_REQUEST)
             
 
@@ -676,6 +686,34 @@ def graph_search(current_user, submission_id, toggle_webpage_results=True):
     }
     return node, submissions_pages
 
+@functional.route("/api/autocomplete", methods=["GET"])
+@token_required
+def autocomplete(current_user):
+    query = request.args.get("query", "")
+    topn = int(request.args.get("topn", 7))
+    cutoff = int(request.args.get("cutoff", 60))
+
+    user_communities = [str(x) for x in current_user.communities]
+
+    try:
+        _, submissions_hits = elastic_manager.auto_complete(query, user_communities, page=0, page_size=topn)
+        suggestions = [{"label": x["_source"]["explanation"], "id": x["_id"]} for x in submissions_hits]
+        for sugg in suggestions:
+            if len(sugg["label"]) > cutoff:
+                sugg["label"] = sugg["label"][:cutoff-3] + "..."
+        return response.success({"suggestions": suggestions}, Status.OK)
+
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return response.error("Failed to get autocomplete, please try again later.", Status.INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
 
 @functional.route("/api/search", methods=["GET"])
 @token_required
@@ -865,7 +903,6 @@ def search(current_user):
                 
                 search_results_page = search_results_page + additional_results
                 if i > 1000: break
-                if i % 100 == 0: print("VIZ", i)
 
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
@@ -873,6 +910,7 @@ def search(current_user):
             tm.pre_process()
             tm.extract_keywords()
             tm.extract_metadesc_per_topic_keywords()
+            tm.sequence()
             graphData = tm.generate_graph_data()
 
             return response.success(graphData, Status.OK)
@@ -1073,6 +1111,9 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     if highlighted_text == None:
         highlighted_text = ""
 
+    if highlighted_text:
+        highlighted_text = sanitize_input(highlighted_text)
+
     # hard-coded to prevent submissions to the web community
     if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
         return "You cannot submit to this community.", Status.FORBIDDEN, None
@@ -1117,27 +1158,32 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
         scraper = ScrapeWorker(webpages.collection)
 
         if source_url and not scraper.is_scraped_before(source_url):
-            data = scraper.scrape(source_url)  # Triggering Scraper
+            try:
+                data = scraper.scrape(source_url)  # Triggering Scraper
+                
 
-            # Check if the URL was already scraped
-            if data['scrape_status']['code'] != -1:
-                # Check if the scrape was not successful
-                if data["scrape_status"]["code"] != 1:
-                    data["webpage"] = {}
+                # Check if the URL was already scraped
+                if data['scrape_status']['code'] != -1:
+                    # Check if the scrape was not successful
+                    if data["scrape_status"]["code"] != 1:
+                        data["webpage"] = {}
 
-                # insert in MongoDB
-                insert_status, webpage = log_webpage(data["url"],
-                                                        data["webpage"],
-                                                        data["scrape_status"],
-                                                        data["scrape_time"]
-                                                        )
-                if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                    # index in OpenSearch
-                    index_status, _ = webpages_elastic_manager.add_to_index(webpage)
-                    print("WEBPAGE_INDEX_STATUS", index_status)
+                    # insert in MongoDB
+                    insert_status, webpage = log_webpage(data["url"],
+                                                            data["webpage"],
+                                                            data["scrape_status"],
+                                                            data["scrape_time"]
+                                                            )
+                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                        # index in OpenSearch
+                        index_status, _ = webpages_elastic_manager.add_to_index(webpage)
+                        print("WEBPAGE_INDEX_STATUS", index_status)
 
-                else:
-                    print("Unable to insert webpage data in database.")
+                    else:
+                        print("Unable to insert webpage data in database.")
+            except Exception as e:
+                traceback.print_exc()
+                pass
 
         return "Context successfully submitted and indexed.", Status.OK, status.inserted_id
         

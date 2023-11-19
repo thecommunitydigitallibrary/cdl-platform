@@ -34,7 +34,7 @@ export default function About({ loggedOut }) {
         <SectionTitle
           pretitle="Why CDL?"
           title=" What we offer">
-          Below, we describe an overview of the CDL's features: forming communities, bookmarking webpages to these communities, taking notes, and discovering information (search and recommendation).
+          Below, we describe an overview of the CDL's features: forming communities, taking notes, and discovering information.
         </SectionTitle>
 
         <Benefits data={benefitOne} />

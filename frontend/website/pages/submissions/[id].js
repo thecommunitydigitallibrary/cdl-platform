@@ -1,8 +1,8 @@
-import { useRouter } from "next/router";
 import jsCookie from "js-cookie";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import SearchResult from "../../components/searchresult";
 import Footer from "../../components/footer";
+import SubmissionForm from "../../components/forms/submissionForm"
 import Error from "next/error";
 import dynamic from 'next/dynamic'
 import { FormControl, Grid, InputLabel, OutlinedInput, Select } from "@mui/material";
@@ -43,7 +43,6 @@ import ListItemText from "@mui/material/ListItemText";
 import ReactDOMServer from 'react-dom/server';
 
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
-import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
 
 import Box from "@mui/system/Box";
 import Head from "next/head";
@@ -85,7 +84,6 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   const graphRef = useRef(graph);
   const sourceRef = useRef(source);
 
-  const [editDescription, setEditDescription] = useState("")
 
 
   const colorNodeBackground = (node) => {
@@ -148,49 +146,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     setOpenEdit(false);
   };
 
-  const editSubmission = async (event) => {
-    var submissionCommunities = Object.keys(
-      submissionDataResponse["submission"]["communities_part_of"]
-    );
-
-    for (let i = 0; i < submissionCommunities.length; ++i) {
-      var URL =
-        baseURL_client +
-        "submission/" +
-        submissionDataResponse.submission.submission_id;
-      var getExplanation = document.getElementById("editExplanation");
-      var getHighlightedText = editDescription
-      var getURL = document.getElementById("editURL");
-      var error = false;
-      const res = await fetch(URL, {
-        method: "PATCH",
-        body: JSON.stringify({
-          community_id: submissionCommunities[i],
-          explanation: getExplanation.value,
-          highlighted_text: editDescription,
-          url: getURL.value,
-        }),
-        headers: new Headers({
-          Authorization: jsCookie.get("token"),
-          "Content-Type": "application/json",
-        }),
-      });
-      const response = await res.json();
-      if (response.status == "ok") {
-        setSeverity("success");
-        setMessage(response.message);
-        handleClick();
-        handleCloseEdit();
-        window.location.reload();
-      } else {
-        setSeverity("error");
-        setMessage(response.message);
-        handleClick();
-      }
-    }
-  };
-
-  const router = useRouter();
+  
   const [submissionDataResponse, setSubmissionDataResponse] = React.useState(
     []
   );
@@ -240,7 +196,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
       const res = await fetch(URL, {
         method: "DELETE",
         body: JSON.stringify({
-          community_id: removeCommunityIDList[i],
+          community: removeCommunityIDList[i],
         }),
         headers: new Headers({
           Authorization: jsCookie.get("token"),
@@ -276,7 +232,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
       const res = await fetch(URL, {
         method: "PATCH",
         body: JSON.stringify({
-          community_id: saveCommunityIDList[i], //i
+          community: saveCommunityIDList[i], //i
         }),
         headers: new Headers({
           Authorization: jsCookie.get("token"),
@@ -300,9 +256,6 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
 
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const handleOpenOptionsMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
 
   const handleCloseOptionsMenu = () => {
     setAnchorElUser(null);
@@ -348,12 +301,6 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
 
   const [shareUrlLink, setShareUrlLink] = React.useState("");
 
-  const [connection_id, setConnectionID] = React.useState("");
-  const [sub_title, setSubTitle] = React.useState("");
-  const [sub_description, setSubDescription] = React.useState("");
-  const [sub_url, setSubURL] = React.useState("");
-  const [selected_community, setSelectedCommunity] = React.useState("")
-
 
   const [openConnectForm, setOpenConnectForm] = React.useState(false);
 
@@ -362,60 +309,14 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   };
 
   const handleCancelConnectForm = () => {
-    setConnectionID("");
     setOpenConnectForm(false);
     handleCloseOptionsMenu();
   };
 
-  const handleConnectionIDType = (event) => {
-    setConnectionID(event.target.value);
-  };
-  const handleSubTitle = (event) => {
-    setSubTitle(event.target.value);
-  };
-  const handleSubDescription = (event) => {
-    setSubDescription(event.target.value);
-  };
-  const handleSubURL = (event) => {
-    setSubURL(event.target.value);
-  };
-  const handleSelectCommunity = (event) => {
-    setSelectedCommunity(event.target.value);
-  }
+ 
 
 
-  const handleCreateConnectForm = async (event) => {
-    var URL = baseURL_client + "connect/";
-
-    const res = await fetch(URL, {
-      method: "POST",
-      body: JSON.stringify({
-        connection_source: submissionDataResponse.submission.submission_id,
-        connection_target: connection_id,
-        submission_url: sub_url,
-        submission_title: sub_title,
-        submission_description: sub_description,
-        community: selected_community
-      }),
-      headers: new Headers({
-        Authorization: jsCookie.get("token"),
-        "Content-Type": "application/json",
-      }),
-    });
-    const response = await res.json();
-    if (res.status == 200) {
-      setSeverity("success");
-      setMessage(response.message);
-      handleClick();
-      handleCloseOptionsMenu();
-      window.location.reload();
-    } else {
-      setSeverity("error");
-      setMessage(response.message);
-      handleClick();
-    }
-  };
-
+  
   const handleClickOptionsMenu = (event, option, param) => {
     console.log("clicked " + option);
     switch (option) {
@@ -591,14 +492,6 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
         console.log(response);
       }
 
-      // Add New Nodes and Links
-      // const graph_response = await callGraphAPI(id);
-      // if (graph_response.status === "ok") {
-      //   handleNodeAdd(node, graph_response.data);
-      // } else {
-      //   console.log(graph_response);
-      // }
-
       // Complete Loading and Change URL
 
       setLoading(false);
@@ -611,7 +504,6 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
   const getSubmissionData = () => {
     if (data.status === "ok") {
       setSubmissionDataResponse(data);
-      setEditDescription(data.submission.highlighted_text)
       setCommunityNameMap(mapCommunitiesToNames(data.submission.communities));
 
       let sharableCommunityIds = [];
@@ -721,10 +613,18 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     var communityNamesList = [];
   }
 
+  var page_title = " - The CDL"
+
+  if (submissionDataResponse.submission) {
+    page_title = submissionDataResponse.submission.explanation + page_title
+  } else {
+    page_title = "Submission" + page_title
+  }
+
   return (
     <>
       <Head>
-        <title>{submissionDataResponse.submission ? submissionDataResponse.submission.explanation : "Submission"} - The CDL</title>
+        <title>{page_title}</title>
         <link rel="icon" href="/images/tree32.png" />
       </Head>
       <Header />
@@ -790,170 +690,17 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 </DialogActions>
               </Dialog>
 
-              <Dialog open={openConnectForm}>
-                <DialogTitle>
-                  {" "}
-                  Post a reply...
-                </DialogTitle>
-
-                <DialogContent>
-
-
-                  <text>
-                    By creating a new submission:
-                  </text>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="submissionURL"
-                    label="Submission URL (optional)"
-                    fullWidth
-                    variant="standard"
-                    defaultValue=""
-                    value={sub_url}
-                    onChange={handleSubURL}
+              <Dialog open={openConnectForm} fullWidth maxWidth="md">
+                  <SubmissionForm
+                    dialog_title="Reply by creating a new submission"
+                    method="reply"
+                    communityNameMap={communityNameMap}
+                    source_url=""
+                    title=""
+                    description=""
+                    submission_id={submissionDataResponse.submission.submission_id}
+                    handle_close={handleCancelConnectForm}
                   />
-                  <TextField
-                    margin="dense"
-                    id="submissionTitle"
-                    label="Submission Title"
-                    fullWidth
-                    variant="standard"
-                    defaultValue=""
-                    value={sub_title}
-                    onChange={handleSubTitle}
-                  />
-                  <DialogContentText>
-                    {<br />}
-                  </DialogContentText>
-                  <DialogContentText>
-                    Submission Description
-                  </DialogContentText>
-
-                  <div data-color-mode="light">
-
-                  <MDEditor
-                    autoFocus
-                    id="submissionDescription"
-                    label="Submission Description"
-                    variant="standard"
-                    value={sub_description}
-                    onChange={(value) => setSubDescription(value)}
-                    highlightEnable={false}
-                    preview="live"
-                    height="200px"
-                    previewOptions={{
-                      rehypePlugins: [[rehypeSanitize]],
-                      components: {
-                        code: ({ inline, children = [], className, ...props }) => {
-                          const txt = children[0] || "";
-                          if (inline) {
-                            if (
-                              typeof txt === "string" &&
-                              /^\$\$(.*)\$\$/.test(txt)
-                            ) {
-                              const html = katex.renderToString(
-                                txt.replace(/^\$\$(.*)\$\$/, "$1"),
-                                {
-                                  throwOnError: false,
-                                }
-                              );
-                              return (
-                                <code dangerouslySetInnerHTML={{ __html: html }} />
-                              );
-                            }
-                            return <code>{txt}</code>;
-                          }
-                          const code =
-                            props.node && props.node.children
-                              ? getCodeString(props.node.children)
-                              : txt;
-                          if (
-                            typeof code === "string" &&
-                            typeof className === "string" &&
-                            /^language-katex/.test(className.toLocaleLowerCase())
-                          ) {
-                            const html = katex.renderToString(code, {
-                              throwOnError: false,
-                            });
-                            return (
-                              <code
-                                style={{ fontSize: "150%" }}
-                                dangerouslySetInnerHTML={{ __html: html }}
-                              />
-                            );
-                          }
-                          return <code className={String(className)}>{txt}</code>;
-                        },
-                      },
-                    }}
-                  />
-                  </div>
-
-
-
-
-                  {" "}
-
-                  <FormControl
-                    sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
-                  >
-                    <InputLabel id="demo-simple-select-label">
-                      Select Community
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      style={{ backgroundColor: "white" }}
-                      label="Select Community"
-                      value={selected_community}
-                      onChange={handleSelectCommunity}
-                    >
-                      {Object.keys(communityNameMap).map(function (key, index) {
-                        return (
-                          <MenuItem key={index} value={key}>
-                            {communityNameMap[key]}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </FormControl>
-
-                  <br />
-                  <br />
-
-                  <text>
-                    Or by connecting an existing submission:
-                  </text>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="message"
-                    name="message"
-                    value={connection_id}
-                    onChange={handleConnectionIDType}
-                    label="Paste Connection ID"
-                    fullWidth
-                    variant="standard"
-                  />
-
-                </DialogContent>
-
-                <DialogActions>
-                  <Button onClick={handleCancelConnectForm}>Cancel</Button>
-                  <Button onClick={handleCreateConnectForm}>Post</Button>
-                </DialogActions>
-
-                <Snackbar
-                  open={open}
-                  autoHideDuration={6000}
-                  onClose={handleClose}
-                  onClick={handleCloseSnackbar}
-                  message={message}
-                  severity={severity}
-
-                />
-
               </Dialog>
 
               <Snackbar
@@ -1367,105 +1114,20 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 </Typography>
               )}
             </div>
-            <Dialog open={openEdit} onClose={handleCloseEdit}>
-              <DialogTitle style={{ width: "600px" }}>
-                {" "}
-                Edit Submission Details{" "}
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText></DialogContentText>
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  id="editURL"
-                  label="Submission URL"
-                  fullWidth
-                  variant="standard"
-                  multiline
-                  defaultValue={
-                    submissionDataResponse.submission.raw_source_url
-                  }
-                />
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  id="editExplanation"
-                  label="Submission Title"
-                  fullWidth
-                  variant="standard"
-                  defaultValue={submissionDataResponse.submission.explanation}
-                />
-                <DialogContentText>
-                  {<br />}
-                </DialogContentText>
-                <DialogContentText>
-                  Submission Description
-                </DialogContentText>
-                <div data-color-mode="light">
-                <MDEditor
-                  autoFocus
-                  id="editHighlightedText"
-                  label="Description"
-                  variant="standard"
-                  value={editDescription}
-                  onChange={(value) => setEditDescription(value)}
-                  preview="live"
-                  highlightEnable={false}
-                  height="300px"
-                  previewOptions={{
-                    rehypePlugins: [[rehypeSanitize]],
-                    components: {
-                      code: ({ inline, children = [], className, ...props }) => {
-                        const txt = children[0] || "";
-                        if (inline) {
-                          if (
-                            typeof txt === "string" &&
-                            /^\$\$(.*)\$\$/.test(txt)
-                          ) {
-                            const html = katex.renderToString(
-                              txt.replace(/^\$\$(.*)\$\$/, "$1"),
-                              {
-                                throwOnError: false,
-                              }
-                            );
-                            return (
-                              <code dangerouslySetInnerHTML={{ __html: html }} />
-                            );
-                          }
-                          return <code>{txt}</code>;
-                        }
-                        const code =
-                          props.node && props.node.children
-                            ? getCodeString(props.node.children)
-                            : txt;
-                        if (
-                          typeof code === "string" &&
-                          typeof className === "string" &&
-                          /^language-katex/.test(className.toLocaleLowerCase())
-                        ) {
-                          const html = katex.renderToString(code, {
-                            throwOnError: false,
-                          });
-                          return (
-                            <code
-                              style={{ fontSize: "150%" }}
-                              dangerouslySetInnerHTML={{ __html: html }}
-                            />
-                          );
-                        }
-                        return <code className={String(className)}>{txt}</code>;
-                      },
-                    },
-                  }}
-                />
-                </div>
 
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseEdit}>Cancel</Button>
-                <Button onClick={editSubmission}>Save</Button>
-              </DialogActions>
+
+            <Dialog open={openEdit} fullWidth maxWidth="md">
+              <SubmissionForm
+                method="edit"
+                dialog_title="Edit Submission Details"
+                source_url={submissionDataResponse.submission.raw_source_url}
+                title={submissionDataResponse.submission.explanation}
+                description={submissionDataResponse.submission.highlighted_text}
+                submission_id={submissionDataResponse.submission.submission_id}
+                handle_close={handleCloseEdit}
+              />
             </Dialog>
+
             <Dialog open={openDelete} onClose={handleCloseDelete}>
               <DialogTitle style={{ width: "500px" }}>
                 {" "}

@@ -125,8 +125,54 @@ class ElasticManager:
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
         hits_total_value, hits = self.postprocess(r.text)
         return hits_total_value, hits
+    
+    def auto_complete(self, query, communities, page=0, page_size=10):
+        """
+        Do a basic search over submission titles for autocomplete.
+
+        Arguments:
+            query : (string) : the search query.
+            communities : list : the communities to search over.
+            page : (int) : the page to return (default 0)
+            page_size : (int) : the number of results per page (default 10).
+        
+        Returns:
+            The JSON hits search.
+        """
+        query_obj = self.process_query(query)
+        fields = ["explanation"]
+        query_comm = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {
+                            "multi_match": {
+                                "query": query_obj["query"],
+                                "fields": fields
+                            }
+                        },
+                    ]
+                }
+            },
+            "_source": {"exclude": ["highlighted_text"]},
+            "from": page * page_size,
+            "size": page_size,
+            "min_score": 0.1
+        }
+        filter = {
+                "bool": {
+                    "must": [
+                        {"terms": {"communities": communities}}
+                    ]
+                }
+            }
+        query_comm["query"]["bool"]["filter"] = filter
+        r = requests.get(self.domain + self.index_name + "/_search", json=query_comm, auth=self.auth)
+        hits_total_value, hits = self.postprocess(r.text)
+        return hits_total_value, hits
 
     def search(self, query, communities, page=0, page_size=10):
+
         """
         The method for searching a query over all of the saved webpage submissions.
 
