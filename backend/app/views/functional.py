@@ -685,12 +685,17 @@ def graph_search(current_user, submission_id, toggle_webpage_results=True):
 @token_required
 def autocomplete(current_user):
     query = request.args.get("query", "")
+    topn = int(request.args.get("topn", 7))
+    cutoff = int(request.args.get("cutoff", 60))
 
     user_communities = [str(x) for x in current_user.communities]
 
     try:
-        _, submissions_hits = elastic_manager.auto_complete(query, user_communities, page=0, page_size=7)
+        _, submissions_hits = elastic_manager.auto_complete(query, user_communities, page=0, page_size=topn)
         suggestions = [{"label": x["_source"]["explanation"], "id": x["_id"]} for x in submissions_hits]
+        for sugg in suggestions:
+            if len(sugg["label"]) > cutoff:
+                sugg["label"] = sugg["label"][:cutoff-3] + "..."
         return response.success({"suggestions": suggestions}, Status.OK)
 
     except Exception as e:

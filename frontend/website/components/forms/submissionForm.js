@@ -55,17 +55,25 @@ export default function SubmissionForm(props) {
 
     const [connection, setConnection] = useState("")
 
+    const [currentQuery, setCurrentQuery] = useState("")
+
     const handleAutoSuggestClick = async (event) => {
 
         const regex = /\[\[([^\]]+)\]\]/i;
         var replacement_text = "[" + event.target.title + "](" + SUB_WEB_ENDPOINT + event.target.id + ")"
         var new_desc = description.replace(regex, replacement_text)
         setDescription(new_desc)
+        setCurrentQuery("")
+        setSuggestions(null)
     }
 
     const getSuggestions = async (text) => {
 
-        const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + text, {
+        if (text == currentQuery) {
+            return
+        }
+
+        const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + text + "&topn=5&cutoff=33", {
             method: "GET",
             headers: new Headers({
               Authorization: jsCookie.get("token"),
@@ -78,6 +86,7 @@ export default function SubmissionForm(props) {
                     {x.label} 
                 </Button>
             ));
+            setCurrentQuery(text)
           } else {
             console.log(response.message)
             setSuggestions(null)
@@ -241,7 +250,7 @@ export default function SubmissionForm(props) {
                     />
                 </div>
                 <Box sx={{ bgcolor: 'background.paper' }}>
-                    {suggestions}
+                    {suggestions ? suggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                 </Box>
 
                 {(props.method == "create" || props.method == "reply") ?
