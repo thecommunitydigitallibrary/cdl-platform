@@ -31,13 +31,14 @@ RE_LECTURE_TAG = "[#][\w]*[\d.\d]*[,]*[1-9]*[.\d]*"
 RE_LECTURE_WITHOUT_TAG = "[Ll][\w ]*[1-9][\d.\d]*[,]*[1-9]*[.\d]*"
 RE_LECTURE_NUM = "[1-9][\d.]*\d*"
 TOP_N_SUBMISSIONS = 5
+TOP_N_HASHTAGS = 15
 META_DESCRIPTOR = {
     "Description": ["describe", "overview", "explanation", "introduce", "discuss", "explain", "introduction", "description"],
     "Comparison": ["difference", "comparison", "vs", "versus", "between"],
     "Articles/Papers": ["paper", "conference", "research", "survey", "reading", "article"],
     "Examples": ["examples", "applications", "exemplar", "instance", "case study", "application"],
     "Intuition": ["intuitive", "understanding"],
-    "Tutorial": ["tutorial", "class", "lesson", "demo", "demonstration", "guide", "implementataion"],
+    "Tutorial": ["tutorial", "class", "lesson", "demo", "demonstration", "guide", "implementation"],
     "Theory": ["theorem", "proof", "theory"],
     "Videos": ["video"],
     "Miscellaneous" : ["miscellaneous"]
