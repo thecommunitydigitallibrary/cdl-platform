@@ -154,6 +154,8 @@ export default function SubmissionForm(props) {
             setOpenSnackbar(true);
             if (props.method == "edit" || props.method == "reply") {
                 window.location.reload();
+            } else {
+                props.handle_close()
             }
         } else {
             setSeverity("error");

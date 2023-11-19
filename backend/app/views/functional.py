@@ -154,10 +154,15 @@ def create_submission(current_user):
         ip = request.remote_addr
         user_id = current_user.id
         user_communities = current_user.communities
-        highlighted_text = request.form.get("highlighted_text", "") or request.form.get("description")
-        source_url = request.form.get("source_url")
-        explanation = request.form.get("explanation") or request.form.get("title")
-        community = request.form.get("community", "")
+
+        req = request.form
+        if not request.form:
+            req = request.get_json()
+
+        highlighted_text = req.get("highlighted_text", "") or req.get("description")
+        source_url = req.get("source_url")
+        explanation = req.get("explanation") or req.get("title")
+        community = req.get("community", "")
 
         message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
                                  source_url=source_url, explanation=explanation, community=community)
@@ -1153,27 +1158,32 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
         scraper = ScrapeWorker(webpages.collection)
 
         if source_url and not scraper.is_scraped_before(source_url):
-            data = scraper.scrape(source_url)  # Triggering Scraper
+            try:
+                data = scraper.scrape(source_url)  # Triggering Scraper
+                
 
-            # Check if the URL was already scraped
-            if data['scrape_status']['code'] != -1:
-                # Check if the scrape was not successful
-                if data["scrape_status"]["code"] != 1:
-                    data["webpage"] = {}
+                # Check if the URL was already scraped
+                if data['scrape_status']['code'] != -1:
+                    # Check if the scrape was not successful
+                    if data["scrape_status"]["code"] != 1:
+                        data["webpage"] = {}
 
-                # insert in MongoDB
-                insert_status, webpage = log_webpage(data["url"],
-                                                        data["webpage"],
-                                                        data["scrape_status"],
-                                                        data["scrape_time"]
-                                                        )
-                if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
-                    # index in OpenSearch
-                    index_status, _ = webpages_elastic_manager.add_to_index(webpage)
-                    print("WEBPAGE_INDEX_STATUS", index_status)
+                    # insert in MongoDB
+                    insert_status, webpage = log_webpage(data["url"],
+                                                            data["webpage"],
+                                                            data["scrape_status"],
+                                                            data["scrape_time"]
+                                                            )
+                    if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                        # index in OpenSearch
+                        index_status, _ = webpages_elastic_manager.add_to_index(webpage)
+                        print("WEBPAGE_INDEX_STATUS", index_status)
 
-                else:
-                    print("Unable to insert webpage data in database.")
+                    else:
+                        print("Unable to insert webpage data in database.")
+            except Exception as e:
+                traceback.print_exc()
+                pass
 
         return "Context successfully submitted and indexed.", Status.OK, status.inserted_id
         
