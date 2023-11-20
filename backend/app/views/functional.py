@@ -696,11 +696,22 @@ def autocomplete(current_user):
     user_communities = [str(x) for x in current_user.communities]
 
     try:
-        _, submissions_hits = elastic_manager.auto_complete(query, user_communities, page=0, page_size=topn)
-        suggestions = [{"label": x["_source"]["explanation"], "id": x["_id"]} for x in submissions_hits]
-        for sugg in suggestions:
-            if len(sugg["label"]) > cutoff:
-                sugg["label"] = sugg["label"][:cutoff-3] + "..."
+        _, submissions_hits = elastic_manager.auto_complete(query, user_communities, page=0, page_size=20)
+        seen_titles = {}
+        suggestions = []
+        for x in submissions_hits:
+            label = x["_source"]["explanation"]
+            id = x["_id"]
+            if label in seen_titles:
+                continue
+            else:
+                seen_titles[label] = True
+            if len(label) > cutoff:
+                label = label[:cutoff-3] + "..."
+            suggestions.append({"label": label, "id": id})
+            if len(suggestions) >= topn:
+                break
+
         return response.success({"suggestions": suggestions}, Status.OK)
 
     except Exception as e:

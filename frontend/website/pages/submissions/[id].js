@@ -1020,8 +1020,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               <MDEditor
                 value={submissionDataResponse.submission.highlighted_text}
                 preview="preview"
-                height="300px"
-                hideToolbar={true}
+                minHeight="300"
+                maxHeight="1000"
+                hideToolbar={false}
                 previewOptions={{
                   rehypePlugins: [[rehypeSanitize]],
                   components: {
