@@ -203,8 +203,8 @@ export default function SubmissionForm(props) {
                         onChange={(value) => setDescriptionListener(value)}
                         highlightEnable={false}
                         preview="live"
-                        maxHeight="400"
-                        minHeight="200"
+                        maxHeight={400}
+                        minHeight={200}
                         previewOptions={{
                             rehypePlugins: [[rehypeSanitize]],
                             components: {
