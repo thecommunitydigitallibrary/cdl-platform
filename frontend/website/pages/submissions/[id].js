@@ -506,6 +506,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
       setSubmissionDataResponse(data);
       setCommunityNameMap(mapCommunitiesToNames(data.submission.communities));
 
+
       let sharableCommunityIds = [];
       let removableCommnuityIds = [];
 
@@ -732,7 +733,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   margin: "0px 0px 0px 0px",
                 }}
               >
-                {submissionDataResponse.submission.display_url} | {submissionDataResponse.submission.time}
+                {submissionDataResponse.submission.display_url} | {new Date(parseInt(submissionDataResponse.submission.time)).toLocaleDateString("en-us")}
               </p>
             </div>
 

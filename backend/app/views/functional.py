@@ -1370,7 +1370,7 @@ def format_webpage_for_display(webpage, search_id):
     submission["explanation"] = webpage["webpage"]["metadata"].get("title")
         
     display_time = format_time_for_display(webpage["scrape_time"])
-    submission["time"] = "Indexed " + display_time
+    submission["time"] = display_time
 
     # make display url
     display_url = build_display_url(webpage["url"])
@@ -1465,7 +1465,7 @@ def format_submission_for_display(submission, current_user, search_id):
     submission["submission_id"] = str(submission["_id"])
     submission["user_id"] = str(submission["user_id"])
 
-    display_time = "Submitted " + format_time_for_display(submission["time"])
+    display_time = format_time_for_display(submission["time"])
 
     submission["time"] = display_time
 

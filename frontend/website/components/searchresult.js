@@ -454,7 +454,7 @@ function SearchResult(props) {
           margin: "0px 0px 1px 0px",
         }}
       >
-        {props.display_url} | {props.time}
+        {props.display_url} | {new Date(parseInt(props.time)).toLocaleDateString("en-us")}
       </p>
       {/* restricting text to only 500 characters per result to make it more uniform */}
       <p style={{fontSize: '15px', marginTop: '1%', textAlign: 'justify', maxWidth: '100%',
