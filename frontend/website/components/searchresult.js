@@ -28,6 +28,9 @@ import React, {useState, useContext, useEffect} from "react";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { Bookmark, BookmarkAddOutlined, Close, Launch } from "@mui/icons-material";
 
+import rehypeSanitize from "rehype-sanitize";
+
+
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const websiteURL = process.env.NEXT_PUBLIC_FROM_CLIENT;
 
@@ -451,14 +454,14 @@ function SearchResult(props) {
           margin: "0px 0px 1px 0px",
         }}
       >
-        {props.display_url} | {props.time}
+        {props.display_url} | {new Date(parseInt(props.time)).toLocaleDateString("en-us")}
       </p>
       {/* restricting text to only 500 characters per result to make it more uniform */}
       <p style={{fontSize: '15px', marginTop: '1%', textAlign: 'justify', maxWidth: '100%',
         display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: '5', overflow: 'hidden', textOverflow: 'ellipsis'}}>
           {props.highlighted_text && props.highlighted_text.length > 0 && (
             // props.highlighted_text
-          <span dangerouslySetInnerHTML={{ __html: props.highlighted_text }}></span>
+          <span dangerouslySetInnerHTML={{ __html:  props.highlighted_text }}></span>
         )}
         </p>
 

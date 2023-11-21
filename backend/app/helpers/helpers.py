@@ -54,27 +54,31 @@ def validate_submission(highlighted_text, explanation, source_url=None):
     return True, "Validation successful"
 
 
-def format_time_for_display(timestamp):
-	# hack to compute time ago up to years
-	current_time = int(time.time())
-	time_ago = current_time - int(timestamp)
-	time_map = {"minutes": 60,
-				"hours": 60,
-				"days": 24,
-				"months": 30,
-				"years": 12}
-	display_text = "seconds"
-	for time_str in time_map:
-		if time_ago / time_map[time_str] < 1:
-			break
-		else:
-			time_ago = time_ago / time_map[time_str]
-			display_text = time_str
-	time_ago = str(int(time_ago))
-	if time_ago == "1":
-		display_text = display_text[:-1]
-	
-	return time_ago + " " + display_text + " ago"
+def format_time_for_display(timestamp, format="date"):
+
+    if format == "relative":
+        # hack to compute time ago up to years
+        current_time = int(time.time())
+        time_ago = current_time - int(timestamp)
+        time_map = {"minutes": 60,
+                    "hours": 60,
+                    "days": 24,
+                    "months": 30,
+                    "years": 12}
+        display_text = "seconds"
+        for time_str in time_map:
+            if time_ago / time_map[time_str] < 1:
+                break
+            else:
+                time_ago = time_ago / time_map[time_str]
+                display_text = time_str
+        time_ago = str(int(time_ago))
+        if time_ago == "1":
+            display_text = display_text[:-1]
+        
+        return time_ago + " " + display_text + " ago"
+    elif format == "date":
+        return str(int(float(timestamp) * 1000))
 	
 
 
@@ -240,10 +244,10 @@ def create_page(hits, communities, toggle_display="highlight"):
         result["submission_id"] = str(hit["_id"])
 
         if "time" in hit["_source"]:
-            formatted_time = "Submitted " + format_time_for_display(hit["_source"]["time"])
+            formatted_time = format_time_for_display(hit["_source"]["time"])
             result["time"] = formatted_time
         elif "scrape_time" in hit["_source"]:
-            formatted_time = "Indexed " + format_time_for_display(hit["_source"]["scrape_time"])
+            formatted_time = format_time_for_display(hit["_source"]["scrape_time"])
             result["time"] = formatted_time
 
 

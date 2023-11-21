@@ -73,7 +73,7 @@ export default function SubmissionForm(props) {
             return
         }
 
-        const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + text + "&topn=5&cutoff=33", {
+        const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + text + "&topn=5", {
             method: "GET",
             headers: new Headers({
               Authorization: jsCookie.get("token"),
@@ -203,8 +203,8 @@ export default function SubmissionForm(props) {
                         onChange={(value) => setDescriptionListener(value)}
                         highlightEnable={false}
                         preview="live"
-                        maxHeight="400"
-                        minHeight="200"
+                        maxHeight={400}
+                        minHeight={200}
                         previewOptions={{
                             rehypePlugins: [[rehypeSanitize]],
                             components: {
