@@ -58,7 +58,7 @@ def get_community_history(current_user):
 						"description": community.description,
 						"join_key": community.join_key,
 						"is_admin": is_admin,
-						"time": format_time_for_display(log.time)
+						"time": format_time_for_display(log.time, format="relative")
 					}
 		left_communities = list(left_communities.values())
 		return response.success({"left_communities": left_communities}, Status.OK)
