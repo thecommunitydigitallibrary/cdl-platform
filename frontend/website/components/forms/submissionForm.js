@@ -73,7 +73,7 @@ export default function SubmissionForm(props) {
             return
         }
 
-        const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + text + "&topn=5&cutoff=33", {
+        const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + text + "&topn=5", {
             method: "GET",
             headers: new Headers({
               Authorization: jsCookie.get("token"),
