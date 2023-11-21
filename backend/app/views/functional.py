@@ -706,8 +706,6 @@ def autocomplete(current_user):
                 continue
             else:
                 seen_titles[label] = True
-            if len(label) > cutoff:
-                label = label[:cutoff-3] + "..."
             suggestions.append({"label": label, "id": id})
             if len(suggestions) >= topn:
                 break
