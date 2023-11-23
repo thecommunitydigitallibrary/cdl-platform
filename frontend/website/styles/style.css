@@ -171,6 +171,14 @@ div.result {
   padding: 0.5rem 1rem;
 }
 
+.Auth-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 10px;
+}
 
 .Auth-form {
   width: 420px;
