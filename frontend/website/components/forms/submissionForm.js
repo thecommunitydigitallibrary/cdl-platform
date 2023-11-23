@@ -3,6 +3,8 @@ import "katex/dist/katex.css";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import rehypeSanitize from "rehype-sanitize";
+import { getCodeString } from 'rehype-rewrite';
+
 
 
 import jsCookie from "js-cookie";
@@ -164,6 +166,9 @@ export default function SubmissionForm(props) {
         }
     };
 
+    document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true);
+    //document.querySelectorAll('w-md-editor-text').forEach(field => field.style = {"min-height": "200px"});
+
 
     return (
         <div>
@@ -203,8 +208,9 @@ export default function SubmissionForm(props) {
                         onChange={(value) => setDescriptionListener(value)}
                         highlightEnable={false}
                         preview="live"
-                        maxHeight={400}
-                        minHeight={200}
+                        height={400}
+                        minHeight="100%"
+                        visibleDragbar={false}
                         previewOptions={{
                             rehypePlugins: [[rehypeSanitize]],
                             components: {
