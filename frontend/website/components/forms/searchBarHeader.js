@@ -8,7 +8,7 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from '@mui/material/Autocomplete';
 import jsCookie from "js-cookie";
 import Stack from '@mui/material/Stack';
-
+import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 
 
 
@@ -75,6 +75,18 @@ function searchBarHeader(props) {
     }, [inputValue]);
 
 
+    const handleVisualizeCommunity = (event) => {
+        console.log('>>> [TEST] router.asPath=', router.asPath)
+        if(router.asPath.includes("visualizemap"))
+            window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all";
+        Router.push({
+            pathname: "/visualizemap",
+            query: {
+                query: encodeURIComponent(inputValue),
+                community: "all"
+            },
+        });
+    }
 
     return (
         <>
@@ -95,6 +107,7 @@ function searchBarHeader(props) {
                         value={inputValue}
                         renderInput={(params) => 
                             <TextField {...params}
+                                required
                                 variant="outlined"
                                 sx={{ m:1 }}
                                 style={{
@@ -109,7 +122,8 @@ function searchBarHeader(props) {
                                 InputProps={{
                                     ...params.InputProps,
                                     endAdornment: (
-                                        <IconButton type="submit"
+                                        <>
+                                            <IconButton type="submit"
                                             variant="contained"
                                             sx={{
                                                 border: "1px solid #efffff",
@@ -126,9 +140,37 @@ function searchBarHeader(props) {
                                                     width: '60px'
                                                 },
                                             }}
-                                        >
-                                            <SearchIcon />
-                                        </IconButton>),
+                                            >
+                                                <SearchIcon />
+                                            </IconButton>
+                                            { inputValue.length > 0 && <IconButton
+                                            variant="contained"
+                                            onClick={handleVisualizeCommunity}
+                                            sx={{
+                                                border: "1px solid #efffff",
+                                                bgcolor: '#eceff1',
+                                                borderRadius: 1,
+                                                transition: "transform 0.3s ease, width 0.3s ease",
+                                                transform: "translateZ(0)",
+                                                width: '40px',
+                                                "&:hover": {
+                                                    border: "1px solid #eceff1",
+                                                    bgcolor: "#F5F5F5",
+                                                    color: '#696969',
+                                                    transform: "translateZ(30px)",
+                                                    width: '60px'
+                                                },
+                                            }}
+                                            >
+                                                <BubbleChartIcon
+                                                    style={{marginLeft: "5px", marginRight: "5px"}}
+                                                    size="medium"
+
+                                                 />
+                                            </IconButton>
+                                            }
+                                        </>
+                                    ),
                                     style: {
                                         paddingRight: 0, // remove right padding
                                     },
@@ -137,6 +179,7 @@ function searchBarHeader(props) {
                         }
                         
                     />
+
 
                 </Stack>
 

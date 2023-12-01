@@ -392,7 +392,7 @@ class TopicMap:
             source: "1.1",
             target: "1.1/Text Mining",
             targetNode: {
-                id: "6400479525bd2feef310aaa8",
+                id: "1.1/Text Mining",
                 type: "topic",
                 title: "Text Mining",
                 path: "1.1/Text Mining",
