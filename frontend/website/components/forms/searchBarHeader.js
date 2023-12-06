@@ -32,14 +32,19 @@ function searchBarHeader(props) {
     const handleSearch = async (event) => {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
-        Router.push(
-            "/search?query=" +
-            encodeURIComponent(inputValue) +
-            "&community=" +
-            event.target.community.value +
-            "&page=0"
 
-        );
+        //No submit on empty query
+        if (inputValue.length == 0) {
+            return
+        } else {
+            Router.push(
+                "/search?query=" +
+                encodeURIComponent(inputValue) +
+                "&community=" +
+                event.target.community.value +
+                "&page=0"
+            );
+        }
     };
 
     
@@ -76,7 +81,9 @@ function searchBarHeader(props) {
 
 
     const handleVisualizeCommunity = (event) => {
-        console.log('>>> [TEST] router.asPath=', router.asPath)
+        if (inputValue.length == 0) {
+            return
+        }
         if(router.asPath.includes("visualizemap"))
             window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all";
         Router.push({
@@ -143,7 +150,7 @@ function searchBarHeader(props) {
                                             >
                                                 <SearchIcon />
                                             </IconButton>
-                                            { inputValue.length > 0 && <IconButton
+                                            <IconButton
                                             variant="contained"
                                             onClick={handleVisualizeCommunity}
                                             sx={{
@@ -168,7 +175,6 @@ function searchBarHeader(props) {
 
                                                  />
                                             </IconButton>
-                                            }
                                         </>
                                     ),
                                     style: {

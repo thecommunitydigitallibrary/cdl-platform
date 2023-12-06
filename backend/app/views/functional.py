@@ -901,6 +901,10 @@ def search(current_user):
         query = request.args.get("query", "")
         source = request.args.get("source", "webpage_search")
 
+        if query == "" and source in ["webpage_search", "extension_search"]:
+            return response.error("Query cannot be empty.", Status.BAD_REQUEST)
+
+
         # for when source == "extension_open" or source == "extension_search"
         highlighted_text = request.args.get("highlighted_text", "")
         url = request.args.get("url", "")
