@@ -17,6 +17,7 @@ import Footer from "./footer";
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 
+const graphRoot2 = "Loading...";
 const graphData2 = {
     "nodes": [
         {
@@ -34,17 +35,20 @@ const graphData2 = {
 }
 
 const VisualizeMap = () => {
-    let router = useRouter();
+    const router = useRouter();
     let obj = router.query;
     let cid = "";
     let cn = "";
+    let q = "";
     if (obj != undefined || obj != null || obj != "") {
-        cid = obj["communityId"]
+        cid = obj["community"]
         cn = obj["communityName"]
+        q = obj["query"]
     }
     const [isClient, setIsClient] = useState(false);
     const [communityId, setCommunityId] = useState(cid);
     const [communityName, setCommunityName] = useState(cn);
+    const [query, setQuery] = useState(q);
     const fgRef = useRef();
     const [height, setHeight] = useState(900);
     const [maxWidth, setMaxWidth] = useState(800);
@@ -53,14 +57,18 @@ const VisualizeMap = () => {
     const [prevNodeId, setPrevNodeId] = useState(undefined);
     const [graphData, setGraphData] = useState(graphData2);
     const [nodesById, setNodeById] = useState();
-    const [rootId, setRootId] = useState("Loading...");
+    const [rootId, setRootId] = useState(graphRoot2);
     const [submissions, setSubmissions] = useState({
         md_name: "",
         submission_list: [],
     });
 
     const getCommunityDocuments = async () => {
-        let url = baseURL_client + "search?community=" + communityId + "&source=visualize";
+        let url; //= baseURL_client + "search?community=" + communityId + "&source=visualize&query=" + query;
+        if(communityId == "all")
+            url = baseURL_client + "search?query=" + query + "&community=all&source=visualize";
+        else
+            url = baseURL_client + "search?community=" + communityId + "&source=visualize";
         const res = await fetch(url, {
             method: "GET",
             headers: new Headers({
@@ -70,8 +78,11 @@ const VisualizeMap = () => {
         });
         const response = await res.json();
         if (response.status === "ok") {
+            if(communityId == "all")
+                setRootId(query);
+            else
+                setRootId(communityName);
             setGraphData(response);
-            setRootId(communityName);
             createNodeByIdMap(response);
         } else {
             // console.log(response);
@@ -111,7 +122,6 @@ const VisualizeMap = () => {
                 pathname: "/auth",
             });
         }
-
     }, []);
 
     const getPrunedTree = useCallback(() => {

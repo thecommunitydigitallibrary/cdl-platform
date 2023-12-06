@@ -1014,7 +1014,7 @@ def search(current_user):
 
         # Return nodes and links for community visualisation
         if source == "visualize":
-            community_name = communities[community_id]['name']
+            root_label = communities[community_id]['name'] if query == "" else query
 
             for i in range(10, total_num_results, 10):
                 _, additional_results = cache_search(query, search_id, i/10, rc_dict, user_id=user_id_str,
@@ -1026,7 +1026,7 @@ def search(current_user):
 
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
-            tm = TopicMap(data_ip, community_name)
+            tm = TopicMap(data_ip, root_label)
             tm.pre_process()
             tm.extract_keywords()
             tm.extract_metadesc_per_topic_keywords()
