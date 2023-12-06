@@ -335,7 +335,12 @@ class ScrapeWorker:
 
         return url, full_path
 
-    def is_scraped_before(self, source_url):
+    def is_scraped_before(self, source_url, return_data=False):
         source_url, _ = self.format_url_to_path(source_url)
         webpage = [document for document in self.webpages_collection.find({'url': source_url})]
-        return True if webpage else False
+        if not webpage:
+            return False
+        elif return_data:
+            return webpage[0]
+        else:
+            return True
