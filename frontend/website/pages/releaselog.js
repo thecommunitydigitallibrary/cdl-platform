@@ -23,6 +23,25 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        ?, 2023
+      </h2>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Compare functionality in extension</li>
+            <li className="list-item">Visualize on search</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Removed empty username login</li>
+            <li className="list-item">Properly handle duplicate recommendations on homepage</li>
+        </ul>
+
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         November 21st, 2023
       </h2>
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
