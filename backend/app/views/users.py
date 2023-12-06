@@ -260,7 +260,7 @@ def login():
 		user_acct = users.find_one({"username": username})
 		hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
 
-		if not user_acct:
+		if not user_acct or username == "":
 			return response.error("User not found or Incorrect Username. Please try again.", Status.UNAUTHORIZED)
 		elif user_acct and user_acct.hashed_password != hashed_password:
 			return response.error("Password is incorrect. Please try again.", Status.UNAUTHORIZED)
