@@ -906,7 +906,7 @@ def search(current_user):
 
 
 
-        if query == "" and requested_communities == "all" and own_submissions == False and source in ["webpage_search", "extension_search"]:
+        if query == "" and requested_communities == "all" and own_submissions == False and source in ["webpage_search", "extension_search", "visualize"]:
             return response.error("Query cannot be empty.", Status.BAD_REQUEST)
 
 
