@@ -900,8 +900,13 @@ def search(current_user):
 
         query = request.args.get("query", "")
         source = request.args.get("source", "webpage_search")
+        
+        requested_communities = request.args.get("community")
+        own_submissions = request.args.get("own_submissions", False)
 
-        if query == "" and source in ["webpage_search", "extension_search"]:
+
+
+        if query == "" and requested_communities == "all" and own_submissions == False and source in ["webpage_search", "extension_search"]:
             return response.error("Query cannot be empty.", Status.BAD_REQUEST)
 
 
@@ -936,9 +941,7 @@ def search(current_user):
                 new_terms = " ".join(list(set([x for x in blob.noun_phrases])))
                 query = new_terms
 
-        requested_communities = request.args.get("community")
 
-        own_submissions = request.args.get("own_submissions", False)
 
         page = request.args.get("page", 0)
         if page == "undefined":
