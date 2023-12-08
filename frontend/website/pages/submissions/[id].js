@@ -44,6 +44,7 @@ import Save from "@mui/icons-material/Save";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
 import ReactDOMServer from 'react-dom/server';
+import SpriteText from 'three-spritetext';
 
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
 
@@ -64,6 +65,8 @@ const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), {
   loading: () => <p>Loading...</p>, ssr: false
 })
+
+// import ForceGraph3D, { ForceGraphMethods } from "react-force-graph-3d";
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
@@ -91,18 +94,18 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
 
   const colorNodeBackground = (node) => {
     switch (node.type) {
-      case "current": return "#2c7dcc";
-      case "submission": return "#75a936";
-      case "webpage": return "#FDD835";
-      case "visited": return "#7d51af";
-      default: return "#ad3b3b";
+      case "current": return "rgba(44, 125, 204, 0.7)";
+      case "submission": return "rgba(117, 169, 54, 0.7)";
+      case "webpage": return "rgba(253, 216, 53, 0.7)";
+      case "visited": return "rgba(125, 81, 175, 0.7)";
+      default: return "rgba(173, 59, 59, 0.7)";
     }
   }
 
   const handleNodeLabel = useCallback(
     (node) => {
       let desc = node.desc ? <p>{node.desc}</p> : null;
-      let tooltip = <div style={{ background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px" }}>
+      let tooltip = <div style={{ background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "5px" }}>
         <h6>{node.label}</h6>
         {desc}
       </div>;
@@ -569,6 +572,10 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     getGraphData();
   }, []);
 
+  // useEffect(() => {
+  //    fgRef.current.d3Force('link').distance(link => 500).strength(link => -300);
+  //  }, []);
+
 
   if (submissionDataResponse.submission && submissionDataResponse.submission.hashtags) {
     var hashtag_results = submissionDataResponse.submission.hashtags.map(function (item) {
@@ -783,7 +790,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               justifyContent="space-between"
               sx={{ my: 1 }}
             >
-              <Grid item sx={{ width: "33%" }}>
+              <Grid className="counter" item sx={{ width: "33%" }}>
                 <Box
                   sx={{
                     my: 1,
@@ -819,12 +826,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               </Grid>
 
               {submissionDataResponse.submission && submissionDataResponse.submission.type === "user_submission" &&
-                <Grid item sx={{ width: "66%" }}>
+                <Grid item sx={{ width: "66%" }} className="addRemoveCommunities">
                   <Grid container sx={{ flexFlow: "nowrap" }}>
                     <Grid item sx={{ width: "50%" }}>
                       {(
                         <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
-                          <Grid item sx={{ width: "80%" }}>
+                          <Grid item sx={{ width: "80%" }} className="addRemoveText">
                             <div>
                               <FormControl
                                 sx={{ width: "100%" }}
@@ -882,7 +889,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     <Grid item sx={{ width: "50%" }}>
                       { }
                       <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
-                        <Grid item sx={{ width: "80%" }}>
+                        <Grid item sx={{ width: "80%" }}  className="addRemoveText">
                           <div>
                             <FormControl
                               sx={{ width: "100%" }}
@@ -965,6 +972,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   type="filled"
                   variant="contained"
                   name="shareurl"
+                  id="shareIcon"
+                  className="shareIcon"
                   style={{ width: "95%", padding: "8px" }}
                   value={submissionDataResponse.submission.submission_id}
                   action={(event) =>
@@ -1179,10 +1188,31 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
             graphData={graph}
             width={width}
             height={height}
+            d3Force="link"
+            distance={300}
             backgroundColor={'#e5e5e5'}
             onNodeClick={handleNodeClick}
-            nodeColor={colorNodeBackground}
             nodeLabel={handleNodeLabel}
+            nodeThreeObject={node => {
+              let label = node.label.length > 30 ? node.label.substring(0, 30) + '...' : node.label;
+              const sprite = new SpriteText(label);
+              sprite.backgroundColor = colorNodeBackground(node);
+              sprite.color = "#fff";
+              sprite.padding = [12, 5];
+              sprite.textHeight = 5;
+              sprite.fontWeight = 700;
+              sprite.fontSize = 12;
+              sprite.borderRadius = 4;
+              return sprite;
+            }}
+            linkThreeObjectExtend={true}
+            linkThreeObject={(link) => {
+              // extend link with text sprite
+              const sprite = new SpriteText("Related");
+              sprite.color = "darkgrey";
+              sprite.textHeight = 10.0;
+              return sprite;
+            }}
             linkColor={() => 'rgba(0,0,0,0.7)'}
             linkDirectionalParticles={1}
           />

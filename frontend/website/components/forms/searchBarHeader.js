@@ -130,7 +130,8 @@ function searchBarHeader(props) {
                                             <SearchIcon />
                                         </IconButton>),
                                     style: {
-                                        paddingRight: 0, // remove right padding
+                                        padding: 0,
+                                        overflow: "hidden"
                                     },
                                 }}
                             />
