@@ -128,7 +128,8 @@ export default function CommunityBox(props) {
       pathname: "/visualizemap",
       query: {
         community: props.communityId,
-        communityName: props.name
+        communityName: props.name,
+        levelfilter: "hashtags;topics;metadescs"
       }
     });
   }

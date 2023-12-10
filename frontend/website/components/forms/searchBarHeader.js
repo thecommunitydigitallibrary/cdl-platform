@@ -85,12 +85,13 @@ function searchBarHeader(props) {
             return
         }
         if(router.asPath.includes("visualizemap"))
-            window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all";
+            window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all&levelfilter=hashtags;topics;metadescs";
         Router.push({
             pathname: "/visualizemap",
             query: {
                 query: encodeURIComponent(inputValue),
-                community: "all"
+                community: "all",
+                levelfilter: "hashtags;topics;metadescs"
             },
         });
     }
@@ -148,9 +149,11 @@ function searchBarHeader(props) {
                                                 },
                                             }}
                                             >
-                                                <SearchIcon />
+                                                <Tooltip title={"Search"}>
+                                                    <SearchIcon />
+                                                </Tooltip>
                                             </IconButton>
-                                            <IconButton
+                                            { inputValue.length > 0 && <IconButton
                                             variant="contained"
                                             onClick={handleVisualizeCommunity}
                                             sx={{
@@ -169,12 +172,15 @@ function searchBarHeader(props) {
                                                 },
                                             }}
                                             >
-                                                <BubbleChartIcon
+                                                <Tooltip title={"Visualize"}>
+                                                    <BubbleChartIcon
                                                     style={{marginLeft: "5px", marginRight: "5px"}}
                                                     size="medium"
 
                                                  />
+                                                </Tooltip>
                                             </IconButton>
+                                            }
                                         </>
                                     ),
                                     style: {
