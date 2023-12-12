@@ -18,7 +18,12 @@ let show_relevant = true;
 
 export default function FindTab() {
   const [comparisonResults, setComparisonResults] = React.useState(false);
+  
+
   const [comparisonSpinner, setComparisonSpinner] = React.useState(false);
+  const [generationSpinner, setGenerationSpinner] = React.useState(false);
+
+
   const baseURL = localStorage.getItem('backendSource') + "api/";
 
   const [text, setText] = React.useState("");
@@ -28,10 +33,61 @@ export default function FindTab() {
   const [highlightedText, setHighlightedText] = React.useState();
   const [isUserQueried, setUserQueried] = React.useState(false);
 
+  const [generationResults, setGenerationResults] = React.useState();
+
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [severity, setSeverity] = React.useState("");
   const [allCommunities, setAllCommunities] = React.useState([]);
+
+
+  const onQA = async () => {
+    onGenerate("qa")
+  }
+  const onCQA = async () => {
+    onGenerate("contextual_qa")
+  }
+  const onQG = async () => {
+    onGenerate("gen_questions")
+  }
+  const onS = async () => {
+    onGenerate("summarize")
+  }
+  
+  
+
+
+  const onGenerate = async (mode) => {
+    setGenerationSpinner(true)
+    if (mode == "qa" || mode == "contextual_qa") {
+      if (text === undefined || text.length == 0) {
+        setSeverity("error");
+        setMessage("Search bar cannot be empty for this feature.");
+        handleClick();
+        return;
+      }
+    }
+    
+    //        "comparison": comparisonResults,
+
+    let res = await fetch(baseURL + "generate", {
+      method: "POST",
+      headers: {
+        Authorization: localStorage.getItem("authToken"),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        "context": highlightedText,
+        "query": text,
+        "mode": mode
+      }),
+    });
+
+    let response = await res.json();
+    setGenerationSpinner(false)
+    setGenerationResults(response.output)
+    getComparison(url, response.output)
+  };
 
   function editWebpage(response) {
     var response = response["annotated_paragraphs"]
@@ -374,15 +430,45 @@ export default function FindTab() {
         </Box>
       )}
 
-        {!isUserQueried && !comparisonSpinner && highlightedText && (
+        {!isUserQueried && highlightedText && (
                 <div style={{ textAlign: "left", width: "90%" }}>
-                  <p>{highlightedText}</p>
+                  <p>{highlightedText.substring(0,100)}...</p>
                 </div>
         )}
+
+        {!isUserQueried && comparisonResults && (
+            <div>
+              <Button variant="contained" style={{padding: 14, width: "22%", marginRight: "5px"}} onClick={onQA}>
+                  Ask a Question
+              </Button>
+              <Button variant="contained" style={{padding: 14, width: "22%", marginRight: "5px"}} onClick={onCQA}>
+                  Ask in Context
+              </Button>
+              <Button variant="contained" style={{padding: 14, width: "22%", marginRight: "5px"}} onClick={onQG}>
+                  Generate Questions
+              </Button>
+              <Button variant="contained" style={{padding: 14, width: "22%", marginRight: "5px"}} onClick={onS}>
+                  Summarize Selection
+              </Button>
+            </div>
+        )}
+
+
+        {!isUserQueried && !generationSpinner && generationResults && (
+            <div style={{ textAlign: "left", width: "90%" }}>
+              <p>{generationResults}</p>
+            </div>
+        )}
+
+        {!isUserQueried && generationSpinner && (
+          <CircularProgress style={{ marginTop: "70px" }} color="success" />
+        )}
+
         {!isUserQueried && comparisonSpinner && (
           <CircularProgress style={{ marginTop: "70px" }} color="success" />
         )}
         {!isUserQueried && !comparisonSpinner && comparisonResults && (
+          
           <Box style={{ bgcolor: "background.paper" }}>
             <div>
             {comparisonResults.submitted_you.results.length !== 0 && (<div><h4>Submitted by You</h4><p>Keywords: {comparisonResults.submitted_you.keywords}</p></div>)}

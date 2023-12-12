@@ -736,6 +736,66 @@ def process_keywords_hits(keywords, hits, seen_urls):
     return remaining_keywords, used_keywords, new_pages, seen_urls
 
 
+@functional.route("/api/generate", methods=["POST"])
+@token_required
+def generate(current_user): 
+    """
+    Endpoint for generating text in the extension. Proxys to GPU server.
+	Arguments:
+		current_user : (dictionary): the user recovered from the JWT token.
+		request args with:
+			query : (string) : the typed query of the user.
+			context: (string) : the highlighted text by the user.
+			mode : (str) : one of
+                qa : given a query, generate the answer
+                contextual_qa : given a context and a portion of a query, generate the answer
+                gen_questions: given a context, generate some questions
+                summarize : given a context, summarize the selection
+	Returns:
+		200 : generated text.
+    """
+    ip = request.remote_addr
+    user_id = current_user.id
+    user_communities = current_user.communities
+    requested_communities = [str(x) for x in user_communities]
+    communities = get_communities_helper(current_user, return_dict=True)["community_info"]
+    rc_dict = {}
+    for community_id in requested_communities:
+        try:
+            rc_dict[community_id] = communities[community_id]["name"]
+        except Exception as e:
+            print(e)
+            print(f"Could not find community for community id: {community_id}")
+
+    req = request.form
+    if not request.form:
+        req = request.get_json()
+
+    context = req.get("context", "")
+    query = req.get("query", "")
+    mode = req.get("mode", "")
+
+    if not mode or mode not in ["qa", "summarize", "gen_questions", "contextual_qa"]:
+        return response.error("Mode missing or unsupported.", Status.BAD_REQUEST)
+
+    neural_api = os.environ.get("neural_api")
+    if not neural_api:
+        return response.error("Generation not currently supported.", Status.NOT_IMPLEMENTED)
+    try:
+        resp = requests.post(requests.post(neural_api + "/neural/generate", json={"context": context, "query": query, "mode": mode}))
+        resp_json = resp.to_json()
+        if resp.status_code == 200:
+            output = resp_json["output"]
+            log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": output, "version": "0"})
+            return response.success({"output": output}, Status.OK)
+        else:
+            print(resp_json["message"])
+            return response.error(resp_json["message"], Status.INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        traceback.print_exc()
+
+
+
 @functional.route("/api/compare", methods=["POST"])
 @token_required
 def context_analysis(current_user):
@@ -770,6 +830,7 @@ def context_analysis(current_user):
         highlighted_text = " ".join(highlighted_text.split())
 
 
+    """
     # scrape the webpage if public
     try:
         webpages = Webpages()
@@ -797,6 +858,7 @@ def context_analysis(current_user):
     except Exception as e:
         traceback.print_exc()
         print("Scrape failed for annotate.")
+    """
 
 
     ht_stats = {
@@ -880,7 +942,6 @@ def search(current_user):
 	Returns:
 		200 : output of search_helper, results and metadata.
 
-	TODO: add error handling.
 	"""
     try:
         return_obj = {
@@ -1433,8 +1494,9 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
 
            
-
-            if "neural_api" in os.environ:
+            # removing this for now because we are adding llama chat on neural, and it is a bit slow
+            # will reinstate once we can run this independently as to not slow down main search
+            if False: #"neural_api" in os.environ:
                 try:
                     resp = requests.post(os.environ["neural_api"] + "neural/rerank/", json = {"pages": submissions_pages, "query": query})
                     if resp.status_code == 200:
