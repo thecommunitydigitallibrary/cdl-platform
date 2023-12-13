@@ -782,8 +782,8 @@ def generate(current_user):
     if not neural_api:
         return response.error("Generation not currently supported.", Status.NOT_IMPLEMENTED)
     try:
-        resp = requests.post(requests.post(neural_api + "/neural/generate", json={"context": context, "query": query, "mode": mode}))
-        resp_json = resp.to_json()
+        resp = requests.post(neural_api + "/neural/generate", json={"context": context, "query": query, "mode": mode})
+        resp_json = resp.json()
         if resp.status_code == 200:
             output = resp_json["output"]
             log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": output, "version": "0"})
