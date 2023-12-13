@@ -1084,6 +1084,12 @@ def search(current_user):
         if source == "visualize":
             root_label = communities[community_id]['name'] if query == "" else query
 
+            # Get levels filter info
+            if request.args.get("levelfilter"):
+                levels = request.args.get("levelfilter").split(";")
+            else:
+                levels = ["topics", "hashtags", "metadescs"]
+
             for i in range(10, total_num_results, 10):
                 _, additional_results = cache_search(query, search_id, i/10, rc_dict, user_id=user_id_str,
                                                     own_submissions=own_submissions, toggle_webpage_results=toggle_webpage_results,
@@ -1094,13 +1100,10 @@ def search(current_user):
 
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
-            tm = TopicMap(data_ip, root_label)
+            tm = TopicMap(data_ip, root_label, levels)
             tm.pre_process()
-            tm.extract_keywords()
-            tm.extract_metadesc_per_topic_keywords()
-            tm.sequence()
-            graphData = tm.generate_graph_data()
-
+            op_dict = tm.generate_map(0)
+            graphData = tm.generate_graph_json(op_dict)
             return response.success(graphData, Status.OK)
         return response.success(return_obj, Status.OK)
     except Exception as e:

@@ -12,7 +12,6 @@ from textblob import TextBlob
 from typing import List, Dict
 from app.helpers.helper_constants import RE_LECTURE_TAG, RE_LECTURE_NUM, RE_LECTURE_WITHOUT_TAG, TOP_N_SUBMISSIONS, META_DESCRIPTOR, \
     KEYWORDS_IGNORE, TOP_N_HASHTAGS
-from app.helpers.helpers import extract_hashtags
 
 class TopicMap:
     '''
@@ -21,18 +20,24 @@ class TopicMap:
 
     def __init__(self, *args) -> None:
         if len(args) == 0:
-            raise Exception("Need to pass the json to the TopicMap()")
+            raise Exception("Need to pass the json, root node name, community dict and levels list to the TopicMap()")
 
         self.data = None
         self.submission_df = pd.read_json(args[0])
-        self.community_name = args[1]
+        self.root_name = args[1]
+        self.levels = args[2]
         self.ps = PorterStemmer()
-        self.lec_to_obj = OrderedDict()
-        self.lec_to_topics = {}
 
         self.meta_desc = {}
         self.meta_desc_set = set()
         self.meta_desc_to_obj = {}
+
+        self.rowid_map = {
+            "metadescs": {},
+            "topics": {},
+            "hashtags": {},
+            "communities": {}
+        }
 
     def read_file(self, file_name: str) -> None:
         '''
@@ -110,71 +115,120 @@ class TopicMap:
             self.meta_desc_to_obj[name] = []
             self.meta_desc_set = self.meta_desc_set.union(v)
 
-        # Extract lectures from explanation and build ObjID to Obj map
-        self.extract_lec_to_obj()
+        self.extract_all()
 
-    def add_to_lec_to_obj_map(self, lec_id: str, obj_id: str, meta_descriptor_list: List[str]) -> None:
+    def add_to_rowid_metadescs(self, rowid: str, metadesc_list: List[str]):
         '''
-        This method adds the obj and metadescriptors to lec to obj map
+        This method added meta-descriptor list corresponding to the row.
 
         Parameters:
-            lec_id(str): Lecture ID
-            obj_id(str): Obj Index in Data frame
-            meta_descriptor_list(List(str)): List of meta descriptors extracted from the submission title
-
+            rowid(str): Row ID in the dataframe.
+            metadesc_list(List[str]): List of meta-descriptors corresponding to the current row(submission) explanation.
         Returns:
             None
         '''
-        # Add to lec_id -> obj_idx list
-        if self.lec_to_obj.get(lec_id):
-            self.lec_to_obj[lec_id]["obj_idx"].append(obj_id)
-            self.lec_to_obj[lec_id]["count"] += 1
-        else:
-            self.lec_to_obj[lec_id] = {}
-            self.lec_to_obj[lec_id]["meta_descriptors"] = {}
-            self.lec_to_obj[lec_id]["obj_idx"] = [obj_id]
-            self.lec_to_obj[lec_id]["count"] = 0
+        self.rowid_map["metadescs"][rowid] = metadesc_list
 
-        # Handle lec_id -> metadescriptor
-        for meta_descriptor in meta_descriptor_list:
-            if self.lec_to_obj[lec_id]["meta_descriptors"].get(meta_descriptor):
-                self.lec_to_obj[lec_id]["meta_descriptors"][meta_descriptor].append(obj_id)
-            else:
-                self.lec_to_obj[lec_id]["meta_descriptors"][meta_descriptor] = [obj_id]
-
-    def extract_lec_to_obj(self) -> None:
+    def add_to_rowid_hastags(self, rowid: str, hastag_list):
         '''
-        This method parses the explanations in submissions dataframe to extract lecture numbers and creates a lecture map with the following structure:
-        lec_id : {
-            'obj_idx': [id1, id2, ]
-            'meta_descriptors': {
-                'descriptor_1': [id4, id7],
-                'descriptor_2': [id9], ..
-            }
-        }
+        This method added hashtags list corresponding to the row.
+
+        Parameters:
+            rowid(str): Row ID in the dataframe.
+            hastag_list(): List of hashtags corresponding to the current row(submission) explanation.
+        Returns:
+            None
+        '''
+        self.rowid_map["hashtags"][rowid] = hastag_list
+
+    def add_to_rowid_topics(self, rowid: str, topic_list: List[str]):
+        '''
+        This method added hashtags list corresponding to the row.
+
+        Parameters:
+            rowid(str): Row ID in the dataframe.
+            topic_list(List[str]): List of topics corresponding to the current row(submission) explanation.
+        Returns:
+            None
+        '''
+        self.rowid_map["topics"][rowid] = topic_list
+
+    def add_to_rowid_communities(self, rowid: str, community_list: List[str]):
+        '''
+        This method added communities list corresponding to the row.
+
+        Parameters:
+            rowid(str): Row ID in the dataframe.
+            community_list(List[str]): List of community corresponding to the current row(submission) explanation.
+        Returns:
+            None
+        '''
+        self.rowid_map["communities"][rowid] = community_list
+
+    def extract_all(self):
+        '''
+        Extract meta-descriptors, hashtags, topics and communities from each submission.
 
         Parameters:
             None.
-
-        Returns:
+        Return:
             None.
         '''
         for idx, row in self.submission_df.iterrows():
             expl = row['explanation']
             hgh_txt = row["highlighted_text"]
+
+            # For meta-descriptor extaction
             meta_descriptors = self.get_meta_descriptor(expl)
-            tags_from_expl = extract_hashtags(expl)
-            tags_from_hgh_txt = extract_hashtags(hgh_txt)
-            tags_from_expl.extend(tags_from_hgh_txt)
-            tags = set(tags_from_expl)
+
+            # For hashtag extraction
+            tags = row['hashtags']
+            # Add hashtags
             if tags:
                 if len(tags) > 0:
-                    for tag in tags:
-                        self.add_to_lec_to_obj_map(tag, idx, meta_descriptors)
+                    self.add_to_rowid_hastags(idx, tags)
                 else:
-                    self.add_to_lec_to_obj_map("-1", idx, meta_descriptors)
+                    self.add_to_rowid_hastags(idx, ["-1"])
             else:
-                self.add_to_lec_to_obj_map("-1", idx, meta_descriptors)
+                self.add_to_rowid_hastags(idx, ["-1"])
+
+            # Add metadesc
+            self.add_to_rowid_metadescs(idx, meta_descriptors)
+
+            # For topic extraction
+            expl = self.post_process_explanation(expl)
+
+            blob = TextBlob(expl)
+            keywords = [x for x in blob.noun_phrases]
+            kw_freq = {}
+
+            # Using the keyword frequency to determine the most frequent topics
+            for key in keywords:
+                if not kw_freq.get(key):
+                    kw_freq[key] = 0
+                kw_freq[key] += 1
+            # Getting the most frequent keywords
+            kw_freq_srt = sorted(kw_freq, key=kw_freq.get, reverse=True)
+            possible_topics = kw_freq_srt[:TOP_N_SUBMISSIONS]
+            filtered_keywords = []
+            for k in possible_topics:
+                f = 0
+                for w in possible_topics:
+                    if (k != w and k in w) or k in KEYWORDS_IGNORE:
+                        f = 1
+                        break
+                if f == 0:
+                    filtered_keywords.append(k)
+            self.add_to_rowid_topics(idx, filtered_keywords)
+
+            # For community extraction
+            comm_list = []
+            if row.get("communities_part_of"):
+                for k, v in row['communities_part_of'].items():
+                    comm_list.append(v)
+            else:
+                comm_list.append("Webpages")
+            self.add_to_rowid_communities(idx, comm_list)
 
     def get_meta_descriptor(self, s: str) -> List[str]:
         '''
@@ -186,7 +240,6 @@ class TopicMap:
         Returns:
             list(str): List of meta descriptors found.
         '''
-        f = 0
         op = set()
         tokens = word_tokenize(s)
         for token in tokens:
@@ -223,108 +276,19 @@ class TopicMap:
                 op += token + " "
         return op
 
-    def extract_keywords(self) -> None:
+    def sequence(self, m) -> None:
         '''
-        Extract keywords using TextBlob.
+        This method sorts based on the len of obj_list of map m in ascending order.
 
         Paramters:
-            None.
+            m (dict): Dict of a level (topics, hashtags, metadescs or communities).
 
         Returns:
-            None.
+            new_m(dict): Sorted Dict of a level (topics, hashtags, metadescs or communities)
         '''
-        i = 0
-        for lec, m in self.lec_to_obj.items():
-            objid_lst = m["obj_idx"]
-            i += 1
-            kw_freq = {}
-            for obj in objid_lst:
-                row = self.submission_df.iloc[obj]
-                expl = row['explanation']
-                expl = self.post_process_explanation(expl)
-
-                blob = TextBlob(expl)
-                keywords = [x for x in blob.noun_phrases]
-
-                # Using the keyword frequency to determine the most important keyword
-                for key in keywords:
-                    if not kw_freq.get(key):
-                        kw_freq[key] = 0
-                    kw_freq[key] += 1
-            # Getting the most frequent keywords
-            kw_freq_srt = sorted(kw_freq, key=kw_freq.get, reverse=True)
-            # Picking the top TOP_N_SUBMISSIONS keywords as possible topics.
-            m["possible_topics"] = kw_freq_srt[:TOP_N_SUBMISSIONS]
-            filtered_keywords = []
-            for k in m["possible_topics"]:
-                f = 0
-                for w in m["possible_topics"]:
-                    if (k != w and k in w) or k in KEYWORDS_IGNORE:
-                        f = 1
-                        break
-                if f == 0:
-                    filtered_keywords.append(k)
-            m["possible_topics"] = filtered_keywords
-
-    def extract_metadesc_per_topic_keywords(self) -> None:
-        '''
-            Extract submissions per meta-descriptor for the possible topics and updated the lec_to_obj map to:
-            lec_id : {
-                'obj_idx': [id1, id2, ]
-                'meta_descriptors': {
-                    'descriptor_1': [id4, id7],
-                    'descriptor_2': [id9], ..
-                }
-                'possible_topics': [topic1, topic2]
-                'topics': [
-                    {
-                        'name': 'topic1',
-                        'meta_descriptors': {
-                            'descriptor_1': [], ...
-                        }
-                    }
-                ]
-            }
-
-            Parameters:
-                None.
-
-            Returns:
-                None.
-        '''
-        for lec, m in self.lec_to_obj.items():
-            if m.get("possible_topics") is None or m.get("meta_descriptors") is None:
-                continue
-            topics = m["possible_topics"]
-            lec_metadesc = m["meta_descriptors"]
-            m["topics"] = []
-            for topic in topics:
-                topic_obj = {
-                    "name": topic,
-                    "meta_descriptors": {}
-                }
-                for desc_name, objid_lst in lec_metadesc.items():
-                    df_expl = self.submission_df.iloc[objid_lst]
-                    for i, row in df_expl.iterrows():
-                        if topic.lower() in row["explanation"].lower():
-                            if topic_obj["meta_descriptors"].get(desc_name):
-                                topic_obj["meta_descriptors"][desc_name].append(json.loads(row.to_json()))
-                            else:
-                                topic_obj["meta_descriptors"][desc_name] = [json.loads(row.to_json())]
-                m["topics"].append(topic_obj)
-
-    def sequence(self) -> None:
-        '''
-        This method sorts the lectures based on their lec numbers in ascending order in the lec_to_obj map.
-
-        Paramters:
-            None.
-
-        Returns:
-            None.
-        '''
-        self.lec_to_obj = OrderedDict(
-            sorted(self.lec_to_obj.items(), key=lambda kv: -kv[1]['count'])[:TOP_N_HASHTAGS])
+        new_m = OrderedDict(
+            sorted(m.items(), key=lambda kv: -len(kv[1]['obj_list']))[:TOP_N_HASHTAGS])
+        return new_m
 
     def create_node(self, id: str, type: str, title: str, path: str, leaf: str, module: str, parent: str, sub_list="null") -> Dict:
         """
@@ -372,77 +336,100 @@ class TopicMap:
             "targetNode": target_node
         }
 
-    def generate_graph_data(self) -> Dict:
+    def generate_map(self, idx, objid_list=None):
         '''
-        This method transforms the lec to obj map data into the a structure thats consumable by the front-end api
+        This method generates the dict which follows the hierarchy in levels.
 
-        nodes: [
-            {
-                id: "6412242ba16775cc9de298c6",
-                type: "lecture",
-                title: "1.1",
-                path: "1.1",
-                leaf: "1.1",
-                module: null,
-                parent: "",
-            },
-        ],
-        links: [
-            {
-            source: "1.1",
-            target: "1.1/Text Mining",
-            targetNode: {
-                id: "1.1/Text Mining",
-                type: "topic",
-                title: "Text Mining",
-                path: "1.1/Text Mining",
-                leaf: "Text Mining",
-                module: "Text Mining",
-                parent: "1.1",
-            },
-        ]
-
-        Paramters:
-            None.
+        Parameters:
+            idx (int): Index of row in submissions dataframe.
+            objid_list(List(int)): List of indices from the dataframe.
 
         Returns:
-            Dict(graphData): Contains nodes and links data
+            m(Dict): Dict containing type, obj_list and it's children.
         '''
+        if objid_list is None:
+            objid_list = [i for i in range(len(self.submission_df))]
+
+        if idx == len(self.levels):
+            l = []
+            df = self.submission_df.iloc[list(objid_list)]
+            for i, row in df.iterrows():
+                l.append(json.loads(row.to_json()))
+            return l
+
+        m = {}
+        for i in objid_list:
+            for l in self.rowid_map[self.levels[idx]][i]:
+                if m.get(l):
+                    m[l]["obj_list"].add(i)
+                else:
+                    s = set()
+                    s.add(i)
+                    m[l] = {
+                        "type": self.levels[idx],
+                        "obj_list": s
+                    }
+        m = self.sequence(m)
+        # Get children
+        for k, v in m.items():
+            m[k]["children"] = self.generate_map(idx + 1, v["obj_list"])
+
+        return m
+
+    def generate_graph(self, m, idx, parent, nodes, links):
+        '''
+        This method generates graph which follows the hierarchy in levels.
+
+        Parameters:
+            m(Dict): The dict use to create nodes and links in the current level idx.
+            idx(int): The index of level in the self.levels list.
+            parent(str): The parent title.
+            nodes(List[obj]): List of nodes in the graph to be visualized.
+            links(List[obj]): List of links in the graph to be visualized.
+
+        Returns:
+            None.
+        '''
+        if idx == len(self.levels):
+            return
+
+        for k, v in m.items():
+            curr_type = v['type']
+            if v['type'] == 'hashtags' and k == '-1':
+                k = 'Misc'
+
+            module = k
+            if idx == 0:
+                module = "null"
+
+            path = parent + "/" + k
+            if idx == len(self.levels) - 1:
+                node = self.create_node(
+                    path, curr_type, k, path, k, module, parent, v['children'])
+            else:
+                node = self.create_node(
+                    path, curr_type, k, path, k, module, parent)
+            nodes.append(node)
+            links.append(self.create_link(parent, path, node))
+
+            self.generate_graph(v['children'], idx + 1, path, nodes, links)
+
+    def generate_graph_json(self, m):
+        '''
+        This method generates nodes and links which will be used for visualization.
+
+        Parameters:
+            m(dict): Dict that holds the hierarchy info.
+
+        Return:
+            graph(dict): Contains nodes and links dict.
+        '''
+
         nodes = []
         links = []
+        nodes.append(self.create_node(
+            self.root_name, "root", self.root_name, self.root_name, self.root_name, "null", ""))
+        self.generate_graph(m, 0, self.root_name, nodes, links)
 
-        root = self.community_name
-        i = 0
-        nodes.append(self.create_node(root, "root", root, root, root, "null", ""))
-        for lec, m in self.lec_to_obj.items():
-            if lec == "-1":
-                lec = "Misc"
-            else:
-                lec = lec
-            path = root + "/" + lec
-
-            if len(m["topics"]) > 0:
-                node = self.create_node(path, "lecture", lec, path, lec, "null", root)
-                nodes.append(node)
-                links.append(self.create_link(root, path, node))
-            for topic in m["topics"]:
-                parent = root + "/" + lec
-                if len(topic["name"]) < 5:
-                    topic["name"] = topic["name"].upper()
-                else:
-                    topic["name"] = topic["name"].title()
-                path = root + "/" + lec + "/" + topic["name"]
-
-                if len(topic["meta_descriptors"]) > 0:
-                    node = self.create_node(path, "topic", topic["name"], path, topic["name"], topic["name"], parent)
-                    nodes.append(node)
-                    links.append(self.create_link(parent, path, node))
-                for md_name, md_lst in topic["meta_descriptors"].items():
-                    parent = root + "/" + lec + "/" + topic["name"]
-                    path = root + "/" + lec + "/" + topic["name"] + "/" + md_name
-                    node = self.create_node(path, "meta-descriptor", md_name, path, md_name, topic["name"], parent,
-                                            md_lst)
-                    nodes.append(node)
-                    links.append(self.create_link(parent, path, node))
-        graphData = {'nodes': nodes, 'links': links}
-        return graphData
+        graph = {"nodes": nodes, "links": links}
+        return graph
