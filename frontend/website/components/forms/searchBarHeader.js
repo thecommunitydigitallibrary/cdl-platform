@@ -131,7 +131,7 @@ function searchBarHeader(props) {
                                     ...params.InputProps,
                                     endAdornment: (
                                         <>
-                                            <IconButton type="submit"
+                                            {inputValue.length > 0 && <IconButton type="submit"
                                             variant="contained"
                                             sx={{
                                                 border: "1px solid #efffff",
@@ -152,7 +152,7 @@ function searchBarHeader(props) {
                                                 <Tooltip title={"Search"}>
                                                     <SearchIcon />
                                                 </Tooltip>
-                                            </IconButton>
+                                            </IconButton>}
                                             { inputValue.length > 0 && <IconButton
                                             variant="contained"
                                             onClick={handleVisualizeCommunity}

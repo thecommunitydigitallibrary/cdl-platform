@@ -328,10 +328,6 @@ function Header(props) {
   const createSubmissionEndpoint = "submission/";
   const settings = [
     {
-      label: "Notes",
-      value: "notes",
-    },
-    {
       label: "Communities",
       value: "communities",
     },
@@ -383,8 +379,6 @@ function Header(props) {
       Router.push("/communities");
     } else if (option == "ownSubmissions") {
       Router.push("/search?own_submissions=True&community=all");
-    } else if (option == "notes") {
-      Router.push("/notes");
     } else if (option == "about") {
       Router.push("/about");
     } else if (option == "documentation") {
