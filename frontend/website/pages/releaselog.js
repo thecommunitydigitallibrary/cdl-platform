@@ -31,6 +31,8 @@ export default function ReleaseLog() {
         <ul className="list-disc pl-6">
             <li className="list-item">Compare functionality in extension</li>
             <li className="list-item">Visualize on search</li>
+            <li className="list-item">Non-anonymous submissions</li>
+            <li className="list-item">Generative LLM in extension</li>
         </ul>
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
         Bug Fixes

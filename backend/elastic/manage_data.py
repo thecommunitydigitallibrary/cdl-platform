@@ -29,6 +29,7 @@ class ElasticManager:
         self.cdl_logs = cdl_logs
         self.stopwords = {}
 
+        # comment this out for updating elastic mapping
         with open("stopwords.txt", "r", encoding="utf8") as f:
             for line in f:
                 self.stopwords[line.strip("\n")] = True
@@ -299,6 +300,8 @@ class ElasticManager:
             # for ordering by time
             time = int(float(doc.time))
 
+            anonymous = doc.anonymous
+
             explanation = doc.explanation
             source_url = doc.source_url
 
@@ -315,7 +318,8 @@ class ElasticManager:
                 "communities": flat_communities,
                 "user_id": user_id,
                 "hashtags": hashtags,
-                "time": time
+                "time": time,
+                "anonymous": anonymous
             }
 
         elif self.index_name == os.environ["elastic_webpages_index_name"]:

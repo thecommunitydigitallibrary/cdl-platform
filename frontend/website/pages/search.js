@@ -187,6 +187,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
                         communities_part_of={d.communities_part_of}
                         auth_token={jsCookie.get("token")}
                         show_relevant={show_relevance_judgment}
+                        username={d.username}
                       ></SearchResult>
                     </div>
                   );

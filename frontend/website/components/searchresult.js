@@ -454,8 +454,9 @@ function SearchResult(props) {
           margin: "0px 0px 1px 0px",
         }}
       >
-        {props.display_url} | {new Date(parseInt(props.time)).toLocaleDateString("en-us")}
-      </p>
+        {props.display_url} | {new Date(parseInt(props.time)).toLocaleDateString("en-us")} {props.username && " | " + props.username}
+      </p>      
+
       {/* restricting text to only 500 characters per result to make it more uniform */}
       <p style={{fontSize: '15px', marginTop: '1%', textAlign: 'justify', maxWidth: '100%',
         display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: '5', overflow: 'hidden', textOverflow: 'ellipsis'}}>
@@ -492,16 +493,18 @@ function SearchResult(props) {
         </div>
 
         <div style={{ float: "left", overflowX: "auto", width: "100%" }}>
-        {communityNamesList && communityNamesList.length !== 0 ? (
-          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
-            {communityNamesList}
-          </p>
-        ) : (
-          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
-            Webpage
-          </p>
-        )}
+          
+          {communityNamesList && communityNamesList.length !== 0 ? (
+            <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+              {communityNamesList}
+            </p>
+          ) : (
+            <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+              Webpage
+            </p>
+          )}
         </div>
+
 
         {props.show_relevant ? (
           <div style={{ float: "right", display: "flex" }}>
@@ -536,7 +539,9 @@ function SearchResult(props) {
             </Tooltip>
           </div>
         ) : null}
+
       </div>
+      
 
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} onClick={(event) => {event.preventDefault()}}>
         <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>

@@ -774,6 +774,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
 
             </div>
 
+            {submissionDataResponse.submission.username && "Submitted by " + submissionDataResponse.submission.username}
+
 
 
             <Grid
@@ -1130,6 +1132,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 title={submissionDataResponse.submission.explanation}
                 description={submissionDataResponse.submission.highlighted_text}
                 submission_id={submissionDataResponse.submission.submission_id}
+                username={submissionDataResponse.submission.username}
                 handle_close={handleCloseEdit}
               />
             </Dialog>

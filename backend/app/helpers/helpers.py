@@ -187,6 +187,10 @@ def create_page(hits, communities, toggle_display="highlight"):
 	"""
 
     return_obj = []
+
+
+    cdl_users = Users()
+
     for i, hit in enumerate(hits):
         result = {
             "redirect_url": None,
@@ -199,11 +203,12 @@ def create_page(hits, communities, toggle_display="highlight"):
             "score": hit.get("_score", 0),
             "time": "",
             "type": "submission",
-            "communities_part_of": []
+            "communities_part_of": [],
+            "username": ""
         }
 
         if "webpage" in hit["_source"]:
-            result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title", "No Title Available")
+            result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title") | hit["_source"]["webpage"]["metadata"].get("h1") | "No title available"
             result["type"] = "webpage"
             possible_matches = []
             if "highlight" in hit and toggle_display == "highlight":
@@ -230,6 +235,12 @@ def create_page(hits, communities, toggle_display="highlight"):
             result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
 
 
+            # Old submissions may not have the anonymous field, default to true
+            is_anonymous  = hit["_source"].get("anonymous", True)
+            if not is_anonymous:
+                creator = cdl_users.find_one({"_id": ObjectId(hit["_source"]["user_id"])})
+                if creator:
+                     result["username"] = creator.username
 
 
             description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) and toggle_display == "highlight" else hit["_source"].get("highlighted_text", None)
@@ -262,9 +273,10 @@ def create_page(hits, communities, toggle_display="highlight"):
 
         display_url = build_display_url(url)
         result["display_url"] = display_url
-        result["orig_url"] = url
+        result["orig_url"] = url             
 
         return_obj.append(result)
+
     return return_obj
 
 def hydrate_with_hash_url(results, search_id, page=0, page_size=10, method="search"):

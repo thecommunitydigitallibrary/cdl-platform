@@ -49,7 +49,7 @@ def log_connection(ip, user_id, source_id, target_id, description):
 	return cdl_connections.insert(connection)
 
 
-def log_submission(ip, user_id, highlighted_text, source_url, explanation, community):
+def log_submission(ip, user_id, highlighted_text, source_url, explanation, community, anonymous):
 	"""
 	Logs when a user submits a webpage to a community.
 	Arguments:
@@ -59,6 +59,7 @@ def log_submission(ip, user_id, highlighted_text, source_url, explanation, commu
 		source_url : (string) : the full URL of the webpage where the extension is opened.
 		explanation : (string) : the reason provided by the user for why the webpage is helpful.
 		community : (string) : the ObjectID of the community to add the result to.
+		anonymous : (bool) : if true, do not display username of creator
 	Returns:
 		insert : Pymongo object with property .acknowledged (should be true on success).
 		log : (dictionary) the final saved log
@@ -69,7 +70,7 @@ def log_submission(ip, user_id, highlighted_text, source_url, explanation, commu
 	communities = {
 		str(user_id): [ObjectId(community)]
 	}
-	log = Log(ip, user_id, highlighted_text, source_url, explanation, communities)
+	log = Log(ip, user_id, highlighted_text, source_url, explanation, communities, anonymous=anonymous)
 	cdl_logs = Logs()
 	inserted_status = cdl_logs.insert(log)
 	return inserted_status, log
