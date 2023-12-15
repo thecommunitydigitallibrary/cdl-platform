@@ -5,7 +5,7 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import SubmitTab from './SubmitTab';
-import SearchTab from './SearchTab';
+import FindTab from './FindTab';
 import SettingsTab from './SettingsTab';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -48,7 +48,7 @@ function a11yProps(index) {
 }
 
 export default function BasicTabs() {
-  const [value, setValue] = React.useState(localStorage.getItem('defaultTab') === "submit" ? 2 : 1);
+  const [value, setValue] = React.useState(localStorage.getItem('defaultTab') === "submit" ? 1 : 2);
   const [url, setUrl] = React.useState();
   const [highlightedText, setHighlightedText] = React.useState();
 
@@ -88,9 +88,9 @@ export default function BasicTabs() {
                    label={<div style={{padding: 0, margin: 0}}><h3 style={{margin: 0}}>CDL</h3>
                    </div>} {...a11yProps(0)} />
               <Tab style={{width: "25%", float: "left"}}
-                   label={<div><FindInPageIcon style={{verticalAlign: 'middle'}}/> Search </div>} {...a11yProps(1)} />
+                   label={<div><UploadFileOutlinedIcon style={{verticalAlign: 'middle'}}/> Submit </div>} {...a11yProps(1)} />
               <Tab style={{width: "25%", float: "left"}}
-                   label={<div><UploadFileOutlinedIcon style={{verticalAlign: 'middle'}}/> Submit
+                   label={<div><FindInPageIcon style={{verticalAlign: 'middle'}}/> Find
                    </div>} {...a11yProps(2)} />
               <Tab style={{width: "12.5%", float: "left", minWidth: "0px"}}
                    label={<div><SettingsIcon style={{verticalAlign: 'middle'}}/></div>} {...a11yProps(3)} />
@@ -99,13 +99,12 @@ export default function BasicTabs() {
             </Tabs>
           </Box>
           <TabPanel value={value} index={0}>
-
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <SearchTab setUrlState={setUrlState}/>
+            <SubmitTab setUrlState={setUrlState}/>
           </TabPanel>
           <TabPanel value={value} index={2}>
-            <SubmitTab setUrlState={setUrlState}/>
+            <FindTab setUrlState={setUrlState}/>
           </TabPanel>
           <TabPanel value={value} index={3}>
             <SettingsTab setUrlState={setUrlState}/>

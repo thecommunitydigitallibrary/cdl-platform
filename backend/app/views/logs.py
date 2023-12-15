@@ -179,13 +179,18 @@ def log_click(ip, result_hash, redirect_url):
 	else: print("logged search click successfully")
 	return
 
-def log_recommendation_request(ip, user_id, communities, method):
+def log_recommendation_request(ip, user_id, communities, method, metadata={}):
 	"""
 	Logs when a user requests for their recommendations.
 	Arguments:
 		ip : (string) : the IP address of the request sent by the user.
 		user_id : (ObjectID) : the ID of the user making the request.
 		communities : (list) : the community scope of the user search.
+		method : (str) : the type of recommendation
+			recent: homepage, shows most recent submissions
+		 	explore_similar_extension: homepage, similar submissions to history
+			augment: extension, edits the webpage
+		metadata : (dict) : information about the rec request (used for A/B testing)
 	Returns:
 		recommendation_id : (string) : the search ID of the query.
 		insert.acknowledged : (boolean) : indicates if the log was successful.
@@ -197,7 +202,8 @@ def log_recommendation_request(ip, user_id, communities, method):
 		"user_id": user_id,
 		"community": communities,
 		"time": time.time(),
-		"method": method
+		"method": method,
+		"metadata": metadata
 	}
 
 	insert = cdl_recommendations_requests.insert_one_db(log)

@@ -113,6 +113,8 @@ export default function ImgMediaCard({setUrlState}) {
     setCommunity("");
   }
 
+  
+
   const onSubmit = async () => {
     try {
       var data = new FormData();

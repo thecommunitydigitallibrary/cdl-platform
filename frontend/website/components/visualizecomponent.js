@@ -14,9 +14,13 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import SearchResult from "./searchresult";
 import Head from "next/head";
 import Footer from "./footer";
+import {Alert, Box, Button, FormControlLabel, FormGroup, FormHelperText, FormLabel, Snackbar} from "@mui/material";
+import Checkbox from "@mui/material/Checkbox";
+import FormControl from "@mui/material/FormControl";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-
+const graphRoot2 = "Loading...";
 const graphData2 = {
     "nodes": [
         {
@@ -31,20 +35,33 @@ const graphData2 = {
         },
     ],
     "links": []
-}
+};
+const levelMap = {
+    "communities": "Communities",
+    "hashtags": "Hashtags",
+    "topics": "Topics",
+    "metadescs": "Meta-descriptors"
+};
 
 const VisualizeMap = () => {
-    let router = useRouter();
+    const router = useRouter();
     let obj = router.query;
     let cid = "";
     let cn = "";
+    let q = "";
+    let filter = "";
+    let arr = [];
     if (obj != undefined || obj != null || obj != "") {
-        cid = obj["communityId"]
+        cid = obj["community"]
         cn = obj["communityName"]
+        q = obj["query"]
+        filter = obj["levelfilter"];
+        arr = filter.split(';');
     }
     const [isClient, setIsClient] = useState(false);
     const [communityId, setCommunityId] = useState(cid);
     const [communityName, setCommunityName] = useState(cn);
+    const [query, setQuery] = useState(q);
     const fgRef = useRef();
     const [height, setHeight] = useState(900);
     const [maxWidth, setMaxWidth] = useState(800);
@@ -53,14 +70,62 @@ const VisualizeMap = () => {
     const [prevNodeId, setPrevNodeId] = useState(undefined);
     const [graphData, setGraphData] = useState(graphData2);
     const [nodesById, setNodeById] = useState();
-    const [rootId, setRootId] = useState("Loading...");
+    const [rootId, setRootId] = useState(graphRoot2);
     const [submissions, setSubmissions] = useState({
         md_name: "",
         submission_list: [],
     });
+    const [checkState, setCheckState] = useState({
+        communities: false,
+        hashtags: false,
+        topics: false,
+        metadescs: false
+    });
+    const {communities, hashtags, topics, metadescs} = checkState;
+    const [filterOrder, setFilterOrder] = useState(arr);
+    const error = [communities, hashtags, topics, metadescs].filter((v) => v).length < 1;
+    const [levelView, setLevelView] = useState("")
+
+    // Necessary States for Alert Message
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState("");
+    const [severity, setSeverity] = useState("error");
+    const handleClick = () => {
+        setOpen(true);
+    };
+    const handleClose = (event, reason) => {
+        if (reason === "clickaway") {
+          return;
+        }
+        setOpen(false);
+    };
+
+    const updateFilterOrderList = () => {
+        let newState = {};
+        Object.keys(checkState).forEach(key => {
+            newState[key] = checkState[key];
+        })
+        for(let fil of filterOrder) {
+            newState[fil] = true;
+        }
+        setCheckState(newState);
+        updateLevelView();
+    };
+
+    const updateLevelView = () => {
+        let op = [];
+        for(let itr of filterOrder) {
+            op.push(levelMap[itr]);
+        }
+        setLevelView(op.join(" > "));
+    };
 
     const getCommunityDocuments = async () => {
-        let url = baseURL_client + "search?community=" + communityId + "&source=visualize";
+        let url; //= baseURL_client + "search?community=" + communityId + "&source=visualize&query=" + query;
+        if (communityId == "all")
+            url = baseURL_client + "search?query=" + query + "&community=all&source=visualize&levelfilter=" + filterOrder.join(";");
+        else
+            url = baseURL_client + "search?community=" + communityId + "&source=visualize&levelfilter=" + filterOrder.join(";");
         const res = await fetch(url, {
             method: "GET",
             headers: new Headers({
@@ -70,11 +135,17 @@ const VisualizeMap = () => {
         });
         const response = await res.json();
         if (response.status === "ok") {
+            if (communityId == "all")
+                setRootId(query);
+            else
+                setRootId(communityName);
             setGraphData(response);
-            setRootId(communityName);
             createNodeByIdMap(response);
         } else {
-            // console.log(response);
+            setSeverity("error");
+            setMessage(response.message);
+            handleClick();
+            return;
         }
     }
 
@@ -100,6 +171,7 @@ const VisualizeMap = () => {
     useEffect(() => {
         setIsClient(true);
         if (jsCookie.get("token") != undefined) {
+            updateFilterOrderList();
             getCommunityDocuments();
             setHeight(window.innerHeight);
             let canvasWidth = window.innerWidth; //- 0.01 * window.innerWidth
@@ -111,8 +183,11 @@ const VisualizeMap = () => {
                 pathname: "/auth",
             });
         }
-
     }, []);
+
+    useEffect(() => {
+        updateLevelView();
+    }, [checkState]);
 
     const getPrunedTree = useCallback(() => {
         const visibleNodes = [];
@@ -148,19 +223,21 @@ const VisualizeMap = () => {
             switch (node.type) {
                 case "root":
                     return "#E27429";
-                case "lecture":
+                case "hashtags":
                     return "#5F9EA0";
-                case "topic":
+                case "topics":
                     return "#CC1D7C";
-                case "meta-descriptor":
+                case "metadescs":
                     return "#964B00";
+                case "communities":
+                    return "#1876d2"
                 default:
                     return "red";
             }
         };
 
         const handleNodeClick = useCallback((node) => {
-            if (node.type == "meta-descriptor") {
+            if (node.type === filterOrder[filterOrder.length-1]) {
                 if (prevNodeId == undefined) {
                     if (!isModalOpen) {
                         setIsModalOpen(true);
@@ -285,6 +362,38 @@ const VisualizeMap = () => {
         }
     };
 
+    const handleCheckBoxChange = (e) => {
+        if(!!e.target.checked) {
+            setFilterOrder([...filterOrder, e.target.name]);
+        }
+        else {
+            let l = [...filterOrder];
+            setFilterOrder(l.filter(function(i) { return i !== e.target.name }));
+        }
+        //Update the state of the checkbox
+        setCheckState({
+            ...checkState,
+            [e.target.name]: e.target.checked,
+        });
+    };
+
+    const handleFilterOnClick = (e) => {
+        if(!!error) {
+            setSeverity("error");
+            setMessage("Check at least one Checkbox!");
+            handleClick();
+            return;
+        }
+        let url = router.pathname;
+        if(!!router.query["query"]) {
+            url += "?query=" + router.query["query"] + "&community=all" + "&levelfilter=" + filterOrder.join(";");
+        }
+        else {
+            url += "?community=" + router.query["community"] + "&communityName=" + router.query["communityName"] + "&levelfilter=" + filterOrder.join(";");
+        }
+        window.location = url;
+    };
+
     return (
         <>
             <Head>
@@ -293,7 +402,69 @@ const VisualizeMap = () => {
             </Head>
             <Header/>
             {isClient ? (
-                <div className="graph" id="graph-outer-div" style={{display: "flex"}}>
+                <div className="graph" id="graph-outer-div"
+                     style={{display: "flex", position: "relative", zIndex: "1"}}>
+                    <Box id={"filter-div"}
+                         style={{
+                             marginTop: "70px",
+                             marginLeft: "1%",
+                             zIndex: "2",
+                             position: "absolute",
+                             top: "0",
+                             display: "flex",
+                             fontSize: "14px",
+                             alignItems: "flex-start",
+                             flexDirection: "column"
+                         }}
+                    >
+                        <FormControl
+                            required
+                            error={error}
+                            component="fieldset"
+                            sx={{m: 3}}
+                            variant="standard"
+                        >
+                            <FormLabel component="legend" style={{fontSize: "15px"}}>
+                                LEVEL VIEW: <span style={{fontWeight: "bold"}}>{levelView}</span>
+                            </FormLabel>
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox style={{transform: "scale(.8)"}} checked={communities} onChange={handleCheckBoxChange} name="communities"/>
+                                    }
+                                    label={<span style={{fontSize: "14px"}}>Communities Level</span>}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox style={{transform: "scale(.8)"}} checked={hashtags} onChange={handleCheckBoxChange} name="hashtags"/>
+                                    }
+                                    label={<span style={{fontSize: "14px"}}>Hashtag Level</span>}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox style={{transform: "scale(.75)"}} checked={topics} onChange={handleCheckBoxChange} name="topics"/>
+                                    }
+                                    label={<span style={{fontSize: "14px"}}>Topic Level</span>}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox style={{transform: "scale(.75)"}} checked={metadescs} onChange={handleCheckBoxChange} name="metadescs"/>
+                                    }
+                                    label={<span style={{fontSize: "14px"}}>Meta-descriptor Level</span>}
+                                />
+                            </FormGroup>
+                            <FormHelperText>Please select at least one level to display</FormHelperText>
+                        </FormControl>
+                        <Button
+                            variant={"contained"}
+                            onClick={handleFilterOnClick}
+                            size="medium"
+                            endIcon={<FilterAltIcon />}
+                            style={{transform: "scale(0.75)"}}
+                        >
+                            Filter
+                        </Button>
+                    </Box>
                     <Paper elevation={0} id="graph-wrapper" style={{width: "inherit"}}>
                         {nodesById && <ForceTree data={graphData}/>}
                     </Paper>
@@ -334,7 +505,12 @@ const VisualizeMap = () => {
                                     {
                                         submissions["md_name"].length > 0 ?
                                             (
-                                                <h5>{submissions["md_name"].split("/")[1]} &#62; {submissions["md_name"].split("/")[2]} &#62; {submissions["md_name"].split("/")[3]}</h5>)
+                                                <h5>{!!submissions["md_name"].split("/")[1] && submissions["md_name"].split("/")[1]}
+                                                    {!!submissions["md_name"].split("/")[2] && " > " + submissions["md_name"].split("/")[2]}
+                                                    {!!submissions["md_name"].split("/")[3] && " > " + submissions["md_name"].split("/")[3]}
+                                                    {!!submissions["md_name"].split("/")[4] && " > " + submissions["md_name"].split("/")[4]}
+                                                </h5>
+                                            )
                                             :
                                             (<h5>Please select a Meta-descriptor of any topic to see related
                                                 submissions</h5>)
@@ -345,7 +521,12 @@ const VisualizeMap = () => {
                                         style={{height: height}}
                                         dataLength={submissions["submission_list"].length}
                                         loader="">
-                                        <Grid item style={{padding: "1%", display: "flex", flexDirection: "column", gap: "10px"}}>
+                                        <Grid item style={{
+                                            padding: "1%",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "10px"
+                                        }}>
                                             {submissions["submission_list"] !== undefined && submissions["submission_list"].length !== 0 &&
                                                 submissions["submission_list"].map(function (d, idx) {
                                                     return (
@@ -379,6 +560,11 @@ const VisualizeMap = () => {
             ) : (
                 "Loading..."
             )}
+            <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
+                  {message}
+                </Alert>
+            </Snackbar>
             <Footer/>
         </>
     );
