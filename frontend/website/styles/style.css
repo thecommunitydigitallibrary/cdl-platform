@@ -144,6 +144,20 @@ header {
   }
 }
 
+@media (max-width: 1400px) {
+  .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.text-center.bg-blue-500.rounded-md.no-underline {
+    font-size: 0px;
+  }
+
+  .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedError.MuiButton-sizeMedium.MuiButton-containedSizeMedium.text-center.bg-blue-500.rounded-md.no-underline {
+    font-size: 0;
+  }
+
+  .counter { width: 100% !important;}
+  .addRemoveCommunities, .addRemoveText {width: 100% !important;}
+
+}
+
 /* html,
   body {
   padding: 0;

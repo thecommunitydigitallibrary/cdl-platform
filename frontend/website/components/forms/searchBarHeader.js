@@ -184,7 +184,8 @@ function searchBarHeader(props) {
                                         </>
                                     ),
                                     style: {
-                                        paddingRight: 0, // remove right padding
+                                        padding: 0,
+                                        overflow: "hidden"
                                     },
                                 }}
                             />

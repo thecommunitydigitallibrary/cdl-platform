@@ -44,6 +44,7 @@ import Save from "@mui/icons-material/Save";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
 import ReactDOMServer from 'react-dom/server';
+import SpriteText from 'three-spritetext';
 
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
 
@@ -64,6 +65,8 @@ const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), {
   loading: () => <p>Loading...</p>, ssr: false
 })
+
+// import ForceGraph3D, { ForceGraphMethods } from "react-force-graph-3d";
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
@@ -91,18 +94,18 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
 
   const colorNodeBackground = (node) => {
     switch (node.type) {
-      case "current": return "#2c7dcc";
-      case "submission": return "#75a936";
-      case "webpage": return "#FDD835";
-      case "visited": return "#7d51af";
-      default: return "#ad3b3b";
+      case "current": return "rgb(255, 204, 0, 0.7)";
+      case "submission": return "rgba(19, 41, 75, 0.7)";
+      case "webpage": return "rgba(232, 74, 39, 0.7)";
+      case "visited": return "rgba(125, 81, 175, 0.7)";
+      default: return "rgba(173, 59, 59, 0.7)";
     }
   }
 
   const handleNodeLabel = useCallback(
     (node) => {
       let desc = node.desc ? <p>{node.desc}</p> : null;
-      let tooltip = <div style={{ background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "4px" }}>
+      let tooltip = <div style={{ background: "#fff", color: "#000000de", padding: "15px", border: "1px solid #0000001f", borderRadius: "5px" }}>
         <h6>{node.label}</h6>
         {desc}
       </div>;
@@ -149,7 +152,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     setOpenEdit(false);
   };
 
-  
+
   const [submissionDataResponse, setSubmissionDataResponse] = React.useState(
     []
   );
@@ -316,10 +319,10 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     handleCloseOptionsMenu();
   };
 
- 
 
 
-  
+
+
   const handleClickOptionsMenu = (event, option, param) => {
     console.log("clicked " + option);
     switch (option) {
@@ -569,6 +572,10 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     getGraphData();
   }, []);
 
+  // useEffect(() => {
+  //    fgRef.current.d3Force('link').distance(link => 500).strength(link => -300);
+  //  }, []);
+
 
   if (submissionDataResponse.submission && submissionDataResponse.submission.hashtags) {
     var hashtag_results = submissionDataResponse.submission.hashtags.map(function (item) {
@@ -785,7 +792,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               justifyContent="space-between"
               sx={{ my: 1 }}
             >
-              <Grid item sx={{ width: "33%" }}>
+              <Grid className="counter" item sx={{ width: "33%" }}>
                 <Box
                   sx={{
                     my: 1,
@@ -821,12 +828,12 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               </Grid>
 
               {submissionDataResponse.submission && submissionDataResponse.submission.type === "user_submission" &&
-                <Grid item sx={{ width: "66%" }}>
+                <Grid item sx={{ width: "66%" }} className="addRemoveCommunities">
                   <Grid container sx={{ flexFlow: "nowrap" }}>
                     <Grid item sx={{ width: "50%" }}>
                       {(
                         <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
-                          <Grid item sx={{ width: "80%" }}>
+                          <Grid item sx={{ width: "80%" }} className="addRemoveText">
                             <div>
                               <FormControl
                                 sx={{ width: "100%" }}
@@ -884,7 +891,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     <Grid item sx={{ width: "50%" }}>
                       { }
                       <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
-                        <Grid item sx={{ width: "80%" }}>
+                        <Grid item sx={{ width: "80%" }}  className="addRemoveText">
                           <div>
                             <FormControl
                               sx={{ width: "100%" }}
@@ -967,6 +974,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   type="filled"
                   variant="contained"
                   name="shareurl"
+                  id="shareIcon"
+                  className="shareIcon"
                   style={{ width: "95%", padding: "8px" }}
                   value={submissionDataResponse.submission.submission_id}
                   action={(event) =>
@@ -1177,15 +1186,50 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
             width: "50%",
             padding: 0
           }}>
+          <Legend/>
           <ForceGraph3D
             ref={fgRef}
             graphData={graph}
             width={width}
             height={height}
+            d3Force="link"
+            distance={300}
             backgroundColor={'#e5e5e5'}
             onNodeClick={handleNodeClick}
-            nodeColor={colorNodeBackground}
             nodeLabel={handleNodeLabel}
+            linkDirectionalArrowLength={3.5}
+            linkDirectionalArrowRelPos={1}
+            linkCurvature={0.25}
+            nodeThreeObject={node => {
+              let label = node.label.length > 30 ? node.label.substring(0, 30) + '...' : node.label;
+              const sprite = new SpriteText(label);
+              sprite.backgroundColor = colorNodeBackground(node);
+              sprite.color = "#fff";
+              sprite.padding = [1.5, 1.5];
+              sprite.textHeight = 2;
+              sprite.fontWeight = 700;
+              sprite.fontSize = 90;
+              sprite.borderRadius = 4;
+              return sprite;
+            }}
+            // zoomToFit={(20)}
+            linkThreeObjectExtend={true}
+            linkWidth={1}
+            cameraPosition={(0, 0, 0)}
+            linkThreeObject={(link) => {
+              const sprite = new SpriteText("RELATED");
+              sprite.fontWeight = 700;
+              sprite.color = 'rgba(0,0,0,0.7)';
+              sprite.textHeight = 3;
+              return sprite;
+            }}
+            linkPositionUpdate={(sprite, { start, end }) => {
+              const middlePos = Object.assign(...['x', 'y', 'z'].map(c => ({
+              [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
+              })));
+
+              Object.assign(sprite.position, middlePos);
+            }}
             linkColor={() => 'rgba(0,0,0,0.7)'}
             linkDirectionalParticles={1}
           />
@@ -1195,6 +1239,50 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     </>
   );
 }
+
+const Legend = () => {
+  const legendStyle = {
+    position: 'absolute',
+    padding: '10px',
+    zIndex: "100"
+  };
+
+  const legendItemStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '5px',
+  };
+
+  const colorBoxStyle = (backgroundColor) => ({
+    width: '20px',
+    height: '20px',
+    marginRight: '10px',
+    backgroundColor,
+    borderRadius: "1000px"
+  });
+
+  return (
+    <div style={legendStyle}>
+      <div style={legendItemStyle}>
+        <span style={colorBoxStyle("rgb(255, 204, 0, 0.7)")}></span>
+        <span>Current Submission</span>
+      </div>
+      <div style={legendItemStyle}>
+        <span style={colorBoxStyle("rgba(19, 41, 75, 0.7)")}></span>
+        <span>User Submission</span>
+      </div>
+      <div style={legendItemStyle}>
+        <span style={colorBoxStyle("rgba(232, 74, 39, 0.7)")}></span>
+        <span>Scrapped Webpage</span>
+      </div>
+      <div style={legendItemStyle}>
+        <span style={colorBoxStyle("rgba(125, 81, 175, 0.7)")}></span>
+        <span>Visited Submission</span>
+      </div>
+      {/* Add more legend items here */}
+    </div>
+  );
+};
 
 // This gets called on every request
 export async function getServerSideProps(context) {
