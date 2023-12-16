@@ -65,7 +65,7 @@ export default function HomeTabs() {
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example"
                 style={{textAlign: "center"}}>
             <Tab style={{width: "25%", float: "left"}}
-                 label={<div style={{padding: 0, margin: 0}}><h3 style={{margin: 0}}>CDL</h3>
+                 label={<div style={{padding: 0, margin: 0}}><h3 style={{margin: 0}}>TextData</h3>
                  </div>} {...a11yProps(0)} />
             <Tab style={{width: "62.5%", float: "left"}}
                  label={<div><UploadFileOutlinedIcon style={{verticalAlign: 'middle'}}/>Login

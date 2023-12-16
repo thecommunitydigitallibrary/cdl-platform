@@ -21,10 +21,10 @@ export default function About({ loggedOut }) {
   return (
     <>
       <Head>
-        <title>The Community Digital Library</title>
+        <title>TextData</title>
         <meta
           name="description"
-          content="CDL"
+          content="TextData"
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -32,9 +32,9 @@ export default function About({ loggedOut }) {
       <div className="allResults">
         <Hero />
         <SectionTitle
-          pretitle="Why CDL?"
-          title=" What we offer">
-          Below, we describe an overview of the CDL's features: forming communities, taking notes, and discovering information.
+          pretitle="Why TextData?"
+          title=" What does TextData Provide?">
+          Below, we describe how TextData helps you create, save, and find online information.
         </SectionTitle>
 
         <Benefits data={benefitOne} />

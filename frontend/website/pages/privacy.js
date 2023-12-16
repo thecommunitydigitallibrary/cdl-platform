@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Head>
-        <title>Privacy Policy - The CDL</title>
+        <title>Privacy Policy - TextData</title>
         <link rel="icon" href="/images/tree32.png" />
       </Head>
       <Header />
@@ -19,7 +19,7 @@ export default function PrivacyPolicy() {
         <br />
         <p>
           In this privacy policy, we want to help you understand how the
-          Community Digital Library. ("CDL,” "we” or "us”) collects, uses, and
+          TextData. ("we" or "us") collects, uses, and
           shares information about you when you use our website and browser
           extension (collectively, the “Services”).{" "}
         </p>
@@ -44,8 +44,7 @@ export default function PrivacyPolicy() {
             </p>{" "}
             This includes submissions (URL, title, highlighted text),
             communities (name, description, membership status), feedback and
-            relevance judgments, note pages, and queries typed into the search
-            bar.
+            relevance judgments, notes, queries, and recommendation requests.
           </li>
           <li>
             <p style={{ fontWeight: "bold", display: "inline" }}>
@@ -89,7 +88,7 @@ export default function PrivacyPolicy() {
               With other users.
             </p>{" "}
             Much of the information that we collect is available to you or to
-            other members of your communities by design of the CDL. This
+            other members of your communities by design of TextData. This
             includes the submission titles, descriptions, and URLs, and the
             community names and descriptions.{" "}
           </li>
@@ -97,9 +96,9 @@ export default function PrivacyPolicy() {
             <p style={{ fontWeight: "bold", display: "inline" }}>
               With researchers (de-identified, and with consent).
             </p>{" "}
-            The long-term goal of the CDL is to research the information needs
+            The long-term goal of TextData is to research the information needs
             of individuals in specific contexts so that we can better resolve
-            these needs. Thus, a significant component of the CDL is researching
+            these needs. Thus, a significant component of TextData is researching
             the usage patterns of users. If we perform research (beyond the use
             of improving the platform), then we will (1) ask for your consent,
             and (2) de-identify the data before analysis.
@@ -116,7 +115,7 @@ export default function PrivacyPolicy() {
             <p style={{ fontWeight: "bold", display: "inline" }}>
               All requests are sent over HTTPS.
             </p>{" "}
-            Any time you send data to the CDL or receive data from the CDL, it
+            Any time you send data to the TextData or receive data from the TextData, it
             is secured using HTTPS.
           </li>
           <li>
@@ -124,7 +123,7 @@ export default function PrivacyPolicy() {
               The production databases are under access control.
             </p>{" "}
             We restrict internal access to production data to minimize the
-            likelihood of your data being accidently accessed or released from
+            likelihood of your data being accidentally accessed or released from
             our databases.
           </li>
         </ul>

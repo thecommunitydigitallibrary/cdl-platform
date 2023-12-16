@@ -132,7 +132,7 @@ function Communities({ data, history_data }, props) {
         <Header dropdowndata={props.dropdowndata} />
         <div className="allResults">
           <Head>
-            <title>Manage Communities - The CDL</title>
+            <title>Manage Communities - TextData</title>
             <link rel="icon" href="/images/tree32.png" />
           </Head>
           <h1>Manage Communities</h1>
@@ -144,7 +144,7 @@ function Communities({ data, history_data }, props) {
     return (
       <div>
         <Head>
-          <title>Manage Communities - The CDL</title>
+          <title>Manage Communities - TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
         <Box sx={{ width: "100%", paddingTop: "75px" }}>

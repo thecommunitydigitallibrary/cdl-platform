@@ -3,3 +3,6 @@ Flask-Cors===4.0.0
 requests===2.31.0
 pytest===7.4.2
 sentence-transformers===2.2.2
+accelerate==0.21.0
+torch==2.1.1
+bitsandbytes==0.41.3.post2

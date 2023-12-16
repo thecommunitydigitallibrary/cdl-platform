@@ -11,6 +11,10 @@ import FormData from "form-data";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
+import Checkbox from '@mui/material/Checkbox';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -18,6 +22,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 export default function ImgMediaCard({setUrlState}) {
   const [community, setCommunity] = React.useState("");
   const [title, setTitle] = React.useState("");
+  const [isAnonymous, setAnonymous] = React.useState(true);
   const [allCommunities, setAllCommunities] = React.useState([]);
   const [description, setDesciption] = React.useState("");
   const [url, setUrl] = React.useState("");
@@ -38,6 +43,14 @@ export default function ImgMediaCard({setUrlState}) {
 
     setOpen(false);
   };
+
+  const handleAnonymous = async (event) => {
+    if (isAnonymous) {
+        setAnonymous(false)
+    } else {
+        setAnonymous(true)
+    }
+}
 
   const handleChange = (event) => {
     setCommunity(event.target.value);
@@ -113,6 +126,8 @@ export default function ImgMediaCard({setUrlState}) {
     setCommunity("");
   }
 
+  
+
   const onSubmit = async () => {
     try {
       var data = new FormData();
@@ -141,6 +156,7 @@ export default function ImgMediaCard({setUrlState}) {
       data.append("source_url", url);
       data.append("highlighted_text", description);
       data.append("community", community);
+      data.append("anonymous", isAnonymous);
 
       let res = await fetch(baseURL + "submission/", {
         method: "post",
@@ -237,13 +253,16 @@ export default function ImgMediaCard({setUrlState}) {
           </Select>
         </FormControl>
       </Box>
+      <FormGroup>
+          <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
+      </FormGroup>
       <div style={{display: "flex", marginTop: "20px"}}>
         <Button variant="contained" style={{padding: 14, width: "48%", marginRight: "20px"}}
                 onClick={onClear}>
           CLEAR
         </Button>
         <Button variant="contained" style={{padding: 14, width: "48%"}} onClick={onSubmit}>
-          SUBMIT
+          SAVE
         </Button>
       </div>
 

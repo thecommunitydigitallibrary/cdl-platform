@@ -328,10 +328,6 @@ function Header(props) {
   const createSubmissionEndpoint = "submission/";
   const settings = [
     {
-      label: "Notes",
-      value: "notes",
-    },
-    {
       label: "Communities",
       value: "communities",
     },
@@ -383,8 +379,6 @@ function Header(props) {
       Router.push("/communities");
     } else if (option == "ownSubmissions") {
       Router.push("/search?own_submissions=True&community=all");
-    } else if (option == "notes") {
-      Router.push("/notes");
     } else if (option == "about") {
       Router.push("/about");
     } else if (option == "documentation") {
@@ -412,7 +406,7 @@ function Header(props) {
                   <a>
                     <Image
                       src="/images/tree48.png"
-                      alt="CDL"
+                      alt="TextData"
                       width="40"
                       height="40"
                       className="w-8"
@@ -705,14 +699,14 @@ function Header(props) {
                   <a>
                     <Image
                       src="/images/tree48.png"
-                      alt="CDL"
+                      alt="TextData"
                       width="40"
                       height="40"
                       className="w-8"
                     />
                   </a>
                 </a>
-                <span className="mb-2">CDL</span>
+                <span className="mb-2">TextData</span>
               </div>
 
               {/* Add links below based on what to show on About page when logged out */}

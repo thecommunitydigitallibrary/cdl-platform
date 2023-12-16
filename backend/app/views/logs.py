@@ -49,7 +49,7 @@ def log_connection(ip, user_id, source_id, target_id, description):
 	return cdl_connections.insert(connection)
 
 
-def log_submission(ip, user_id, highlighted_text, source_url, explanation, community):
+def log_submission(ip, user_id, highlighted_text, source_url, explanation, community, anonymous):
 	"""
 	Logs when a user submits a webpage to a community.
 	Arguments:
@@ -59,6 +59,7 @@ def log_submission(ip, user_id, highlighted_text, source_url, explanation, commu
 		source_url : (string) : the full URL of the webpage where the extension is opened.
 		explanation : (string) : the reason provided by the user for why the webpage is helpful.
 		community : (string) : the ObjectID of the community to add the result to.
+		anonymous : (bool) : if true, do not display username of creator
 	Returns:
 		insert : Pymongo object with property .acknowledged (should be true on success).
 		log : (dictionary) the final saved log
@@ -69,7 +70,7 @@ def log_submission(ip, user_id, highlighted_text, source_url, explanation, commu
 	communities = {
 		str(user_id): [ObjectId(community)]
 	}
-	log = Log(ip, user_id, highlighted_text, source_url, explanation, communities)
+	log = Log(ip, user_id, highlighted_text, source_url, explanation, communities, anonymous=anonymous)
 	cdl_logs = Logs()
 	inserted_status = cdl_logs.insert(log)
 	return inserted_status, log
@@ -179,13 +180,18 @@ def log_click(ip, result_hash, redirect_url):
 	else: print("logged search click successfully")
 	return
 
-def log_recommendation_request(ip, user_id, communities, method):
+def log_recommendation_request(ip, user_id, communities, method, metadata={}):
 	"""
 	Logs when a user requests for their recommendations.
 	Arguments:
 		ip : (string) : the IP address of the request sent by the user.
 		user_id : (ObjectID) : the ID of the user making the request.
 		communities : (list) : the community scope of the user search.
+		method : (str) : the type of recommendation
+			recent: homepage, shows most recent submissions
+		 	explore_similar_extension: homepage, similar submissions to history
+			augment: extension, edits the webpage
+		metadata : (dict) : information about the rec request (used for A/B testing)
 	Returns:
 		recommendation_id : (string) : the search ID of the query.
 		insert.acknowledged : (boolean) : indicates if the log was successful.
@@ -197,7 +203,8 @@ def log_recommendation_request(ip, user_id, communities, method):
 		"user_id": user_id,
 		"community": communities,
 		"time": time.time(),
-		"method": method
+		"method": method,
+		"metadata": metadata
 	}
 
 	insert = cdl_recommendations_requests.insert_one_db(log)

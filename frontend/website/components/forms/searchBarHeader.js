@@ -8,7 +8,7 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from '@mui/material/Autocomplete';
 import jsCookie from "js-cookie";
 import Stack from '@mui/material/Stack';
-
+import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 
 
 
@@ -32,14 +32,19 @@ function searchBarHeader(props) {
     const handleSearch = async (event) => {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
-        Router.push(
-            "/search?query=" +
-            encodeURIComponent(inputValue) +
-            "&community=" +
-            event.target.community.value +
-            "&page=0"
 
-        );
+        //No submit on empty query
+        if (inputValue.length == 0) {
+            return
+        } else {
+            Router.push(
+                "/search?query=" +
+                encodeURIComponent(inputValue) +
+                "&community=" +
+                event.target.community.value +
+                "&page=0"
+            );
+        }
     };
 
     
@@ -75,6 +80,21 @@ function searchBarHeader(props) {
     }, [inputValue]);
 
 
+    const handleVisualizeCommunity = (event) => {
+        if (inputValue.length == 0) {
+            return
+        }
+        if(router.asPath.includes("visualizemap"))
+            window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all&levelfilter=hashtags;topics;metadescs";
+        Router.push({
+            pathname: "/visualizemap",
+            query: {
+                query: encodeURIComponent(inputValue),
+                community: "all",
+                levelfilter: "hashtags;topics;metadescs"
+            },
+        });
+    }
 
     return (
         <>
@@ -95,6 +115,7 @@ function searchBarHeader(props) {
                         value={inputValue}
                         renderInput={(params) => 
                             <TextField {...params}
+                                required
                                 variant="outlined"
                                 sx={{ m:1 }}
                                 style={{
@@ -109,7 +130,8 @@ function searchBarHeader(props) {
                                 InputProps={{
                                     ...params.InputProps,
                                     endAdornment: (
-                                        <IconButton type="submit"
+                                        <>
+                                           <IconButton type="submit"
                                             variant="contained"
                                             sx={{
                                                 border: "1px solid #efffff",
@@ -126,17 +148,51 @@ function searchBarHeader(props) {
                                                     width: '60px'
                                                 },
                                             }}
-                                        >
-                                            <SearchIcon />
-                                        </IconButton>),
+                                            >
+                                                <Tooltip title={"Search"}>
+                                                    <SearchIcon />
+                                                </Tooltip>
+                                            </IconButton>
+                                            <IconButton
+                                            variant="contained"
+                                            onClick={handleVisualizeCommunity}
+                                            sx={{
+                                                border: "1px solid #efffff",
+                                                bgcolor: '#eceff1',
+                                                borderRadius: 1,
+                                                transition: "transform 0.3s ease, width 0.3s ease",
+                                                transform: "translateZ(0)",
+                                                width: '40px',
+                                                "&:hover": {
+                                                    border: "1px solid #eceff1",
+                                                    bgcolor: "#F5F5F5",
+                                                    color: '#696969',
+                                                    transform: "translateZ(30px)",
+                                                    width: '60px'
+                                                },
+                                            }}
+                                            >
+                                                <Tooltip title={"Visualize"}>
+                                                    <BubbleChartIcon
+                                                    style={{marginLeft: "5px", marginRight: "5px"}}
+                                                    size="medium"
+
+                                                 />
+                                                </Tooltip>
+                                            </IconButton>
+                                            
+                                        </>
+                                    ),
                                     style: {
-                                        paddingRight: 0, // remove right padding
+                                        padding: 0,
+                                        overflow: "hidden"
                                     },
                                 }}
                             />
                         }
                         
                     />
+
 
                 </Stack>
 

@@ -29,6 +29,7 @@ class ElasticManager:
         self.cdl_logs = cdl_logs
         self.stopwords = {}
 
+        # comment this out for updating elastic mapping
         with open("stopwords.txt", "r", encoding="utf8") as f:
             for line in f:
                 self.stopwords[line.strip("\n")] = True
@@ -125,6 +126,7 @@ class ElasticManager:
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
         hits_total_value, hits = self.postprocess(r.text)
         return hits_total_value, hits
+
     
     def auto_complete(self, query, communities, page=0, page_size=10):
         """
@@ -171,7 +173,7 @@ class ElasticManager:
         hits_total_value, hits = self.postprocess(r.text)
         return hits_total_value, hits
 
-    def search(self, query, communities, page=0, page_size=10):
+    def search(self, query, communities, user_id=None, page=0, page_size=10):
 
         """
         The method for searching a query over all of the saved webpage submissions.
@@ -223,9 +225,6 @@ class ElasticManager:
             "min_score": 0.1
         }
 
-        # <mark>
-        # </mark>
-
         if self.index_name != os.environ["elastic_webpages_index_name"]:
             filter = {
                 "bool": {
@@ -234,8 +233,14 @@ class ElasticManager:
                     ]
                 }
             }
+
+            # for filtering submissions by hashtag
             if query_obj["hashtags"]:
                 filter["bool"]["must"].append({"terms": {"hashtags": query_obj["hashtags"]}})
+
+            # for searching submissions by a specific user
+            if user_id:
+                filter["bool"]["must"].append({"term": {"user_id": user_id}})
 
             query_comm["query"]["bool"]["filter"] = filter
             query_comm["highlight"]["fields"] = {
@@ -295,6 +300,8 @@ class ElasticManager:
             # for ordering by time
             time = int(float(doc.time))
 
+            anonymous = doc.anonymous
+
             explanation = doc.explanation
             source_url = doc.source_url
 
@@ -311,7 +318,8 @@ class ElasticManager:
                 "communities": flat_communities,
                 "user_id": user_id,
                 "hashtags": hashtags,
-                "time": time
+                "time": time,
+                "anonymous": anonymous
             }
 
         elif self.index_name == os.environ["elastic_webpages_index_name"]:
@@ -434,8 +442,6 @@ class ElasticManager:
         try:
             text = text.encode("latin1", errors="strict").decode("utf8", errors="strict")
         except Exception as e:
-            #print(e)
-            #traceback.print_exc()
             text = text.encode("utf8", errors="ignore").decode("utf8", errors="ignore")
         
         try:
@@ -446,7 +452,6 @@ class ElasticManager:
         except Exception as e:
             print(e)
             traceback.print_exc()
-            print(text)
             return 0, []
 
         return hits["total"]["value"], hits["hits"]

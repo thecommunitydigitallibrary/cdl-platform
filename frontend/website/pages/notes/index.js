@@ -84,7 +84,7 @@ function Notes({ data }) {
   return (
     <div>
       <Head>
-        <title>Notes - The CDL</title>
+        <title>Notes - TextData</title>
         <link rel="icon" href="/images/tree32.png" />
       </Head>
       <div className="allResults">

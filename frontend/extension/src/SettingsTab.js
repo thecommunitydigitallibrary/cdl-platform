@@ -33,7 +33,7 @@ export default function ImgMediaCard({setUrlState}) {
   const [selectedValue, setSelectedValue] = React.useState((backendSource === null || backendSource === TEXTDATA_URL) ? TEXTDATA_URL : 'other');
   const [disabled, setDisabled] = React.useState(selectedValue !== "other");
   const [source, setSource] = React.useState(selectedValue === "other" ? backendSource : LOCALHOST_DEFAULT);
-  const [detaultTab, setDefaultTab] = React.useState(localStorage.getItem('defaultTab') === null ? "search" : localStorage.getItem('defaultTab'));
+  const [detaultTab, setDefaultTab] = React.useState(localStorage.getItem('defaultTab') === null ? "find" : localStorage.getItem('defaultTab'));
   const handleClick = () => {
     setOpen(true);
   };
@@ -117,8 +117,8 @@ export default function ImgMediaCard({setUrlState}) {
             value={detaultTab}
             onChange={handleDefaultTabChange}
           >
-            <FormControlLabel value="search" control={<Radio/>} label="Search"/>
             <FormControlLabel value="submit" control={<Radio/>} label="Submit"/>
+            <FormControlLabel value="find" control={<Radio/>} label="Find"/>
           </RadioGroup>
           <FormLabel id="demo-controlled-radio-buttons-group">Backend Source</FormLabel>
           <RadioGroup

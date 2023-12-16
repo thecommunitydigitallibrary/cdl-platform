@@ -127,8 +127,9 @@ export default function CommunityBox(props) {
     Router.push({
       pathname: "/visualizemap",
       query: {
-        communityId: props.communityId,
-        communityName: props.name
+        community: props.communityId,
+        communityName: props.name,
+        levelfilter: "hashtags;topics;metadescs"
       }
     });
   }
