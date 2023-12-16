@@ -102,7 +102,7 @@ export default function SignIn() {
             style={{fontSize: 20}}
             href={localStorage.getItem('backendSource')}
           >
-            The Community Digital Library
+            TextData
           </a>
           <Typography component="h1" variant="h5">
             Sign in

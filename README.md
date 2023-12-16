@@ -1,12 +1,12 @@
-# The Community Digital Library 
-The Community Digital Library (CDL) is an online and open-source social bookmarking platform that allows you to collaboratively describe and save, search for, and discover webpages related to your interests. We offer a stand-alone website and a Chrome extension, all for free.
+# TextData
+TextData is an online and open-source platform that helps you save what you know and find what you don't. We offer a stand-alone website and a Chrome extension, all for free.
 
 
-To use the CDL, you have three options:
+To use TextData, you have three options:
 
-1. Full online version: Visit [the CDL website](https://textdata.org/), install the [Chrome extension](https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0), create an account, and begin using the CDL.
+1. Full online version: Visit [textdata.org](https://textdata.org/), install the [Chrome extension](https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0), create an account, and begin using TextData.
 2. Full offline version: Clone this repository, set up Docker, and run the services locally. This is described in the section below titled "Setting Up the Local Version".
-3. Hosted backend, local frontend: You can leverage the APIs for the backend of the CDL, and create or extend your own frontend (website or browser extension). The API documentation is [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
+3. Hosted backend, local frontend: You can leverage the APIs for the backend, and create or extend your own frontend (website or browser extension). The API documentation is [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
 
 <details>
 <summary>Setting Up the Offline Version</summary>
@@ -185,10 +185,10 @@ The `--type` is another optional argument that takes two values: `submissions` o
 </details>
 
 <details>
-<summary>Building on Top of the Hosted CDL</summary>
+<summary>Building on Top of the Hosted Backend</summary>
 <br>
 
-## Building on Top of the Hosted CDL
+## Building on Top of the Hosted Backend
 See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend). Please be courteous regarding the amount of API calls so that the backend servers do not get overwhelmed.
 
 </details>
@@ -203,8 +203,8 @@ For any single bug fix or small feature: fork this repository, make a pull reque
 For a longer-term collaboration, big feature, or large change, please send an email to ``kjros2@illinois.edu``. 
 </details>
 
-- [Kevin Ros](https://kevinros.github.io/) is a 4th year Ph.D. student at the University of Illinois Urbana Champaign. This is the main component of his thesis project. He built the initial version of the CDL platform and has led its development since its beginning (September 2022). 
-- [ChengXiang Zhai](https://czhai.cs.illinois.edu/) is Kevin's advisor, and he has played a crucial role in shaping the vision of the CDL. Moreover, he has provided the grant funding to support the CDL infrastructure, the research, and the development.
+- [Kevin Ros](https://kevinros.github.io/) is a 4th year Ph.D. student at the University of Illinois Urbana Champaign. This is the main component of his thesis project. He built the initial version of the platform and has led its development since its beginning (September 2022). 
+- [ChengXiang Zhai](https://czhai.cs.illinois.edu/) is Kevin's advisor, and he has played a crucial role in shaping the vision. Moreover, he has provided the grant funding to support the infrastructure, the research, and the development.
 - Current contributors: Rakshana Jayaprakash, Dhyey Pandya, Kedar Takwane, and Sharath Chandra.
 - Past contributors: Ashwin Patil, Alvin Zhang, Nikhitha Reddeddy, Heth Gala
 

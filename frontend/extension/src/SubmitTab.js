@@ -262,7 +262,7 @@ export default function ImgMediaCard({setUrlState}) {
           CLEAR
         </Button>
         <Button variant="contained" style={{padding: 14, width: "48%"}} onClick={onSubmit}>
-          SUBMIT
+          SAVE
         </Button>
       </div>
 
