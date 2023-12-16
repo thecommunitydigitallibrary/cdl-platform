@@ -1,6 +1,4 @@
-import Image from "next/image";
 import Container from "./container";
-import heroImg from "../../public/images/cdl-ss.png";
 import jsCookie from "js-cookie";
 
 import React, { useState, useEffect } from "react";
@@ -19,7 +17,7 @@ const Hero = () => {
   return (
     <>
       <Container className="flex flex-wrap">
-        <div className="flex items-center w-full h-full lg:w-2/3 px-2">
+        <div className="flex items-center w-full h-full lg:w-2/4 px-2">
           <div className="max-w-2xl ml-6 mt-30">
             <h1 className="text-4xl font-bold leading-snug tracking-tight text-gray-800 lg:text-3xl lg:leading-tight xl:text-5xl xl:leading-tight dark:text-white">
               TextData
@@ -76,18 +74,11 @@ const Hero = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-center w-full lg:w-1/3">
-          <div className="">
-            <Image
-              src={heroImg}
-              width="600"
-              height="500"
-              className={"object-cover"}
-              alt="Hero"
-              loading="eager"
-              placeholder="blur"
-            />
-          </div>
+        <div className="flex items-center justify-center w-full lg:w-2/4">
+          <video muted controls autoPlay loop>
+            <source src="/images/extension_find.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
       </Container>
 
