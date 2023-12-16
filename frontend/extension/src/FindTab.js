@@ -96,7 +96,7 @@ export default function FindTab() {
     for (let i=0; i < bod.length; i++) {
       if (i in response) {
         if (response[i]["indexed_cdl"]["results"].length > 0) {
-          var html = '<div style="background-color: #FF0000;"><h4>CDL - Indexed by the CDL</h4>Keywords: ' + response[i]["indexed_cdl"]["keywords"].join(", ") + '<ul>'
+          var html = '<div style="background-color: #FF0000;"><h4>Indexed by TextData</h4>Keywords: ' + response[i]["indexed_cdl"]["keywords"].join(", ") + '<ul>'
           for (let k=0; k < response[i]["indexed_cdl"]["results"].length; k++) {
             var url = response[i]["indexed_cdl"]["results"][k]["url"]
             var title = response[i]["indexed_cdl"]["results"][k]["title"]
@@ -107,7 +107,7 @@ export default function FindTab() {
         }
 
         if (response[i]["submitted_community"]["results"].length > 0) {
-          var html = '<div style="background-color: #FFEA00;"><h4>CDL - Submitted by Other Community Members</h4>Keywords: ' + response[i]["submitted_community"]["keywords"].join(", ") + '<ul>'
+          var html = '<div style="background-color: #FFEA00;"><h4>Saved by Other Community Members</h4>Keywords: ' + response[i]["submitted_community"]["keywords"].join(", ") + '<ul>'
           for (let k=0; k < response[i]["submitted_community"]["results"].length; k++) {
             var url = response[i]["submitted_community"]["results"][k]["url"]
             var title = response[i]["submitted_community"]["results"][k]["title"]
@@ -118,7 +118,7 @@ export default function FindTab() {
         }
 
         if (response[i]["submitted_you"]["results"].length > 0) {
-          var html = '<div style="background-color: #00FF00;"><h4>CDL - Submitted by You</h4>Keywords: ' + response[i]["submitted_you"]["keywords"].join(", ") + '<ul>'
+          var html = '<div style="background-color: #00FF00;"><h4>Saved by You</h4>Keywords: ' + response[i]["submitted_you"]["keywords"].join(", ") + '<ul>'
           for (let k=0; k < response[i]["submitted_you"]["results"].length; k++) {
             var url = response[i]["submitted_you"]["results"][k]["url"]
             var title = response[i]["submitted_you"]["results"][k]["title"]
@@ -471,7 +471,7 @@ export default function FindTab() {
           
           <Box style={{ bgcolor: "background.paper" }}>
             <div>
-            {comparisonResults.submitted_you.results.length !== 0 && (<div><h4>Submitted by You</h4><p>Keywords: {comparisonResults.submitted_you.keywords}</p></div>)}
+            {comparisonResults.submitted_you.results.length !== 0 && (<div><h4>Saved by You</h4><p>Keywords: {comparisonResults.submitted_you.keywords}</p></div>)}
             {comparisonResults.submitted_you.results.length !== 0 && (
               comparisonResults.submitted_you.results.map((d, idx) => (
                 <div key={idx} style={{ width: "100%", textAlign: "left" }}>
@@ -491,7 +491,7 @@ export default function FindTab() {
                 </div>
               )))}
 
-            {comparisonResults.submitted_community.results.length !== 0 && (<div><h4>Submitted by Other Community Members</h4><p>Keywords: {comparisonResults.submitted_community.keywords}</p></div>)}
+            {comparisonResults.submitted_community.results.length !== 0 && (<div><h4>Saved by Other Community Members</h4><p>Keywords: {comparisonResults.submitted_community.keywords}</p></div>)}
             {comparisonResults.submitted_community.results.length !== 0 && (
               comparisonResults.submitted_community.results.map((d, idx) => (
                 <div key={idx} style={{ width: "100%", textAlign: "left" }}>
@@ -511,7 +511,7 @@ export default function FindTab() {
                 </div>
               )))}
 
-            {comparisonResults.indexed_cdl.results.length !== 0 && (<div><h4>Indexed by the CDL</h4><p>Keywords: {comparisonResults.indexed_cdl.keywords}</p></div>)}
+            {comparisonResults.indexed_cdl.results.length !== 0 && (<div><h4>Indexed by TextData</h4><p>Keywords: {comparisonResults.indexed_cdl.keywords}</p></div>)}
             {comparisonResults.indexed_cdl.results.length !== 0 && (
               comparisonResults.indexed_cdl.results.map((d, idx) => (
                 <div key={idx} style={{ width: "100%", textAlign: "left" }}>

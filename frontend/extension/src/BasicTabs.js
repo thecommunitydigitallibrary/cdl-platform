@@ -85,10 +85,10 @@ export default function BasicTabs() {
           <Box sx={{borderBottom: 1, borderColor: 'divider', float: "center"}}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" style={{textAlign: "center"}}>
               <Tab style={{width: "25%", float: "left"}}
-                   label={<div style={{padding: 0, margin: 0}}><h3 style={{margin: 0}}>CDL</h3>
+                   label={<div style={{padding: 0, margin: 0}}><h3 style={{margin: 0}}>TextData</h3>
                    </div>} {...a11yProps(0)} />
               <Tab style={{width: "25%", float: "left"}}
-                   label={<div><UploadFileOutlinedIcon style={{verticalAlign: 'middle'}}/> Submit </div>} {...a11yProps(1)} />
+                   label={<div><UploadFileOutlinedIcon style={{verticalAlign: 'middle'}}/> Save </div>} {...a11yProps(1)} />
               <Tab style={{width: "25%", float: "left"}}
                    label={<div><FindInPageIcon style={{verticalAlign: 'middle'}}/> Find
                    </div>} {...a11yProps(2)} />

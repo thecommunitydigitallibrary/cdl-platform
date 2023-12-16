@@ -1,4 +1,4 @@
-# The CDL Extension
+# The Chrome Extension
 
 ``npm install``
 

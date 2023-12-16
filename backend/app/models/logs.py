@@ -20,7 +20,8 @@ class Logs(Mongo):
 			deleted=log_db.get("deleted", False),
 			submit_time=log_db["time"],
 			type="submit_context",
-			id=log_db["_id"]
+			id=log_db["_id"],
+			anonymous=log_db.get("anonymous", True)
 		)
 
 	def insert(self, log):
@@ -32,12 +33,13 @@ class Logs(Mongo):
 			"explanation": log.explanation,
 			"type": "submit_context",
 			"communities": log.communities,
-			"time": log.time
+			"time": log.time,
+			"anonymous": log.anonymous
 		})
 		return inserted
 
 class Log:
-	def __init__(self, ip, user_id, highlighted_text, source_url, explanation, communities, deleted=False,
+	def __init__(self, ip, user_id, highlighted_text, source_url, explanation, communities, deleted=False, anonymous=True,
 				 submit_time=None, type="submit_context", id=None):
 		self.id = id
 		self.ip = ip
@@ -49,6 +51,7 @@ class Log:
 		self.type = type,
 		self.time = time.time() if not submit_time else submit_time
 		self.deleted = deleted
+		self.anonymous = anonymous
 
 	def to_dict(self):
 		return {
@@ -61,6 +64,7 @@ class Log:
 			"communities": self.communities,
 			"type": self.type,
 			"time": self.time,
-			"deleted": self.deleted
+			"deleted": self.deleted,
+			"anonymous": self.anonymous
 
 		}

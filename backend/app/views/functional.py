@@ -31,6 +31,8 @@ from app.views.communities import get_communities_helper
 from app.views.logs import log_connection, log_submission, log_click, log_community_action, log_submission_view, \
     log_search, log_recommendation_request, log_recommendation_click, log_webpage
 from elastic.manage_data import ElasticManager
+from app.models.users import Users
+
 
 functional = Blueprint('functional', __name__)
 CORS(functional)
@@ -142,9 +144,10 @@ def create_submission(current_user):
 		current_user : (dictionary): the user recovered from the JWT token.
 		request form with
 			highlighted_text/description : (string) : any highlighted text from the user's webpage (can be "").
-			source_url : (string) : the full URL of the webpage being submitted. As of 11/8/2023, this is now optional, and default's to the CDL's submission URL if left blank.
+			source_url : (string) : the full URL of the webpage being submitted. As of 11/8/2023, this is now optional, and default's to TextData's submission URL if left blank.
 			explanation/title : (string) : the reason provided by the user for why the webpage is helpful.
 			community : (string) : the ID of the community to add the result to
+            anonymous : (bool) : true or false, to display the creator's username on the submission
 
 	Returns:
 		200 : a dictionary with "status" = "ok and a note in the "message" field.
@@ -163,9 +166,17 @@ def create_submission(current_user):
         source_url = req.get("source_url")
         explanation = req.get("explanation") or req.get("title")
         community = req.get("community", "")
+        anonymous = req.get("anonymous", True) # assume anonymous if not included
+        # convert from extension
+        if anonymous == "false":
+            anonymous = False
+        if anonymous == "true":
+            anonymous = True
+
+        
 
         message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
-                                 source_url=source_url, explanation=explanation, community=community)
+                                 source_url=source_url, explanation=explanation, community=community, anonymous=anonymous)
 
         if status == Status.OK:
             return response.success({
@@ -195,6 +206,7 @@ def create_batch_submission(current_user):
 				highlighted_text/description : (string) : any highlighted text from the user's webpage (can be "").
 				source_url : (string) : the full URL of the webpage where the extension is opened.
 				explanation/title : (string) : the reason provided by the user for why the webpage is helpful.
+                anonymous : (bool) : if false, displays username on submission
 
 	Returns:
 		In all cases, a status code and a list containing the status/error message (if any) for each attempted submission.
@@ -203,6 +215,7 @@ def create_batch_submission(current_user):
     r = request.get_json()
     data = r['data']
     community = r['community']
+    anonymous = r.get("anonymous", True)
     results = {}
     errors = []
     for i, submission in enumerate(data):
@@ -215,7 +228,7 @@ def create_batch_submission(current_user):
             explanation = submission["title"]
 
             message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
-                                source_url=source_url, explanation=explanation, community=community)
+                                source_url=source_url, explanation=explanation, community=community, anonymous=anonymous)
             
             if status == Status.OK:
                 results[f'Submission {i}'] = {
@@ -339,6 +352,7 @@ def submission(current_user, id):
 				highlighted_text : (str) : the new highlighted text
 				explanation : (str) : the new description
 				url : (str) : the new url
+                anonymous : (bool) : the new anonymous setting
 			Response:
 				On error, a JSON dictionary with "status" as "error" and a message.
 				On success, a JSON dictionary with "status" as "ok" and a message.
@@ -429,6 +443,7 @@ def submission(current_user, id):
             highlighted_text = sanitize_input(request_json.get("description", None))
             explanation = request_json.get("title", None)
             source_url = request_json.get("source_url", None)
+            anonymous = request_json.get("anonymous", True)
 
             user_id = str(user_id)
 
@@ -493,11 +508,14 @@ def submission(current_user, id):
                     insert_obj["source_url"] = source_url
 
 
+
+            if submission.anonymous != anonymous:
+                insert_obj["anonymous"] = anonymous
+
+
             update = cdl_logs.update_one({"_id": ObjectId(id)}, {"$set": insert_obj})
 
             if update.acknowledged:
-
-
 
                 # a submission is added to a new community
                 if community_id:
@@ -541,6 +559,9 @@ def submission(current_user, id):
 
                 if "source_url" in insert_obj:
                     submission.source_url = source_url
+
+                if "anonymous" in insert_obj:
+                    submission.anonymous = anonymous
 
                 deleted_index_status = elastic_manager.delete_document(id)
                 added_index_status, hashtags = elastic_manager.add_to_index(submission)
@@ -869,6 +890,8 @@ def context_analysis(current_user):
 
     blob = TextBlob(highlighted_text)
     keywords = [x for x in list(set(" ".join([x for x in blob.noun_phrases]).split())) if len(x) > 3]
+    if keywords == []:
+        keywords = highlighted_text.split()
     ht_stats["keywords"] = keywords
 
     metadata = {
@@ -878,9 +901,6 @@ def context_analysis(current_user):
         "subset": "own_submissions"
     }
 
-
-    user_id = str(user_id)
-
     
     if keywords:
         seen_urls = {}
@@ -889,7 +909,8 @@ def context_analysis(current_user):
         # first search over all of your submissions
         recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
         recommendation_id = str(recommendation_id)
-        _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, user_id, own_submissions=True, toggle_webpage_results=False, url_core_retrieve=url)
+        _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, str(user_id), own_submissions=True, 
+                               toggle_webpage_results=False, url_core_retrieve=url, method="recommendation")
         if hits:
             remaining_keywords, used_keywords, results, seen_urls = process_keywords_hits(keywords, hits, seen_urls)
             ht_stats["submitted_you"]["keywords"] = used_keywords
@@ -902,7 +923,8 @@ def context_analysis(current_user):
             metadata["subset"] = "community_submissions"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
             recommendation_id = str(recommendation_id)
-            _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, user_id, own_submissions=False, toggle_webpage_results=False, url_core_retrieve=url)
+            _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, str(user_id), own_submissions=False, 
+                                    toggle_webpage_results=False, url_core_retrieve=url, method="recommendation")
             if hits:
                 remaining_keywords, used_keywords, results, seen_urls = process_keywords_hits(keywords, hits, seen_urls)
                 ht_stats["submitted_community"]["keywords"] = used_keywords
@@ -912,19 +934,17 @@ def context_analysis(current_user):
 
         # finally search over all webpages
         if keywords:
-            metadata["subset"] = "cdl_index"
+            metadata["subset"] = "auto_indexed"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
             recommendation_id = str(recommendation_id)
-            _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, user_id, own_submissions=False, toggle_webpage_results=True, url_core_retrieve=False, toggle_submission_results=False)
+            _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, str(user_id), own_submissions=False,
+                                    toggle_webpage_results=True, url_core_retrieve=False, toggle_submission_results=False, method="recommendation")
 
             if hits:
                 remaining_keywords, used_keywords, results, seen_urls= process_keywords_hits(keywords, hits, seen_urls)
                 ht_stats["indexed_cdl"]["keywords"] = used_keywords
                 ht_stats["indexed_cdl"]["results"] = results
                 keywords = remaining_keywords
-
-
-    print(ht_stats)
 
     return response.success({"analyzed_ht": ht_stats}, Status.OK)
 
@@ -1301,7 +1321,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
 ### HELPERS that cannot be removed (yet)###
 
-def create_submission_helper(ip=None, user_id=None, user_communities=None, highlighted_text=None, source_url=None, explanation=None, community=None):
+def create_submission_helper(ip=None, user_id=None, user_communities=None, highlighted_text=None, source_url=None, explanation=None, community=None, anonymous=True):
     # assumed string, so check to make sure is not none
     if highlighted_text == None:
         highlighted_text = ""
@@ -1329,7 +1349,7 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
         return message, Status.BAD_REQUEST, None
 
     # for logging a top-level submission
-    status, doc = log_submission(ip, user_id, highlighted_text, source_url, explanation, community)
+    status, doc = log_submission(ip, user_id, highlighted_text, source_url, explanation, community, anonymous)
 
     if status.acknowledged:
         doc.id = status.inserted_id
@@ -1385,7 +1405,7 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     else:
         return "Unable to make submission. Please try again later.", Status.INTERNAL_SERVER_ERROR, None
 
-def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True, url_core_retrieve=None, toggle_submission_results=True):
+def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True, url_core_retrieve=None, toggle_submission_results=True, method="search"):
     """
 	Helper function for pulling search results.
 	Arguments:
@@ -1521,7 +1541,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             pages = deduplicate(pages)
             print("\tDedup: ", time.time() - start_time)
 
-            pages = hydrate_with_hash_url(pages, search_id, page=index)
+            pages = hydrate_with_hash_url(pages, search_id, page=index, method=method)
             print("\tURL: ", time.time() - start_time)
 
             pages = hydrate_with_hashtags(pages)
@@ -1565,6 +1585,8 @@ def format_webpage_for_display(webpage, search_id):
     submission["user_id"] = None
     submission["highlighted_text"] = webpage["webpage"]["metadata"].get("description", "No Preview Available")
     submission["explanation"] = webpage["webpage"]["metadata"].get("title")
+    if submission["explanation"] == "":
+        submission["explanation"] = webpage["webpage"]["metadata"].get("h1")
         
     display_time = format_time_for_display(webpage["scrape_time"])
     submission["time"] = display_time
@@ -1660,7 +1682,19 @@ def format_submission_for_display(submission, current_user, search_id):
 
     # convert some ObjectIDs to strings for serialization
     submission["submission_id"] = str(submission["_id"])
-    submission["user_id"] = str(submission["user_id"])
+
+    
+
+    # Old submissions may not have the anonymous field, default to true
+    is_anonymous  = submission.get("anonymous", True)
+    if not is_anonymous:
+        cdl_users = Users()
+        creator = cdl_users.find_one({"_id": ObjectId(submission["user_id"])})
+        if creator:
+            submission["username"] = creator.username
+
+    # Now that we return usernames, need to delete this
+    del submission["user_id"]
 
     display_time = format_time_for_display(submission["time"])
 

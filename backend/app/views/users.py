@@ -97,12 +97,12 @@ def send_reset_email(username, token, email):
 
 	content = "<text>Hi " + username + ",<br/><br/> Here is your password reset link: " + \
 	reset_url + "<br/><br/>" + \
-	"This link will expire in 72 hours.<br/><br/> If you experience any problems, please contact:<br/> Kevin Ros at kjros2@illinois.edu<br/>CDL Developer<br/>https://textdata.org"
+	"This link will expire in 72 hours.<br/><br/> If you experience any problems, please contact:<br/> Kevin Ros at kjros2@illinois.edu<br/>TextData Developer<br/>https://textdata.org"
 
 	message = Mail(
 		from_email='no-reply@textdata.org',
 		to_emails=email,
-		subject='Community Digital Library Password Reset',
+		subject='TextData Password Reset',
 		html_content=content)
 	try:
 		sg = SendGridAPIClient(os.environ.get('sendgrid_api'))

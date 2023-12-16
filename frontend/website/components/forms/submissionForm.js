@@ -21,6 +21,10 @@ import DialogContentText from "@mui/material/DialogContentText";
 import MenuItem from "@mui/material/MenuItem";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Checkbox from '@mui/material/Checkbox';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+
 
 import Box from '@mui/material/Box';
 
@@ -58,6 +62,16 @@ export default function SubmissionForm(props) {
     const [connection, setConnection] = useState("")
 
     const [currentQuery, setCurrentQuery] = useState("")
+
+    const [isAnonymous, setAnonymous] = useState(props.username == undefined)
+
+    const handleAnonymous = async (event) => {
+        if (isAnonymous) {
+            setAnonymous(false)
+        } else {
+            setAnonymous(true)
+        }
+    }
 
     const handleAutoSuggestClick = async (event) => {
 
@@ -118,7 +132,8 @@ export default function SubmissionForm(props) {
             community: community,
             source_url: sourceURL,
             title: title,
-            description: description
+            description: description,
+            anonymous: isAnonymous
         }
 
         
@@ -262,6 +277,14 @@ export default function SubmissionForm(props) {
                     {suggestions ? suggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                 </Box>
 
+                <FormGroup>
+                    <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
+                </FormGroup>
+                                
+                <br/>
+
+
+
                 {(props.method == "create" || props.method == "reply") ?
                     <FormControl
                         sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
@@ -326,7 +349,7 @@ export default function SubmissionForm(props) {
 
             <DialogActions>
                 <Button onClick={props.handle_close}>Cancel</Button>
-                <Button onClick={handleSubmit}>Submit</Button>
+                <Button onClick={handleSubmit}>Save</Button>
             </DialogActions>
             <Snackbar open={openSnackbar} autoHideDuration={6000} >
                 <Alert

@@ -259,7 +259,7 @@ export default function ({ data }) {
     return (
       <div className="Auth-form-container">
         <Head>
-          <title>Sign In - The CDL</title>
+          <title>Sign In - TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
 
@@ -267,7 +267,7 @@ export default function ({ data }) {
 
           <div className="Auth-form-content">
             <h3 className="Auth-form-title">
-              <a href="/about">Community Digital Library</a>
+              <a href="/about">TextData</a>
             </h3>
 
             <div className="form-group mt-3">
@@ -332,13 +332,13 @@ export default function ({ data }) {
     return (
       <div className="Auth-form-container">
         <Head>
-          <title>Create an Account - The CDL</title>
+          <title>Create an Account - TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
         <form className="Auth-form" onSubmit={handleCreateAccount}>
           <div className="Auth-form-content">
             <h3 className="Auth-form-title">
-              <a href="/about">Community Digital Library</a>
+              <a href="/about">TextData</a>
             </h3>
 
             <div className="form-group mt-3">
@@ -435,7 +435,7 @@ export default function ({ data }) {
     return (
       <div className="Auth-form-container">
         <Head>
-          <title>Request Password Reset - The CDL</title>
+          <title>Request Password Reset - TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
         <div className="d-grid gap-2 mt-3">
@@ -532,7 +532,7 @@ export default function ({ data }) {
     return (
       <div className="Auth-form-container">
         <Head>
-          <title>Reset Password - The CDL</title>
+          <title>Reset Password - TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
         <div className="d-grid gap-2 mt-3">

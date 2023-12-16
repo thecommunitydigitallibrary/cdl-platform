@@ -7,7 +7,8 @@
           "communities": {"type": "keyword"},
           "hashtags": {"type": "keyword"},
           "time": {"type": "date"},
-          "user_id": {"type": "keyword"}
+          "user_id": {"type": "keyword"},
+          "anonymous": {"type": "boolean"}
         }
       }
   }

@@ -65,6 +65,10 @@ def generate():
 
     if not generate_model:
         return {"message": "Generation model not initialized."}, 500
+
+    """
+    VERSION: 0
+    """
     
     if mode == "qa":
         if not query:
@@ -81,7 +85,7 @@ def generate():
     elif mode == "summarize":
         if not context:
             return {"message": "Context required for question generation."}, 400
-        prompt = context + "... Please summarize the previous text. Summary: "
+        prompt = context + "... Please summarize the previous text, and only reply with the summary. Summary: "
     
     try:
         with torch.no_grad():

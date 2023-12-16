@@ -624,7 +624,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     var communityNamesList = [];
   }
 
-  var page_title = " - The CDL"
+  var page_title = " - TextData"
 
   if (submissionDataResponse.submission) {
     page_title = submissionDataResponse.submission.explanation + page_title
@@ -780,6 +780,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               </div>
 
             </div>
+
+            {submissionDataResponse.submission.username && "Submitted by " + submissionDataResponse.submission.username}
 
 
 
@@ -1139,6 +1141,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 title={submissionDataResponse.submission.explanation}
                 description={submissionDataResponse.submission.highlighted_text}
                 submission_id={submissionDataResponse.submission.submission_id}
+                username={submissionDataResponse.submission.username}
                 handle_close={handleCloseEdit}
               />
             </Dialog>

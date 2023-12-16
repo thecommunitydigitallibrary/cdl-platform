@@ -1,11 +1,11 @@
 {
-	"name": "The Community Digital Library",
-	"description": "A platform to describe, save, search, share, and connect web content.",
-	"version": "0.0.0.3",
+	"name": "TextData",
+	"description": "Save what you know and find what you don't.",
+	"version": "0.0.0.4",
 	"manifest_version": 3,
 	"action": {
 		"default_popup": "index.html",
-		"default_title": "Open The Community Digital Library"
+		"default_title": "Open TextData"
 	},
 	"icons": {
 		"16": "tree16.png",
