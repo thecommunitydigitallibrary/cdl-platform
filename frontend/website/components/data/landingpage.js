@@ -18,41 +18,41 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 
 
 import submissionImg from "../../public/images/submission_page.png";
-import searchRecImg from "../../public/images/search_rec.png";
+import extFindImg from "../../public/images/extension_find_2023-12-15.png";
 
 const benefitOne = {
   title: "Form Communities",
-  desc: "A community is where submissions are saved. A community consists of any number of CDL users, all generally interested in a similar topic.",
+  desc: "A community is where you save information. A community consists of any number of users, all generally interested in a similar topic.",
   image: communityImg,
   link: "community-overview",
   bullets: [
     {
       title: "Create a Community",
-      desc: "Make one for private personal archives, for working on a class project, or for remembering interesting articles.",
+      desc: "Make one for private personal archives, for class notes, for working on a class project, or for thoughts on interesting articles.",
       icon: <AddCircleOutlineIcon />,
     },
     {
       title: "Join a Community",
-      desc: "You can join a community by copy-pasting the community join key (accessible from clicking the 'Key' icon!).",
+      desc: "You can join a community by copy-pasting the community join key (accessible from clicking the 'Key' icon).",
       icon: <ArrowForwardIcon />,
     },
     {
-      title: "Explore with Other Members",
-      desc: "All submissions to a community are accessible by any member of the community.",
+      title: "Collaborate with Others",
+      desc: "All information saved to a community is accessible by any member of the community, and only members of a community can see the content.",
       icon: <PeopleIcon />,
     },
   ],
 };
 
 const benefitTwo = {
-  title: "Make Submissions",
-  desc: "Create markdown-style notes and submit them to any of your communities",
+  title: "Create and Save Information",
+  desc: "Create markdown-style notes and save them to any of your communities.",
   image: submitImg,
   link: "how-to-bookmark",
   bullets: [
     {
-      title: "Optionally Add a Webpage",
-      desc: "Adding a Submission URL will link your notes to an external webpage.",
+      title: "Optionally Add an External URL",
+      desc: "Adding a Submission URL will link your notes to an external webpage. Use this to take notes with respect to something online (e.g., a lecture video).",
       icon: <CreateIcon />,
     },
     {
@@ -70,7 +70,7 @@ const benefitTwo = {
 
 const benefitFour = {
   title: "Interact with Submissions",
-  desc: "Visit a submission's CDL-specific webpage to read, reply, visualize, share.",
+  desc: "Visit a submission's TextData-specific page to read, reply, visualize, share.",
   image: submissionImg,
   link: "submission-overview",
 
@@ -94,14 +94,14 @@ const benefitFour = {
 };
 
 const benefitThree = {
-  title: "Discover Information",
-  desc: "Search and view recommendations from the content submitted to your communities.",
-  image: searchRecImg,
+  title: "Find Information",
+  desc: "Search, view recommendations, ask questions, and more from the content submitted to your communities.",
+  image: extFindImg,
   link: "search-overview",
   bullets: [
     {
-      title: "Search Your Communities",
-      desc: "The submissions to your joined communities are searchable using the website or the extension.",
+      title: "Search and Browse Your Communities",
+      desc: "The submissions to your joined communities are searchable using the search bar on the website or in the extension.",
       icon: <SearchIcon />,
     },
     {
@@ -110,8 +110,8 @@ const benefitThree = {
       icon: <FeedIcon />,
     },
     {
-      title: "Automatic Suggestions",
-      desc: "See recommendations for your queries and while typing submission descriptions in real time.",
+      title: "Interact in Context",
+      desc: "Use the extension to ask questions in context, summarize selected text, and drive curiosity with automatically generated questions.",
       icon: <ChangeCircleIcon />,
     },
   ],

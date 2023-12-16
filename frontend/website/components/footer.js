@@ -151,17 +151,17 @@ export default function Footer(props) {
               <a href="/" className="flex items-center space-x-2 text-2xl font-medium text-blue-500 dark:text-gray-100 no-underline">
                 <Image
                   src="/images/tree48.png"
-                  alt="CDL"
+                  alt="TextData"
                   width="32"
                   height="32"
                   className="w-8"
                 />
-                <span>CDL</span>
+                <span>TextData</span>
               </a>
             </div>
 
             <div className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
-              The Community Digital Library (CDL) is an online and open-source social bookmarking platform that allows you to collaboratively describe and save, search for, and discover webpages related to your interests. We offer a stand-alone website and a Chrome extension, all for free.
+            TextData is an online and open-source platform that helps you save what you know and find what you don't. We offer a stand-alone website and a Chrome extension, all for free.
             </div>
 
 
@@ -234,7 +234,7 @@ export default function Footer(props) {
           <DialogTitle>Feedback</DialogTitle>
           <DialogContent style={{ width: "500px" }}>
             <DialogContentText>
-              If you have any suggestions or feedback for the CDL, you may input
+              If you have any suggestions or feedback, you may input
               it into the field below and submit it.
             </DialogContentText>
             <TextField

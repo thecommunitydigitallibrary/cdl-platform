@@ -397,7 +397,7 @@ const VisualizeMap = () => {
     return (
         <>
             <Head>
-                <title>Visualize - The CDL</title>
+                <title>Visualize - TextData</title>
                 <link rel="icon" href="/images/tree32.png"/>
             </Head>
             <Header/>

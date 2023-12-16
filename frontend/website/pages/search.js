@@ -100,7 +100,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
       <div className="allResults">
         <Head>
           <title>
-            {data.query != "" ? data.query : "Search"} - The CDL
+            {data.query != "" ? data.query : "Search"} - TextData
           </title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
@@ -130,7 +130,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
   return (
     <div className="allResults">
       <Head>
-        <title>{data.query != "" ? data.query : "Search"} - The CDL</title>
+        <title>{data.query != "" ? data.query : "Search"} - TextData</title>
         <link rel="icon" href="/images/tree32.png" />
       </Head>
 

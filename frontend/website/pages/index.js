@@ -124,7 +124,7 @@ function Home({ data }) {
       <div className="allResults">
 
         <Head>
-          <title>The CDL</title>
+          <title>TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
 
@@ -139,7 +139,7 @@ function Home({ data }) {
         >
           <Grid item>
             <div style={{ textAlign: 'center' }}>
-              <h1>The Community Digital Library</h1>
+              <h1>TextData</h1>
             </div>
           </Grid>
           <br/>

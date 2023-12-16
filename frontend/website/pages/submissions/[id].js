@@ -617,7 +617,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
     var communityNamesList = [];
   }
 
-  var page_title = " - The CDL"
+  var page_title = " - TextData"
 
   if (submissionDataResponse.submission) {
     page_title = submissionDataResponse.submission.explanation + page_title

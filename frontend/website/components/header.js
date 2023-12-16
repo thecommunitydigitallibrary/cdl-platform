@@ -406,7 +406,7 @@ function Header(props) {
                   <a>
                     <Image
                       src="/images/tree48.png"
-                      alt="CDL"
+                      alt="TextData"
                       width="40"
                       height="40"
                       className="w-8"
@@ -699,14 +699,14 @@ function Header(props) {
                   <a>
                     <Image
                       src="/images/tree48.png"
-                      alt="CDL"
+                      alt="TextData"
                       width="40"
                       height="40"
                       className="w-8"
                     />
                   </a>
                 </a>
-                <span className="mb-2">CDL</span>
+                <span className="mb-2">TextData</span>
               </div>
 
               {/* Add links below based on what to show on About page when logged out */}

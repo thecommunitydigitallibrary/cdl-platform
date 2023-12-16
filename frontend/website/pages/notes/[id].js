@@ -181,7 +181,7 @@ function Notes({ data }) {
   return (
     <div className="allResults">
       <Head>
-        <title>{originalTitle} - The CDL</title>
+        <title>{originalTitle} - TextData</title>
         <link rel="icon" href="/images/tree32.png" />
       </Head>
 

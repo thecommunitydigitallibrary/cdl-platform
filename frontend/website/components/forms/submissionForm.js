@@ -349,7 +349,7 @@ export default function SubmissionForm(props) {
 
             <DialogActions>
                 <Button onClick={props.handle_close}>Cancel</Button>
-                <Button onClick={handleSubmit}>Submit</Button>
+                <Button onClick={handleSubmit}>Save</Button>
             </DialogActions>
             <Snackbar open={openSnackbar} autoHideDuration={6000} >
                 <Alert

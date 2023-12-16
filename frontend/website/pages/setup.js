@@ -38,7 +38,7 @@ const steps = [
     ),
   },
   {
-    label: "Start using the CDL!",
+    label: "Start using TextData!",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
         Once you are logged in to the Chrome extension and to the website, you are ready to go! More details about submission, connections, and communities
@@ -52,7 +52,7 @@ export default function Setup() {
   return (
    <>
     <Head>
-        <title>Setup - The CDL</title>
+        <title>Setup - TextData</title>
         <link rel="icon" href="/images/tree32.png" />
     </Head>
     <Header/>
@@ -69,7 +69,7 @@ export default function Setup() {
     >
       <h1 style={{ margin: "10px 0px 10px 0px" }}>
         {" "}
-        Setting up the Community Digital Library{" "}
+        Setting up TextData{" "}
       </h1>
       The following instructions will walk you through account creation and Chrome extension setup.
       <VerticalLinearStepper steps={steps} />

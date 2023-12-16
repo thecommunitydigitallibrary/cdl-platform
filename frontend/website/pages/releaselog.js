@@ -19,7 +19,7 @@ export default function ReleaseLog() {
       }}
     >
       <h1 className="text-5xl mb-6" style={{ margin: "10px 0px 0px 0px" }}>
-        CDL Release Log
+        Release Log
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
@@ -140,7 +140,7 @@ export default function ReleaseLog() {
       Miscellaneous
       </h5>
         <ul className="list-disc pl-6">
-            <li className="list-item">Search result whitespace click now navigates to submission's CDL page</li>
+            <li className="list-item">Search result whitespace click now navigates to submission's TextData page</li>
             <li className="list-item">Submission time on search result made smaller</li>
         </ul>
 

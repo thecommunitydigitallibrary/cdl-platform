@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Container from "./container";
-// import heroImg from "../../public/images/test.png";
 import heroImg from "../../public/images/cdl-ss.png";
-import Link from "next/link";
 import jsCookie from "js-cookie";
 
 import React, { useState, useEffect } from "react";
@@ -24,10 +22,13 @@ const Hero = () => {
         <div className="flex items-center w-full h-full lg:w-2/3 px-2">
           <div className="max-w-2xl ml-6 mt-30">
             <h1 className="text-4xl font-bold leading-snug tracking-tight text-gray-800 lg:text-3xl lg:leading-tight xl:text-5xl xl:leading-tight dark:text-white">
-              The Community Digital Library
+              TextData
             </h1>
+            <h3>
+              <b>Save</b> what you know. <b>Find</b> what you don't.
+            </h3>
             <p className="py-5 text-xl leading-normal text-gray-500 lg:text-xl xl:text-xl dark:text-gray-300">
-            The Community Digital Library (CDL) is an online and open-source collaborative knowledge management platform. You can take markdown-style notes, connect them together, visualize them, share them across communities, and search or discover submitted and indexed content related to your interests. We offer a website and a Chrome extension, all for free.
+            TextData is an online and open-source platform that helps you save what you know and find what you don't. Use our website or Chrome browser extension to form communities, bookmark webpages, and take notes to create and save online information. <br/><br/>Then, using everything that you and your collaborators have saved, we'll help you find old information, ask and answer questions, and contextualize new information.            
             </p>
 
             <div className="flex flex-col m-3 items-start space-y-3 sm:space-x-4 sm:space-y-0 sm:items-center sm:flex-row">
