@@ -1,4 +1,4 @@
-# CDL Backend API Documentation
+# Backend API Documentation
 
 All endpoints are under the following base URL: ``https://textdata.org``
 
@@ -11,7 +11,7 @@ Endpoint: ``/api/createAccount``
 ---
 
 #### POST
-Creates a new account for the CDL. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/users.py).
+Creates a new account. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/users.py).
 
 ##### Requires
 Requires the following in the request body:
@@ -24,7 +24,7 @@ Requires the following in the request body:
 On success, status ``200`` with the following JSON body fields:
 - ``username``: Username provided by request.
 - ``token``: Login JWT token for the session.
-- ``userid``: The CDL-generated ID of the user. 
+- ``userid``: The generated ID of the user. 
 
 On failure, status code indicating respective error with body describing the error.
 
@@ -43,7 +43,7 @@ Requires the following in the request body:
 On success, status ``200`` with the following JSON body fields:
 - ``username``: Username provided by request.
 - ``token``: Login JWT token for the session.
-- ``userid``: The CDL-generated ID of the user. 
+- ``userid``: The generated ID of the user. 
 
 On failure, status code indicating respective error with body describing the error.
 
@@ -56,13 +56,13 @@ Endpoint: ``/api/login``
 ---
 
 #### POST
-For a user to log into the CDL. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/users.py).
+For a user to log in. [Implementation File](https://github.com/thecommunitydigitallibrary/cdl-platform/blob/dev/backend/app/views/users.py).
 
 ##### Requires
 Requires the following in the request body:
 
-- ``username``: The CDL username of the account.
-- ``password``: The CDL password of the account.
+- ``username``: The username of the account.
+- ``password``: The password of the account.
 
 ##### Returns
 On success, status ``200`` with the following JSON body fields:
@@ -119,7 +119,7 @@ Requires the following in the request body:
 On success, status ``200`` with the following JSON body fields:
 - ``username``: Username provided by request.
 - ``token``: Login JWT token for the session.
-- ``userid``: The CDL-generated ID of the user. 
+- ``userid``: The generated ID of the user. 
 
 On failure, status code indicating respective error with body describing the error.
 
@@ -485,7 +485,7 @@ Requires the following in the request body (on a new query):
 - ``community``: The community ID to search over. If "all", then the query will be searched over all communities joined by the user.
 - ``page``: The page of the search to be returned. If not included, then defaults to 0. Pages are returned in batches of 10.
 - ``source``: The type of query to perform. This can be one of the following (defaults to ``webpage_search``):
-  - ``webpage_search``: The search performed by a user entering a query on the main CDL website in the search bar.
+  - ``webpage_search``: The search performed by a user entering a query on the main website in the search bar.
   - ``note_automatic``: The search performed automatically when a user edits a notes page.
   - ``extension_open``: The search performed automatically when a user opens the extension.
 
@@ -525,7 +525,7 @@ This API endpoint handles multiple types of recommendation for a user.
 Requires the following in the request body (on a new recommendation request):
 
 - ``method``: The type of recommendation to return. Can either be:
-  - ``recent``: Which will return the most recent submissions to the user's communities (not including CDLWeb or own submissions).
+  - ``recent``: Which will return the most recent submissions to the user's communities (not including own submissions).
   - ``explore_similar_extension``: Which will return most similar submissions to user's communities according to their most recent three submissions and their three most recent extension opens.
 - ``page``: The page of the search to be returned. If not included, then defaults to 0. Pages are returned in batches of 10.
 
@@ -639,7 +639,7 @@ On failure, status code indicating respective error with body describing the err
   highlighted_text : the highlighted text of the submission (actually the description)
   explanation : the explanation of the submission (actually the title)
   time : the string indicating how long ago the submission was made (e.g., "5 days ago", "10 minutes ago")
-  redirect_url : the full URL + metadata so when the user clicks, it redirects through the CDL server to log
+  redirect_url : the full URL + metadata so when the user clicks, it redirects through the server to log
   display_url : the URL displayed to the user (with ">")
   connections : [
       A list of api/submission/<id> GET return objects EXCEPT for the connections field
@@ -659,7 +659,7 @@ On failure, status code indicating respective error with body describing the err
   current_page : the current page being requested by the user
   search_results_page [
     {
-      redirect_url : the full URL + metadata so when the user clicks, it redirects through the CDL server to log
+      redirect_url : the full URL + metadata so when the user clicks, it redirects through the server to log
       display_url : the URL displayed to the user (with ">")
       raw_source_url : the full URL as submitted for editing
       submission_id: the string ObjectId of the submission
