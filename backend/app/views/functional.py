@@ -144,7 +144,7 @@ def create_submission(current_user):
 		current_user : (dictionary): the user recovered from the JWT token.
 		request form with
 			highlighted_text/description : (string) : any highlighted text from the user's webpage (can be "").
-			source_url : (string) : the full URL of the webpage being submitted. As of 11/8/2023, this is now optional, and default's to the CDL's submission URL if left blank.
+			source_url : (string) : the full URL of the webpage being submitted. As of 11/8/2023, this is now optional, and default's to TextData's submission URL if left blank.
 			explanation/title : (string) : the reason provided by the user for why the webpage is helpful.
 			community : (string) : the ID of the community to add the result to
             anonymous : (bool) : true or false, to display the creator's username on the submission
@@ -890,6 +890,8 @@ def context_analysis(current_user):
 
     blob = TextBlob(highlighted_text)
     keywords = [x for x in list(set(" ".join([x for x in blob.noun_phrases]).split())) if len(x) > 3]
+    if keywords == []:
+        keywords = highlighted_text.split()
     ht_stats["keywords"] = keywords
 
     metadata = {
@@ -899,9 +901,6 @@ def context_analysis(current_user):
         "subset": "own_submissions"
     }
 
-
-    user_id = str(user_id)
-
     
     if keywords:
         seen_urls = {}
@@ -910,7 +909,8 @@ def context_analysis(current_user):
         # first search over all of your submissions
         recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
         recommendation_id = str(recommendation_id)
-        _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, user_id, own_submissions=True, toggle_webpage_results=False, url_core_retrieve=url)
+        _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, str(user_id), own_submissions=True, 
+                               toggle_webpage_results=False, url_core_retrieve=url, method="recommendation")
         if hits:
             remaining_keywords, used_keywords, results, seen_urls = process_keywords_hits(keywords, hits, seen_urls)
             ht_stats["submitted_you"]["keywords"] = used_keywords
@@ -923,7 +923,8 @@ def context_analysis(current_user):
             metadata["subset"] = "community_submissions"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
             recommendation_id = str(recommendation_id)
-            _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, user_id, own_submissions=False, toggle_webpage_results=False, url_core_retrieve=url)
+            _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, str(user_id), own_submissions=False, 
+                                    toggle_webpage_results=False, url_core_retrieve=url, method="recommendation")
             if hits:
                 remaining_keywords, used_keywords, results, seen_urls = process_keywords_hits(keywords, hits, seen_urls)
                 ht_stats["submitted_community"]["keywords"] = used_keywords
@@ -933,19 +934,17 @@ def context_analysis(current_user):
 
         # finally search over all webpages
         if keywords:
-            metadata["subset"] = "cdl_index"
+            metadata["subset"] = "auto_indexed"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
             recommendation_id = str(recommendation_id)
-            _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, user_id, own_submissions=False, toggle_webpage_results=True, url_core_retrieve=False, toggle_submission_results=False)
+            _, hits = cache_search(" ".join(keywords), recommendation_id, 0, rc_dict, str(user_id), own_submissions=False,
+                                    toggle_webpage_results=True, url_core_retrieve=False, toggle_submission_results=False, method="recommendation")
 
             if hits:
                 remaining_keywords, used_keywords, results, seen_urls= process_keywords_hits(keywords, hits, seen_urls)
                 ht_stats["indexed_cdl"]["keywords"] = used_keywords
                 ht_stats["indexed_cdl"]["results"] = results
                 keywords = remaining_keywords
-
-
-    print(ht_stats)
 
     return response.success({"analyzed_ht": ht_stats}, Status.OK)
 
@@ -1406,7 +1405,7 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     else:
         return "Unable to make submission. Please try again later.", Status.INTERNAL_SERVER_ERROR, None
 
-def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True, url_core_retrieve=None, toggle_submission_results=True):
+def cache_search(query, search_id, index, communities, user_id, own_submissions=False, toggle_webpage_results=True, url_core_retrieve=None, toggle_submission_results=True, method="search"):
     """
 	Helper function for pulling search results.
 	Arguments:
@@ -1542,7 +1541,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             pages = deduplicate(pages)
             print("\tDedup: ", time.time() - start_time)
 
-            pages = hydrate_with_hash_url(pages, search_id, page=index)
+            pages = hydrate_with_hash_url(pages, search_id, page=index, method=method)
             print("\tURL: ", time.time() - start_time)
 
             pages = hydrate_with_hashtags(pages)
