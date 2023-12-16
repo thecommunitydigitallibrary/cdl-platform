@@ -34,12 +34,20 @@ export default function ReleaseLog() {
             <li className="list-item">Non-anonymous submissions</li>
             <li className="list-item">Generative LLM in extension</li>
         </ul>
+      
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
         Bug Fixes
       </h5>
         <ul className="list-disc pl-6">
             <li className="list-item">Removed empty username login</li>
             <li className="list-item">Properly handle duplicate recommendations on homepage</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Renamed "The Community Digital Library" and "CDL" to "TextData"</li>
+            <li className="list-item">Sharpened message on About page</li>
         </ul>
 
 
