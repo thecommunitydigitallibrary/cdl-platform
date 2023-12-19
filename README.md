@@ -137,20 +137,12 @@ services:
 
 ```
 
-If you would like to add the neural reranking, add the following to the ``docker-compose.yml`` file:
+Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --build``
 
-```
-    neural:
-        depends_on:
-            - api
-        image: neural
-        build: ./neural
-        restart: always
-        ports:
-            - 9300:80
-```
+To stop: ``docker-compose -f docker-compose.yml down``
 
-And add the following to ``backend\env_local.ini``:
+
+If you would like to add the neural options (reranking, generation), add the following to ``backend\env_local.ini`` and restart docker-compose:
 
 ```
 neural_api=http://host.docker.internal:9300/
@@ -158,9 +150,18 @@ neural_api=http://host.docker.internal:9300/
 
 Note that the slashes need to be reversed if running on Mac/Linux (above is written for windows).
 
-Run the docker-compose file: ``docker-compose -f docker-compose.yml up -d --build``
+Then, navigate to the neural folder, add the following to ``env_neural_prod.ini``
 
-To stop: ``docker-compose -f docker-compose.yml down``
+```
+hf_token=<your huggingface token>
+```
+
+Finally, to start the neural docker container (requires GPU), run the following from the ``neural`` folder: 
+
+```
+docker build -t .
+docker run --gpus --env-file env_neural_prod.ini -p 9300:80 hash_of_above_image
+```
 
 #### Extension:
 Navigate to ``frontend\extension`` and run ``npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
