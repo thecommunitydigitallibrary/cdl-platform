@@ -919,6 +919,11 @@ def context_analysis(current_user):
             
 
         # next search over all community submissions
+        """
+        There is an error here where if the keywords do not match in the top 10 from above,
+        then they will be used to search here. But then there is a chance that you pull in your own submissions.
+        so TODO filter this / restrict this to non your submissions
+        """
         if keywords:
             metadata["subset"] = "community_submissions"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)

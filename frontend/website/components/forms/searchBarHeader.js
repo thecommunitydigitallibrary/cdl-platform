@@ -85,15 +85,14 @@ function searchBarHeader(props) {
             return
         }
         if(router.asPath.includes("visualizemap"))
-            window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all&levelfilter=hashtags;topics;metadescs";
-        Router.push({
-            pathname: "/visualizemap",
-            query: {
-                query: encodeURIComponent(inputValue),
-                community: "all",
-                levelfilter: "hashtags;topics;metadescs"
-            },
-        });
+            window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all&levelfilter=topics";
+        alert(inputValue)
+        Router.push(
+            "/visualizemap?query=" +
+            encodeURIComponent(inputValue) +
+            "&community=all" +
+            "&levelfilter=topics"
+        );
     }
 
     return (
