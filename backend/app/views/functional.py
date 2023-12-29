@@ -440,7 +440,8 @@ def submission(current_user, id):
             request_json = request.get_json()
 
             community_id = request_json.get("community", "")
-            highlighted_text = sanitize_input(request_json.get("description", None))
+            #highlighted_text = sanitize_input()
+            highlighted_text = request_json.get("description", None)
             explanation = request_json.get("title", None)
             source_url = request_json.get("source_url", None)
             anonymous = request_json.get("anonymous", True)
@@ -1331,8 +1332,8 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     if highlighted_text == None:
         highlighted_text = ""
 
-    if highlighted_text:
-        highlighted_text = sanitize_input(highlighted_text)
+    #if highlighted_text:
+    #    highlighted_text = sanitize_input(highlighted_text)
 
     # hard-coded to prevent submissions to the web community
     if community == "63a4c21aee3be6ac5c533a55" and str(user_id) != "63a4c201ee3be6ac5c533a54":
