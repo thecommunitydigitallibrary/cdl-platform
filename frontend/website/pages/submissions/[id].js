@@ -33,8 +33,6 @@ import Typography from "@mui/material/Typography";
 
 import Delete from "@mui/icons-material/Delete";
 import DeleteIcon from "@mui/icons-material/Delete";
-//import FeedbackIcon from "@mui/icons-material/Feedback";
-//import AddLinkIcon from "@mui/icons-material/AddLink";
 import ReportIcon from '@mui/icons-material/Report';
 import ReplyIcon from '@mui/icons-material/Reply';
 import ShareIcon from "@mui/icons-material/Share";
@@ -42,7 +40,7 @@ import ActionButton from "../../components/buttons/actionbutton";
 import Edit from "@mui/icons-material/Edit";
 import Close from "@mui/icons-material/Close";
 import Launch from "@mui/icons-material/Launch";
-import Save from "@mui/icons-material/Save";
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
 import ReactDOMServer from 'react-dom/server';
@@ -943,7 +941,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                               size="small"
                               sx={{ background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px" }}
                               onClick={saveSubmission}>
-                              <Save />
+                              <AddBoxIcon />
                             </IconButton>
                           </Tooltip>
                         </Grid>
