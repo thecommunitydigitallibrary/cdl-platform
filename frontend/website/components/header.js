@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import InputLabel from "@mui/material/InputLabel";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import jsCookie from "js-cookie";
 import dynamic from 'next/dynamic'
 import SubmissionForm from "./forms/submissionForm"
@@ -518,7 +519,8 @@ function Header(props) {
                           }
                           className="text-white bg-red-500 rounded-md no-underline"
                         >
-                          Logout
+                        <ExitToAppIcon />
+                        &nbsp;Logout
                         </Button>
                       </MenuItem>
                     </Menu>

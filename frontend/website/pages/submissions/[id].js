@@ -987,7 +987,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   }
                 >
                   <ShareIcon />
-                  &nbsp;Share URL
+                  &nbsp;COPY URL
                 </ActionButton>
               </div>
               <div style={{ width: "20%" }}>
@@ -999,7 +999,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   action={(event) => handleClickOptionsMenu(event, "feedback")}
                 >
                   <FeedbackIcon />
-                  &nbsp;Feedback
+                  &nbsp;Report
                 </ActionButton>
               </div>
               {submissionDataResponse.submission && submissionDataResponse.submission.can_delete && (
