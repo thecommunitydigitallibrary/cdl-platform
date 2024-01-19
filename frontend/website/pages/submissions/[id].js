@@ -966,7 +966,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     )
                   }
                 >
-                  <ReplyIcon /> &nbsp; Reply
+                <Tooltip title="Create a submission in reply to this submission">
+                  <ReplyIcon /> 
+                </Tooltip> &nbsp; Reply
                 </ActionButton>
               </div>
               <div style={{ width: "20%" }}>
@@ -998,7 +1000,9 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   style={{ width: "95%", padding: "8px" }}
                   action={(event) => handleClickOptionsMenu(event, "feedback")}
                 >
+                <Tooltip title="Send a message to the TextData development team about an issue with this submission">
                   <ReportIcon />
+                </Tooltip>
                   &nbsp;Report
                 </ActionButton>
               </div>
