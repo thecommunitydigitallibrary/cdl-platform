@@ -33,14 +33,14 @@ import Typography from "@mui/material/Typography";
 
 import Delete from "@mui/icons-material/Delete";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ReportIcon from '@mui/icons-material/Report';
-import ReplyIcon from '@mui/icons-material/Reply';
+import FeedbackIcon from "@mui/icons-material/Feedback";
+import AddLinkIcon from "@mui/icons-material/AddLink";
 import ShareIcon from "@mui/icons-material/Share";
 import ActionButton from "../../components/buttons/actionbutton";
 import Edit from "@mui/icons-material/Edit";
 import Close from "@mui/icons-material/Close";
 import Launch from "@mui/icons-material/Launch";
-import AddBoxIcon from '@mui/icons-material/AddBox';
+import Save from "@mui/icons-material/Save";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
 import ReactDOMServer from 'react-dom/server';
@@ -941,7 +941,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                               size="small"
                               sx={{ background: "#ddd", borderRadius: "0 4px 4px 0", padding: "8px" }}
                               onClick={saveSubmission}>
-                              <AddBoxIcon />
+                              <Save />
                             </IconButton>
                           </Tooltip>
                         </Grid>
@@ -966,9 +966,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     )
                   }
                 >
-                <Tooltip title="Create a submission in reply to this submission">
-                  <ReplyIcon /> 
-                </Tooltip> &nbsp; Reply
+                  <AddLinkIcon /> &nbsp; Reply
                 </ActionButton>
               </div>
               <div style={{ width: "20%" }}>
@@ -989,7 +987,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   }
                 >
                   <ShareIcon />
-                  &nbsp;COPY URL
+                  &nbsp;Share URL
                 </ActionButton>
               </div>
               <div style={{ width: "20%" }}>
@@ -1000,10 +998,8 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                   style={{ width: "95%", padding: "8px" }}
                   action={(event) => handleClickOptionsMenu(event, "feedback")}
                 >
-                <Tooltip title="Send a message to the TextData development team about an issue with this submission">
-                  <ReportIcon />
-                </Tooltip>
-                  &nbsp;Report
+                  <FeedbackIcon />
+                  &nbsp;Feedback
                 </ActionButton>
               </div>
               {submissionDataResponse.submission && submissionDataResponse.submission.can_delete && (
