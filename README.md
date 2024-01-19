@@ -164,7 +164,7 @@ docker run --gpus --env-file env_neural_prod.ini -p 9300:80 hash_of_above_image
 ```
 
 #### Extension:
-Navigate to ``frontend\extension`` and run ``npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
+Navigate to ``frontend\extension`` and run ``npm ci`` and then run ``npm run build``. Then upload the ``build`` file to Chome while using Development Mode.
 
 
 ### Running Test cases
