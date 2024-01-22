@@ -14,12 +14,16 @@ import MuiAlert from "@mui/material/Alert";
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import MDEditor from '@uiw/react-md-editor';
+import rehypeSanitize from "rehype-sanitize";
+import { getCodeString } from 'rehype-rewrite';
+import katex from "katex";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-export default function ImgMediaCard({setUrlState}) {
+export default function ImgMediaCard({ setUrlState }) {
   const [community, setCommunity] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [isAnonymous, setAnonymous] = React.useState(true);
@@ -46,18 +50,18 @@ export default function ImgMediaCard({setUrlState}) {
 
   const handleAnonymous = async (event) => {
     if (isAnonymous) {
-        setAnonymous(false)
+      setAnonymous(false)
     } else {
-        setAnonymous(true)
+      setAnonymous(true)
     }
-}
+  }
 
   const handleChange = (event) => {
     setCommunity(event.target.value);
   };
 
   let getSelectionText = () => {
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       var url = tabs[0].url;
       window.source_url = url;
       var hasHttp = url.includes("http") || url.includes("https");
@@ -69,7 +73,7 @@ export default function ImgMediaCard({setUrlState}) {
       }
       chrome.scripting.executeScript(
         {
-          target: {tabId: tabs[0].id},
+          target: { tabId: tabs[0].id },
           function: () => getSelection().toString(),
         },
         (result) => {
@@ -126,7 +130,7 @@ export default function ImgMediaCard({setUrlState}) {
     setCommunity("");
   }
 
-  
+
 
   const onSubmit = async () => {
     try {
@@ -194,7 +198,7 @@ export default function ImgMediaCard({setUrlState}) {
       <Box
         component="form"
         sx={{
-          "& .MuiTextField-root": {width: "100%"},
+          "& .MuiTextField-root": { width: "100%" },
           marginTop: "10px",
         }}
         noValidate
@@ -206,23 +210,67 @@ export default function ImgMediaCard({setUrlState}) {
           rows={2}
           value={title}
           onChange={onChangeTitle}
-          placeholder="Title"
+          placeholder="Title7"
         />
       </Box>
       <Box
         component="form"
         sx={{
-          "& .MuiTextField-root": {width: "100%"},
+          "& .MuiTextField-root": { width: "100%" },
           marginTop: "20px",
           marginBottom: "20px"
         }}>
-        <TextField
-          id="outlined-multiline-static"
-          multiline
-          rows={5}
+        <MDEditor
+          variant="standard"
           value={description}
-          onChange={onChangeDescription}
-          placeholder="Highlighted text and/or description"
+          onChange={setDesciption}
+          highlightEnable={false}
+          preview="live"
+          previewOptions={{
+            rehypePlugins: [[rehypeSanitize]],
+            components: {
+              code: ({ inline, children = [], className, ...props }) => {
+                const txt = children[0] || "";
+                if (inline) {
+                  if (
+                    typeof txt === "string" &&
+                    /^\$\$(.*)\$\$/.test(txt)
+                  ) {
+                    const html = katex.renderToString(
+                      txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                      {
+                        throwOnError: false,
+                      }
+                    );
+                    return (
+                      <code dangerouslySetInnerHTML={{ __html: html }} />
+                    );
+                  }
+                  return <code>{txt}</code>;
+                }
+                const code =
+                  props.node && props.node.children
+                    ? getCodeString(props.node.children)
+                    : txt;
+                if (
+                  typeof code === "string" &&
+                  typeof className === "string" &&
+                  /^language-katex/.test(className.toLocaleLowerCase())
+                ) {
+                  const html = katex.renderToString(code, {
+                    throwOnError: false,
+                  });
+                  return (
+                    <code
+                      style={{ fontSize: "150%" }}
+                      dangerouslySetInnerHTML={{ __html: html }}
+                    />
+                  );
+                }
+                return <code className={String(className)}>{txt}</code>;
+              },
+            },
+          }}
         />
       </Box>
       <Box
@@ -231,13 +279,13 @@ export default function ImgMediaCard({setUrlState}) {
         alignItems="center"
         minHeight="2vh"
       >
-        <FormControl style={{width: "100%", maxHeight: 100}}>
+        <FormControl style={{ width: "100%", maxHeight: 100 }}>
           <InputLabel id="demo-simple-select-label">Community</InputLabel>
           <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
             value={community}
-            style={{textAlign: "left"}}
+            style={{ textAlign: "left" }}
             label="Community"
             onChange={handleChange}
           >
@@ -254,20 +302,20 @@ export default function ImgMediaCard({setUrlState}) {
         </FormControl>
       </Box>
       <FormGroup>
-          <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
+        <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
       </FormGroup>
-      <div style={{display: "flex", marginTop: "20px"}}>
-        <Button variant="contained" style={{padding: 14, width: "48%", marginRight: "20px"}}
-                onClick={onClear}>
+      <div style={{ display: "flex", marginTop: "20px" }}>
+        <Button variant="contained" style={{ padding: 14, width: "48%", marginRight: "20px" }}
+          onClick={onClear}>
           CLEAR
         </Button>
-        <Button variant="contained" style={{padding: 14, width: "48%"}} onClick={onSubmit}>
+        <Button variant="contained" style={{ padding: 14, width: "48%" }} onClick={onSubmit}>
           SAVE
         </Button>
       </div>
 
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity={sever} sx={{width: "100%"}}>
+        <Alert onClose={handleClose} severity={sever} sx={{ width: "100%" }}>
           {message}
         </Alert>
       </Snackbar>
