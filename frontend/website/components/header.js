@@ -62,7 +62,7 @@ const json_example = `{
 }
 `;
 // Expectied fields in each submission
-const expected_submission_fields = ["source_url", "description", "title"];
+const expected_submission_fields = ["description", "title"];
 // Separate function for checking each field, hopefully this allows for reusability
 async function validateSubmissionField(
   field_type,
@@ -74,11 +74,6 @@ async function validateSubmissionField(
     if (value == null || value == undefined) {
       errors.push(
         `Submission ${idx}: Invalid type (null or undefined) for ${field_type}`
-      );
-      return false;
-    } else if (value == "") {
-      errors.push(
-        `Submission ${idx}: Expected a non-empty value for ${field_type}`
       );
       return false;
     }
@@ -137,9 +132,14 @@ function Header(props) {
     // Function for validating each submission. Checks if each key is present,
     // and also checks if the values are okay or not.
     async function validateSubmission(submission, issues, idx) {
+      console.log(">>> [TEST] validateSubmission || submission: ", submission);
       var submission_fields = Object.keys(submission);
-      if (submission_fields.length != expected_submission_fields.length)
+      console.log(">>> [TEST] validateSubmission || submission_fields: ", submission_fields);
+      console.log(">>> [TEST] validateSubmission || expected_submission_fields: ", expected_submission_fields);
+      if (submission_fields.length != expected_submission_fields.length) {
+        console.log(">>> [TEST] validateSubmission || return: false");
         return false;
+      }
       var errors = [];
       for (let i = 0; i < expected_submission_fields.length; ++i) {
         // Check if submitted JSON has each key that we need
@@ -161,6 +161,7 @@ function Header(props) {
       let each_submission = input[i];
       await validateSubmission(each_submission, issues, i);
     }
+    console.log(">>> [TEST] validateSubmission || issues:", issues);
     return issues;
   }
   // Necessary States for Alert Message
@@ -219,12 +220,14 @@ function Header(props) {
       // After validating the JSON, if we find any issues (client side)
       // such as missing fields or invalid entries, show Alert message
       if (Object.keys(ret_issues).length > 0) {
+        console.log(">>> [TEST] createNewSubmission || ret_issues > 0: ", ret_issues);
         // Issues found with JSON
         setValidateStatus("error");
         setValidateStatusMessage("Issues found with JSON data!");
         setValidated(true); // Show the first Alert in the modal
         return;
       }
+      console.log(">>> [TEST] createNewSubmission || outside if ");
       setValidateStatus("success");
       setValidateStatusMessage("No issues found with JSON data!");
       setValidated(true);
@@ -251,6 +254,7 @@ function Header(props) {
 
       let resJson = await res.json();
       if (res.status === 200) {
+        console.log(">>> [TEST] createNewSubmission || success");
         setSeverity("success");
         setMessage("Added batch of submissions successfully!");
         handleCloseSubmission();
@@ -258,6 +262,7 @@ function Header(props) {
         setShowProgress(false);
         return;
       } else {
+        console.log(">>> [TEST] createNewSubmission || failed : ", resJson.message);
         setSubmitBatchStatus("error");
         setSubmitBatchMessage("Issues found with some submissions.");
         setFoundIssues(JSON.stringify(resJson.message));

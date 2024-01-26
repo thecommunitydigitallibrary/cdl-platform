@@ -220,13 +220,19 @@ def create_batch_submission(current_user):
     errors = []
     for i, submission in enumerate(data):
         try:
+            print(f'>>> [TEST] create_batch_submission || submission: {submission}')
             ip = request.remote_addr
+            print(f'>>> [TEST] create_batch_submission || ip: {ip}')
             user_id = current_user.id
+            print(f'>>> [TEST] create_batch_submission || user_id: {user_id}')
             user_communities = current_user.communities
+            print(f'>>> [TEST] create_batch_submission || user_communities: {user_communities}')
             highlighted_text = submission["description"]
-            source_url = submission["source_url"]
+            print(f'>>> [TEST] create_batch_submission || highlighted_text: {highlighted_text}')
+            source_url = submission.get("source_url", "")
             explanation = submission["title"]
-
+            print(f'>>> [TEST] create_batch_submission || explanation: {explanation}')
+            print(f'>>> [TEST] create_batch_submission || source_url: {source_url if source_url is not None else "empty"}')
             message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
                                 source_url=source_url, explanation=explanation, community=community, anonymous=anonymous)
             
@@ -1125,6 +1131,36 @@ def search(current_user):
                 search_results_page = search_results_page + additional_results
                 if i > 1000: break
 
+            # If ownSubmissions requested, get user's submissions
+            if "ownSubmissions" in levels:
+                # Creating a new search_id to avoid retrieving cached results from previous search
+                search_id, _ = log_search(ip, user_id, source, query, requested_communities, own_submissions=True, url=url,
+                                          highlighted_text=highlighted_text)
+                search_id = str(search_id)
+
+                total_sub_num_results, sub_search_results_page = cache_search(query, search_id, page, rc_dict,
+                                                                      user_id=user_id_str,
+                                                                      own_submissions=True,
+                                                                      toggle_webpage_results=False,
+                                                                      url_core_retrieve=URL_CORE_RETRIEVE)
+
+                for i in range(10, int(total_sub_num_results), 10):
+                    _, additional_submissions_results = cache_search(query, search_id, i / 10, rc_dict, user_id=user_id_str,
+                                                         own_submissions=True,
+                                                         toggle_webpage_results=False,
+                                                         url_core_retrieve=URL_CORE_RETRIEVE)
+
+                    sub_search_results_page = sub_search_results_page + additional_submissions_results
+                    if i > 1000: break
+
+                own_submissions_ids = set()
+                for sub_obj in sub_search_results_page:
+                    own_submissions_ids.add(sub_obj["submission_id"])
+
+                for sub_obj in search_results_page:
+                    if sub_obj["submission_id"] in own_submissions_ids:
+                        sub_obj["own_page"] = True
+
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
             tm = TopicMap(data_ip, root_label, levels)
@@ -1330,6 +1366,7 @@ def get_recommendations(current_user, toggle_webpage_results = True):
 
 def create_submission_helper(ip=None, user_id=None, user_communities=None, highlighted_text=None, source_url=None, explanation=None, community=None, anonymous=True):
     # assumed string, so check to make sure is not none
+    print(f'>>> [TEST] create_submission_helper || In')
     if highlighted_text == None:
         highlighted_text = ""
 
@@ -1351,17 +1388,20 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     if not explanation:
         return "Missing submission title.", Status.BAD_REQUEST, None
 
+    print(f'>>> [TEST] create_submission_helper || source_url: {source_url}')
+    print(f'>>> [TEST] create_submission_helper || Before Validate submission')
     validated, message = validate_submission(highlighted_text, explanation, source_url=source_url)
     if not validated:
         return message, Status.BAD_REQUEST, None
 
+    print(f'>>> [TEST] create_submission_helper || Before Log submission')
     # for logging a top-level submission
     status, doc = log_submission(ip, user_id, highlighted_text, source_url, explanation, community, anonymous)
 
     if status.acknowledged:
         doc.id = status.inserted_id
         index_status, hashtags = elastic_manager.add_to_index(doc)
-
+        print(f'>>> [TEST] create_submission_helper || After elastic manager add to index')
         # update community core content if necessary
         # only consider when source url is included
         try:
@@ -1381,6 +1421,7 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
 
         if source_url and not scraper.is_scraped_before(source_url):
             try:
+                print(f'>>> [TEST] create_submission_helper || Before Scraper')
                 data = scraper.scrape(source_url)  # Triggering Scraper
                 
 
@@ -1404,6 +1445,7 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
                     else:
                         print("Unable to insert webpage data in database.")
             except Exception as e:
+                print(f'>>> [TEST] create_submission_helper || In Exception')
                 traceback.print_exc()
                 pass
 
