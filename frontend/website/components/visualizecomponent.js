@@ -40,7 +40,8 @@ const levelMap = {
     "communities": "Communities",
     "hashtags": "Hashtags",
     "topics": "Topics",
-    "metadescs": "Meta-descriptors"
+    "metadescs": "Meta-descriptors",
+    "ownSubmissions": "Own Submissions"
 };
 
 const VisualizeMap = () => {
@@ -79,11 +80,12 @@ const VisualizeMap = () => {
         communities: false,
         hashtags: false,
         topics: false,
-        metadescs: false
+        metadescs: false,
+        ownSubmissions: false
     });
-    const {communities, hashtags, topics, metadescs} = checkState;
+    const {communities, hashtags, topics, metadescs, ownSubmissions} = checkState;
     const [filterOrder, setFilterOrder] = useState(arr);
-    const error = [communities, hashtags, topics, metadescs].filter((v) => v).length < 1;
+    const error = [communities, hashtags, topics, metadescs, ownSubmissions].filter((v) => v).length < 1;
     const [levelView, setLevelView] = useState("")
 
     // Necessary States for Alert Message
@@ -231,6 +233,8 @@ const VisualizeMap = () => {
                     return "#964B00";
                 case "communities":
                     return "#1876d2"
+                case "ownSubmissions":
+                    return "grey"
                 default:
                     return "red";
             }
@@ -316,7 +320,6 @@ const VisualizeMap = () => {
                             (n) => n + fontSize * 0.2
                         ); // some padding
                         ctx.fillStyle = "#e5e5e5";
-                        // ctx.arc(node.x, node.y, fontSize, 0, 360, false);
                         ctx.fillRect(
                             node.x - bckgDimensions[0] / 2,
                             node.y - bckgDimensions[1] / 2,
@@ -425,32 +428,38 @@ const VisualizeMap = () => {
                             variant="standard"
                         >
                             <FormLabel component="legend" style={{fontSize: "15px"}}>
-                                LEVEL VIEW: <span style={{fontWeight: "bold"}}>{levelView}</span>
+                                HIERARCHICAL VIEW: <span style={{fontWeight: "bold"}}>{levelView}</span>
                             </FormLabel>
                             <FormGroup>
                                 <FormControlLabel
                                     control={
                                         <Checkbox style={{transform: "scale(.8)"}} checked={communities} onChange={handleCheckBoxChange} name="communities"/>
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Communities Level</span>}
+                                    label={<span style={{fontSize: "14px"}}>Communities</span>}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox style={{transform: "scale(.8)"}} checked={ownSubmissions} onChange={handleCheckBoxChange} name="ownSubmissions"/>
+                                    }
+                                    label={<span style={{fontSize: "14px"}}>Own Submissions</span>}
                                 />
                                 <FormControlLabel
                                     control={
                                         <Checkbox style={{transform: "scale(.8)"}} checked={hashtags} onChange={handleCheckBoxChange} name="hashtags"/>
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Hashtag Level</span>}
+                                    label={<span style={{fontSize: "14px"}}>Hashtags</span>}
                                 />
                                 <FormControlLabel
                                     control={
                                         <Checkbox style={{transform: "scale(.75)"}} checked={topics} onChange={handleCheckBoxChange} name="topics"/>
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Topic Level</span>}
+                                    label={<span style={{fontSize: "14px"}}>Topics</span>}
                                 />
                                 <FormControlLabel
                                     control={
                                         <Checkbox style={{transform: "scale(.75)"}} checked={metadescs} onChange={handleCheckBoxChange} name="metadescs"/>
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Meta-descriptor Level</span>}
+                                    label={<span style={{fontSize: "14px"}}>Meta-descriptors</span>}
                                 />
                             </FormGroup>
                             <FormHelperText>Please select at least one level to display</FormHelperText>
