@@ -86,7 +86,6 @@ function searchBarHeader(props) {
         }
         if(router.asPath.includes("visualizemap"))
             window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all&levelfilter=topics";
-        alert(inputValue)
         Router.push(
             "/visualizemap?query=" +
             encodeURIComponent(inputValue) +
