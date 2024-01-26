@@ -210,7 +210,7 @@ export default function ImgMediaCard({ setUrlState }) {
           rows={2}
           value={title}
           onChange={onChangeTitle}
-          placeholder="Title7"
+          placeholder="Title"
         />
       </Box>
       <Box
