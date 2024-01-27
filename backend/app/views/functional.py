@@ -800,6 +800,7 @@ def generate(current_user):
     if not mode or mode not in ["qa", "summarize", "gen_questions", "contextual_qa"]:
         return response.error("Mode missing or unsupported.", Status.BAD_REQUEST)
 
+
     neural_api = os.environ.get("neural_api")
     if not neural_api:
         return response.error("Generation not currently supported.", Status.NOT_IMPLEMENTED)
