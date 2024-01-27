@@ -224,9 +224,8 @@ def create_batch_submission(current_user):
             user_id = current_user.id
             user_communities = current_user.communities
             highlighted_text = submission["description"]
-            source_url = submission["source_url"]
+            source_url = submission.get("source_url", "")
             explanation = submission["title"]
-
             message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
                                 source_url=source_url, explanation=explanation, community=community, anonymous=anonymous)
             
@@ -1125,6 +1124,36 @@ def search(current_user):
                 search_results_page = search_results_page + additional_results
                 if i > 1000: break
 
+            # If ownSubmissions requested, get user's submissions
+            if "ownSubmissions" in levels:
+                # Creating a new search_id to avoid retrieving cached results from previous search
+                search_id, _ = log_search(ip, user_id, source, query, requested_communities, own_submissions=True, url=url,
+                                          highlighted_text=highlighted_text)
+                search_id = str(search_id)
+
+                total_sub_num_results, sub_search_results_page = cache_search(query, search_id, page, rc_dict,
+                                                                      user_id=user_id_str,
+                                                                      own_submissions=True,
+                                                                      toggle_webpage_results=False,
+                                                                      url_core_retrieve=URL_CORE_RETRIEVE)
+
+                for i in range(10, int(total_sub_num_results), 10):
+                    _, additional_submissions_results = cache_search(query, search_id, i / 10, rc_dict, user_id=user_id_str,
+                                                         own_submissions=True,
+                                                         toggle_webpage_results=False,
+                                                         url_core_retrieve=URL_CORE_RETRIEVE)
+
+                    sub_search_results_page = sub_search_results_page + additional_submissions_results
+                    if i > 1000: break
+
+                own_submissions_ids = set()
+                for sub_obj in sub_search_results_page:
+                    own_submissions_ids.add(sub_obj["submission_id"])
+
+                for sub_obj in search_results_page:
+                    if sub_obj["submission_id"] in own_submissions_ids:
+                        sub_obj["own_page"] = True
+
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
             tm = TopicMap(data_ip, root_label, levels)
@@ -1361,7 +1390,6 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     if status.acknowledged:
         doc.id = status.inserted_id
         index_status, hashtags = elastic_manager.add_to_index(doc)
-
         # update community core content if necessary
         # only consider when source url is included
         try:
