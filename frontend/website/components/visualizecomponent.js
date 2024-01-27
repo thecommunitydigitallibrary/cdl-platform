@@ -123,9 +123,9 @@ const VisualizeMap = () => {
     };
 
     const getCommunityDocuments = async () => {
-        let url; //= baseURL_client + "search?community=" + communityId + "&source=visualize&query=" + query;
+        let url;
         if (communityId == "all")
-            url = baseURL_client + "search?query=" + query + "&community=all&source=visualize&levelfilter=" + filterOrder.join(";");
+            url = baseURL_client + "search?query=" + encodeURIComponent(query) + "&community=all&source=visualize&levelfilter=" + filterOrder.join(";");
         else
             url = baseURL_client + "search?community=" + communityId + "&source=visualize&levelfilter=" + filterOrder.join(";");
         const res = await fetch(url, {
