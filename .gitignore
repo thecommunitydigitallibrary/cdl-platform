@@ -138,3 +138,5 @@ dmypy.json
 /reverseproxy/cloudflare.pem
 /reverseproxy/cloudflare.key
 cicd.sh
+
+vicuna*
