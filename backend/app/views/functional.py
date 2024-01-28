@@ -224,9 +224,8 @@ def create_batch_submission(current_user):
             user_id = current_user.id
             user_communities = current_user.communities
             highlighted_text = submission["description"]
-            source_url = submission["source_url"]
+            source_url = submission.get("source_url", "")
             explanation = submission["title"]
-
             message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=highlighted_text,
                                 source_url=source_url, explanation=explanation, community=community, anonymous=anonymous)
             
@@ -770,9 +769,10 @@ def generate(current_user):
 			context: (string) : the highlighted text by the user.
 			mode : (str) : one of
                 qa : given a query, generate the answer
-                contextual_qa : given a context and a portion of a query, generate the answer
+                contextual_qa : given a context and a portion of a query, generate some questions
                 gen_questions: given a context, generate some questions
                 summarize : given a context, summarize the selection
+                web: given a question, open a tab and search the web
 	Returns:
 		200 : generated text.
     """
@@ -793,12 +793,20 @@ def generate(current_user):
     if not request.form:
         req = request.get_json()
 
-    context = req.get("context", "")
-    query = req.get("query", "")
+    # limit both to 100 characters
+    context = req.get("context", "")[:1000]
+    query = req.get("query", "")[:1000]
     mode = req.get("mode", "")
+    url = req.get("url", "")
 
-    if not mode or mode not in ["qa", "summarize", "gen_questions", "contextual_qa"]:
+    if not mode or mode not in ["qa", "summarize", "gen_questions", "contextual_qa", "web"]:
         return response.error("Mode missing or unsupported.", Status.BAD_REQUEST)
+    
+
+    if mode == "web":
+        log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": "", "version": "0.1", "url": url})
+        return response.success({"output": "https://www.google.com/search?q=" + query}, Status.OK)
+
 
     neural_api = os.environ.get("neural_api")
     if not neural_api:
@@ -806,9 +814,16 @@ def generate(current_user):
     try:
         resp = requests.post(neural_api + "/neural/generate", json={"context": context, "query": query, "mode": mode})
         resp_json = resp.json()
+
         if resp.status_code == 200:
             output = resp_json["output"]
-            log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": output, "version": "0"})
+
+            if mode in ["contextual_qa", "contextual_qa"]:
+                output = re.sub("[0-9].", "", output)
+                output = re.sub("\"", "", output)
+                output = "\n".join([x for x in output.split("\n") if len(x) > 0])
+
+            log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": output, "version": "0.1", "url": url})
             return response.success({"output": output}, Status.OK)
         else:
             print(resp_json["message"])
@@ -916,16 +931,15 @@ def context_analysis(current_user):
             remaining_keywords, used_keywords, results, seen_urls = process_keywords_hits(keywords, hits, seen_urls)
             ht_stats["submitted_you"]["keywords"] = used_keywords
             ht_stats["submitted_you"]["results"] = results
-            keywords = remaining_keywords
-            
+            keywords = remaining_keywords            
 
         # next search over all community submissions
         """
         There is an error here where if the keywords do not match in the top 10 from above,
         then they will be used to search here. But then there is a chance that you pull in your own submissions.
-        so TODO filter this / restrict this to non your submissions
+        so we restrict results to max of ten. if not 10 own subs matching, the fill the rest with community
         """
-        if keywords:
+        if keywords and len(ht_stats["submitted_you"]["results"]) < 10:
             metadata["subset"] = "community_submissions"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
             recommendation_id = str(recommendation_id)
@@ -934,12 +948,13 @@ def context_analysis(current_user):
             if hits:
                 remaining_keywords, used_keywords, results, seen_urls = process_keywords_hits(keywords, hits, seen_urls)
                 ht_stats["submitted_community"]["keywords"] = used_keywords
-                ht_stats["submitted_community"]["results"] = results
+                ht_stats["submitted_community"]["results"] = results[:10-len(ht_stats["submitted_you"]["results"])]
                 keywords = remaining_keywords
 
 
         # finally search over all webpages
-        if keywords:
+        # removed for new, but will add back after extension refactoring to avoid typing lag
+        if False:
             metadata["subset"] = "auto_indexed"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
             recommendation_id = str(recommendation_id)
@@ -1123,6 +1138,36 @@ def search(current_user):
                 
                 search_results_page = search_results_page + additional_results
                 if i > 1000: break
+
+            # If ownSubmissions requested, get user's submissions
+            if "ownSubmissions" in levels:
+                # Creating a new search_id to avoid retrieving cached results from previous search
+                search_id, _ = log_search(ip, user_id, source, query, requested_communities, own_submissions=True, url=url,
+                                          highlighted_text=highlighted_text)
+                search_id = str(search_id)
+
+                total_sub_num_results, sub_search_results_page = cache_search(query, search_id, page, rc_dict,
+                                                                      user_id=user_id_str,
+                                                                      own_submissions=True,
+                                                                      toggle_webpage_results=False,
+                                                                      url_core_retrieve=URL_CORE_RETRIEVE)
+
+                for i in range(10, int(total_sub_num_results), 10):
+                    _, additional_submissions_results = cache_search(query, search_id, i / 10, rc_dict, user_id=user_id_str,
+                                                         own_submissions=True,
+                                                         toggle_webpage_results=False,
+                                                         url_core_retrieve=URL_CORE_RETRIEVE)
+
+                    sub_search_results_page = sub_search_results_page + additional_submissions_results
+                    if i > 1000: break
+
+                own_submissions_ids = set()
+                for sub_obj in sub_search_results_page:
+                    own_submissions_ids.add(sub_obj["submission_id"])
+
+                for sub_obj in search_results_page:
+                    if sub_obj["submission_id"] in own_submissions_ids:
+                        sub_obj["own_page"] = True
 
             # Call TopicMap
             data_ip = json.dumps(search_results_page)
@@ -1360,7 +1405,6 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
     if status.acknowledged:
         doc.id = status.inserted_id
         index_status, hashtags = elastic_manager.add_to_index(doc)
-
         # update community core content if necessary
         # only consider when source url is included
         try:

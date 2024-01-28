@@ -62,7 +62,7 @@ const json_example = `{
 }
 `;
 // Expectied fields in each submission
-const expected_submission_fields = ["source_url", "description", "title"];
+const expected_submission_fields = ["description", "title"];
 // Separate function for checking each field, hopefully this allows for reusability
 async function validateSubmissionField(
   field_type,
@@ -74,11 +74,6 @@ async function validateSubmissionField(
     if (value == null || value == undefined) {
       errors.push(
         `Submission ${idx}: Invalid type (null or undefined) for ${field_type}`
-      );
-      return false;
-    } else if (value == "") {
-      errors.push(
-        `Submission ${idx}: Expected a non-empty value for ${field_type}`
       );
       return false;
     }
@@ -138,8 +133,9 @@ function Header(props) {
     // and also checks if the values are okay or not.
     async function validateSubmission(submission, issues, idx) {
       var submission_fields = Object.keys(submission);
-      if (submission_fields.length != expected_submission_fields.length)
+      if (submission_fields.length != expected_submission_fields.length) {
         return false;
+      }
       var errors = [];
       for (let i = 0; i < expected_submission_fields.length; ++i) {
         // Check if submitted JSON has each key that we need
