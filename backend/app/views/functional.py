@@ -769,9 +769,10 @@ def generate(current_user):
 			context: (string) : the highlighted text by the user.
 			mode : (str) : one of
                 qa : given a query, generate the answer
-                contextual_qa : given a context and a portion of a query, generate the answer
+                contextual_qa : given a context and a portion of a query, generate some questions
                 gen_questions: given a context, generate some questions
                 summarize : given a context, summarize the selection
+                web: given a question, open a tab and search the web
 	Returns:
 		200 : generated text.
     """
@@ -792,12 +793,19 @@ def generate(current_user):
     if not request.form:
         req = request.get_json()
 
-    context = req.get("context", "")
-    query = req.get("query", "")
+    # limit both to 100 characters
+    context = req.get("context", "")[:1000]
+    query = req.get("query", "")[:1000]
     mode = req.get("mode", "")
+    url = req.get("url", "")
 
-    if not mode or mode not in ["qa", "summarize", "gen_questions", "contextual_qa"]:
+    if not mode or mode not in ["qa", "summarize", "gen_questions", "contextual_qa", "web"]:
         return response.error("Mode missing or unsupported.", Status.BAD_REQUEST)
+    
+
+    if mode == "web":
+        log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": "", "version": "0.1", "url": url})
+        return response.success({"output": "https://www.google.com/search?q=" + query}, Status.OK)
 
 
     neural_api = os.environ.get("neural_api")
@@ -806,9 +814,16 @@ def generate(current_user):
     try:
         resp = requests.post(neural_api + "/neural/generate", json={"context": context, "query": query, "mode": mode})
         resp_json = resp.json()
+
         if resp.status_code == 200:
             output = resp_json["output"]
-            log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": output, "version": "0"})
+
+            if mode in ["contextual_qa", "contextual_qa"]:
+                output = re.sub("[0-9].", "", output)
+                output = re.sub("\"", "", output)
+                output = "\n".join([x for x in output.split("\n") if len(x) > 0])
+
+            log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": output, "version": "0.1", "url": url})
             return response.success({"output": output}, Status.OK)
         else:
             print(resp_json["message"])
