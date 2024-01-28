@@ -923,9 +923,9 @@ def context_analysis(current_user):
         """
         There is an error here where if the keywords do not match in the top 10 from above,
         then they will be used to search here. But then there is a chance that you pull in your own submissions.
-        so TODO filter this / restrict this to non your submissions
+        so we restrict results to max of ten. if not 10 own subs matching, the fill the rest with community
         """
-        if keywords:
+        if keywords and len(ht_stats["submitted_you"]["results"]) < 10:
             metadata["subset"] = "community_submissions"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
             recommendation_id = str(recommendation_id)
@@ -934,7 +934,7 @@ def context_analysis(current_user):
             if hits:
                 remaining_keywords, used_keywords, results, seen_urls = process_keywords_hits(keywords, hits, seen_urls)
                 ht_stats["submitted_community"]["keywords"] = used_keywords
-                ht_stats["submitted_community"]["results"] = results
+                ht_stats["submitted_community"]["results"] = results[:10-len(ht_stats["submitted_you"]["results"])]
                 keywords = remaining_keywords
 
 
