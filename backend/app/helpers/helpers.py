@@ -246,7 +246,20 @@ def create_page(hits, communities, toggle_display="highlight"):
             description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) and toggle_display == "highlight" else hit["_source"].get("highlighted_text", None)
             if not description:
                 description ="No Preview Available"
+
+            
+            
             result["highlighted_text"] = description
+
+        # So that we can (1) mitigate XSS and (2) keep the highlighted match text
+        # AND (3) properly render markdown pages on submission view (quote, code, etc.)
+        result["highlighted_text"] = re.sub("<mark>", "@startmark@", result["highlighted_text"])
+        result["highlighted_text"] = re.sub("<\/mark>", "@endmark@", result["highlighted_text"])
+        result["highlighted_text"] = sanitize_input(result["highlighted_text"])
+        result["highlighted_text"] = re.sub("@startmark@", "<mark>", result["highlighted_text"])
+        result["highlighted_text"] = re.sub("@endmark@", "</mark>", result["highlighted_text"])
+
+
 
         # possible that returns additional communities?
         result["communities_part_of"] = {community_id: communities[community_id] for community_id in
