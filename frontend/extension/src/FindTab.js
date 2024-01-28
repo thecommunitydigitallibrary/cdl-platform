@@ -56,7 +56,21 @@ export default function FindTab() {
   
 
   const onAskWeb = async (question) => {
-    window.open("https://www.google.com/search?q=" + question, "_blank", "noopener noreferrer");
+    let res = await fetch(baseURL + "generate", {
+      method: "POST",
+      headers: {
+        Authorization: localStorage.getItem("authToken"),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        "context": "",
+        "query": question,
+        "mode": "web",
+        "url": url
+      }),
+    });
+    let response = await res.json();
+    window.open(response.output, "_blank", "noopener noreferrer");
   }
 
   const onAskLLM = async (question) => {
@@ -71,7 +85,8 @@ export default function FindTab() {
       body: JSON.stringify({ 
         "context": "",
         "query": question,
-        "mode": "qa"
+        "mode": "qa",
+        "url": url
       }),
     });
     let response = await res.json();
@@ -105,7 +120,8 @@ export default function FindTab() {
       body: JSON.stringify({ 
         "context": highlightedText,
         "query": text,
-        "mode": mode
+        "mode": mode,
+        "url": url
       }),
     });
 
@@ -114,9 +130,7 @@ export default function FindTab() {
     var output = ""
 
     if(mode == "contextual_qa" || mode == "gen_questions"){
-      let resultArray = response.output.replace(/^\d+\.\s*/gm, '').split('\n');
-      resultArray = resultArray.filter(str => str !== '');
-      //output = resultArray.map(item => `<p>${item}</p>`).join('');
+      let resultArray = response.output.split('\n');
       output = resultArray.map((item, index) => <div>
                                                   <p key={index}>
                                                     {item}
