@@ -916,8 +916,7 @@ def context_analysis(current_user):
             remaining_keywords, used_keywords, results, seen_urls = process_keywords_hits(keywords, hits, seen_urls)
             ht_stats["submitted_you"]["keywords"] = used_keywords
             ht_stats["submitted_you"]["results"] = results
-            keywords = remaining_keywords
-            
+            keywords = remaining_keywords            
 
         # next search over all community submissions
         """
