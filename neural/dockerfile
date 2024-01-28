@@ -7,6 +7,9 @@ FROM python:3.8-slim-buster
 WORKDIR /docker-flask
 
 COPY requirements.txt requirements.txt
+
+COPY vicuna-7b-v1.5-awq/ vicuna-7b-v1.5-awq/
+
 RUN pip3 install -r requirements.txt
 COPY . .
 

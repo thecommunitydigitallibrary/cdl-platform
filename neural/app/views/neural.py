@@ -4,6 +4,9 @@ from sentence_transformers import CrossEncoder
 import torch
 import traceback
 import os
+import time
+from vllm import LLM, SamplingParams
+
 from flask_cors import CORS
 
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
@@ -12,33 +15,23 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 neural = Blueprint('neural', __name__)
 CORS(neural)
 
-
-hf_token = os.environ.get("hf_token")
-
 # set up rerank model
 try:
     rerank_model = CrossEncoder('cross-encoder/ms-marco-TinyBERT-L-2', max_length=512)
-except:
+except Exception as e:
     rerank_model = False
+    print("No rerank", e)
 
 # set up generate model
 try:
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16
-    )
 
-    device = "cuda:3"
+    sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=200)
 
-    # mistralai/Mistral-7B-Instruct-v0.1
-    # meta-llama/Llama-2-13b-chat-hf
-
-    generate_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-13b-chat-hf", token=hf_token)
-    generate_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-13b-chat-hf", token=hf_token, quantization_config=bnb_config, device_map=device)
-except:
+    generate_model = LLM(model="vicuna-7b-v1.5-awq/", quantization="AWQ", gpu_memory_utilization=0.5)
+    
+except Exception as e:
     generate_model = False
+    print("No generate", e)
 
 
 @neural.route('/neural/generate', methods=["POST"])
@@ -67,37 +60,47 @@ def generate():
         return {"message": "Generation model not initialized."}, 500
 
     """
-    VERSION: 0
+    VERSION: 0.1 (Vicuna)
     """
     
     if mode == "qa":
         if not query:
             return {"message": "Query required for question-answer mode."}, 400
-        prompt = "Answer the following question in fewer than 100 words: " + query
-    elif mode == "contextual_qa":
-        if not query or not context:
-            return {"message": "Query and context required for contextual question-answer mode."}, 400
-        prompt = "'" + context + "'. Please generate a question I may have after reading the previous text. The question should contain the words'" + query + "'. After generating the question, provide a short answer. Question:" 
-    elif mode == "gen_questions":
+        prompt = "Answer the following question with fewer than 100 words. Question: " + query + ". Answer: "
+
+    elif mode == "contextual_qa" or mode == "gen_questions":
         if not context:
-            return {"message": "Context required for question generation."}, 400
-        prompt = "Generate three questions (without answers) that I may have after reading the following text: '" + context + "'. Here are the questions (without answers): "
+            return {"message": "Context required for contextual question generation."}, 400
+        
+        if len(context.split()) <= 3:
+            prompt = "List three diverse, short, curiosity-sparking search engine questions that contain the words: '" + context
+            if query:
+                prompt += "'. Each question should also explicitly reference the intent '" + query
+        else:
+            prompt = context + "...List three diverse, short search engine questions that a curious reader might have after reading the preceeding text. The questions should not be answered by the text itself"
+            if query:
+                prompt += "'. Each question should also explicitly reference the intent '" + context
+
+        prompt += "'. Here are the short search engine questions (separated with newlines):"
+
+
     elif mode == "summarize":
         if not context:
-            return {"message": "Context required for question generation."}, 400
+            return {"message": "Context required for summarization."}, 400
         prompt = context + "... Please summarize the previous text, and only reply with the summary. Summary: "
     
     try:
-        with torch.no_grad():
-            inputs = generate_tokenizer(prompt, return_tensors="pt").to(device)
-            outputs = generate_model.generate(**inputs, max_new_tokens=250)
-            resp = generate_tokenizer.decode(outputs[0], skip_special_tokens=True)
-            resp = resp[len(prompt):]
+        prompts = [prompt]
+        start_time = time.time()
+        outputs = generate_model.generate(prompts, sampling_params)
+        stop_time = time.time()
+        output = outputs[0].outputs[0].text
+        print("Request completed in ", stop_time-start_time)
     except Exception as e:
         traceback.print_exec()
         return {"message": "Something went wrong with generation, please try again later."}, 400
 
-    return {"output": resp}
+    return {"output": output}
 
 
 
