@@ -40,7 +40,7 @@ export default function FindTab() {
   const [severity, setSeverity] = React.useState("");
   const [allCommunities, setAllCommunities] = React.useState([]);
 
-
+  //onGenerate is the function that gets called when "Ask a Question" button is clicked with "qa" as param
   const onQA = async () => {
     onGenerate("qa")
   }
@@ -56,6 +56,9 @@ export default function FindTab() {
   
 
   const onAskWeb = async (question) => {
+    //window.open("https://www.google.com/search?q=" + question, "_blank", "noopener noreferrer");
+    //we need to add the logic used by onGenerate or call onGenerate properly
+    //"mode": "web" -- this mode is not supported in the backend
     let res = await fetch(baseURL + "generate", {
       method: "POST",
       headers: {
@@ -65,12 +68,14 @@ export default function FindTab() {
       body: JSON.stringify({ 
         "context": "",
         "query": question,
-        "mode": "web",
+        "mode": "qa",
         "url": url
       }),
     });
     let response = await res.json();
-    window.open(response.output, "_blank", "noopener noreferrer");
+    let output = <p>{response.output}</p>
+    setGenerationResults(output)
+    // window.open(response.output, "_blank", "noopener noreferrer");
   }
 
   const onAskLLM = async (question) => {
@@ -131,7 +136,8 @@ export default function FindTab() {
 
     if(mode == "contextual_qa" || mode == "gen_questions"){
       let resultArray = response.output.split('\n');
-      output = resultArray.map((item, index) => <div>
+      console.log(resultArray);
+      output = resultArray.map((item, index) => index > 1 ? (<div>
                                                   <p key={index}>
                                                     {item}
                                                   </p>
@@ -143,7 +149,7 @@ export default function FindTab() {
                                                             onClick={() => onAskLLM(item)}
                                                     >Ask the LLM</Button>
                                                   </div>
-                                                </div>
+                                                </div>) : null
                               );
     } else {
       output = <p>{response.output}</p>
