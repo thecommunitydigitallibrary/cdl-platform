@@ -939,7 +939,8 @@ def context_analysis(current_user):
 
 
         # finally search over all webpages
-        if keywords:
+        # removed for new, but will add back after extension refactoring to avoid typing lag
+        if False:
             metadata["subset"] = "auto_indexed"
             recommendation_id, _ = log_recommendation_request(ip, user_id, user_communities, "compare", metadata=metadata)
             recommendation_id = str(recommendation_id)
