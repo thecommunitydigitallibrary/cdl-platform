@@ -32,6 +32,33 @@ export default function ReleaseLog() {
         Release Log
       </h1>
 
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        January 28, 2024
+      </h2>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">New faster LLM for extension question generation</li>
+            <li className="list-item">Own submission toggle in search graph visualization</li>
+        </ul>
+      
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Query encoding error on visualization</li>
+            <li className="list-item">Markdown quote and sanitize</li>
+
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Removed webpages from extension open to decrease lag</li>
+        </ul>
+
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         December 16th, 2023
       </h2>
