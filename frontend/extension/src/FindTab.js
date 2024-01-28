@@ -40,7 +40,6 @@ export default function FindTab() {
   const [severity, setSeverity] = React.useState("");
   const [allCommunities, setAllCommunities] = React.useState([]);
 
-  //onGenerate is the function that gets called when "Ask a Question" button is clicked with "qa" as param
   const onQA = async () => {
     onGenerate("qa")
   }
@@ -56,9 +55,6 @@ export default function FindTab() {
   
 
   const onAskWeb = async (question) => {
-    //window.open("https://www.google.com/search?q=" + question, "_blank", "noopener noreferrer");
-    //we need to add the logic used by onGenerate or call onGenerate properly
-    //"mode": "web" -- this mode is not supported in the backend
     let res = await fetch(baseURL + "generate", {
       method: "POST",
       headers: {
@@ -75,7 +71,6 @@ export default function FindTab() {
     let response = await res.json();
     let output = <p>{response.output}</p>
     setGenerationResults(output)
-    // window.open(response.output, "_blank", "noopener noreferrer");
   }
 
   const onAskLLM = async (question) => {
@@ -158,8 +153,6 @@ export default function FindTab() {
     setGenerationResults(output)
     getComparison(url, response.output)
   };
-
-
 
   const handleClick = () => {
     setOpen(true);
