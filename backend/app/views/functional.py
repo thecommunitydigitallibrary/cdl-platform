@@ -818,10 +818,10 @@ def generate(current_user):
         if resp.status_code == 200:
             output = resp_json["output"]
 
-            if mode in ["contextual_qa", "contextual_qa"]:
+            if mode in ["contextual_qa", "gen_questions"]:
                 output = re.sub("[0-9].", "", output)
                 output = re.sub("\"", "", output)
-                output = "\n".join([x for x in output.split("\n") if len(x) > 0])
+                output = "\n".join([x for x in output.split("\n") if len(x) > 5])
 
             log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": output, "version": "0.1", "url": url})
             return response.success({"output": output}, Status.OK)

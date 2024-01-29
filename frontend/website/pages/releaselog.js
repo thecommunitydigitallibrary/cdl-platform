@@ -41,6 +41,7 @@ export default function ReleaseLog() {
       </h5>
         <ul className="list-disc pl-6">
             <li className="list-item">New faster LLM for extension question generation</li>
+            <li className="list-item">Logging and extension QA formatting, open to web</li>
             <li className="list-item">Own submission toggle in search graph visualization</li>
         </ul>
       
