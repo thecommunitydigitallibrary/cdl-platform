@@ -50,14 +50,52 @@ export default function FindTab() {
   const onQG = async () => {
     onGenerate("gen_questions")
   }
-  const onS = async () => {
-    onGenerate("summarize")
+  
+
+  const onAskWeb = async (question) => {
+    let res = await fetch(baseURL + "generate", {
+      method: "POST",
+      headers: {
+        Authorization: localStorage.getItem("authToken"),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        "context": highlightedText,
+        "query": question,
+        "mode": "web",
+        "url": url
+      }),
+    });
+    let response = await res.json();
+    window.open(response.output, "_blank", "noopener noreferrer");
+  }
+
+  const onAskLLM = async (question) => {
+    setGenerationSpinner(true)
+    setText(question)
+    let res = await fetch(baseURL + "generate", {
+      method: "POST",
+      headers: {
+        Authorization: localStorage.getItem("authToken"),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        "context": highlightedText,
+        "query": question,
+        "mode": "qa",
+        "url": url
+      }),
+    });
+    let response = await res.json();
+    let output = <p>{response.output}</p>
+    setGenerationSpinner(false)
+    setGenerationResults(output)
+    getComparison(url, response.output)
   }
   
-  
 
 
-  const onGenerate = async (mode) => {
+  const onGenerate = async (mode, ht) => {
     setGenerationSpinner(true)
     if (mode == "qa" || mode == "contextual_qa") {
       if (text === undefined || text.length == 0) {
@@ -70,6 +108,13 @@ export default function FindTab() {
     
     //        "comparison": comparisonResults,
 
+    var context = ""
+    if (ht === null || ht === undefined){
+      context = highlightedText
+    } else {
+      context = ht
+    }
+
     let res = await fetch(baseURL + "generate", {
       method: "POST",
       headers: {
@@ -77,115 +122,39 @@ export default function FindTab() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ 
-        "context": highlightedText,
+        "context": context,
         "query": text,
-        "mode": mode
+        "mode": mode,
+        "url": url
       }),
     });
 
     let response = await res.json();
+
+    var output = ""
+
+    if(mode == "contextual_qa" || mode == "gen_questions"){
+      let resultArray = response.output.split('\n');
+      output = resultArray.map((item, index) => <div>
+                                                  <p key={index}>
+                                                    {item}
+                                                  </p>
+                                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    <Button style={{ marginRight: '10px' }} 
+                                                            onClick={() => onAskWeb(item)}
+                                                    >Ask the Web</Button>
+                                                    <Button style={{ marginRight: '10px' }} 
+                                                            onClick={() => onAskLLM(item)}
+                                                    >Ask the LLM</Button>
+                                                  </div>
+                                                </div>
+                              );
+    } else {
+      output = <p>{response.output}</p>
+      getComparison(url, response.output)
+    }
     setGenerationSpinner(false)
-    setGenerationResults(response.output)
-    getComparison(url, response.output)
-  };
-
-  function editWebpage(response) {
-    var response = response["annotated_paragraphs"]
-    console.log(response)
-    var bod = document.body.getElementsByTagName("p")
-    for (let i=0; i < bod.length; i++) {
-      if (i in response) {
-        if (response[i]["indexed_cdl"]["results"].length > 0) {
-          var html = '<div style="background-color: #FF0000;"><h4>Indexed by TextData</h4>Keywords: ' + response[i]["indexed_cdl"]["keywords"].join(", ") + '<ul>'
-          for (let k=0; k < response[i]["indexed_cdl"]["results"].length; k++) {
-            var url = response[i]["indexed_cdl"]["results"][k]["url"]
-            var title = response[i]["indexed_cdl"]["results"][k]["title"]
-            html = html + '<li><a href="' + url + '" target="_blank" rel="noopener noreferrer">' + title + "</a></li>"
-          }
-          html = html + "</ul></div>"
-          bod[i].insertAdjacentHTML("afterend", html)
-        }
-
-        if (response[i]["submitted_community"]["results"].length > 0) {
-          var html = '<div style="background-color: #FFEA00;"><h4>Saved by Other Community Members</h4>Keywords: ' + response[i]["submitted_community"]["keywords"].join(", ") + '<ul>'
-          for (let k=0; k < response[i]["submitted_community"]["results"].length; k++) {
-            var url = response[i]["submitted_community"]["results"][k]["url"]
-            var title = response[i]["submitted_community"]["results"][k]["title"]
-            html = html + '<li><a href="' + url + '" target="_blank" rel="noopener noreferrer">' + title + "</a></li>"
-          }
-          html = html + "</ul></div>"
-          bod[i].insertAdjacentHTML("afterend", html)
-        }
-
-        if (response[i]["submitted_you"]["results"].length > 0) {
-          var html = '<div style="background-color: #00FF00;"><h4>Saved by You</h4>Keywords: ' + response[i]["submitted_you"]["keywords"].join(", ") + '<ul>'
-          for (let k=0; k < response[i]["submitted_you"]["results"].length; k++) {
-            var url = response[i]["submitted_you"]["results"][k]["url"]
-            var title = response[i]["submitted_you"]["results"][k]["title"]
-            html = html + '<li><a href="' + url + '" target="_blank" rel="noopener noreferrer">' + title + "</a></li>"
-          }
-          html = html + "</ul></div>"
-          bod[i].insertAdjacentHTML("afterend", html)
-        }
-      }
-    }
-  }
-
-  const analyzeParagraphs = async (paragraphs) => {
-    chrome.runtime.onMessage.removeListener(listener)
-    let res = await fetch(baseURL + "annotate", {
-      method: "POST",
-      headers: {
-        Authorization: localStorage.getItem("authToken"),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ 
-        "paragraphs": paragraphs, 
-        "url": url, 
-        "highlighted_text": highlightedText 
-      }),
-    });
-
-    let response = await res.json();
-    
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const activeTab = tabs[0];
-      chrome.scripting.executeScript({
-        target: { tabId: activeTab.id },
-        function: editWebpage,
-        args: [response]
-      });
-    });
-  }
-
-  function annotate() {
-    var bod = document.body.getElementsByTagName("p")
-    var paragraphs = {}
-
-    for (let i=0; i < bod.length; i++) {
-      paragraphs[i] = bod[i].innerHTML
-    }
-    chrome.runtime.sendMessage({ paragraphs });
-  }
-
-  function listener(message, sender, sendResponse) {
-    var paragraphs = message;
-    analyzeParagraphs(paragraphs)
-  }
-
-
-  const onAnnotate = async () => {
-    chrome.runtime.onMessage.addListener(listener)
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const activeTab = tabs[0];
-      chrome.scripting.executeScript({
-        target: { tabId: activeTab.id },
-        function: annotate,
-      });
-    });
-
+    setGenerationResults(output)
   };
 
 
@@ -203,7 +172,7 @@ export default function FindTab() {
   };
 
   let getComparison = async (current_url, current_ht) => {
-    setComparisonSpinner(true);
+    //setComparisonSpinner(true);
     try {
 
       let res = await fetch(baseURL + "compare", {
@@ -281,6 +250,7 @@ export default function FindTab() {
             setHighlightedText(result[0].result);
             setUrl(url);
             getComparison(url, result[0].result);
+            onGenerate("gen_questions", result[0].result)
           }
         });
       });
@@ -371,6 +341,7 @@ export default function FindTab() {
               <IconButton type="submit" variant="contained" >
               <SearchIcon />
               </IconButton>}}
+            autoFocus
           />
           <FormControl style={{maxWidth: 100}}>
             <Select
@@ -447,8 +418,8 @@ export default function FindTab() {
               <Button variant="contained" style={{padding: 14, width: "22%", marginRight: "5px"}} onClick={onQG}>
                   Generate Questions
               </Button>
-              <Button variant="contained" style={{padding: 14, width: "22%", marginRight: "5px"}} onClick={onS}>
-                  Summarize Selection
+              <Button variant="contained" style={{padding: 14, width: "22%", marginRight: "5px"}} onClick={() => onAskWeb(text)}>
+                  Ask the Web
               </Button>
             </div>
         )}
@@ -456,7 +427,7 @@ export default function FindTab() {
 
         {!isUserQueried && !generationSpinner && generationResults && (
             <div style={{ textAlign: "left", width: "90%" }}>
-              <p>{generationResults}</p>
+              {generationResults}
             </div>
         )}
 
@@ -534,7 +505,6 @@ export default function FindTab() {
 
           </Box>
         )}
-        {!isUserQueried && !comparisonSpinner && !comparisonResults && <p>No results found.</p>}
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
       <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
         {message}

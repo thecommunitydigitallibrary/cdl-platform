@@ -1,7 +1,7 @@
 {
 	"name": "TextData",
 	"description": "Save what you know and find what you don't.",
-	"version": "0.0.0.4",
+	"version": "0.0.0.5",
 	"manifest_version": 3,
 	"action": {
 		"default_popup": "index.html",
@@ -16,13 +16,5 @@
 		"activeTab",
 		"tabs",
 		"scripting"
-	],
-	"commands": {
-		"_execute_action": {
-			"suggested_key": {
-				"default": "Alt+S",
-				"mac": "Alt+S"
-			}
-		}
-	}
+	]
 }
