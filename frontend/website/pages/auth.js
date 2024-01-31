@@ -298,7 +298,7 @@ export default function ({ data }) {
               </Button>
             </p>
             <div className="d-grid gap-2 mt-3 text-center">
-              <ActionButton form="Auth-form" type="submit" variant="contained" >
+              <ActionButton form="Auth-form" type="submit" variant="contained" style={{ fontSize: '0.875rem' }}>
                 Sign In
               </ActionButton>
               {showProgress ?
@@ -401,7 +401,7 @@ export default function ({ data }) {
               )}
             </div>
             <div className="d-grid gap-2 mt-3 text-center">
-              <ActionButton form="Auth-form" type="submit" variant="contained">
+              <ActionButton form="Auth-form" type="submit" variant="contained" style={{ fontSize: '0.875rem' }}>
                 Create Account
               </ActionButton>
 
@@ -486,6 +486,7 @@ export default function ({ data }) {
                     form="Auth-form"
                     type="submit"
                     variant="contained"
+                    style={{ fontSize: '0.875rem' }}
                     action={() => changeAuthMode("signin")}
                   >
                     Done
@@ -498,6 +499,7 @@ export default function ({ data }) {
                       form="Auth-form"
                       type="submit"
                       variant="contained"
+                      style={{ fontSize: '0.875rem' }}
                     >
                       Submit
                     </ActionButton>
@@ -506,7 +508,8 @@ export default function ({ data }) {
                     <ActionButton
                       form="Auth-form"
                       type="submit"
-                      variant="outlined"
+                      variant="contained"
+                      style={{ fontSize: '0.875rem' }}
                       action={() => changeAuthMode("signin")}
                     >
                       Cancel
@@ -582,6 +585,7 @@ export default function ({ data }) {
                   form="Auth-form"
                   type="submit"
                   variant="contained"
+                  style={{ fontSize: '0.875rem' }}
                 >
                   Confirm
                 </ActionButton>
