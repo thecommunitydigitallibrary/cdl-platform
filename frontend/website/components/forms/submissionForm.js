@@ -9,7 +9,7 @@ import jsCookie from "js-cookie";
 import React, { useState, useEffect, useRef } from "react";
 
 import dynamic from 'next/dynamic'
-import { FormControl, InputLabel, List, ListItem, Paper, Select } from "@mui/material";
+import { DialogTitle, FormControl, IconButton, InputLabel, List, ListItem, Paper, Select } from "@mui/material";
 import Button from "@mui/material/Button";
 
 import TextField from "@mui/material/TextField";
@@ -27,6 +27,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from '@mui/material/Box';
 import useSubmissionStore from "../../store/submissionStore";
 import { BASE_URL_CLIENT, BASE_URL_SERVER, GET_SUBMISSION_ENDPOINT } from "../../static/constants";
+import { CloseFullscreenOutlined, CloseOutlined } from "@mui/icons-material";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -337,11 +338,22 @@ export default function SubmissionForm(props) {
     return (
 
         props.isAConnection ? // if props.isConnection si true, then this is a CONNECTION-submission so use the local states for inputs
-            <div>
+            <div style={{ border: "1px solid #ccc", borderRadius: "4px", order: 2, elevation: 2 }}>
                 {/* for submission mode create, set all params to empty string? */}
 
                 <DialogContent>
-                    <Button style={{ float: 'right' }} onClick={() => { handleCancel() }}>Cancel</Button>
+
+                    <IconButton
+                        style={{ float: 'right' }}
+                        edge="end"
+                        color="gray"
+                        onClick={handleCancel}
+                        aria-label="close"
+                    >
+                        <CloseOutlined />
+                    </IconButton>
+
+
                     <TextField
                         margin="dense"
                         id="submissionURL"
@@ -355,11 +367,48 @@ export default function SubmissionForm(props) {
                         margin="dense"
                         id="submissionTitle"
                         label="Submission Title"
-                        fullWidth
                         variant="standard"
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
+                        style={{ width: "75%" }} // Increase the width to 100%
                     />
+
+                    <FormControl
+                        sx={{ float: 'right', minWidth: 200, maxHeight: 150 }}
+                    >
+                        <InputLabel id="demo-simple-select-label">
+                            Select Community
+                        </InputLabel>
+
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            style={{ backgroundColor: "white" }}
+                            label="Select Community"
+                            value={community}
+                            onChange={(event) => setCommunity(event.target.value)}
+                        >
+                            {props.communitiesNameMap && Array.isArray(props.communitiesNameMap) &&
+                                props.communitiesNameMap.map(function (d, idx) {
+                                    return (
+                                        <MenuItem key={idx} value={d.community_id}>
+                                            {d.name}
+                                        </MenuItem>
+                                    );
+                                })
+                            }
+
+                            {props.communitiesNameMap && !Array.isArray(props.communitiesNameMap) && Object.keys(submissionCommunitiesNameMap).map(function (key, index) {
+                                return (
+                                    <MenuItem key={index} value={key}>
+                                        {props.communitiesNameMap[key]}
+                                    </MenuItem>
+                                );
+                            })}
+
+                        </Select>
+
+                    </FormControl>
                     <br />
                     <div data-color-mode="light">
                         <MDEditor
@@ -422,49 +471,11 @@ export default function SubmissionForm(props) {
                     </div>
                     <Box sx={{ bgcolor: 'background.paper' }}>
                         {suggestions ? suggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
+                        <FormGroup>
+                            <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
+                        </FormGroup>
                     </Box>
 
-                    <FormGroup>
-                        <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
-                    </FormGroup>
-
-                    <br />
-
-                    <FormControl
-                        sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
-                    >
-                        <InputLabel id="demo-simple-select-label">
-                            Select Community
-                        </InputLabel>
-
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            style={{ backgroundColor: "white" }}
-                            label="Select Community"
-                            value={community}
-                            onChange={(event) => setCommunity(event.target.value)}
-                        >
-                            {props.communitiesNameMap && Array.isArray(props.communitiesNameMap) &&
-                                props.communitiesNameMap.map(function (d, idx) {
-                                    return (
-                                        <MenuItem key={idx} value={d.community_id}>
-                                            {d.name}
-                                        </MenuItem>
-                                    );
-                                })
-                            }
-
-                            {props.communitiesNameMap && !Array.isArray(props.communitiesNameMap) && Object.keys(submissionCommunitiesNameMap).map(function (key, index) {
-                                return (
-                                    <MenuItem key={index} value={key}>
-                                        {props.communitiesNameMap[key]}
-                                    </MenuItem>
-                                );
-                            })}
-
-                        </Select>
-                    </FormControl>
                 </DialogContent>
 
                 <DialogActions>

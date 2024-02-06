@@ -182,13 +182,16 @@ function Header(props) {
   const [selected_community, setCommunity] = useState("");
   const handleSelectCommunity = async (event) => {
     setCommunity(event.target.value);
+    setSelectedCommunity(event.target.value);
+
   };
 
   // Necessary variables and functions for edit
   const [openSubmission, setOpenSubmission] = useState(false);
 
-  const { submissionMode, setSubmissionProps } = useSubmissionStore();
+  const { submissionMode, submissionCommunitiesNameMap, setSubmissionProps } = useSubmissionStore();
   const { userCommunities, setUserDataStoreProps } = useUserDataStore();
+  const [selectedCommunity, setSelectedCommunity] = useState("");
 
   const handleClickSubmission = () => {
     setOpenSubmission(true);
@@ -206,6 +209,7 @@ function Header(props) {
   }
 
   const [newSubTitle, setNewSubTitle] = useState("");
+
   const handleMessageType = event => {
     setNewSubTitle(event.target.value);
   };
@@ -214,13 +218,18 @@ function Header(props) {
     if (newSubTitle == "") {
       setSeverity("error");
       setMessage("Title cannot be empty!");
-
       handleClick();
       return;
     }
 
+    if (selectedCommunity == "") {
+      setSeverity("error");
+      setMessage("Select a community and try again");
+      handleClick();
+      return;
+    }
     var DATA = {
-      community: userCommunities[0].community_id,
+      community: selectedCommunity,
       source_url: "",
       title: newSubTitle,
       description: "",
@@ -242,7 +251,8 @@ function Header(props) {
     const response = await res.json();
     if (res.status == 200) {
       setSubmissionProps({ submissionMode: "edit" });
-
+      setCommunity("");
+      setSelectedCommunity("");
       handleCancelNewSubTitleDialog();
       // Open a new tab
       window.open(WEBSITE_URL + 'submissions/' + response.submission_id, '_blank');
@@ -616,6 +626,33 @@ function Header(props) {
                   error={newSubTitle.trim() === ''}
                   helperText={newSubTitle.trim() === '' ? 'Title is required' : ''}
                 />
+
+                <FormControl
+                  sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
+                >
+                  <InputLabel id="demo-simple-select-label">
+                    Select Community
+                  </InputLabel>
+
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    style={{ backgroundColor: "white" }}
+                    label="Select Community"
+                    value={selectedCommunity}
+                    onChange={(event) => handleSelectCommunity(event)}
+                  >
+
+                    {userCommunities && userCommunities.map(function (elem, index) {
+                      return (
+                        <MenuItem key={elem.community_id} value={elem.community_id}>
+                          {elem.name}
+                        </MenuItem>
+                      );
+                    })}
+
+                  </Select>
+                </FormControl>
 
                 <Typography variant="subtitle">
                   OR

@@ -5,6 +5,7 @@ import Slide from '@material-ui/core/Slide';
 import { Typography } from '@mui/material';
 import SubmissionForm from '../forms/submissionForm';
 import useSubmissionStore from '../../store/submissionStore';
+import { ReplyAllOutlined } from '@mui/icons-material';
 
 const AddConnectionsButton = ({ setSelectedOption }) => {
     const [isTextBoxVisible, setTextBoxVisible] = useState(false);
@@ -28,16 +29,9 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
         <>
             <Box>
                 <Button
-                    // sx={{
-                    //     color: 'black',
-                    //     backgroundColor: 'black',
-                    //     '&:hover': {
-                    //         color: 'white',
-                    //     },
-                    // }}
-                    onClick={handleButtonClick} variant="contained" size="small">
-                    {/* startIcon={<EditIcon />} */}
+                    onClick={handleButtonClick} variant="contained" size="small" endIcon={<ReplyAllOutlined />}>
                     Add Incoming Connection
+
                 </Button>
 
                 <Slide direction="left" in={isTextBoxVisible} mountOnEnter unmountOnExit>
@@ -45,7 +39,7 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                         <SubmissionForm
                             isAConnection={true}
                             isTextBoxVisible={isTextBoxVisible}
-                            setTextBoxVisible = {setTextBoxVisible}
+                            setTextBoxVisible={setTextBoxVisible}
                             source_url=""
                             title=""
                             description={`Reply to [${submissionTitle}](${submissionRedirectUrl})`}
