@@ -153,8 +153,14 @@ header {
     font-size: 0;
   }
 
-  .counter { width: 100% !important;}
-  .addRemoveCommunities, .addRemoveText {width: 100% !important;}
+  .counter {
+    width: 100% !important;
+  }
+
+  .addRemoveCommunities,
+  .addRemoveText {
+    width: 100% !important;
+  }
 
 }
 
@@ -370,4 +376,23 @@ label {
   padding: 20px;
   border: 1px solid #ccc;
   background-color: #f9f9f9;
+}
+
+/* Adds this CSS to style the scrollbar */
+div::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  /* Set the width of the scrollbar */
+}
+
+div::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  /* Set the color of the scrollbar thumb */
+  border-radius: 3px;
+  /* Set the border-radius of the scrollbar thumb for a rounded appearance */
+}
+
+div::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  /* Set the color of the scrollbar track */
 }

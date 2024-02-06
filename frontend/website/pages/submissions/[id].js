@@ -512,7 +512,6 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
       setSubmissionDataResponse(data);
       setCommunityNameMap(mapCommunitiesToNames(data.submission.communities));
 
-
       let sharableCommunityIds = [];
       let removableCommnuityIds = [];
 
@@ -702,16 +701,16 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
               </Dialog>
 
               <Dialog open={openConnectForm} fullWidth maxWidth="md">
-                  <SubmissionForm
-                    dialog_title="Reply by creating a new submission"
-                    method="reply"
-                    communityNameMap={communityNameMap}
-                    source_url=""
-                    title=""
-                    description=""
-                    submission_id={submissionDataResponse.submission.submission_id}
-                    handle_close={handleCancelConnectForm}
-                  />
+                <SubmissionForm
+                  dialog_title="Reply by creating a new submission"
+                  method="reply"
+                  communityNameMap={communityNameMap}
+                  source_url=""
+                  title=""
+                  description=""
+                  submission_id={submissionDataResponse.submission.submission_id}
+                  handle_close={handleCancelConnectForm}
+                />
               </Dialog>
 
               <Snackbar
@@ -891,7 +890,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     <Grid item sx={{ width: "50%" }}>
                       { }
                       <Grid container alignItems="center" sx={{ flexFlow: "nowrap" }}>
-                        <Grid item sx={{ width: "80%" }}  className="addRemoveText">
+                        <Grid item sx={{ width: "80%" }} className="addRemoveText">
                           <div>
                             <FormControl
                               sx={{ width: "100%" }}
@@ -1186,7 +1185,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
             width: "50%",
             padding: 0
           }}>
-          <Legend/>
+          <Legend />
           <ForceGraph3D
             ref={fgRef}
             graphData={graph}
@@ -1225,7 +1224,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
             }}
             linkPositionUpdate={(sprite, { start, end }) => {
               const middlePos = Object.assign(...['x', 'y', 'z'].map(c => ({
-              [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
+                [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
               })));
 
               Object.assign(sprite.position, middlePos);
