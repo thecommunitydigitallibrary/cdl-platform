@@ -210,7 +210,7 @@ export default function SubmissionForm(props) {
         }
     }
 
-    const handleCancel = () =>{
+    const handleCancel = () => {
         props.setTextBoxVisible(false)
     }
 
@@ -230,7 +230,6 @@ export default function SubmissionForm(props) {
 
             URL = URL + GET_SUBMISSION_ENDPOINT
 
-
             const res = await fetch(URL, {
                 method: METH,
                 body: JSON.stringify(DATA),
@@ -239,6 +238,7 @@ export default function SubmissionForm(props) {
                     "Content-Type": "application/json",
                 }),
             });
+
             const response = await res.json();
             if (res.status == 200) {
                 setSeverity("success");
@@ -246,8 +246,10 @@ export default function SubmissionForm(props) {
                 props.setTextBoxVisible(false)
                 setOpenSnackbar(true);
 
-                URL = BASE_URL_SERVER + GET_SUBMISSION_ENDPOINT;
+                URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + response.submission_id;
+
                 const newSubmissionRes = await fetch(URL, {
+                    method: "GET",
                     headers: new Headers({
                         Authorization: jsCookie.get("token"),
                     }),
@@ -255,20 +257,18 @@ export default function SubmissionForm(props) {
                 const newConnection = await newSubmissionRes.json();
 
                 const errorCode = newSubmissionRes.ok ? false : newSubmissionRes.status;
+
                 if (!errorCode) {
-                    // gets submission form res.submisionId
-                    setSubmissionProps(prevProps => ({
-                        ...prevProps,
-                        submissionIncomingConnections: [...prevProps.submissionIncomingConnections, newConnection]
-                    }));
-                    
+                    let newIncomingSubs = [...submissionIncomingConnections, newConnection.submission];
+                    setSubmissionProps({ submissionIncomingConnections: newIncomingSubs });
                 }
                 // window.location.reload(); not needed if we change connectiosn state
-
-            } else {
+            }
+            else {
                 setSeverity("error");
                 setMessage(response.message);
                 setOpenSnackbar(true);
+                alert('error')
             }
         }
         else {
@@ -321,21 +321,27 @@ export default function SubmissionForm(props) {
                 setOpenSnackbar(true);
             }
         }
-    
-        
+
+
     };
+
+    useEffect(() => {
+
+        console.log('submissionIncomingConnections has changed: ', submissionIncomingConnections)
+
+    }, [submissionIncomingConnections]);
 
     // document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true);
     // document.querySelectorAll('w-md-editor-text').forEach(field => field.style = {"min-height": "200px"});
 
     return (
 
-        props.isAConnection ? // if props.isConnection si true, then this is a connection so use local states
+        props.isAConnection ? // if props.isConnection si true, then this is a CONNECTION-submission so use the local states for inputs
             <div>
                 {/* for submission mode create, set all params to empty string? */}
 
                 <DialogContent>
-                <Button style={{ float: 'right'}} onClick={() => { handleCancel() }}>Cancel</Button>
+                    <Button style={{ float: 'right' }} onClick={() => { handleCancel() }}>Cancel</Button>
                     <TextField
                         margin="dense"
                         id="submissionURL"
@@ -566,62 +572,6 @@ export default function SubmissionForm(props) {
                             </div>
                             <br />
 
-                            {/* {(submissionMode == "create" || submissionMode == "reply") ?
-                        <FormControl
-                            sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
-                        >
-                            <InputLabel id="demo-simple-select-label">
-                                Select Community
-                            </InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                style={{ backgroundColor: "white" }}
-                                label="Select Community"
-                                value={submissionCommunities}
-                                onChange={(event) => setSubmissionProps({ submissionCommunities: event.target.value })}
-                            // onChange={(event) => setCommunity(event.target.value)}
-                            >
-                                {props.submissionCommunitiesNameMap && Array.isArray(props.submissionCommunitiesNameMap) &&
-                                    props.submissionCommunitiesNameMap.map(function (d, idx) {
-                                        return (
-                                            <MenuItem key={idx} value={d.community_id}>
-                                                {d.name}
-                                            </MenuItem>
-                                        );
-                                    })
-                                }
-
-                                {props.submissionCommunitiesNameMap && !Array.isArray(props.submissionCommunitiesNameMap) && Object.keys(props.submissionCommunitiesNameMap).map(function (key, index) {
-                                    return (
-                                        <MenuItem key={index} value={key}>
-                                            {props.submissionCommunitiesNameMap[key]}
-                                        </MenuItem>
-                                    );
-                                })}
-
-                            </Select>
-                        </FormControl>
-                        : null}
-
-                    {submissionMode == "reply" ?
-                        <div>
-                            <br />
-                            <h6 align="center">
-                                Or by connecting an existing submission
-                            </h6>
-                            <TextField
-                                margin="dense"
-                                id="message"
-                                name="message"
-                                value={connection}
-                                onChange={(event) => setConnection(event.target.value)}
-                                label="Paste Connection ID"
-                                fullWidth
-                                variant="standard"
-                            />
-                        </div>
-                        : null} */}
                         </div>
                     }
 

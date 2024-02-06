@@ -106,7 +106,7 @@ export default function SubmissionDetails(subData) {
     };
 
     const deleteSubmissionEntirely = async (event) => {
-        
+
         var submissionId = submissionData.submission.submission_id;
         var URL = BASE_URL_CLIENT + 'submission/' + submissionId;
 
@@ -121,16 +121,16 @@ export default function SubmissionDetails(subData) {
             const response = await res.json();
 
             if (response.status == "ok") {
-                setSnackBarProps({isSnackBarOpen: true})
-                setSnackBarProps({snackBarSeverity: 'success'});
-                setSnackBarProps({snackBarMessage: 'Deleted submission from all communities successfully!'})
+                setSnackBarProps({ isSnackBarOpen: true })
+                setSnackBarProps({ snackBarSeverity: 'success' });
+                setSnackBarProps({ snackBarMessage: 'Deleted submission from all communities successfully!' })
 
                 window.close()
             }
         } else {
-            setSnackBarProps({isSnackBarOpen: true})
-                setSnackBarProps({snackBarSeverity: 'error'});
-                setSnackBarProps({snackBarMessage: 'Only the original poster of this submission can delete this.'})
+            setSnackBarProps({ isSnackBarOpen: true })
+            setSnackBarProps({ snackBarSeverity: 'error' });
+            setSnackBarProps({ snackBarMessage: 'Only the original poster of this submission can delete this.' })
         }
         handleCloseDelete()
     };
@@ -207,7 +207,7 @@ export default function SubmissionDetails(subData) {
                             href={'/' + SEARCH_ENDPOINT + "?community=" + key + "&page=0"}
                             target="_blank"
                             rel="noopener noreferrer"
-                            
+
                             style={{
                                 fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
                                 fontWeight: "500",
@@ -220,21 +220,21 @@ export default function SubmissionDetails(subData) {
                                 marginRight: "5px",
                                 textDecoration: "none",
                                 background: "aliceblue",
-                              }}
+                            }}
 
-                            // style={{
-                            //     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-                            //     fontWeight: "750",
-                            //     fontSize: "0.75rem",
-                            //     letterSpacing: "0.02857em",
-                            //     textTransform: "uppercase",
-                            //     color: "white",
-                            //     padding: "5px 7px",
-                            //     marginRight: "5px",
-                            //     textDecoration: "none",
-                            //     background: "#1976d2",
-                            //     borderRadius: '1rem'
-                            // }}
+                        // style={{
+                        //     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                        //     fontWeight: "750",
+                        //     fontSize: "0.75rem",
+                        //     letterSpacing: "0.02857em",
+                        //     textTransform: "uppercase",
+                        //     color: "white",
+                        //     padding: "5px 7px",
+                        //     marginRight: "5px",
+                        //     textDecoration: "none",
+                        //     background: "#1976d2",
+                        //     borderRadius: '1rem'
+                        // }}
                         >
                             {submissionData.submission.communities_part_of[key]}
                         </a>
@@ -424,43 +424,43 @@ export default function SubmissionDetails(subData) {
                                 </Typography>
                             </Grid>
                             <Grid item>
-{ submissionType != "webpage" && 
-                                (submissionMode == "edit" ?
-                                    <ButtonGroup>
-                                        <Button onClick={changeMode} variant="outlined" startIcon={<Save />} size="small" color="success">
-                                            Save
+                                {submissionType != "webpage" &&
+                                    (submissionMode == "edit" ?
+                                        <ButtonGroup>
+                                            <Button onClick={changeMode} variant="outlined" startIcon={<Save />} size="small" color="success">
+                                                Save
+                                            </Button>
+                                            <Button onClick={handleClickDelete} variant="outlined" startIcon={<Delete />} size="small" color="error">
+                                                Delete
+                                            </Button>
+                                        </ButtonGroup>
+                                        : <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
+                                            Edit
                                         </Button>
-                                        <Button onClick={handleClickDelete} variant="outlined" startIcon={<Delete />} size="small" color="error">
-                                            Delete
-                                        </Button>
-                                    </ButtonGroup>
-                                    : <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
-                                        Edit
-                                    </Button>
-                                )
-                            }
-<Dialog open={openDelete} onClose={handleCloseDelete}>
-                            <DialogTitle style={{ width: "500px" }}>
-                                {" "}
-                                Delete Submission{" "}
-                            </DialogTitle>
-                            <DialogContent>
-                                <DialogContentText>
-                                    Are you sure you want to delete this submission? This will
-                                    remove the submission from all communities.
-                                </DialogContentText>
-                            </DialogContent>
+                                    )
+                                }
+                                <Dialog open={openDelete} onClose={handleCloseDelete}>
+                                    <DialogTitle style={{ width: "500px" }}>
+                                        {" "}
+                                        Delete Submission{" "}
+                                    </DialogTitle>
+                                    <DialogContent>
+                                        <DialogContentText>
+                                            Are you sure you want to delete this submission? This will
+                                            remove the submission from all communities.
+                                        </DialogContentText>
+                                    </DialogContent>
 
-                            <DialogActions>
-                                <Button onClick={handleCloseDelete}>Cancel</Button>
-                                <Button
-                                    style={{ color: "red" }}
-                                    onClick={deleteSubmissionEntirely}
-                                >
-                                    I'm Sure
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
+                                    <DialogActions>
+                                        <Button onClick={handleCloseDelete}>Cancel</Button>
+                                        <Button
+                                            style={{ color: "red" }}
+                                            onClick={deleteSubmissionEntirely}
+                                        >
+                                            I'm Sure
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
 
                                 <IconButton
                                     aria-label="more"
@@ -617,7 +617,7 @@ export default function SubmissionDetails(subData) {
                             flex: 1,
                         }}>
                             <FormControl
-                                sx={{ width: "100%" }}
+                                sx={{ width: "100px" }}
                                 size="small"
                             >
                                 <InputLabel
@@ -680,7 +680,7 @@ export default function SubmissionDetails(subData) {
                             flex: 1,
                         }}>
                             <FormControl
-                                sx={{ width: "100%" }}
+                                sx={{ width: "100px" }}
                                 size="small"
                             >
                                 <InputLabel
