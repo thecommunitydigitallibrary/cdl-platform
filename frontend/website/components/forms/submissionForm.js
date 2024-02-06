@@ -370,7 +370,7 @@ export default function SubmissionForm(props) {
                         variant="standard"
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
-                        style={{ width: "75%" }} // Increase the width to 100%
+                        style={{ width: "50%" }} // Increase the width to 100%
                     />
 
                     <FormControl

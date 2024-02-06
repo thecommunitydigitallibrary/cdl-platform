@@ -27,7 +27,7 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
 
     return (
         <>
-            <Box>
+            <Box minWidth={'750px'}>
                 <Button
                     onClick={handleButtonClick} variant="contained" size="small" endIcon={<ReplyAllOutlined />}>
                     Add Incoming Connection
