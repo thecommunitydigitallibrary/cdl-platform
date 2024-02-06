@@ -34,30 +34,12 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     setSubmissionProps
   } = useSubmissionStore();
 
-  useEffect(() => {
-
-    const handleBeforeUnload = (event) => {
-      const shouldPreventClosing = submissionTitle === 'Untitled';
-
-      if (shouldPreventClosing) {
-        const message = "Title cannot be 'Untitled'. Please change the title before exiting.";
-        event.returnValue = message;
-        return message;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [submissionDescription, submissionIsAnonymous, submissionTitle])
 
   useEffect(() => {
     console.log(data)
 
     setSubmissionProps({ submissionTitle: data.submission.explanation });
-    setSubmissionProps({submissionType: data.submission.type})
+    setSubmissionProps({ submissionType: data.submission.type })
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
     setSubmissionProps({ submissionCommunities: data.submission.communities });
     setSubmissionProps({ submissionSourceUrl: data.submission.source_url });

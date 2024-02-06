@@ -1,4 +1,4 @@
-import { React, useEffect } from 'react';
+import { React, useEffect, useState } from 'react';
 import { Typography, Grid, Paper, Box } from '@mui/material';
 import SearchResult from '../searchresult';
 import jsCookie from 'js-cookie';
@@ -10,11 +10,14 @@ import { BASE_URL_CLIENT, BASE_URL_SERVER, SEARCH_ENDPOINT } from '../../static/
 
 export default function Connections({ submissionDataResponse, id }) {
     const { submissionId, submissionIncomingConnections, submissionOutgoingConnections, setSubmissionProps } = useSubmissionStore();
-
+    const [count, setCount] = useState(0);
     useEffect(() => {
+        console.log('called :' + count)
+        console.log(submissionId)
+        setCount(count + 1);
         getIncomingConnections();
     }, [
-        submissionId, submissionIncomingConnections
+        submissionId
     ])
 
     async function getIncomingConnections() {
@@ -48,14 +51,14 @@ export default function Connections({ submissionDataResponse, id }) {
             const data = await res.json();
             setSubmissionProps({ submissionIncomingConnections: data.search_results_page })
         } else {
-            console.log('nope')
+            console.log(res.status)
         }
 
     }
 
     const renderConnections = (connections, title) => {
         return (
-            <Grid item xs={6} width={'90ch'} style={{padding: '3ch'}} >
+            <Grid item style={{ padding: '3ch' }} >
                 {/* style={{ border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }} */}
                 <Typography variant='h6' gutterBottom>
 
@@ -108,7 +111,7 @@ export default function Connections({ submissionDataResponse, id }) {
 
                 <Grid container rowSpacing={1} columnSpacing={1} justifyContent={'space-between'}>
                     {submissionIncomingConnections && renderConnections(submissionIncomingConnections, 'Incoming Connections')}
-                    {submissionIncomingConnections && renderConnections(submissionOutgoingConnections, 'Mentions')}
+                    {/* {submissionIncomingConnections && renderConnections(submissionOutgoingConnections, 'Mentions')} */}
                 </Grid>
             </Stack>
         </>
