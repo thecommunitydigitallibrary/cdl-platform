@@ -155,7 +155,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
   return (<>
 
     <Head>
-      <title>{APP_NAME}</title>
+      <title>{'Submission - Textdata'}</title>
       <link rel="icon" href="/images/tree32.png" />
     </Head>
 
