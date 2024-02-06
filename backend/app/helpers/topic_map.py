@@ -36,7 +36,8 @@ class TopicMap:
             "metadescs": {},
             "topics": {},
             "hashtags": {},
-            "communities": {}
+            "communities": {},
+            "ownSubmissions": {}
         }
 
     def read_file(self, file_name: str) -> None:
@@ -165,6 +166,18 @@ class TopicMap:
         '''
         self.rowid_map["communities"][rowid] = community_list
 
+    def add_to_rowid_ownSubmissions(self, rowid: str, own_sub_list: List[str]):
+        '''
+                This method added communities list corresponding to the row.
+
+                Parameters:
+                    rowid(str): Row ID in the dataframe.
+                    own_sub_list(List[str]): Indicates if the submission is current user's submission or not.
+                Returns:
+                    None
+                '''
+        self.rowid_map["ownSubmissions"][rowid] = own_sub_list
+
     def extract_all(self):
         '''
         Extract meta-descriptors, hashtags, topics and communities from each submission.
@@ -229,6 +242,17 @@ class TopicMap:
             else:
                 comm_list.append("Webpages")
             self.add_to_rowid_communities(idx, comm_list)
+
+            # For own submission extraction
+            own_sub_list = []
+            if row.get("own_page"):
+                if row["own_page"] == 1.0:
+                    own_sub_list.append("Your Submissions")
+                else:
+                    own_sub_list.append("Other Submissions")
+            else:
+                own_sub_list.append("Other Submissions")
+            self.add_to_rowid_ownSubmissions(idx, own_sub_list)
 
     def get_meta_descriptor(self, s: str) -> List[str]:
         '''

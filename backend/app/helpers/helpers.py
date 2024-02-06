@@ -164,7 +164,7 @@ def build_redirect_url(url, result_hash, highlighted_text, method="search"):
 	redirect_url += "&hash=" + result_hash
 	url, fragment = urldefrag(url)
 	# handling edge cases
-	if "pdf" in url and fragment != "":  # for proxies
+	if "pdf" in url or "smartdiff" in url and fragment != "":  # for proxies
 		redirect_url += "&redirect_url=" + url + "#" + fragment
 	elif "youtube" in url:
 		redirect_url += "&redirect_url=" + quote(url)
