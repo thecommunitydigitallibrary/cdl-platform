@@ -28,7 +28,6 @@ export default function Connections({ submissionDataResponse, id }) {
 
         var searchURL = BASE_URL_CLIENT + SEARCH_ENDPOINT + "?";
 
-        console.log(searchURL, id)
         if (id) {
             searchURL += "query=" + encodeURIComponent(submissionId);
 
@@ -40,7 +39,6 @@ export default function Connections({ submissionDataResponse, id }) {
         //     searchURL += "query=" + "";
         // }
 
-        console.log(searchURL)
 
         const res = await fetch(searchURL, {
             headers: new Headers({
