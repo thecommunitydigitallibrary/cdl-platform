@@ -20,9 +20,7 @@ export default function Connections({ submissionDataResponse, id }) {
         console.log(submissionId)
         setCount(count + 1);
         getIncomingConnections();
-    }, [
-        submissionId
-    ])
+    }, [submissionId])
 
     async function getIncomingConnections() {
 

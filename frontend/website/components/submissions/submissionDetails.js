@@ -369,7 +369,7 @@ export default function SubmissionDetails(subData) {
         }
 
         var URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + submissionId
-        console.log(DATA, URL)
+
         const res = await fetch(URL, {
             method: "PATCH",
             body: JSON.stringify(DATA),
@@ -380,7 +380,17 @@ export default function SubmissionDetails(subData) {
         });
         const response = await res.json();
         if (res.status == 200) {
-            window.location.reload();
+            console.log('Saved successfully')
+            setSnackBarProps({ isSnackBarOpen: true })
+            setSnackBarProps({ snackBarSeverity: 'success' });
+            setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
+            // window.location.reload();
+        }
+        else {
+
+            setSnackBarProps({ isSnackBarOpen: true })
+            setSnackBarProps({ snackBarSeverity: 'error' });
+            setSnackBarProps({ snackBarMessage: 'Could not save changes' })
         }
     };
 
@@ -388,7 +398,6 @@ export default function SubmissionDetails(subData) {
         if (submissionMode === "edit") {
             // first save the changes
             handleSubmit()
-            console.log(submissionTitle)
             setSubmissionProps({ ...submissionMode, submissionMode: "view" });
         } else {
             setSubmissionProps({ ...submissionMode, submissionMode: "edit" });
