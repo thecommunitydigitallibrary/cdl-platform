@@ -665,7 +665,6 @@ function Header(props) {
               <Button onClick={handleNewSubmissionRequest}>Create</Button>
             </DialogActions>
           </Dialog>
-
           <Dialog open={openSubmission} onClose={handleCloseSubmission} fullWidth maxWidth="md">
 
             {/* {!batch ? (
