@@ -202,7 +202,7 @@ export default function SubmissionDetails(subData) {
                 return (
                     // <Tooltip title={"Go to " + submissionData.submission.communities_part_of[key]}>
 
-                    <Tooltip title={"Go to community"}>
+                    <Tooltip key={key} title={"Go to community"}>
                         <a
                             href={'/' + SEARCH_ENDPOINT + "?community=" + key + "&page=0"}
                             target="_blank"
@@ -221,20 +221,6 @@ export default function SubmissionDetails(subData) {
                                 textDecoration: "none",
                                 background: "aliceblue",
                             }}
-
-                        // style={{
-                        //     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-                        //     fontWeight: "750",
-                        //     fontSize: "0.75rem",
-                        //     letterSpacing: "0.02857em",
-                        //     textTransform: "uppercase",
-                        //     color: "white",
-                        //     padding: "5px 7px",
-                        //     marginRight: "5px",
-                        //     textDecoration: "none",
-                        //     background: "#1976d2",
-                        //     borderRadius: '1rem'
-                        // }}
                         >
                             {submissionData.submission.communities_part_of[key]}
                         </a>
@@ -303,7 +289,23 @@ export default function SubmissionDetails(subData) {
                 setMessage("Submission removed from community.");
                 handleClick();
                 handleCloseDelete();
-                window.location.reload();
+                console.log("removed!!")
+
+                let temp = [...submissionCommunitiesNamesList];
+                temp = temp.filter((x) => x.key != submissionRemoveCommunityIDList[i]);
+                setSubmissionProps({ submissionCommunitiesNamesList: temp })
+
+                // add to 'add' dropdown
+                let tempSubmissionSaveCommunityID = submissionSaveCommunityID;
+                tempSubmissionSaveCommunityID.push(submissionRemoveCommunityIDList[i]);
+                setSubmissionProps({ submissionSaveCommunityID: tempSubmissionSaveCommunityID })
+
+                // remove from 'add' dropdown
+                let tempSubmissionRemoveCommunityID = submissionRemoveCommunityID;
+                tempSubmissionRemoveCommunityID = tempSubmissionRemoveCommunityID.filter((x) => x != submissionRemoveCommunityIDList[i]);
+                setSubmissionProps({ submissionRemoveCommunityID: tempSubmissionRemoveCommunityID })
+
+                // window.location.reload();
             } else {
                 setSeverity("error");
                 setMessage(response.message);
@@ -339,7 +341,46 @@ export default function SubmissionDetails(subData) {
                 setSeverity("success");
                 setMessage("Saved submission successfully!");
                 handleClick();
-                window.location.reload();
+                console.log('Added to community!')
+
+                let temp = submissionCommunitiesNamesList;
+
+                temp.push(<Tooltip key={submissionSaveCommunityIDList[i]} title={"Go to community"}>
+                    <a
+                        href={'/' + SEARCH_ENDPOINT + "?community=" + submissionSaveCommunityIDList[i] + "&page=0"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+
+                        style={{
+                            fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                            fontWeight: "500",
+                            fontSize: "0.8125rem",
+                            lineHeight: "1.75",
+                            letterSpacing: "0.02857em",
+                            textTransform: "uppercase",
+                            color: "#1976D2",
+                            padding: "3px 7px",
+                            marginRight: "5px",
+                            textDecoration: "none",
+                            background: "aliceblue",
+                        }}
+                    >
+                        {submissionCommunitiesNameMap[submissionSaveCommunityIDList[i]]}
+                    </a>
+                </Tooltip>)
+                setSubmissionProps({ submissionCommunitiesNamesList: temp })
+
+                // remove from 'add' dropdown
+                let tempSubmissionSaveCommunityID = submissionSaveCommunityID;
+                tempSubmissionSaveCommunityID = tempSubmissionSaveCommunityID.filter((x) => x != submissionSaveCommunityIDList[i]);
+                setSubmissionProps({ submissionSaveCommunityID: tempSubmissionSaveCommunityID })
+
+                // add to 'remove' dropdown
+                let tempSubmissionRemoveCommunityID = submissionRemoveCommunityID;
+                tempSubmissionRemoveCommunityID.push(submissionSaveCommunityIDList[i]);
+                setSubmissionProps({ submissionRemoveCommunityID: tempSubmissionRemoveCommunityID })
+
+                // window.location.reload();
             } else {
                 setSeverity("error");
                 setMessage(response.message);
@@ -387,7 +428,6 @@ export default function SubmissionDetails(subData) {
             // window.location.reload();
         }
         else {
-
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'error' });
             setSnackBarProps({ snackBarMessage: 'Could not save changes' })
