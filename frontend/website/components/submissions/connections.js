@@ -14,7 +14,7 @@ export default function Connections({ submissionDataResponse, id }) {
     useEffect(() => {
         getIncomingConnections();
     }, [
-        submissionId
+        submissionId, submissionIncomingConnections
     ])
 
     async function getIncomingConnections() {
@@ -23,7 +23,7 @@ export default function Connections({ submissionDataResponse, id }) {
 
         var searchURL = BASE_URL_CLIENT + SEARCH_ENDPOINT + "?";
 
-        alert(searchURL, id)
+        console.log(searchURL, id)
         if (id) {
             searchURL += "query=" + encodeURIComponent(submissionId);
 
@@ -35,7 +35,7 @@ export default function Connections({ submissionDataResponse, id }) {
         //     searchURL += "query=" + "";
         // }
 
-        alert(searchURL)
+        console.log(searchURL)
 
         const res = await fetch(searchURL, {
             headers: new Headers({
@@ -48,14 +48,15 @@ export default function Connections({ submissionDataResponse, id }) {
             const data = await res.json();
             setSubmissionProps({ submissionIncomingConnections: data.search_results_page })
         } else {
-            alert('nope')
+            console.log('nope')
         }
 
     }
 
     const renderConnections = (connections, title) => {
         return (
-            <Grid item xs={6} width={'90ch'} textAlign={'center'} style={{ border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }}>
+            <Grid item xs={6} width={'90ch'} style={{padding: '3ch'}} >
+                {/* style={{ border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }} */}
                 <Typography variant='h6' gutterBottom>
 
                     {title + " "}
@@ -90,9 +91,7 @@ export default function Connections({ submissionDataResponse, id }) {
                     </Box>
                 ) : (
                     <Box>
-
                         <Typography variant='body2'>No {title.toLowerCase()} found.</Typography>
-
                     </Box>
                 )}
 
@@ -109,7 +108,7 @@ export default function Connections({ submissionDataResponse, id }) {
 
                 <Grid container rowSpacing={1} columnSpacing={1} justifyContent={'space-between'}>
                     {submissionIncomingConnections && renderConnections(submissionIncomingConnections, 'Incoming Connections')}
-                    {submissionIncomingConnections && renderConnections(submissionOutgoingConnections, 'mentions')}
+                    {submissionIncomingConnections && renderConnections(submissionOutgoingConnections, 'Mentions')}
                 </Grid>
             </Stack>
         </>

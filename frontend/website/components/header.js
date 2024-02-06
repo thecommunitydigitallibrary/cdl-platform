@@ -219,8 +219,6 @@ function Header(props) {
       return;
     }
 
-    console.log(userCommunities);
-
     var DATA = {
       community: userCommunities[0].community_id,
       source_url: "",
@@ -247,7 +245,7 @@ function Header(props) {
 
       handleCancelNewSubTitleDialog();
       // Open a new tab
-      window.open(WEBSITE_URL + GET_SUBMISSION_ENDPOINT + response.submission_id, '_blank');
+      window.open(WEBSITE_URL + 'submissions/' + response.submission_id, '_blank');
     }
   }
 

@@ -8,11 +8,11 @@ import useSubmissionStore from '../../store/submissionStore';
 
 const AddConnectionsButton = ({ setSelectedOption }) => {
     const [isTextBoxVisible, setTextBoxVisible] = useState(false);
-    const { submissionTitle, submissionCommunitiesNameMap, submissionDisplayUrl, setSubmissionProps }
+    const { submissionTitle, submissionCommunitiesNameMap, submissionRedirectUrl, setSubmissionProps }
         = useSubmissionStore();
 
     const { connectionDescription, setConnectionDescription } =
-        useState(`Reply to [${submissionTitle}](${submissionDisplayUrl})`);
+        useState(`Reply to [${submissionTitle}](${submissionRedirectUrl})`);
     // useState(`Reply to [[${submissionTitle}]]` + ' ');
 
     const handleButtonClick = () => {
@@ -44,9 +44,11 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                     <div style={{ padding: 2 }}>
                         <SubmissionForm
                             isAConnection={true}
+                            isTextBoxVisible={isTextBoxVisible}
+                            setTextBoxVisible = {setTextBoxVisible}
                             source_url=""
                             title=""
-                            description={`Reply to [${submissionTitle}](${submissionDisplayUrl})`}
+                            description={`Reply to [${submissionTitle}](${submissionRedirectUrl})`}
                             communitiesNameMap={submissionCommunitiesNameMap}
                         />
 

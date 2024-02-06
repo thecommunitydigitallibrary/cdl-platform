@@ -1,6 +1,6 @@
 import jsCookie from "js-cookie";
 import { ContentCopy, Delete, LocalLibraryOutlined, LocalLibraryRounded, LocalLibraryTwoTone, Save, Edit } from '@mui/icons-material';
-import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar } from '@mui/material';
+import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { React, useState, useEffect } from 'react';
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, SEARCH_ENDPOINT, WEBSITE_URL } from '../../static/constants';
 import SubmissionStatistics from "./stats";
@@ -19,6 +19,7 @@ export default function SubmissionDetails(subData) {
         submissionCommunities,
         submissionIsAnonymous,
         submissionMode,
+        submissionType,
         submissionId,
         submissionIncomingConnections,
         submissionCommunitiesNamesList,
@@ -104,6 +105,36 @@ export default function SubmissionDetails(subData) {
         setOpenDelete(false);
     };
 
+    const deleteSubmissionEntirely = async (event) => {
+        
+        var submissionId = submissionData.submission.submission_id;
+        var URL = BASE_URL_CLIENT + 'submission/' + submissionId;
+
+        if (subData.data.submission.can_delete) {
+            const res = await fetch(URL, {
+                method: "DELETE",
+                headers: new Headers({
+                    Authorization: jsCookie.get("token"),
+                }),
+            });
+
+            const response = await res.json();
+
+            if (response.status == "ok") {
+                setSnackBarProps({isSnackBarOpen: true})
+                setSnackBarProps({snackBarSeverity: 'success'});
+                setSnackBarProps({snackBarMessage: 'Deleted submission from all communities successfully!'})
+
+                window.close()
+            }
+        } else {
+            setSnackBarProps({isSnackBarOpen: true})
+                setSnackBarProps({snackBarSeverity: 'error'});
+                setSnackBarProps({snackBarMessage: 'Only the original poster of this submission can delete this.'})
+        }
+        handleCloseDelete()
+    };
+
 
     const handleClickDelete = () => {
         setOpenDelete(true);
@@ -176,19 +207,34 @@ export default function SubmissionDetails(subData) {
                             href={'/' + SEARCH_ENDPOINT + "?community=" + key + "&page=0"}
                             target="_blank"
                             rel="noopener noreferrer"
+                            
                             style={{
                                 fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-                                fontWeight: "750",
-                                fontSize: "0.75rem",
+                                fontWeight: "500",
+                                fontSize: "0.8125rem",
+                                lineHeight: "1.75",
                                 letterSpacing: "0.02857em",
                                 textTransform: "uppercase",
-                                color: "white",
-                                padding: "5px 7px",
+                                color: "#1976D2",
+                                padding: "3px 7px",
                                 marginRight: "5px",
                                 textDecoration: "none",
-                                background: "#1976d2",
-                                borderRadius: '1rem'
-                            }}
+                                background: "aliceblue",
+                              }}
+
+                            // style={{
+                            //     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                            //     fontWeight: "750",
+                            //     fontSize: "0.75rem",
+                            //     letterSpacing: "0.02857em",
+                            //     textTransform: "uppercase",
+                            //     color: "white",
+                            //     padding: "5px 7px",
+                            //     marginRight: "5px",
+                            //     textDecoration: "none",
+                            //     background: "#1976d2",
+                            //     borderRadius: '1rem'
+                            // }}
                         >
                             {submissionData.submission.communities_part_of[key]}
                         </a>
@@ -378,20 +424,44 @@ export default function SubmissionDetails(subData) {
                                 </Typography>
                             </Grid>
                             <Grid item>
-
-                                {submissionMode == "edit" ?
+{ submissionType != "webpage" && 
+                                (submissionMode == "edit" ?
                                     <ButtonGroup>
                                         <Button onClick={changeMode} variant="outlined" startIcon={<Save />} size="small" color="success">
                                             Save
                                         </Button>
-                                        <Button onClick={subData.handleDelete} variant="outlined" startIcon={<Delete />} size="small" color="error">
+                                        <Button onClick={handleClickDelete} variant="outlined" startIcon={<Delete />} size="small" color="error">
                                             Delete
                                         </Button>
                                     </ButtonGroup>
                                     : <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
                                         Edit
                                     </Button>
-                                }
+                                )
+                            }
+<Dialog open={openDelete} onClose={handleCloseDelete}>
+                            <DialogTitle style={{ width: "500px" }}>
+                                {" "}
+                                Delete Submission{" "}
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText>
+                                    Are you sure you want to delete this submission? This will
+                                    remove the submission from all communities.
+                                </DialogContentText>
+                            </DialogContent>
+
+                            <DialogActions>
+                                <Button onClick={handleCloseDelete}>Cancel</Button>
+                                <Button
+                                    style={{ color: "red" }}
+                                    onClick={deleteSubmissionEntirely}
+                                >
+                                    I'm Sure
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+
                                 <IconButton
                                     aria-label="more"
                                     id="long-button"
@@ -521,6 +591,15 @@ export default function SubmissionDetails(subData) {
                                 float: "left",
                             }}>
 
+                                {/* {submissionCommunitiesNamesList.length > 0 && submissionData.submission.type === "user_submission"
+                                    ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
+                                    : ""}
+                                {submissionData.submission.type === "webpage" &&
+                                    <Typography>
+                                        "Webpage"
+                                    </Typography>
+                                } */}
+
                                 {submissionCommunitiesNamesList.length > 0 && submissionData.submission.type === "user_submission"
                                     ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
                                     : ""}
@@ -529,15 +608,6 @@ export default function SubmissionDetails(subData) {
                                         "Webpage"
                                     </Typography>
                                 }
-
-                                {/* {communityNamesList.length > 0 && submissionData.submission.type === "user_submission"
-                                    ? communityNamesList.map((link, i) => [i > 0, link])
-                                    : ""}
-                                {submissionData.submission.type === "webpage" &&
-                                    <Typography>
-                                        "Webpage"
-                                    </Typography>
-                                } */}
                             </div>
 
                         </div>

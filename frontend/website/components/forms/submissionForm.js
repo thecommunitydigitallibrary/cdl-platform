@@ -210,6 +210,10 @@ export default function SubmissionForm(props) {
         }
     }
 
+    const handleCancel = () =>{
+        props.setTextBoxVisible(false)
+    }
+
     const handleSubmit = async (event) => {
 
         if (props.isAConnection) {
@@ -239,6 +243,7 @@ export default function SubmissionForm(props) {
             if (res.status == 200) {
                 setSeverity("success");
                 setMessage(response.message);
+                props.setTextBoxVisible(false)
                 setOpenSnackbar(true);
 
                 URL = BASE_URL_SERVER + GET_SUBMISSION_ENDPOINT;
@@ -256,6 +261,7 @@ export default function SubmissionForm(props) {
                         ...prevProps,
                         submissionIncomingConnections: [...prevProps.submissionIncomingConnections, newConnection]
                     }));
+                    
                 }
                 // window.location.reload(); not needed if we change connectiosn state
 
@@ -264,9 +270,7 @@ export default function SubmissionForm(props) {
                 setMessage(response.message);
                 setOpenSnackbar(true);
             }
-
         }
-
         else {
             var DATA = {
                 community: submissionCommunity,
@@ -317,6 +321,8 @@ export default function SubmissionForm(props) {
                 setOpenSnackbar(true);
             }
         }
+    
+        
     };
 
     // document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true);
@@ -329,7 +335,7 @@ export default function SubmissionForm(props) {
                 {/* for submission mode create, set all params to empty string? */}
 
                 <DialogContent>
-
+                <Button style={{ float: 'right'}} onClick={() => { handleCancel() }}>Cancel</Button>
                     <TextField
                         margin="dense"
                         id="submissionURL"
@@ -456,7 +462,7 @@ export default function SubmissionForm(props) {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={() => { console.log('cancel') }}>Cancel</Button>
+                    <Button onClick={() => { handleCancel() }}>Cancel</Button>
                     <Button onClick={() => { handleSubmit() }}>Save</Button>
                 </DialogActions>
                 <Snackbar open={openSnackbar} autoHideDuration={6000} >

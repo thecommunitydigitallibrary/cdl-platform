@@ -15,14 +15,11 @@ export default function SubmissionExtensions({ data, id, target }) {
         <div style={{ width: "100%", display: 'flex', flexDirection: 'column' }}>
 
             <Grid container justifyContent={'space-between'}>
-                {/* justifyContent={selectedOption === 'connections' ? 'space-between' : 'flex-end' */}
 
-                <Grid item width={"75%"}>
+                <Grid item width={"80%"}>
 
                     {selectedOption === 'connections' &&
                         <AddConnectionsButton setSelectedOption={setSelectedOption} />}
-
-                    {/* <AddConnectionsButton setSelectedOption={setSelectedOption} /> */}
 
                 </Grid>
                 <Grid item style={{ marginLeft: '16px', marginRight: '16px' }}>

@@ -1,6 +1,4 @@
 
-// end
-
 import jsCookie from "js-cookie";
 import { Grid, Paper, Skeleton, Stack, Breadcrumbs } from '@mui/material';
 import { React, useState, useEffect } from 'react';
@@ -29,6 +27,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     submissionMode,
     submissionId,
     submissionIncomingConnections,
+    submissionRedirectUrl,
     submissionUsername,
     submissionLastModified,
     submissionDate,
@@ -58,6 +57,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     console.log(data)
 
     setSubmissionProps({ submissionTitle: data.submission.explanation });
+    setSubmissionProps({submissionType: data.submission.type})
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
     setSubmissionProps({ submissionCommunities: data.submission.communities });
     setSubmissionProps({ submissionSourceUrl: data.submission.source_url });
@@ -109,12 +109,6 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
   const handleSubmit = async (method) => {
     const now = new Date().getTime();
     var DATA = {
-      // community: community,
-      // source_url: source_url,
-      // title: title,
-      // description: description,
-      // anonymous: isAnonymous,
-      // time: new Date().getTime(),
 
       community: submissionCommunity,
       source_url: submissionSourceUrl,
@@ -173,25 +167,11 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
           <Stack spacing={1} alignItems={'center'}>
             <SubmissionDetails
               data={data}
-              // title={title}
-              // community={community}
-              // sourceURL={source_url}
-              // submissionDate={submissionDate}
-              // mode={mode}
               changeMode={changemode}
               handleDelete={handleDelete}
             />
             <NoteEditor
-            // data={data}
-            // title={title}
-            // community={community}
-            // sourceURL={source_url}
-            // submissionDate={submissionDate}
-            // mode={mode}
-            // description={description}
-            // id={id} 
             />
-            {/* <SubmissionExtensions data={data} id={id} target={target} /> */}
             <SubmissionExtensions data={data} id={id} target={target} />
             <Footer />
           </Stack>
