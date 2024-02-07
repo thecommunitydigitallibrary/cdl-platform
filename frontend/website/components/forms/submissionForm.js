@@ -139,7 +139,7 @@ export default function SubmissionForm(props) {
             }),
         });
         const response = await res.json();
-        console.log(text)
+
         if (res.status == 200) {
 
             if (props.isAConnection) {
@@ -156,7 +156,7 @@ export default function SubmissionForm(props) {
 
                 setSubmissionProps({
                     submissionSuggestions:
-                        ((x) =>
+                        response.suggestions.map((x) =>
                             <Button onClick={handleAutoSuggestClick} id={x.id} title={x.label}>
                                 {x.label}
                             </Button>
