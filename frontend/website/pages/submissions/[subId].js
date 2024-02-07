@@ -17,6 +17,10 @@ import SubmissionExtensions from "../../components/submissions/submissionExtensi
 
 export default function SubmissionPage({ errorCode, data, id, target }) {
 
+  if (errorCode) {
+    return <Error statusCode={errorCode} />;
+  }
+
   const {
     submissionTitle,
     submissionDescription,
@@ -131,9 +135,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     }
   };
 
-  if (errorCode) {
-    return <Error statusCode={errorCode} />;
-  }
+
   return (<>
 
     <Head>
