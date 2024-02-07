@@ -22,6 +22,7 @@ const NoteEditor = (props) => {
 
     const {
         submissionTitle,
+        originalDescription,
         submissionDescription,
         submissionCommunities,
         submissionSourceUrl,

@@ -1,5 +1,5 @@
 import jsCookie from "js-cookie";
-import { ContentCopy, Delete, LocalLibraryOutlined, LocalLibraryRounded, LocalLibraryTwoTone, Save, Edit } from '@mui/icons-material';
+import { ContentCopy, Delete, LocalLibraryOutlined, LocalLibraryRounded, LocalLibraryTwoTone, Save, Edit, CloseOutlined, Close } from '@mui/icons-material';
 import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { React, useState, useEffect } from 'react';
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, SEARCH_ENDPOINT, WEBSITE_URL } from '../../static/constants';
@@ -19,6 +19,7 @@ export default function SubmissionDetails(subData) {
         submissionCommunities,
         submissionIsAnonymous,
         submissionMode,
+        originalDescription,
         submissionType,
         submissionId,
         submissionIncomingConnections,
@@ -44,26 +45,6 @@ export default function SubmissionDetails(subData) {
     const [message, setMessage] = useState("");
     const [severity, setSeverity] = useState("error");
     const [openDelete, setOpenDelete] = useState(false);
-
-    // useEffect(() => {
-    //     console.log(
-    //         'removeCommunityID: ', submissionRemoveCommunityID,
-    //         'saveCommunityID: ', submissionSaveCommunityID,
-    //         'removeCommunityIDList: ', submissionRemoveCommunityIDList,
-    //         'saveCommunityIDList: ', submissionSaveCommunityIDList,
-    //     )
-    // }, [
-    //     submissionRemoveCommunityID,
-    //     submissionSaveCommunityID,
-    //     submissionRemoveCommunityIDList,
-    //     submissionSaveCommunityIDList,
-    // ])
-
-    // const [removeCommunityID, setRemoveCommunityID] = useState([]);
-    // const [saveCommunityID, setSaveCommunityID] = useState([]);
-    // const [removeCommunityIDList, setRemoveCommunityIDList] = useState([]);
-    // const [saveCommunityIDList, setSaveCommunityIDList] = useState([]);
-    // const [communityNameMap, setCommunityNameMap] = useState({});
 
     const mapCommunitiesToNames = (commResponse) => {
         let idNameMap = {};
@@ -395,13 +376,21 @@ export default function SubmissionDetails(subData) {
     };
 
     const changeMode = () => {
+
         if (submissionMode === "edit") {
-            // first save the changes
-            handleSubmit()
+            let temp = originalDescription
+            setSubmissionProps({ submissionDescription: temp })
             setSubmissionProps({ ...submissionMode, submissionMode: "view" });
         } else {
             setSubmissionProps({ ...submissionMode, submissionMode: "edit" });
         }
+    }
+
+    const submitDescriptionChanges = () => {
+        let temp = submissionDescription
+        setSubmissionProps({ originalDescription: temp })
+        handleSubmit()
+        setSubmissionProps({ ...submissionMode, submissionMode: "view" });
     }
 
     useEffect(() => {
@@ -433,21 +422,68 @@ export default function SubmissionDetails(subData) {
                                 </Typography>
                             </Grid>
                             <Grid item>
+
                                 {submissionType != "webpage" &&
                                     (submissionMode == "edit" ?
-                                        <ButtonGroup>
-                                            <Button onClick={changeMode} variant="outlined" startIcon={<Save />} size="small" color="success">
+
+                                        <>
+                                            <Button onClick={submitDescriptionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
                                                 Save
                                             </Button>
-                                            <Button onClick={handleClickDelete} variant="outlined" startIcon={<Delete />} size="small" color="error">
+                                            <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
                                                 Delete
                                             </Button>
-                                        </ButtonGroup>
-                                        : <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
+
+                                        </>
+                                        :
+                                        <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
                                             Edit
                                         </Button>
                                     )
                                 }
+
+                                {submissionMode == "edit" &&
+                                    <IconButton
+                                        size="small" color="gray"
+                                        onClick={changeMode}
+                                        aria-label="close"
+                                        variant="outlined"
+                                    >
+                                        <CloseOutlined />
+                                    </IconButton>}
+                                <IconButton
+                                    aria-label="more"
+                                    id="long-button"
+                                    size="small"
+                                    aria-controls={open ? 'long-menu' : undefined}
+                                    aria-expanded={open ? 'true' : undefined}
+                                    aria-haspopup="true"
+                                    onClick={handleClickOtherOptionsMenu}
+                                >
+                                    <MoreVertIcon />
+                                </IconButton>
+
+                                <Menu
+                                    id="long-menu"
+                                    MenuListProps={{
+                                        'aria-labelledby': 'long-button',
+                                    }}
+                                    anchorEl={otherMenuAnchor}
+                                    open={openOtherOptionsMenu}
+                                    onClose={handleCloseOtherOptionsMenu}
+                                    PaperProps={{
+                                        style: {
+                                            maxHeight: ITEM_HEIGHT * 4.5,
+                                            width: '20ch',
+                                        },
+                                    }}
+                                >
+                                    {otherMenuOptions.map((option) => (
+                                        <MenuItem key={option} selected={option === 'Report Submission'} onClick={() => { console.log('need to report'); handleCloseOtherOptionsMenu(); }}>
+                                            {option}
+                                        </MenuItem>
+                                    ))}
+                                </Menu>
                                 <Dialog open={openDelete} onClose={handleCloseDelete}>
                                     <DialogTitle style={{ width: "500px" }}>
                                         {" "}
@@ -471,37 +507,7 @@ export default function SubmissionDetails(subData) {
                                     </DialogActions>
                                 </Dialog>
 
-                                <IconButton
-                                    aria-label="more"
-                                    id="long-button"
-                                    aria-controls={open ? 'long-menu' : undefined}
-                                    aria-expanded={open ? 'true' : undefined}
-                                    aria-haspopup="true"
-                                    onClick={handleClickOtherOptionsMenu}
-                                >
-                                    <MoreVertIcon />
-                                </IconButton>
-                                <Menu
-                                    id="long-menu"
-                                    MenuListProps={{
-                                        'aria-labelledby': 'long-button',
-                                    }}
-                                    anchorEl={otherMenuAnchor}
-                                    open={openOtherOptionsMenu}
-                                    onClose={handleCloseOtherOptionsMenu}
-                                    PaperProps={{
-                                        style: {
-                                            maxHeight: ITEM_HEIGHT * 4.5,
-                                            width: '20ch',
-                                        },
-                                    }}
-                                >
-                                    {otherMenuOptions.map((option) => (
-                                        <MenuItem key={option} selected={option === 'Report Submission'} onClick={() => { console.log('need to report'); handleCloseOtherOptionsMenu(); }}>
-                                            {option}
-                                        </MenuItem>
-                                    ))}
-                                </Menu>
+
 
                             </Grid>
 
