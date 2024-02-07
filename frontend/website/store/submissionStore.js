@@ -4,6 +4,7 @@ const useSubmissionStore = create((set) => ({
     submissionUsername: "",
     submissionTitle: "Untitled",
     submissionDescription: "",
+    originalDescription: "",
     submissionDisplayUrl: "",
     submissionSourceUrl: "",
     submissionCommunity: "",
