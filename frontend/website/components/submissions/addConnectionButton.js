@@ -6,14 +6,15 @@ import { Typography } from '@mui/material';
 import SubmissionForm from '../forms/submissionForm';
 import useSubmissionStore from '../../store/submissionStore';
 import { ReplyAllOutlined } from '@mui/icons-material';
+import { GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from '../../static/constants';
 
 const AddConnectionsButton = ({ setSelectedOption }) => {
     const [isTextBoxVisible, setTextBoxVisible] = useState(false);
-    const { submissionTitle, submissionCommunitiesNameMap, submissionRedirectUrl, setSubmissionProps }
+    const { submissionTitle, submissionId, submissionCommunitiesNameMap, submissionRedirectUrl, submissionDisplayUrl, setSubmissionProps }
         = useSubmissionStore();
 
     const { connectionDescription, setConnectionDescription } =
-        useState(`Reply to [${submissionTitle}](${submissionRedirectUrl})`);
+        useState(`Reply to [${submissionTitle}](${WEBSITE_URL}+'submissions/'+${submissionId}})`);
     // useState(`Reply to [[${submissionTitle}]]` + ' ');
 
     const handleButtonClick = () => {
@@ -42,7 +43,7 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                             setTextBoxVisible={setTextBoxVisible}
                             source_url=""
                             title=""
-                            description={`Reply to [${submissionTitle}](${submissionRedirectUrl})`}
+                            description={`Reply to [${submissionTitle}](${WEBSITE_URL}submissions/${submissionId})`}
                             communitiesNameMap={submissionCommunitiesNameMap}
                         />
 

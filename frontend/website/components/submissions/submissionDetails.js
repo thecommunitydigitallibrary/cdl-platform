@@ -414,8 +414,6 @@ export default function SubmissionDetails(subData) {
                                         maxWidth: '95ch',
                                     }}>
                                     <Link target="_blank" color="inherit" href={submissionData.submission.redirect_url}>
-                                        {/* {submissionData.submission.explanation} HERE*/}
-                                        {/* {subData.title} */}
                                         {submissionTitle}
                                     </Link>
 

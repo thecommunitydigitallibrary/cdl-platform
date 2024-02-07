@@ -71,14 +71,16 @@ export default function Connections({ submissionDataResponse, id }) {
 
                             {"Incoming connections" + " "}
 
-                            <Tooltip title="Explanation of the title">
+                            <Tooltip title="All submissions that mention this one ">
                                 <InfoOutlined fontSize="xs" />
                             </Tooltip>
                         </Typography>
+
                         {submissionIncomingConnections ?
                             (<Box display="flex" flexDirection="column" gap={2}>
                                 {submissionIncomingConnections.map((d, index) => (
                                     <Paper key={index} elevation={3} style={{ padding: '10px' }}>
+
                                         <SearchResult
                                             search_idx={index}
                                             redirect_url={d.redirect_url}
