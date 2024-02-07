@@ -507,6 +507,38 @@ def submission(current_user, id):
                 if source_url != None:
                     insert_obj["source_url"] = source_url
 
+                    # (try to) scrape the URL if we change it
+                    webpages = Webpages()
+                    scraper = ScrapeWorker(webpages.collection)
+
+                    if source_url and not scraper.is_scraped_before(source_url):
+                        try:
+                            data = scraper.scrape(source_url)  # Triggering Scraper
+                            
+
+                            # Check if the URL was already scraped
+                            if data['scrape_status']['code'] != -1:
+                                # Check if the scrape was not successful
+                                if data["scrape_status"]["code"] != 1:
+                                    data["webpage"] = {}
+
+                                # insert in MongoDB
+                                insert_status, webpage = log_webpage(data["url"],
+                                                                        data["webpage"],
+                                                                        data["scrape_status"],
+                                                                        data["scrape_time"]
+                                                                        )
+                                if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                                    # index in OpenSearch
+                                    index_status, _ = webpages_elastic_manager.add_to_index(webpage)
+                                    print("WEBPAGE_INDEX_STATUS", index_status)
+
+                                else:
+                                    print("Unable to insert webpage data in database.")
+                        except Exception as e:
+                            traceback.print_exc()
+                            pass
+
 
 
             if submission.anonymous != anonymous:
@@ -606,6 +638,17 @@ def submission(current_user, id):
                 traceback.print_exc()
                 return response.error("Invalid submission ID", Status.NOT_FOUND)
 
+            # make requested communities a dict containing the name too, for display
+            communities = get_communities_helper(current_user, return_dict=True)["community_info"]
+            rc_dict = {}
+            for community_id in communities:
+                try:
+                    rc_dict[community_id] = communities[community_id]["name"]
+                except Exception as e:
+                    print(e)
+                    print(f"Could not find community for community id: {community_id}")
+            
+
             try:
                 is_deleted = submission.deleted
             except:
@@ -619,14 +662,14 @@ def submission(current_user, id):
                     if str(community) in community_submissions:
                         search_id = log_submission_view(ip, user_id, submission.id).inserted_id
                         submission = format_submission_for_display(submission, current_user, search_id)
-                        submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
+                        submission["connections"] = find_connections(ObjectId(id), rc_dict, current_user, search_id)
                         return response.success({"submission": submission}, Status.OK)
 
                 # Case where user is the original submitter but it has been removed from all communities.
                 if str(submission.user_id) == str(user_id):
                     search_id = log_submission_view(ip, user_id, submission.id).inserted_id
                     submission = format_submission_for_display(submission, current_user, search_id)
-                    submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
+                    submission["connections"] = find_connections(ObjectId(id), rc_dict, current_user, search_id)
                     return response.success({"submission": submission}, Status.OK)
 
                 return response.error("You do not have access to this submission.", Status.FORBIDDEN)
@@ -636,7 +679,7 @@ def submission(current_user, id):
                     if webpage:
                         search_id = log_submission_view(ip, user_id, webpage.id).inserted_id
                         submission = format_webpage_for_display(webpage, search_id)
-                        submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
+                        submission["connections"] = find_connections(ObjectId(id), rc_dict, current_user, search_id)
                         return response.success({"submission": submission}, Status.OK)
                 except Exception as e:
                     print(e)
@@ -1418,6 +1461,9 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
             traceback.print_exc()
             print("Failed to update Community Core Content")
         
+
+        # not used on create from webpage, so copy-pasted to
+        # PATCH if URL is updated
         print("SUBMISSION_INDEX_STATUS", index_status)
         webpages = Webpages()
         scraper = ScrapeWorker(webpages.collection)
@@ -1804,6 +1850,18 @@ def find_connections(submission_id, user_communities, current_user, search_id):
 		filtered_connections : list : a list of submissions formatted according to format_submission_for_display
 			each submission also contains a "connection_description" field
 	"""
+
+    user_id = current_user.id
+
+
+    _, hits = cache_search(str(submission_id), str(search_id), 0, user_communities, str(user_id), method="search")
+
+    print(hits)
+
+    return hits
+
+    
+
 
     cdl_connections = Connections()
     all_connections = cdl_connections.find({"source_id": submission_id})
