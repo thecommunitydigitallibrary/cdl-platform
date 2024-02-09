@@ -296,7 +296,7 @@ export default function SubmissionDetails(subData) {
 
                 setSnackBarProps({ isSnackBarOpen: true })
                 setSnackBarProps({ snackBarSeverity: 'error' });
-                setSnackBarProps({ snackBarMessage: 'Cannot remove from community' })
+                setSnackBarProps({ snackBarMessage: response.message })
 
                 handleClick();
             }
@@ -393,7 +393,9 @@ export default function SubmissionDetails(subData) {
 
         if (submissionMode === "edit") {
             let temp = originalDescription
-            setSubmissionProps({ submissionDescription: temp })
+            if (originalDescription) {
+                setSubmissionProps({ submissionDescription: temp })
+            }
             setSubmissionProps({ ...submissionMode, submissionMode: "view" });
         } else {
             setSubmissionProps({ ...submissionMode, submissionMode: "edit" });
@@ -557,7 +559,7 @@ export default function SubmissionDetails(subData) {
                                             name="message"
                                             value={feedbackMessage}
                                             onChange={handleMessageType}
-                                            label="Description"
+                                            label="Why are you reporting this submission?"
                                             fullWidth
                                             variant="standard"
                                         />
