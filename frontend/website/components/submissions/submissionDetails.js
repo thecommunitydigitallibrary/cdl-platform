@@ -445,14 +445,19 @@ export default function SubmissionDetails(subData) {
                                 }
 
                                 {submissionMode == "edit" &&
-                                    <IconButton
-                                        size="small" color="gray"
-                                        onClick={changeMode}
-                                        aria-label="close"
-                                        variant="outlined"
-                                    >
-                                        <CloseOutlined />
-                                    </IconButton>}
+                                    <Tooltip title="Cancel">
+                                        <IconButton
+                                            size="small" color="gray"
+                                            onClick={changeMode}
+                                            label="cancel"
+                                            aria-label="close"
+                                            variant="outlined"
+                                        >
+                                            <CloseOutlined />
+                                        </IconButton>
+                                    </Tooltip>
+
+                                }
                                 <IconButton
                                     aria-label="more"
                                     id="long-button"
