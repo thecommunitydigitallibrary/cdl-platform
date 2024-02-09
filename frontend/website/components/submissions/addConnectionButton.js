@@ -14,8 +14,8 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
         = useSubmissionStore();
 
     const { connectionDescription, setConnectionDescription } =
-        useState(`Reply to [${submissionTitle}](${WEBSITE_URL}+'submissions/'+${submissionId}})`);
-    // useState(`Reply to [[${submissionTitle}]]` + ' ');
+        useState(`[${submissionTitle}](${WEBSITE_URL}+'submissions/'+${submissionId}})`);
+    // useState(`[[${submissionTitle}]]` + ' ');
 
     const handleButtonClick = () => {
         // setSubmissionProps({ submissionMode: "create" });
@@ -30,9 +30,13 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
         <>
             <Box minWidth={'750px'}>
                 <Button
-                    onClick={handleButtonClick} variant="contained" size="small" endIcon={<ReplyAllOutlined />}>
-                    Add Incoming Connection
-
+                    onClick={handleButtonClick}
+                    variant="contained"
+                    size="small"
+                    endIcon={<ReplyAllOutlined />}
+                    style={{ textTransform: 'none' }}
+                >
+                    Make Submission with Mention
                 </Button>
 
                 <Slide direction="left" in={isTextBoxVisible} mountOnEnter unmountOnExit>
@@ -43,7 +47,7 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                             setTextBoxVisible={setTextBoxVisible}
                             source_url=""
                             title=""
-                            description={`Reply to [${submissionTitle}](${WEBSITE_URL}submissions/${submissionId})`}
+                            description={`[${submissionTitle}](${WEBSITE_URL}submissions/${submissionId})`}
                             communitiesNameMap={submissionCommunitiesNameMap}
                         />
 

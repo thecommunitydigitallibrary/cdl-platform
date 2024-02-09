@@ -60,7 +60,7 @@ export default function Connections({ submissionDataResponse, id }) {
         <>
             <Stack flexDirection='column' alignItems={'center'}>
                 <Typography variant='h4' gutterBottom>
-                    Connections
+                    Mentions
                 </Typography>
 
                 <Grid container rowSpacing={1} columnSpacing={1} justifyContent={'space-between'}>
@@ -69,7 +69,7 @@ export default function Connections({ submissionDataResponse, id }) {
                         {/* style={{ border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }} */}
                         <Typography variant='h6' gutterBottom>
 
-                            {"Incoming connections" + " "}
+                            {"All submissions that mention this one" + " "}
 
                             <Tooltip title="All submissions that mention this one ">
                                 <InfoOutlined fontSize="xs" />
