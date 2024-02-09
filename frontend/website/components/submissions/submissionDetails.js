@@ -386,9 +386,13 @@ export default function SubmissionDetails(subData) {
         }
     }
 
-    const submitDescriptionChanges = () => {
-        let temp = submissionDescription
-        setSubmissionProps({ originalDescription: temp })
+    const submitSubmissionChanges = () => {
+
+        // let tempTitle = submissionTitle
+        // setSubmissionProps({ originalTitle: tempTitle })
+
+        let tempDesc = submissionDescription
+        setSubmissionProps({ originalDescription: tempDesc })
         handleSubmit()
         setSubmissionProps({ ...submissionMode, submissionMode: "view" });
     }
@@ -425,7 +429,7 @@ export default function SubmissionDetails(subData) {
                                     (submissionMode == "edit" ?
 
                                         <>
-                                            <Button onClick={submitDescriptionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
+                                            <Button onClick={submitSubmissionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
                                                 Save
                                             </Button>
                                             <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
