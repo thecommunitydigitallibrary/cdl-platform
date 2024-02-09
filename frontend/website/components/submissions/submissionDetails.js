@@ -617,8 +617,22 @@ export default function SubmissionDetails(subData) {
                                     ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
                                     : ""}
                                 {submissionData.submission.type === "webpage" &&
-                                    <Typography>
-                                        "Webpage"
+                                    <Typography
+                                        style={{
+                                            fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                                            fontWeight: "500",
+                                            fontSize: "0.8125rem",
+                                            lineHeight: "1.75",
+                                            letterSpacing: "0.02857em",
+                                            textTransform: "uppercase",
+                                            // color: "#1976D2",
+                                            padding: "3px 7px",
+                                            marginRight: "5px",
+                                            textDecoration: "none",
+                                            background: "#DCDCDC",
+                                        }}
+                                    >
+                                        Webpage
                                     </Typography>
                                 }
                             </div>
