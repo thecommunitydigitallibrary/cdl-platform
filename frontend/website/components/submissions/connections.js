@@ -15,13 +15,12 @@ export default function Connections({ submissionDataResponse, id }) {
     }, [submissionIncomingConnections]);
 
     useEffect(() => {
-        getIncomingConnections();
+        // getIncomingConnections();
     }, [submissionId])
 
     async function getIncomingConnections() {
 
-
-        var searchURL = BASE_URL_CLIENT + SEARCH_ENDPOINT + "?";
+        // var searchURL = BASE_URL_CLIENT + SEARCH_ENDPOINT + "?";
 
         if (id) {
             searchURL += "query=" + encodeURIComponent(submissionId);
@@ -57,38 +56,36 @@ export default function Connections({ submissionDataResponse, id }) {
                 <Grid container rowSpacing={1} columnSpacing={1} justifyContent={'space-between'}>
 
                     <Grid item style={{ padding: '3ch' }} >
-                        {/* style={{ border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }} */}
                         <Typography variant='h6' gutterBottom>
 
-                            {"All submissions that mention this one" + " "}
+                            {"Submissions that mention this one" + " "}
 
-                            <Tooltip title="All submissions that mention this one ">
+                            <Tooltip title="A Mention is where another submission references this one.">
                                 <InfoOutlined fontSize="xs" />
                             </Tooltip>
                         </Typography>
 
                         {submissionIncomingConnections ?
-                            (<Box display="flex" flexDirection="column" gap={2}>
+                            (<Box display="flex" flexDirection="column" gap={1}>
                                 {submissionIncomingConnections.map((d, index) => (
-                                    <Paper key={index} elevation={3} style={{ padding: '10px' }}>
 
-                                        <SearchResult
-                                            search_idx={index}
-                                            redirect_url={d.redirect_url}
-                                            display_url={d.display_url}
-                                            submission_id={d.submission_id}
-                                            result_hash={d.result_hash}
-                                            highlighted_text={d.highlighted_text}
-                                            explanation={d.explanation}
-                                            hashtags={d.hashtags}
-                                            time={d.time}
-                                            communities_part_of={d.communities_part_of}
-                                            auth_token={jsCookie.get('token')}
-                                            show_relevant={true}
-                                            paperWidth={'100%'}
-                                            paperMarginX={'0%'}
-                                        ></SearchResult>
-                                    </Paper>
+                                    <SearchResult
+                                        search_idx={index}
+                                        redirect_url={d.redirect_url}
+                                        display_url={d.display_url}
+                                        submission_id={d.submission_id}
+                                        result_hash={d.result_hash}
+                                        highlighted_text={d.highlighted_text}
+                                        explanation={d.explanation}
+                                        hashtags={d.hashtags}
+                                        time={d.time}
+                                        communities_part_of={d.communities_part_of}
+                                        auth_token={jsCookie.get('token')}
+                                        show_relevant={true}
+                                        paperWidth={'100%'}
+                                        paperMarginX={'0%'}
+                                    ></SearchResult>
+
                                 ))}
                             </Box>
                             ) : (
