@@ -269,7 +269,6 @@ export default function SubmissionForm(props) {
                 setSeverity("error");
                 setMessage(response.message);
                 setOpenSnackbar(true);
-                alert('error')
             }
         }
         else {
