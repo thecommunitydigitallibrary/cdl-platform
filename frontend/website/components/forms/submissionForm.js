@@ -144,7 +144,6 @@ export default function SubmissionForm(props) {
 
             if (props.isAConnection) {
 
-                console.log('shoudl be setting noe')
                 setSuggestions(response.suggestions.map((x) =>
                     <Button onClick={handleAutoSuggestClick} id={x.id} title={x.label}>
                         {x.label}
@@ -152,7 +151,6 @@ export default function SubmissionForm(props) {
                 ));
             }
             else {
-                console.log('looking for suggestiong for : ', text)
 
                 setSubmissionProps({
                     submissionSuggestions:
@@ -247,29 +245,33 @@ export default function SubmissionForm(props) {
                 props.setTextBoxVisible(false)
                 setOpenSnackbar(true);
 
-                URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + response.submission_id;
+                // URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + submissionId;
 
-                const newSubmissionRes = await fetch(URL, {
-                    method: "GET",
-                    headers: new Headers({
-                        Authorization: jsCookie.get("token"),
-                    }),
-                });
-                const newConnection = await newSubmissionRes.json();
+                // const newSubmissionRes = await fetch(URL, {
+                //     method: "GET",
+                //     headers: new Headers({
+                //         Authorization: jsCookie.get("token"),
+                //     }),
+                // });
+                // const newConnection = await newSubmissionRes.json();
+                // console.log(newConnection)
 
-                const errorCode = newSubmissionRes.ok ? false : newSubmissionRes.status;
+                // const errorCode = newSubmissionRes.ok ? false : newSubmissionRes.status;
 
-                if (!errorCode) {
-                    let newIncomingSubs = [...submissionIncomingConnections, newConnection.submission];
-                    setSubmissionProps({ submissionIncomingConnections: newIncomingSubs });
-                }
-                // window.location.reload(); not needed if we change connectiosn state
+                // if (!errorCode) {
+                //     let newIncomingSubs = [submissionIncomingConnections, newConnection.submission.mentions];
+                //     console.log(newIncomingSubs)
+                //     setSubmissionProps({ submissionIncomingConnections: newIncomingSubs });
+                // }
+
+                // window.location.reload();
+                // might want to chage this so tht window reload is avoaided!
+                // not needed if we change connectiosn state
             }
             else {
                 setSeverity("error");
                 setMessage(response.message);
                 setOpenSnackbar(true);
-                alert('error')
             }
         }
         else {
@@ -328,12 +330,10 @@ export default function SubmissionForm(props) {
 
     useEffect(() => {
 
-        console.log('submissionIncomingConnections has changed: ', submissionIncomingConnections)
+        // console.log('submissionIncomingConnections has changed: ', submissionIncomingConnections)
 
     }, [submissionIncomingConnections]);
 
-    // document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true);
-    // document.querySelectorAll('w-md-editor-text').forEach(field => field.style = {"min-height": "200px"});
 
     return (
 

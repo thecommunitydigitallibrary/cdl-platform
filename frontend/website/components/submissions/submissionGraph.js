@@ -128,7 +128,7 @@ export default function SubmissionGraph({ id, target }) {
 
     const handleNodeClick = useCallback(
         async (node) => {
-            setLoading(true);
+            // setLoading(true);
             const res = await fetch(BASE_URL_CLIENT + "submission/" + node.id, {
                 method: "GET",
                 headers: new Headers({
@@ -146,12 +146,22 @@ export default function SubmissionGraph({ id, target }) {
 
             // Complete Loading and Change URL
 
-            setLoading(false);
+            // setLoading(false);
             const nextURL = WEBSITE_URL + 'submissions/' + sourceRef.current + "?target=" + node.id;
             window.history.replaceState(null, "", nextURL);
         },
         [graph, setGraph]
     );
+
+    const handleNodeClickV2 = useCallback(
+        async (node) => {
+            const url = `${WEBSITE_URL}/submissions/${node.id}`;
+            // Open the URL in a new tab
+            window.open(url, '_blank'); // 
+        },
+        [graph, setGraph]
+    );
+
 
     useEffect(() => {
         sourceRef.current = source;
@@ -177,7 +187,7 @@ export default function SubmissionGraph({ id, target }) {
                     distance={300}
                     zoom={1}
                     backgroundColor={'#e5e5e5'}
-                    onNodeClick={handleNodeClick}
+                    onNodeClick={handleNodeClickV2}
                     nodeLabel={handleNodeLabel}
                     linkDirectionalArrowLength={3.5}
                     linkDirectionalArrowRelPos={1}

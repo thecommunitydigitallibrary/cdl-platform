@@ -56,85 +56,6 @@ webpages_elastic_manager = ElasticManager(
     "webpages")
 
 
-@functional.route("/api/connect/", methods=["POST"])
-@token_required
-def create_connection(current_user):
-    """
-	Endpoint for a user to create a directional connection between two submissions. Either connection_target is given or submission_X is given.
-	Arguments:
-		current_user: dictionary : the user recovered from the JWT token.
-		request form with:
-			connection_source : string : the id of the source of the connection.
-			connection_description : string : optional text describing the connection, submitted by the user.
-
-			connection_target : string : optional id of the target of the connection.
-            source_url: string : optional, the URL of the new submission.
-            title: string : the title of the new submission.
-            description: string : the description of the new submission
-            community: string : the community of the new submission
-
-
-	Returns:
-		200 : a dictionary with "status" = "ok and a note in the "message" field.
-		500 : a dictionary with "status" = "error" and an error in the "message" field.
-	"""
-    try:
-        ip = request.remote_addr
-        user_id = current_user.id
-        user_communities = current_user.communities
-
-
-        request_json =  request.get_json()
-
-        connection_source = request_json.get("connection_source", "")
-        connection_target = request_json.get("connection_target", "")
-        connection_description = request_json.get("connection_description", "")
-
-        submission_url = request_json.get("source_url", None)
-        submission_title = request_json.get("title", None)
-        submission_description = request_json.get("description", None)
-        submission_community = request_json.get("community", None)
-
-
-        if submission_url or submission_title or submission_description or submission_community:
-            if not submission_title or not submission_community:
-                print("Error: Must include a submission title and community if creating a new submission.")
-                return response.error("Error: Must include a submission title and community if creating a new submission.", Status.BAD_REQUEST)
-
-            message, status, submission_id = create_submission_helper(ip=ip, user_id=user_id, user_communities=user_communities, highlighted_text=submission_description,
-                    source_url=submission_url, explanation=submission_title, community=submission_community)
-            
-            if status != Status.OK:
-                print(status, message)
-                return response.error(message, status)
-            else:
-                connection_target = submission_id
-        elif not connection_target:
-            return response.error("Error: Must include either a submission title or connection ID.", Status.BAD_REQUEST)
-
-
-        try:
-            connection_source_id = ObjectId(connection_source)
-            connection_target_id = ObjectId(connection_target)
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            return response.error("Error: Invalid connection ID.", Status.BAD_REQUEST)
-        ack = log_connection(ip, user_id, connection_source_id, connection_target_id, connection_description)
-        if ack.acknowledged:
-            return response.success({
-                "message": "Connection successfully created",
-                "connection_id": str(ack.inserted_id)
-            }, Status.OK)
-        else:
-            return response.error("Failed to make connection, please try again later.", Status.INTERNAL_SERVER_ERROR)
-    except Exception as e:
-        print(e)
-        traceback.print_exc()
-        return response.error("Failed to create connection, please try again later.", Status.INTERNAL_SERVER_ERROR)
-
-
-
 @functional.route("/api/submission/", methods=["POST"])
 @token_required
 def create_submission(current_user):
@@ -343,7 +264,7 @@ def submission(current_user, id):
 			Response:
 				On error, a JSON dictionary with "status" as "error" and a message.
 				On success, a JSON dictionary with "status" as "ok" and a "submission" field with a trimmed submission JSON
-					that also includes a list of added connections.
+					that also includes a list of added mentions.
 
 		For PATCH:
 			A required request form with (all optional)
@@ -507,6 +428,38 @@ def submission(current_user, id):
                 if source_url != None:
                     insert_obj["source_url"] = source_url
 
+                    # (try to) scrape the URL if we change it
+                    webpages = Webpages()
+                    scraper = ScrapeWorker(webpages.collection)
+
+                    if source_url and not scraper.is_scraped_before(source_url):
+                        try:
+                            data = scraper.scrape(source_url)  # Triggering Scraper
+                            
+
+                            # Check if the URL was already scraped
+                            if data['scrape_status']['code'] != -1:
+                                # Check if the scrape was not successful
+                                if data["scrape_status"]["code"] != 1:
+                                    data["webpage"] = {}
+
+                                # insert in MongoDB
+                                insert_status, webpage = log_webpage(data["url"],
+                                                                        data["webpage"],
+                                                                        data["scrape_status"],
+                                                                        data["scrape_time"]
+                                                                        )
+                                if insert_status.acknowledged and data["scrape_status"]["code"] == 1:
+                                    # index in OpenSearch
+                                    index_status, _ = webpages_elastic_manager.add_to_index(webpage)
+                                    print("WEBPAGE_INDEX_STATUS", index_status)
+
+                                else:
+                                    print("Unable to insert webpage data in database.")
+                        except Exception as e:
+                            traceback.print_exc()
+                            pass
+
 
 
             if submission.anonymous != anonymous:
@@ -606,6 +559,17 @@ def submission(current_user, id):
                 traceback.print_exc()
                 return response.error("Invalid submission ID", Status.NOT_FOUND)
 
+            # make requested communities a dict containing the name too, for display
+            communities = get_communities_helper(current_user, return_dict=True)["community_info"]
+            rc_dict = {}
+            for community_id in communities:
+                try:
+                    rc_dict[community_id] = communities[community_id]["name"]
+                except Exception as e:
+                    print(e)
+                    print(f"Could not find community for community id: {community_id}")
+            
+
             try:
                 is_deleted = submission.deleted
             except:
@@ -619,14 +583,14 @@ def submission(current_user, id):
                     if str(community) in community_submissions:
                         search_id = log_submission_view(ip, user_id, submission.id).inserted_id
                         submission = format_submission_for_display(submission, current_user, search_id)
-                        submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
+                        submission["mentions"] = find_mentions(ObjectId(id), rc_dict, current_user, search_id)
                         return response.success({"submission": submission}, Status.OK)
 
                 # Case where user is the original submitter but it has been removed from all communities.
                 if str(submission.user_id) == str(user_id):
                     search_id = log_submission_view(ip, user_id, submission.id).inserted_id
                     submission = format_submission_for_display(submission, current_user, search_id)
-                    submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
+                    submission["mentions"] = find_mentions(ObjectId(id), rc_dict, current_user, search_id)
                     return response.success({"submission": submission}, Status.OK)
 
                 return response.error("You do not have access to this submission.", Status.FORBIDDEN)
@@ -636,7 +600,7 @@ def submission(current_user, id):
                     if webpage:
                         search_id = log_submission_view(ip, user_id, webpage.id).inserted_id
                         submission = format_webpage_for_display(webpage, search_id)
-                        submission["connections"] = find_connections(ObjectId(id), communities, current_user, search_id)
+                        submission["mentions"] = find_mentions(ObjectId(id), rc_dict, current_user, search_id)
                         return response.success({"submission": submission}, Status.OK)
                 except Exception as e:
                     print(e)
@@ -1418,6 +1382,9 @@ def create_submission_helper(ip=None, user_id=None, user_communities=None, highl
             traceback.print_exc()
             print("Failed to update Community Core Content")
         
+
+        # not used on create from webpage, so copy-pasted to
+        # PATCH if URL is updated
         print("SUBMISSION_INDEX_STATUS", index_status)
         webpages = Webpages()
         scraper = ScrapeWorker(webpages.collection)
@@ -1652,7 +1619,7 @@ def format_webpage_for_display(webpage, search_id):
     redirect_url = build_redirect_url(webpage["url"], result_hash, submission["highlighted_text"], "search")
     submission["redirect_url"] = redirect_url
 
-    submission["connections"] = []
+    submission["mentions"] = []
 
     submission["type"] = "webpage"
 
@@ -1789,11 +1756,9 @@ def format_submission_for_display(submission, current_user, search_id):
 
     return submission
 
-def find_connections(submission_id, user_communities, current_user, search_id):
+def find_mentions(submission_id, user_communities, current_user, search_id):
     """
-	Helper method for getting the connections given a submission from mongodb.
-	A bit of work because we need to make sure that we only return connections that are
-	in the communities accessible by the user requesting the connections.
+	Helper method for getting the mentions. Searches and matches the submission ID
 	Arguments:
 		submission_id : ObjectID : the ObjectID of the source submission.
 		user_communities : list : a list of ObjectIDs, ids of communities accessible by user.
@@ -1801,48 +1766,12 @@ def find_connections(submission_id, user_communities, current_user, search_id):
 		search_id : ObjectID : the id of the view submission log (for tracking clicks).
 
 	Returns:
-		filtered_connections : list : a list of submissions formatted according to format_submission_for_display
-			each submission also contains a "connection_description" field
+		hits : list : a list of submissions formatted according to format_submission_for_display
 	"""
 
-    cdl_connections = Connections()
-    all_connections = cdl_connections.find({"source_id": submission_id})
-    filtered_connections = []
+    user_id = current_user.id
 
-    all_connections = sorted(all_connections, reverse=True, key=lambda x: x.time)
 
-    for connection in all_connections:
-        cdl_logs = Logs()
-        cdl_webpages = Webpages()
+    _, hits = cache_search(str(submission_id), str(search_id), 0, user_communities, str(user_id), method="search")
 
-        target_connection = cdl_logs.find_one({"_id": connection.target_id})
-
-        if not target_connection:
-            target_connection = cdl_webpages.find_one({"_id": connection.target_id})
-
-            if not target_connection:
-                continue
-            formatted_connection = format_webpage_for_display(target_connection, search_id)
-            formatted_connection["connection_description"] = connection.description
-            filtered_connections.append(formatted_connection)
-            continue
-
-        else:
-            if target_connection.deleted == True:
-                continue
-
-        connection_communities = {}
-
-        # gets all communities that a submission is a part of
-        for uid in target_connection.communities:
-            for community in target_connection.communities[uid]:
-                connection_communities[str(community)] = True
-        # checks user's communities and only adds connection if user is in connection's community
-        for community in user_communities:
-            community = str(community)
-            if community in connection_communities:
-                formatted_connection = format_submission_for_display(target_connection, current_user, search_id)
-                formatted_connection["connection_description"] = connection.description
-                filtered_connections.append(formatted_connection)
-                break
-    return filtered_connections
+    return hits

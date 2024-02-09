@@ -2,9 +2,9 @@ import { create } from 'zustand';
 const useSubmissionStore = create((set) => ({
     submissionId: "",
     submissionUsername: "",
-    submissionTitle: "Untitled",
+    submissionTitle: "Loading...",
     submissionDescription: "",
-    originalDescription: "",
+    originalDescription: null,
     submissionDisplayUrl: "",
     submissionSourceUrl: "",
     submissionCommunity: "",

@@ -40,13 +40,11 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
 
 
   useEffect(() => {
-    console.log(data)
-
     setSubmissionProps({ submissionTitle: data.submission.explanation });
     setSubmissionProps({ submissionType: data.submission.type })
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
     setSubmissionProps({ submissionCommunities: data.submission.communities });
-    setSubmissionProps({ submissionSourceUrl: data.submission.source_url });
+    setSubmissionProps({ submissionSourceUrl: data.submission.raw_source_url });
     setSubmissionProps({ submissionDisplayUrl: data.submission.display_url });
     setSubmissionProps({ submissionRedirectUrl: data.submission.redirect_url });
     setSubmissionProps({ submissionIsAnonymous: data.submission.username == undefined });
@@ -57,7 +55,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     setSubmissionProps({ submissionDate: new Date(parseInt(data.submission.time)).toLocaleDateString("en-us") });
     setSubmissionProps({ submissionHashtags: data.submission.hashtags })
     setSubmissionProps({ submissionStats: data.submission.stats });
-    setSubmissionProps({ submissionIncomingConnections: data.submission.connections });
+    setSubmissionProps({ submissionIncomingConnections: data.submission.mentions });
 
   }, [data]);
 
@@ -113,7 +111,6 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     } else if (mode == "edit") {
       URL = URL + GET_SUBMISSION_ENDPOINT + id
       METH = "PATCH"
-      console.log('patch')
     }
 
     const res = await fetch(URL, {
@@ -127,7 +124,6 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     });
     const response = await res.json();
     if (res.status == 200) {
-      console.log('+ response')
       if (method == "edit" || method == "reply") {
         console.log('need reload now!')
         window.location.reload();
@@ -139,7 +135,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
   return (<>
 
     <Head>
-      <title>{'Submission - Textdata'}</title>
+      <title>{`${submissionTitle} - Textdata`}</title>
       <link rel="icon" href="/images/tree32.png" />
     </Head>
 
