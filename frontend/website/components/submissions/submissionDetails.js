@@ -639,127 +639,127 @@ export default function SubmissionDetails(subData) {
 
                         </div>
 
-                        <div style={{
-                            display: "flex",
-                            flex: 1,
-                        }}>
-                            <FormControl
-                                sx={{ width: "100px" }}
-                                size="small"
-                            >
-                                <InputLabel
-                                    id="demo-multiple-checkbox-label"
-                                    sx={{ width: 150, fontSize: "0.8rem" }} // Adjusting label width and font size
-                                >
-                                    Add
-                                </InputLabel>
-
-                                <Select
-                                    labelId="demo-multiple-checkbox-label"
-                                    id="demo-multiple-checkbox"
-                                    value={submissionSaveCommunityIDList}
-                                    // value={saveCommunityIDList}
-                                    onChange={handleSaveDropdownChange}
-                                    sx={{ borderRadius: "4px 0 0 4px", fontSize: "0.8rem" }} // Adjusting border radius and font size
-                                    input={
-                                        <OutlinedInput label="Add Community" />
-                                    }
-                                    renderValue={(selected) =>
-                                        selected
-                                            .map((x) => submissionCommunitiesNameMap[x])
-                                            .join(", ")
-                                    }
-                                    MenuProps={MenuProps}
-                                >
-                                    {/* {saveCommunityID.map((item) => ( */}
-                                    {submissionSaveCommunityID && submissionSaveCommunityID.map((item) => (
-                                        <MenuItem key={item} value={item}
-                                        >
-                                            <Checkbox
-                                                size="small"
-                                                checked={
-                                                    submissionSaveCommunityIDList.indexOf(item) > -1
-                                                }
-                                            />
-                                            <ListItemText
-                                                primaryTypographyProps={{ fontSize: '0.8rem' }}
-                                                primary={submissionCommunitiesNameMap[item]}
-                                            />
-                                        </MenuItem>
-
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <Tooltip title="Add to community">
-                                <IconButton
+                        {submissionData.submission.type !== "webpage" && <>
+                            <div style={{
+                                display: "flex",
+                                flex: 1,
+                            }}>
+                                <FormControl
+                                    sx={{ width: "100px" }}
                                     size="small"
-                                    sx={{ padding: "4px", borderColor: "green", borderRadius: "0 5px 5px 0", borderWidth: "1px", borderStyle: "solid" }}
-                                    onClick={saveSubmission}>
-                                    <Save fontSize="small" /> {/* Adjusting icon size */}
-                                </IconButton>
-                            </Tooltip>
-                        </div>
-
-
-
-                        <div style={{
-                            display: "flex",
-                            flex: 1,
-                        }}>
-                            <FormControl
-                                sx={{ width: "100px" }}
-                                size="small"
-                            >
-                                <InputLabel
-                                    id="demo-multiple-checkbox-label"
-                                    sx={{ fontSize: "0.8rem" }}
                                 >
-                                    Remove
-                                </InputLabel>
-                                <Select
-                                    labelId="demo-multiple-checkbox-label"
-                                    id="demo-multiple-checkbox"
-                                    // value={removeCommunityIDList}
-                                    value={submissionRemoveCommunityIDList}
-                                    onChange={handleRemoveDropdownChange}
-                                    input={
-                                        <OutlinedInput label="Remove Community" />
-                                    }
-                                    sx={{ borderRadius: "4px 0 0 4px", fontSize: "0.8rem" }}
-                                    renderValue={(selected) =>
-                                        selected
-                                            .map((x) => submissionCommunitiesNameMap[x])
-                                            .join(", ")
-                                    }
-                                    MenuProps={MenuProps}>
-                                    {/* {removeCommunityID.map((item) => ( */}
-                                    {submissionRemoveCommunityID && submissionRemoveCommunityID.map((item) => (
-                                        <MenuItem key={item} value={item}
-                                        >
-                                            <Checkbox
-                                                size="small"
-                                                checked={submissionRemoveCommunityIDList.indexOf(item) > -1}
-                                            />
-                                            <ListItemText
-                                                primaryTypographyProps={{ fontSize: '0.8rem' }}
-                                                primary={submissionCommunitiesNameMap[item]}
-                                            />
-                                        </MenuItem>
+                                    <InputLabel
+                                        id="demo-multiple-checkbox-label"
+                                        sx={{ width: 150, fontSize: "0.8rem" }} // Adjusting label width and font size
+                                    >
+                                        Add
+                                    </InputLabel>
 
+                                    <Select
+                                        labelId="demo-multiple-checkbox-label"
+                                        id="demo-multiple-checkbox"
+                                        value={submissionSaveCommunityIDList}
+                                        // value={saveCommunityIDList}
+                                        onChange={handleSaveDropdownChange}
+                                        sx={{ borderRadius: "4px 0 0 4px", fontSize: "0.8rem" }} // Adjusting border radius and font size
+                                        input={
+                                            <OutlinedInput label="Add Community" />
+                                        }
+                                        renderValue={(selected) =>
+                                            selected
+                                                .map((x) => submissionCommunitiesNameMap[x])
+                                                .join(", ")
+                                        }
+                                        MenuProps={MenuProps}
+                                    >
+                                        {/* {saveCommunityID.map((item) => ( */}
+                                        {submissionSaveCommunityID && submissionSaveCommunityID.map((item) => (
+                                            <MenuItem key={item} value={item}
+                                            >
+                                                <Checkbox
+                                                    size="small"
+                                                    checked={
+                                                        submissionSaveCommunityIDList.indexOf(item) > -1
+                                                    }
+                                                />
+                                                <ListItemText
+                                                    primaryTypographyProps={{ fontSize: '0.8rem' }}
+                                                    primary={submissionCommunitiesNameMap[item]}
+                                                />
+                                            </MenuItem>
 
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <Tooltip title="Remove from community">
-                                <IconButton
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <Tooltip title="Add to community">
+                                    <IconButton
+                                        size="small"
+                                        sx={{ padding: "4px", borderColor: "green", borderRadius: "0 5px 5px 0", borderWidth: "1px", borderStyle: "solid" }}
+                                        onClick={saveSubmission}>
+                                        <Save fontSize="small" /> {/* Adjusting icon size */}
+                                    </IconButton>
+                                </Tooltip>
+                            </div>
+
+                            <div style={{
+                                display: "flex",
+                                flex: 1,
+                            }}>
+                                <FormControl
+                                    sx={{ width: "100px" }}
                                     size="small"
-                                    sx={{ padding: "4px", borderColor: "red", borderRadius: "0 5px 5px 0", borderWidth: "1px", borderStyle: "solid" }}
-                                    onClick={deleteSubmissionfromCommunity}
                                 >
-                                    <Delete fontSize="small" /> {/* Adjusting icon size */}
-                                </IconButton>
-                            </Tooltip>
-                        </div>
+                                    <InputLabel
+                                        id="demo-multiple-checkbox-label"
+                                        sx={{ fontSize: "0.8rem" }}
+                                    >
+                                        Remove
+                                    </InputLabel>
+                                    <Select
+                                        labelId="demo-multiple-checkbox-label"
+                                        id="demo-multiple-checkbox"
+                                        // value={removeCommunityIDList}
+                                        value={submissionRemoveCommunityIDList}
+                                        onChange={handleRemoveDropdownChange}
+                                        input={
+                                            <OutlinedInput label="Remove Community" />
+                                        }
+                                        sx={{ borderRadius: "4px 0 0 4px", fontSize: "0.8rem" }}
+                                        renderValue={(selected) =>
+                                            selected
+                                                .map((x) => submissionCommunitiesNameMap[x])
+                                                .join(", ")
+                                        }
+                                        MenuProps={MenuProps}>
+                                        {/* {removeCommunityID.map((item) => ( */}
+                                        {submissionRemoveCommunityID && submissionRemoveCommunityID.map((item) => (
+                                            <MenuItem key={item} value={item}
+                                            >
+                                                <Checkbox
+                                                    size="small"
+                                                    checked={submissionRemoveCommunityIDList.indexOf(item) > -1}
+                                                />
+                                                <ListItemText
+                                                    primaryTypographyProps={{ fontSize: '0.8rem' }}
+                                                    primary={submissionCommunitiesNameMap[item]}
+                                                />
+                                            </MenuItem>
+
+
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <Tooltip title="Remove from community">
+                                    <IconButton
+                                        size="small"
+                                        sx={{ padding: "4px", borderColor: "red", borderRadius: "0 5px 5px 0", borderWidth: "1px", borderStyle: "solid" }}
+                                        onClick={deleteSubmissionfromCommunity}
+                                    >
+                                        <Delete fontSize="small" /> {/* Adjusting icon size */}
+                                    </IconButton>
+                                </Tooltip>
+                            </div>
+                        </>}
 
 
                         <div style={{
