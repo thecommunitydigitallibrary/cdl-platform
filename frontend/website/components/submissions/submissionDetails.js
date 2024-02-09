@@ -123,7 +123,7 @@ export default function SubmissionDetails(subData) {
 
 
     async function copyPageUrl() {
-        const linkToCopy = WEBSITE_URL + GET_SUBMISSION_ENDPOINT + "/" + submissionId;
+        const linkToCopy = WEBSITE_URL + 'submissions/' + submissionId;
         try {
             await navigator.clipboard
                 .writeText(linkToCopy)
