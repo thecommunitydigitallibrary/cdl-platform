@@ -365,6 +365,10 @@ export default function SubmissionDetails(subData) {
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'success' });
             setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
+            // change display url
+            // in response get submission dispaly irl and set it herE?
+            // TODO
+            setSubmissionProps({ submissionDisplayUrl: submissionSourceUrl })
             // window.location.reload();
         }
         else {
