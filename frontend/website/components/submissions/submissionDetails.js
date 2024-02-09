@@ -280,14 +280,23 @@ export default function SubmissionDetails(subData) {
 
             const response = await res.json();
             if (response.status == "ok") {
+
+
+                setSnackBarProps({ isSnackBarOpen: true })
+                setSnackBarProps({ snackBarSeverity: 'success' });
+                setSnackBarProps({ snackBarMessage: 'Submission removed from community!' })
+
                 setSeverity("success");
                 setMessage("Submission removed from community.");
                 handleClick();
                 handleCloseDelete();
                 window.location.reload();
             } else {
-                setSeverity("error");
-                setMessage(response.message);
+
+                setSnackBarProps({ isSnackBarOpen: true })
+                setSnackBarProps({ snackBarSeverity: 'error' });
+                setSnackBarProps({ snackBarMessage: 'Cannot remove from community' })
+
                 handleClick();
             }
         }
@@ -789,7 +798,7 @@ export default function SubmissionDetails(subData) {
                     autoHideDuration={1000}
                     onClick={closeSnackbar}
                     message={snackBarMessage}
-                    severity={snackBarSeverity}
+                    severity={"red"}
                     onClose={closeSnackbar}
                 />
 
