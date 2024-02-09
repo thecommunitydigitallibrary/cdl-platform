@@ -34,8 +34,9 @@ export default function SubmissionExtensions({ data, id, target }) {
                             value={selectedOption}
                             onChange={handleChange}
                         >
+
+                            <FormControlLabel value="connections" control={<Radio />} label={<span style={{ fontSize: '0.8rem' }}>Mentions</span>} />
                             <FormControlLabel value="graph" control={<Radio />} label={<span style={{ fontSize: '0.8rem' }}>Graph</span>} />
-                            <FormControlLabel value="connections" control={<Radio />} label={<span style={{ fontSize: '0.8rem' }}>Connections</span>} />
                         </RadioGroup>
                     </FormControl>
                 </Grid>

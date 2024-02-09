@@ -245,23 +245,28 @@ export default function SubmissionForm(props) {
                 props.setTextBoxVisible(false)
                 setOpenSnackbar(true);
 
-                URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + response.submission_id;
+                // URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + submissionId;
 
-                const newSubmissionRes = await fetch(URL, {
-                    method: "GET",
-                    headers: new Headers({
-                        Authorization: jsCookie.get("token"),
-                    }),
-                });
-                const newConnection = await newSubmissionRes.json();
+                // const newSubmissionRes = await fetch(URL, {
+                //     method: "GET",
+                //     headers: new Headers({
+                //         Authorization: jsCookie.get("token"),
+                //     }),
+                // });
+                // const newConnection = await newSubmissionRes.json();
+                // console.log(newConnection)
 
-                const errorCode = newSubmissionRes.ok ? false : newSubmissionRes.status;
+                // const errorCode = newSubmissionRes.ok ? false : newSubmissionRes.status;
 
-                if (!errorCode) {
-                    let newIncomingSubs = [...submissionIncomingConnections, newConnection.submission];
-                    setSubmissionProps({ submissionIncomingConnections: newIncomingSubs });
-                }
-                // window.location.reload(); not needed if we change connectiosn state
+                // if (!errorCode) {
+                //     let newIncomingSubs = [submissionIncomingConnections, newConnection.submission.mentions];
+                //     console.log(newIncomingSubs)
+                //     setSubmissionProps({ submissionIncomingConnections: newIncomingSubs });
+                // }
+
+                // window.location.reload();
+                // might want to chage this so tht window reload is avoaided!
+                // not needed if we change connectiosn state
             }
             else {
                 setSeverity("error");

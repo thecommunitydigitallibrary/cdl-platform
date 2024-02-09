@@ -40,7 +40,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
 
 
   useEffect(() => {
-
+    console.log('data', data)
     setSubmissionProps({ submissionTitle: data.submission.explanation });
     setSubmissionProps({ submissionType: data.submission.type })
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
@@ -56,7 +56,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     setSubmissionProps({ submissionDate: new Date(parseInt(data.submission.time)).toLocaleDateString("en-us") });
     setSubmissionProps({ submissionHashtags: data.submission.hashtags })
     setSubmissionProps({ submissionStats: data.submission.stats });
-    setSubmissionProps({ submissionIncomingConnections: data.submission.connections });
+    setSubmissionProps({ submissionIncomingConnections: data.submission.mentions });
 
   }, [data]);
 
