@@ -10,21 +10,16 @@ import { BASE_URL_CLIENT, BASE_URL_SERVER, SEARCH_ENDPOINT } from '../../static/
 
 export default function Connections({ submissionDataResponse, id }) {
     const { submissionId, submissionIncomingConnections, submissionOutgoingConnections, setSubmissionProps } = useSubmissionStore();
-    const [count, setCount] = useState(0);
 
     useEffect(() => {
     }, [submissionIncomingConnections]);
 
     useEffect(() => {
-        console.log('called :' + count)
-        console.log(submissionId)
-        setCount(count + 1);
         getIncomingConnections();
     }, [submissionId])
 
     async function getIncomingConnections() {
 
-        // var searchURL = BASE_URL_SERVER + SEARCH_ENDPOINT;
 
         var searchURL = BASE_URL_CLIENT + SEARCH_ENDPOINT + "?";
 
@@ -35,10 +30,6 @@ export default function Connections({ submissionDataResponse, id }) {
 
             searchURL += "&page=0";
         }
-        // else {
-        //     searchURL += "query=" + "";
-        // }
-
 
         const res = await fetch(searchURL, {
             headers: new Headers({
@@ -47,7 +38,7 @@ export default function Connections({ submissionDataResponse, id }) {
         });
 
         if (res.status == 200) {
-            console.log(res)
+
             const data = await res.json();
             setSubmissionProps({ submissionIncomingConnections: data.search_results_page })
         } else {
@@ -60,7 +51,7 @@ export default function Connections({ submissionDataResponse, id }) {
         <>
             <Stack flexDirection='column' alignItems={'center'}>
                 <Typography variant='h4' gutterBottom>
-                    Connections
+                    Mentions
                 </Typography>
 
                 <Grid container rowSpacing={1} columnSpacing={1} justifyContent={'space-between'}>
@@ -69,7 +60,7 @@ export default function Connections({ submissionDataResponse, id }) {
                         {/* style={{ border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }} */}
                         <Typography variant='h6' gutterBottom>
 
-                            {"Incoming connections" + " "}
+                            {"All submissions that mention this one" + " "}
 
                             <Tooltip title="All submissions that mention this one ">
                                 <InfoOutlined fontSize="xs" />

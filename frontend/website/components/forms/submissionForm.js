@@ -144,7 +144,6 @@ export default function SubmissionForm(props) {
 
             if (props.isAConnection) {
 
-                console.log('shoudl be setting noe')
                 setSuggestions(response.suggestions.map((x) =>
                     <Button onClick={handleAutoSuggestClick} id={x.id} title={x.label}>
                         {x.label}
@@ -152,7 +151,6 @@ export default function SubmissionForm(props) {
                 ));
             }
             else {
-                console.log('looking for suggestiong for : ', text)
 
                 setSubmissionProps({
                     submissionSuggestions:
@@ -269,7 +267,6 @@ export default function SubmissionForm(props) {
                 setSeverity("error");
                 setMessage(response.message);
                 setOpenSnackbar(true);
-                alert('error')
             }
         }
         else {
@@ -328,12 +325,10 @@ export default function SubmissionForm(props) {
 
     useEffect(() => {
 
-        console.log('submissionIncomingConnections has changed: ', submissionIncomingConnections)
+        // console.log('submissionIncomingConnections has changed: ', submissionIncomingConnections)
 
     }, [submissionIncomingConnections]);
 
-    // document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true);
-    // document.querySelectorAll('w-md-editor-text').forEach(field => field.style = {"min-height": "200px"});
 
     return (
 
