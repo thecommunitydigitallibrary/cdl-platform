@@ -139,7 +139,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
   return (<>
 
     <Head>
-      <title>{'Submission - Textdata'}</title>
+      <title>{`${submissionTitle} - Textdata`}</title>
       <link rel="icon" href="/images/tree32.png" />
     </Head>
 
