@@ -40,12 +40,11 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
 
 
   useEffect(() => {
-
     setSubmissionProps({ submissionTitle: data.submission.explanation });
     setSubmissionProps({ submissionType: data.submission.type })
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
     setSubmissionProps({ submissionCommunities: data.submission.communities });
-    setSubmissionProps({ submissionSourceUrl: data.submission.source_url });
+    setSubmissionProps({ submissionSourceUrl: data.submission.raw_source_url });
     setSubmissionProps({ submissionDisplayUrl: data.submission.display_url });
     setSubmissionProps({ submissionRedirectUrl: data.submission.redirect_url });
     setSubmissionProps({ submissionIsAnonymous: data.submission.username == undefined });
@@ -112,7 +111,6 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     } else if (mode == "edit") {
       URL = URL + GET_SUBMISSION_ENDPOINT + id
       METH = "PATCH"
-      console.log('patch')
     }
 
     const res = await fetch(URL, {
