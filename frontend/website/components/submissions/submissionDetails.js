@@ -1,6 +1,6 @@
 import jsCookie from "js-cookie";
 import { ContentCopy, Delete, LocalLibraryOutlined, LocalLibraryRounded, LocalLibraryTwoTone, Save, Edit, CloseOutlined, Close } from '@mui/icons-material';
-import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField } from '@mui/material';
 import { React, useState, useEffect } from 'react';
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, SEARCH_ENDPOINT, WEBSITE_URL } from '../../static/constants';
 import SubmissionStatistics from "./stats";
@@ -33,6 +33,7 @@ export default function SubmissionDetails(subData) {
         submissionDisplayUrl,
         submissionLastModified,
         submissionDate,
+        submisssionRedirectUrl,
         isAConnection,
         setSubmissionProps
     } = useSubmissionStore();
@@ -406,6 +407,44 @@ export default function SubmissionDetails(subData) {
         setSubmissionProps({ ...submissionMode, submissionMode: "view" });
     }
 
+
+    const [feedbackMessage, setFeedbackMessage] = useState("");
+
+    const [openFeedbackForm, setOpenFeedbackForm] = useState(false);
+
+    const handleClickOpenFeedbackForm = () => {
+        setOpenFeedbackForm(true);
+    };
+    const handleMessageType = (event) => {
+        setFeedbackMessage(event.target.value);
+    };
+
+    const handleCancelFeedbackForm = () => {
+        setFeedbackMessage("");
+        setOpenFeedbackForm(false);
+        handleCloseOtherOptionsMenu();
+    };
+
+    const handleCreateFeedbackForm = async (event) => {
+        //send feedback
+        var URL = BASE_URL_CLIENT + "feedback" + "/";
+        const res = await fetch(URL, {
+            method: "POST",
+            body: JSON.stringify({
+                submission_id: submissionId,
+                message: feedbackMessage,
+            }),
+            headers: new Headers({
+                Authorization: jsCookie.get("token"),
+                "Content-Type": "application/json",
+            }),
+        });
+        const response = await res.json();
+        setOpenFeedbackForm(false);
+        setFeedbackMessage("");
+        handleCloseOtherOptionsMenu();
+    };
+
     useEffect(() => {
         getSubmissionData();
     }, []);
@@ -490,11 +529,44 @@ export default function SubmissionDetails(subData) {
                                     }}
                                 >
                                     {otherMenuOptions.map((option) => (
-                                        <MenuItem key={option} selected={option === 'Report Submission'} onClick={() => { console.log('need to report'); handleCloseOtherOptionsMenu(); }}>
+                                        <MenuItem key={option} selected={option === 'Report Submission'} onClick={handleClickOpenFeedbackForm}>
                                             {option}
                                         </MenuItem>
                                     ))}
                                 </Menu>
+                                <Dialog open={openFeedbackForm}>
+                                    <DialogTitle>
+                                        {" "}
+                                        Report submission: {" "}
+                                        <a
+                                            style={{ fontSize: "20px" }}
+                                            href={submisssionRedirectUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            {submissionTitle}
+                                        </a>
+                                    </DialogTitle>
+                                    <DialogContent>
+                                        <DialogContentText>
+                                        </DialogContentText>
+                                        <TextField
+                                            autoFocus
+                                            margin="dense"
+                                            id="message"
+                                            name="message"
+                                            value={feedbackMessage}
+                                            onChange={handleMessageType}
+                                            label="Description"
+                                            fullWidth
+                                            variant="standard"
+                                        />
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={handleCancelFeedbackForm}>Cancel</Button>
+                                        <Button onClick={handleCreateFeedbackForm}>Send</Button>
+                                    </DialogActions>
+                                </Dialog>
                                 <Dialog open={openDelete} onClose={handleCloseDelete}>
                                     <DialogTitle style={{ width: "500px" }}>
                                         {" "}

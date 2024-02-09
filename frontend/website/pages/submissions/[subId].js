@@ -40,7 +40,6 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
 
 
   useEffect(() => {
-    console.log(data)
 
     setSubmissionProps({ submissionTitle: data.submission.explanation });
     setSubmissionProps({ submissionType: data.submission.type })
@@ -127,7 +126,6 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     });
     const response = await res.json();
     if (res.status == 200) {
-      console.log('+ response')
       if (method == "edit" || method == "reply") {
         console.log('need reload now!')
         window.location.reload();
