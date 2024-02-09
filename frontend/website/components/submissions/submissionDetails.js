@@ -20,6 +20,7 @@ export default function SubmissionDetails(subData) {
         submissionIsAnonymous,
         submissionMode,
         originalDescription,
+        originalTitle,
         submissionType,
         submissionId,
         submissionIncomingConnections,
@@ -396,15 +397,23 @@ export default function SubmissionDetails(subData) {
             if (originalDescription) {
                 setSubmissionProps({ submissionDescription: temp })
             }
+            let tempTitle = originalTitle
+            if (originalTitle) {
+                setSubmissionProps({ submissionTitle: tempTitle })
+            }
             setSubmissionProps({ ...submissionMode, submissionMode: "view" });
         } else {
             setSubmissionProps({ ...submissionMode, submissionMode: "edit" });
         }
     }
 
-    const submitDescriptionChanges = () => {
-        let temp = submissionDescription
-        setSubmissionProps({ originalDescription: temp })
+    const submitSubmissionChanges = () => {
+
+        let tempTitle = submissionTitle
+        setSubmissionProps({ originalTitle: tempTitle })
+
+        let tempDesc = submissionDescription
+        setSubmissionProps({ originalDescription: tempDesc })
         handleSubmit()
         setSubmissionProps({ ...submissionMode, submissionMode: "view" });
     }
@@ -468,7 +477,8 @@ export default function SubmissionDetails(subData) {
                                         maxWidth: '95ch',
                                     }}>
                                     <Link target="_blank" color="inherit" href={submissionData.submission.redirect_url}>
-                                        {submissionTitle}
+                                        {/* {submissionTitle} */}
+                                        {originalTitle ? originalTitle : submissionTitle}
                                     </Link>
 
                                 </Typography>
@@ -479,7 +489,7 @@ export default function SubmissionDetails(subData) {
                                     (submissionMode == "edit" ?
 
                                         <>
-                                            <Button onClick={submitDescriptionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
+                                            <Button onClick={submitSubmissionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
                                                 Save
                                             </Button>
                                             <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
@@ -495,14 +505,19 @@ export default function SubmissionDetails(subData) {
                                 }
 
                                 {submissionMode == "edit" &&
-                                    <IconButton
-                                        size="small" color="gray"
-                                        onClick={changeMode}
-                                        aria-label="close"
-                                        variant="outlined"
-                                    >
-                                        <CloseOutlined />
-                                    </IconButton>}
+                                    <Tooltip title="Cancel">
+                                        <IconButton
+                                            size="small" color="gray"
+                                            onClick={changeMode}
+                                            label="cancel"
+                                            aria-label="close"
+                                            variant="outlined"
+                                        >
+                                            <CloseOutlined />
+                                        </IconButton>
+                                    </Tooltip>
+
+                                }
                                 <IconButton
                                     aria-label="more"
                                     id="long-button"
