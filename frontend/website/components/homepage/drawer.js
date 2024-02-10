@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import jsCookie from "js-cookie";
 import {
   Drawer,
   IconButton,
@@ -12,9 +13,42 @@ import {
 } from "@mui/material";
 import Divider from '@mui/material/Divider';
 import MenuIcon from "@mui/icons-material/Menu";
+import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from "../../static/constants";
 
 function DrawerComp(props) {
   const [openDrawer, setOpenDrawer] = useState(false);
+
+  const handleNewSubmissionRequest = async (event) => {
+    var DATA = {
+      community: "",
+      source_url: "",
+      title: "",
+      description: "",
+      anonymous: false,
+    }
+
+    var URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT
+
+    const res = await fetch(URL, {
+      method: 'POST',
+      body: JSON.stringify(DATA),
+      headers: new Headers({
+        Authorization: jsCookie.get("token"),
+        "Content-Type": "application/json",
+      }),
+    });
+    const response = await res.json();
+    if (res.status == 200) {
+      if (submissionMode == "edit" || submissionMode == "reply") {
+        console.log(response)
+        // Open a new tab
+        window.open(WEBSITE_URL + GET + 'id_here', '_blank');
+      } else {
+        props.handle_close()
+      }
+    }
+  };
+
 
   return (
     <React.Fragment>
@@ -105,7 +139,8 @@ function DrawerComp(props) {
       </Drawer>
       <IconButton
         sx={{ color: "white", marginLeft: "auto" }}
-        onClick={() => setOpenDrawer(!openDrawer)}
+        onClick={handleNewSubmissionRequest}
+      // setOpenDrawer(!openDrawer)}
       >
         <MenuIcon color="white" />
       </IconButton>
