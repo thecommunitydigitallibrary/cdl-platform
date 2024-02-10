@@ -335,7 +335,7 @@ export default function FindTab() {
             sx={{ ml: 1, flex: 1 }}
             value={text}
             onChange={onChange}
-            placeholder="Search your communities"
+            placeholder="What would you like to know?"
             id="margin-none"
             required
             InputProps={{
@@ -428,7 +428,6 @@ export default function FindTab() {
           </Button>
         </div>
       )}
-
       
 
 
