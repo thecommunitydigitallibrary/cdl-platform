@@ -36,8 +36,7 @@ function Home({ data, community_joined_data }) {
   let homePageContent = <Setup head="Onboarding"></Setup>;
 
   function checkCommunitiesJoined(){
-    //add real logic later
-    if (5 > 10) {
+    if (community_joined_data.community_info.length > 0) {
       setCommunitiesJoined(true);
     }
   }
@@ -114,8 +113,9 @@ function Home({ data, community_joined_data }) {
             <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4> 
             : 
               <>
-              <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> <br/>
-              <a variant="outline" href={"/communities"}>{" Click here to join or create a community!"}</a></h6>
+              <h6 style={{ textAlign: 'center' }}> Thanks for creating or joining a new community! Create a submission to get recommendations. <br/> <br/>
+              {/* Currently is : href needs to be updated to make new submission model open*/}
+              <a variant="outline" href={"/communities"}>{" Click here to create a new submission!"}</a></h6>
               </>}
           >
             <Grid item>
@@ -289,14 +289,17 @@ export async function getServerSideProps(context) {
     });
 
     const data = await res.json();
-    if (res.status == 200) {
-      // Pass data to the page via props
-      if (context.query.page == undefined) {
-        data.current_page = "0";
-      } else {
-        data.current_page = context.query.page;
+    const community_joined_data = await fetchCommunities.json();
+    if (fetchCommunities.status == 200) {
+      if (res.status == 200) {
+        // Pass data to the page via props
+        if (context.query.page == undefined) {
+          data.current_page = "0";
+        } else {
+          data.current_page = context.query.page;
+        }
+        return { props: { data, community_joined_data } };
       }
-      return { props: { data } };
     } else if (res.status == 404) {
       return {
         redirect: {
@@ -304,19 +307,39 @@ export async function getServerSideProps(context) {
           permanent: false,
         },
       };
-    } else {
-      return { props: { error: "error" } };
+    }else {
+      const error_data = { error: "Something went wrong. Please try again later" };
+      return { props: { error: {error_data} } };
     }
+    
+    // if (res.status == 200) {
+    //   // Pass data to the page via props
+    //   if (context.query.page == undefined) {
+    //     data.current_page = "0";
+    //   } else {
+    //     data.current_page = context.query.page;
+    //   }
+    //   return { props: { data } };
+    // } else if (res.status == 404) {
+    //   return {
+    //     redirect: {
+    //       destination: "/auth",
+    //       permanent: false,
+    //     },
+    //   };
+    // } else {
+    //   return { props: { error: "error" } };
+    // }
 
-    const community_joined_data = await fetchCommunities.json();
-    console.log(community_joined_data);
-    if (fetchCommunities.status == 200) {
-      // Pass data to the page via props
-      if(community_joined_data.length() > 0){
-        return { props: { community_joined_data } };
-      }
-      //return communitiesJoined(community_joined_data);
-    }
+    //const community_joined_data = await fetchCommunities.json();
+    //console.log(community_joined_data);
+    // if (fetchCommunities.status == 200) {
+    //   // Pass data to the page via props
+    //   if(community_joined_data.length() > 0){
+    //     return { props: { community_joined_data } };
+    //   }
+    //   //return communitiesJoined(community_joined_data);
+    // }
   }
 }
 
