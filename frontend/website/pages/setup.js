@@ -48,11 +48,11 @@ const steps = [
   },
 ];
 
-export default function Setup() {
+export default function Setup(props) {
   return (
    <>
     <Head>
-        <title>Setup - TextData</title>
+        {!(props.head) ? <title>Setup - TextData</title> : <title>{props.head} - TextData</title>}
         <link rel="icon" href="/images/tree32.png" />
     </Head>
     <Header/>
