@@ -42,8 +42,10 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
   useEffect(() => {
     console.log(data)
     setSubmissionProps({ submissionTitle: data.submission.explanation });
+    setSubmissionProps({ originalTitle: data.submission.explanation });
     setSubmissionProps({ submissionType: data.submission.type })
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
+    setSubmissionProps({ originalDescription: data.submission.highlighted_text });
     setSubmissionProps({ submissionCommunities: data.submission.communities });
     setSubmissionProps({ submissionSourceUrl: data.submission.raw_source_url });
     setSubmissionProps({ submissionDisplayUrl: data.submission.display_url });
