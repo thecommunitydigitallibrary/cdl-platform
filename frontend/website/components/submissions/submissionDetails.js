@@ -379,7 +379,7 @@ export default function SubmissionDetails(subData) {
             // change display url
             // in response get submission dispaly irl and set it herE?
             // TODO
-            setSubmissionProps({ submissionDisplayUrl: submissionSourceUrl })
+            setSubmissionProps({ submissionDisplayUrl: res.url ? res.url : submissionSourceUrl })
             // window.location.reload();
         }
         else {
