@@ -648,7 +648,7 @@ export default function SubmissionDetails(subData) {
                                     {"Submitted"}
                                 </Typography>
 
-                                {submissionUsername &&
+                                {!submissionIsAnonymous &&
                                     <>
                                         <Typography color="grey" variant="subtitle2">
                                             {"by"}
@@ -658,7 +658,6 @@ export default function SubmissionDetails(subData) {
                                                 fontStyle: 'italic',
                                                 textDecoration: 'underline',
                                             }}>
-                                            {/* {submissionData.submission.username} */}
                                             {submissionUsername}
                                         </Typography></>
                                 }
@@ -699,7 +698,6 @@ export default function SubmissionDetails(subData) {
                             overflowX: "auto",
                             overflowY: "hidden",
                             whiteSpace: "nowrap",
-                            borderRadius: "50px"
                         }}
                         >
                             <div style={{
@@ -723,11 +721,12 @@ export default function SubmissionDetails(subData) {
                                         style={{
                                             fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
                                             fontWeight: "500",
-                                            fontSize: "0.8125rem",
+                                            fontSize: "0.7125rem",
                                             lineHeight: "1.75",
                                             letterSpacing: "0.02857em",
                                             textTransform: "uppercase",
                                             // color: "#1976D2",
+                                            borderRadius: "50px",
                                             padding: "3px 7px",
                                             marginRight: "5px",
                                             textDecoration: "none",
@@ -863,12 +862,10 @@ export default function SubmissionDetails(subData) {
                             </div>
                         </>}
 
-
                         <div style={{
                             display: "flex",
                             flex: 5,
                         }}>
-
                         </div>
 
                         <div style={{

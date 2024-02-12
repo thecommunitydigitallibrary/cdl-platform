@@ -44,7 +44,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
 
   const loadMoreResults = async () => {
 
-    console.log("search URL:", searchURL + 'search_id=' + data.search_id + '&page=' + page);
+    // console.log("search URL:", searchURL + 'search_id=' + data.search_id + '&page=' + page);
 
     try {
       const response = await fetch(searchURL + 'search_id=' + data.search_id + '&page=' + page, {
@@ -65,7 +65,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         setPage(page + 1);
       }
 
-      console.log(content.search_results_page);
+      // console.log(content.search_results_page);
 
     } catch (error) {
       console.log(error);

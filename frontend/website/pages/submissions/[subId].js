@@ -40,6 +40,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
 
 
   useEffect(() => {
+    console.log(data)
     setSubmissionProps({ submissionTitle: data.submission.explanation });
     setSubmissionProps({ submissionType: data.submission.type })
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
@@ -47,7 +48,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     setSubmissionProps({ submissionSourceUrl: data.submission.raw_source_url });
     setSubmissionProps({ submissionDisplayUrl: data.submission.display_url });
     setSubmissionProps({ submissionRedirectUrl: data.submission.redirect_url });
-    setSubmissionProps({ submissionIsAnonymous: data.submission.username == undefined });
+    setSubmissionProps({ submissionIsAnonymous: data.submission.anonymous });
     setSubmissionProps({ submissionMode: "view" });
     setSubmissionProps({ submissionId: data.submission.submission_id });
     setSubmissionProps({ submissionUsername: data.submission.username });
