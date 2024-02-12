@@ -371,6 +371,7 @@ export default function SubmissionDetails(subData) {
             }),
         });
         const response = await res.json();
+        console.log(response)
         if (res.status == 200) {
             console.log('Saved successfully')
             setSnackBarProps({ isSnackBarOpen: true })
@@ -379,7 +380,7 @@ export default function SubmissionDetails(subData) {
             // change display url
             // in response get submission dispaly irl and set it herE?
             // TODO
-            setSubmissionProps({ submissionDisplayUrl: res.url ? res.url : submissionSourceUrl })
+            setSubmissionProps({ submissionDisplayUrl: submissionSourceUrl != "" ? submissionSourceUrl : res.url })
             // window.location.reload();
         }
         else {
