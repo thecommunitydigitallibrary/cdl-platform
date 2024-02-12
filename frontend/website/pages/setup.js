@@ -38,6 +38,16 @@ const steps = [
     ),
   },
   {
+    label: "Create a Community!",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+        Much like a group chat, a subreddit, or a folder, a community is place for you and your peers to save organize content. 
+        You can create, join, or leave communities, and any member of a community can search for or browse all content present in the community.
+        Click <a variant="outline" href={"/communities"}>{"here"}</a>  to join or create a community!
+      </p>
+    ),
+  },
+  {
     label: "Start using TextData!",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
