@@ -38,7 +38,7 @@ const steps = [
     ),
   },
   {
-    label: "Create a Community!",
+    label: "Create a Community",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
         Much like a group chat, a subreddit, or a folder, a community is place for you and your peers to save organize content. 
@@ -48,11 +48,63 @@ const steps = [
     ),
   },
   {
+    label: "Create a Submission",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+        A submission is the fundamental building block of TextData. Submissions are user-created, and consist of an optional source URL, a title, and a description which can be added to or removed from communities.
+        You can create a submission by using either Chrome extension's "Save" tab or by clicking the "+" on the TextData website header.
+      </p>
+    ),
+  },
+  {
+    label: "Search and Browse Communities",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+        Searching on TextData is a straightforward process. Whether you are looking for specific content or exploring new resources, our search functionality can assist you in finding what you need. 
+        You are able to search over all submissions that have been added to your communities, and you can perform searches using either the TextData website header or the Chrome extension.
+      </p>
+    ),
+  },
+  {
+    label: "Get Recommendations",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+       View your recommendation feed on the homepage or open the extension on a webpage to see contextual recommendations. Open the extension with highlighted text to see submissions tailored to your selected context.
+      </p>
+    ),
+  },
+  {
+    label: "Interact in Context",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+        Use the extension to ask questions in context, summarize selected text, and drive curiosity with automatically generated questions.
+      </p>
+    ),
+  },
+  {
+    label: "Interact with Submissions",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+        Visit a submission's TextData-specific page to read, mention, visualize, share.You can edit a submission, add or remove it from a community, delete it entirely, or provide feedback.
+        Make submission with mention will create another submission tagging the current submission and display it beneath the description. See how similar submissions are related by interacting with the graph.
+      </p>
+    ),
+  },
+  {
+    label: "Visualize Data",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+        TextData supports the basic visualization of any community's content. To view a community's visualization, you can click the "Visualize Community" on the community's card. This will bring you to an interactive graph where the community's submissions are organized around hashtags, topics, and meta-descriptors.
+        Search query also support visualization, search for a query in the search bar and click on "Visualize" button to see it.
+      </p>
+    ),
+  },
+  {
     label: "Start using TextData!",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
-        Once you are logged in to the Chrome extension and to the website, you are ready to go! More details about submission, connections, and communities
-        can be found on the <a target="_blank" and rel="noopener noreferrer" href="/documentation">Documentation</a> page.
+        That's all for the onboarding, you are ready to go! More details about submission, recommendations, and communities
+        can be found on the <a target="_blank" and rel="noopener noreferrer" href="/about">About</a> page and the <a target="_blank" and rel="noopener noreferrer" href="/documentation">Documentation</a> page.
       </p>
     ),
   },
