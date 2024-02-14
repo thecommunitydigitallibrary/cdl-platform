@@ -278,12 +278,7 @@ def create_page(hits, communities, toggle_display="highlight"):
         # Display URL
         url = hit["_source"].get("source_url", "")
 
-        if url == "":
-            if "localhost" in os.environ["api_url"]:
-                url = os.environ["api_url"] + ":" + os.environ["api_port"] + "/submissions/" + result["submission_id"]
-            else:
-                url = os.environ["api_url"] + "/submissions/" + result["submission_id"]
-
+        url = format_url(url, str(result["submission_id"]))
         display_url = build_display_url(url)
         result["display_url"] = display_url
         result["orig_url"] = url             
@@ -291,6 +286,24 @@ def create_page(hits, communities, toggle_display="highlight"):
         return_obj.append(result)
 
     return return_obj
+
+def format_url(url, submission_id):
+    """
+    Converts a submission URL into the proper format.
+    Handles when empty --> becomes the TextData submission URL (need to handle local vs prod)
+    Otherwise it is the submitted URL by the user.
+
+    url: the raw URL of the submission
+    submission_id: the str of the submission_id
+    """
+    if url == "":
+        if "localhost" in os.environ["api_url"]:
+            url = os.environ["api_url"] + ":" + os.environ["api_port"] + "/submissions/" + submission_id
+        else:
+            url = os.environ["api_url"] + "/submissions/" + submission_id
+    return url
+    
+     
 
 def hydrate_with_hash_url(results, search_id, page=0, page_size=10, method="search"):
     """

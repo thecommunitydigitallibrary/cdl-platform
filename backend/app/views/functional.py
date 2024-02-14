@@ -13,7 +13,7 @@ import requests
 
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
     format_time_for_display, validate_submission, hydrate_with_hash_url, create_page, hydrate_with_hashtags, \
-    deduplicate, combine_pages, standardize_url, extract_hashtags, sanitize_input
+    deduplicate, combine_pages, standardize_url, extract_hashtags, format_url, build_display_url
 from app.helpers import response
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
@@ -413,7 +413,6 @@ def submission(current_user, id):
                 insert_obj["communities"] = submission_communities
 
 
-            # TODO as written, one cannot make source_url empty with it now being optional
             if highlighted_text != None or explanation != None or source_url != None:
 
                 # check highlighted text, explanation, and url to make sure proper formatting
@@ -546,7 +545,12 @@ def submission(current_user, id):
 
                 if "communities" in insert_obj:
                     log_community_action(ip, user_id, community_id, "ADD", submission_id=submission.id)
-                return response.success({"message": "Submission successfully edited."}, Status.OK)
+
+
+                # format source url to display new on frontend
+                formattted_url = format_url(submission.source_url, str(submission.id))
+                display_url = build_display_url(formattted_url)
+                return response.success({"message": "Submission successfully edited.", "display_url": display_url}, Status.OK)
             else:
                 return response.error("Unable to edit submission.", Status.INTERNAL_SERVER_ERROR)
 
