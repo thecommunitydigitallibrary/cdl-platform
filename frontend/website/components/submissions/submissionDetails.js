@@ -372,14 +372,14 @@ export default function SubmissionDetails(subData) {
         });
         const response = await res.json();
         if (res.status == 200) {
-            console.log('Saved successfully')
+            console.log('Saved successfully', response)
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'success' });
             setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
             // change display url
             // in response get submission dispaly irl and set it herE?
             // TODO
-            setSubmissionProps({ submissionDisplayUrl: submissionSourceUrl })
+            setSubmissionProps({ submissionDisplayUrl: response.display_url ? response.display_url : submissionSourceUrl })
             // window.location.reload();
         }
         else {
