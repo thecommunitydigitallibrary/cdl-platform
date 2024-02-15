@@ -371,7 +371,7 @@ export default function SubmissionDetails(subData) {
             }),
         });
         const response = await res.json();
-        console.log(response)
+
         if (res.status == 200) {
             console.log('Saved successfully')
             setSnackBarProps({ isSnackBarOpen: true })
