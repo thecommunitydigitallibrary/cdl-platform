@@ -550,7 +550,7 @@ def submission(current_user, id):
                 # format source url to display new on frontend
                 formattted_url = format_url(submission.source_url, str(submission.id))
                 display_url = build_display_url(formattted_url)
-                return response.success({"message": "Submission successfully edited.", "display_url": display_url}, Status.OK)
+                return response.success({"message": "Submission successfully edited.", "display_url": display_url, "hashtags": hashtags}, Status.OK)
             else:
                 return response.error("Unable to edit submission.", Status.INTERNAL_SERVER_ERROR)
 

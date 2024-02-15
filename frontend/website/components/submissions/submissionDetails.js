@@ -36,6 +36,7 @@ export default function SubmissionDetails(subData) {
         submissionDate,
         submisssionRedirectUrl,
         isAConnection,
+        submissionHashtags,
         setSubmissionProps
     } = useSubmissionStore();
 
@@ -377,10 +378,9 @@ export default function SubmissionDetails(subData) {
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'success' });
             setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
-            // change display url
-            // in response get submission dispaly irl and set it herE?
-            // TODO
-            setSubmissionProps({ submissionDisplayUrl: submissionSourceUrl != "" ? submissionSourceUrl : res.url })
+            setSubmissionProps({ submissionDisplayUrl: response.display_url ? response.display_url : submissionSourceUrl })
+            setSubmissionProps({ submissionHashtags: response.hashtags ? response.hashtags : submissionHashtags })
+
             // window.location.reload();
         }
         else {
