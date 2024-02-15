@@ -323,12 +323,10 @@ export default function SubmissionForm(props) {
 
     };
 
-    useEffect(() => {
+    useEffect(() => { }, [submissionIncomingConnections]);
 
-        // console.log('submissionIncomingConnections has changed: ', submissionIncomingConnections)
-
-    }, [submissionIncomingConnections]);
-
+    document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true);
+    //document.querySelectorAll('w-md-editor-text').forEach(field => field.style = {"min-height": "200px"});
 
     return (
 
