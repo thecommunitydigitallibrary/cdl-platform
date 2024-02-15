@@ -550,7 +550,16 @@ def submission(current_user, id):
                 # format source url to display new on frontend
                 formattted_url = format_url(submission.source_url, str(submission.id))
                 display_url = build_display_url(formattted_url)
-                return response.success({"message": "Submission successfully edited.", "display_url": display_url, "hashtags": hashtags}, Status.OK)
+                submission_username = None
+
+                # if submission PATCHed to non-anonymous, get username
+                if not submission.anonymous:
+                    cdl_users = Users()
+                    creator = cdl_users.find_one({"_id": ObjectId(submission.user_id)})
+                    if creator:
+                        submission_username = creator.username
+
+                return response.success({"message": "Submission successfully edited.", "display_url": display_url, "hashtags": hashtags, "username": submission_username }, Status.OK)
             else:
                 return response.error("Unable to edit submission.", Status.INTERNAL_SERVER_ERROR)
 

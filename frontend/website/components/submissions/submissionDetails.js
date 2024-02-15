@@ -380,6 +380,7 @@ export default function SubmissionDetails(subData) {
             setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
             setSubmissionProps({ submissionDisplayUrl: response.display_url ? response.display_url : submissionSourceUrl })
             setSubmissionProps({ submissionHashtags: response.hashtags ? response.hashtags : submissionHashtags })
+            setSubmissionProps({ submissionUsername: response.username ? response.username : submissionUsername })
 
             // window.location.reload();
         }
