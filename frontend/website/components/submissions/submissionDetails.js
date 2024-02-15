@@ -353,7 +353,6 @@ export default function SubmissionDetails(subData) {
     const handleSubmit = async (event) => {
 
         var DATA = {
-            // community: submissionCommunity, we have option to edit communities in the page itself
             source_url: submissionSourceUrl,
             title: submissionTitle,
             description: submissionDescription,
@@ -386,9 +385,12 @@ export default function SubmissionDetails(subData) {
         }
         else {
 
+            setSubmissionProps({ submissionTitle: originalTitle })
+            console.log('resetting to:', originalTitle)
+
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'error' });
-            setSnackBarProps({ snackBarMessage: 'Could not save changes' })
+            setSnackBarProps({ snackBarMessage: response.message })
         }
     };
 
