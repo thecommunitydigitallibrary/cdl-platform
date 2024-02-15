@@ -108,16 +108,17 @@ export default function SubmissionForm(props) {
 
         const regex = /\[\[([^\]]+)\]\]/i;
         var replacement_text = "[" + event.target.title + "](" + SUB_WEB_ENDPOINT + event.target.id + ")"
-        var new_desc = submissionDescription.replace(regex, replacement_text)
+        console.log(props)
 
         if (props.isAConnection) {
+            console.log(description)
+            var new_desc = description.replace(regex, replacement_text)
             setDescription(new_desc)
         }
         else {
+            var new_desc = submissionDescription.replace(regex, replacement_text)
             setSubmissionProps({ submissionDescription: new_desc })
         }
-        // setSubmissionProps({ submissionDescription: replacement_text })
-        // setDescription(new_desc)
         setCurrentQuery("")
         if (props.isAConnection) {
             setSuggestions(null)
