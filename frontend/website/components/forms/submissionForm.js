@@ -325,14 +325,12 @@ export default function SubmissionForm(props) {
 
     useEffect(() => { }, [submissionIncomingConnections]);
 
-    document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true);
-    //document.querySelectorAll('w-md-editor-text').forEach(field => field.style = {"min-height": "200px"});
-
     return (
 
         props.isAConnection ? // if props.isConnection si true, then this is a CONNECTION-submission so use the local states for inputs
             <div style={{ border: "1px solid #ccc", borderRadius: "4px", order: 2, elevation: 2 }}>
                 {/* for submission mode create, set all params to empty string? */}
+                {document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true)}
 
                 <DialogContent>
 

@@ -708,15 +708,6 @@ export default function SubmissionDetails(subData) {
                                 float: "left",
                             }}>
 
-                                {/* {submissionCommunitiesNamesList.length > 0 && submissionData.submission.type === "user_submission"
-                                    ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
-                                    : ""}
-                                {submissionData.submission.type === "webpage" &&
-                                    <Typography>
-                                        "Webpage"
-                                    </Typography>
-                                } */}
-
                                 {submissionCommunitiesNamesList.length > 0 && submissionData.submission.type === "user_submission"
                                     ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
                                     : ""}
@@ -744,7 +735,7 @@ export default function SubmissionDetails(subData) {
 
                         </div>
 
-                        {submissionData.submission.type !== "webpage" && <>
+                        {submissionData.submission.type !== "webpage" ? <>
                             <div style={{
                                 display: "flex",
                                 flex: 1,
@@ -864,7 +855,21 @@ export default function SubmissionDetails(subData) {
                                     </IconButton>
                                 </Tooltip>
                             </div>
-                        </>}
+                        </>
+                            :
+                            <>
+                                <div style={{
+                                    display: "flex",
+                                    flex: 1,
+                                }}></div>
+                                <div style={{
+                                    display: "flex",
+                                    flex: 1,
+                                }}></div>
+                            </>
+                        }
+
+
 
                         <div style={{
                             display: "flex",
