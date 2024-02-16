@@ -9,8 +9,19 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
 export default function VerticalLinearStepper(props) {
+  //console.log(props.updateStepper);
   const [activeStep, setActiveStep] = React.useState(0);
-
+  
+  React.useEffect(() => {
+    console.log("Inside useEffect")
+    setActiveStep(props.updateStepper);
+    }, [props.updateStepper])
+  
+  // React.useEffect(() => {
+  //   console.log("Inside useEffect")
+  //   setActiveStep(parseInt(props.updateStepper));
+  //   }, [props.updateStepper])
+  
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };

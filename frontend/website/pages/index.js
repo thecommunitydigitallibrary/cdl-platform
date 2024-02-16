@@ -31,21 +31,121 @@ function Home({ data, community_joined_data }) {
   const [endOfRecommendations, setEndOfRecommendations] = useState((data.recommendation_results_page.length) < 10)
   // set 'explore_similar_extension' as default method
   const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
-  const [communitiesJoined, setCommunitiesJoined] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
 
-  let homePageContent = <Setup head="Onboarding"></Setup>;
+  let homePageContent = <Setup head="Onboarding" updateStep={onboardingStep}></Setup>;
 
-  function checkCommunitiesJoined(){
+  function checkOnboarding(){
     if (community_joined_data.community_info.length > 0) {
-      setCommunitiesJoined(true);
+      if(!(endOfRecommendations && items.length > 0)){
+          //if user has created community but no submission
+          setOnboardingStep(4);
+      }
+    } else {
+      setOnboardingStep(3);
     }
+  }
+  
+  useEffect(() => {
+    checkOnboarding();
+  }, []);
+
+  if(onboardingStep > 0){
+    homePageContent = <Setup head="Onboarding" updateStep={onboardingStep}></Setup>;
+  }
+
+
+
+  const fetchNextPage = async () => {
+    let pg = page
+    var recommendationURLClient = baseURL_client + recommendationsEndPoint;
+    try {
+      const response = await fetch(
+        `${recommendationURLClient}?recommendation_id=${latestRecommendationId}&page=${page}`,
+        {
+          headers: new Headers({
+            Authorization: jsCookie.get("token"),
+          }),
+        }
+      );
+      const content = await response.json();
+      var tempItems = content.recommendation_results_page
+      if( tempItems < 10){
+        setEndOfRecommendations(true)
+      }
+      setItems([...items, ...tempItems]);
+      pg += 1
+      setPage(pg)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleRecTypeChange = async (event) => {
+    let pg = 0
+    const value = event.target.value;
+    setSelectedRecOption(value);
+    setItems([])
+    setEndOfRecommendations(false)
+    var recommendationURLClient = baseURL_client + recommendationsEndPoint;
+    const response = await fetch(`${recommendationURLClient}?method=${value}&page=${'0'}`,
+      {
+        headers: new Headers({
+          Authorization: jsCookie.get("token"),
+        }),
+      });
+    const content = await response.json();
+    let response_rec_id = content.recommendation_id;
+    if(content.recommendation_results_page < 10){ //0 to 10
+      setEndOfRecommendations(true)
+    }
+    setLatestRecommendationId(response_rec_id);
+    setItems(content.recommendation_results_page);
+    pg += 1
+    setPage(pg)
   }
 
   useEffect(() => {
-    checkCommunitiesJoined();
-  }, []);
+    if (page) {
+      console.log("On page no:", page);
+    }
+  }, [page])
 
-  if (communitiesJoined) {
+  useEffect(() => {
+  }, [latestRecommendationId])
+
+  
+  useEffect(() => {
+  }, [endOfRecommendations])
+
+  // code to add a 'scroll to top of page' sticky button that is visible once user scrolls down
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset;
+      const buffer = 250
+      if (scrollTop > buffer && !visible) {
+        setVisible(true);
+      } else if (scrollTop < buffer && visible) {
+        setVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [visible]);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  if (onboardingStep == 0) {
     homePageContent = (
       <div>
         <Grid
@@ -156,95 +256,6 @@ function Home({ data, community_joined_data }) {
     );
   }
 
-  const fetchNextPage = async () => {
-    let pg = page
-    var recommendationURLClient = baseURL_client + recommendationsEndPoint;
-    try {
-      const response = await fetch(
-        `${recommendationURLClient}?recommendation_id=${latestRecommendationId}&page=${page}`,
-        {
-          headers: new Headers({
-            Authorization: jsCookie.get("token"),
-          }),
-        }
-      );
-      const content = await response.json();
-      var tempItems = content.recommendation_results_page
-      if( tempItems < 10){
-        setEndOfRecommendations(true)
-      }
-      setItems([...items, ...tempItems]);
-      pg += 1
-      setPage(pg)
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleRecTypeChange = async (event) => {
-    let pg = 0
-    const value = event.target.value;
-    setSelectedRecOption(value);
-    setItems([])
-    setEndOfRecommendations(false)
-    var recommendationURLClient = baseURL_client + recommendationsEndPoint;
-    const response = await fetch(`${recommendationURLClient}?method=${value}&page=${'0'}`,
-      {
-        headers: new Headers({
-          Authorization: jsCookie.get("token"),
-        }),
-      });
-    const content = await response.json();
-    let response_rec_id = content.recommendation_id;
-    if(content.recommendation_results_page < 10){ //0 to 10
-      setEndOfRecommendations(true)
-    }
-    setLatestRecommendationId(response_rec_id);
-    setItems(content.recommendation_results_page);
-    pg += 1
-    setPage(pg)
-  }
-
-  useEffect(() => {
-    if (page) {
-      console.log("On page no:", page);
-    }
-  }, [page])
-
-  useEffect(() => {
-  }, [latestRecommendationId])
-
-  
-  useEffect(() => {
-  }, [endOfRecommendations])
-
-  // code to add a 'scroll to top of page' sticky button that is visible once user scrolls down
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.pageYOffset;
-      const buffer = 250
-      if (scrollTop > buffer && !visible) {
-        setVisible(true);
-      } else if (scrollTop < buffer && visible) {
-        setVisible(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [visible]);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <>
       <div className="allResults">
@@ -311,35 +322,6 @@ export async function getServerSideProps(context) {
       const error_data = { error: "Something went wrong. Please try again later" };
       return { props: { error: {error_data} } };
     }
-    
-    // if (res.status == 200) {
-    //   // Pass data to the page via props
-    //   if (context.query.page == undefined) {
-    //     data.current_page = "0";
-    //   } else {
-    //     data.current_page = context.query.page;
-    //   }
-    //   return { props: { data } };
-    // } else if (res.status == 404) {
-    //   return {
-    //     redirect: {
-    //       destination: "/auth",
-    //       permanent: false,
-    //     },
-    //   };
-    // } else {
-    //   return { props: { error: "error" } };
-    // }
-
-    //const community_joined_data = await fetchCommunities.json();
-    //console.log(community_joined_data);
-    // if (fetchCommunities.status == 200) {
-    //   // Pass data to the page via props
-    //   if(community_joined_data.length() > 0){
-    //     return { props: { community_joined_data } };
-    //   }
-    //   //return communitiesJoined(community_joined_data);
-    // }
   }
 }
 

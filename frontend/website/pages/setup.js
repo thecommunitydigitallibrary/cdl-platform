@@ -134,7 +134,7 @@ export default function Setup(props) {
         Setting up TextData{" "}
       </h1>
       The following instructions will walk you through account creation and Chrome extension setup.
-      <VerticalLinearStepper steps={steps} />
+      <VerticalLinearStepper steps={steps} updateStepper={props.updateStep} />
     </Paper>
     <Footer/>
    </>
