@@ -105,9 +105,7 @@ export default function FindTab() {
         return;
       }
     }
-
-    //        "comparison": comparisonResults,
-
+    
     var context = ""
     if (ht === null || ht === undefined) {
       context = highlightedText
