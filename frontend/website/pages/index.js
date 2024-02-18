@@ -1,3 +1,4 @@
+/*global chrome*/
 import Head from "next/head";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "../components/header";
@@ -32,29 +33,48 @@ function Home({ data, community_joined_data }) {
   // set 'explore_similar_extension' as default method
   const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
   const [onboardingStep, setOnboardingStep] = useState(0);
+  let extensionId = "aafcjihpcjlagambenogkhobogekppgp";
+  let imgSrc = "/tree48.png";
 
   let homePageContent = <Setup head="Onboarding" updateStep={onboardingStep}></Setup>;
 
-  function checkOnboarding(){
-    if (community_joined_data.community_info.length > 0) {
-      if(!(endOfRecommendations && items.length > 0)){
+  function checkExtension(){
+    const isImagePresent = new Promise((resolve, _) => {
+      const img = new Image();
+      img.src = "chrome-extension://" + extensionId + imgSrc;
+      img.onload = () => {
+        resolve(true);
+      }
+      img.onerror = () =>  {
+        resolve(false);
+      }
+    });
+    return isImagePresent;
+  }
+
+  async function checkOnboarding() {
+    const img = await checkExtension();
+    if (!img) {
+      setOnboardingStep(1);
+    } else {
+      if (community_joined_data.community_info.length > 0) {
+        if (!(endOfRecommendations && items.length > 0)) {
           //if user has created community but no submission
           setOnboardingStep(4);
+        }
+      } else {
+        setOnboardingStep(3);
       }
-    } else {
-      setOnboardingStep(3);
     }
   }
   
-  useEffect(() => {
-    checkOnboarding();
+  useEffect(async () => {
+    await checkOnboarding();
   }, []);
 
   if(onboardingStep > 0){
     homePageContent = <Setup head="Onboarding" updateStep={onboardingStep}></Setup>;
   }
-
-
 
   const fetchNextPage = async () => {
     let pg = page

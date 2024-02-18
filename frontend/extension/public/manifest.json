@@ -16,5 +16,12 @@
 		"activeTab",
 		"tabs",
 		"scripting"
-	]
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["tree48.png"],
+			"matches": ["*://localhost/*"]
+		}
+	  ]
 }
+
