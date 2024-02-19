@@ -10,6 +10,9 @@ COPY requirements.txt requirements.txt
 
 COPY vicuna-7b-v1.5-awq/ vicuna-7b-v1.5-awq/
 
+COPY prompts.json prompts.json
+
+
 RUN pip3 install -r requirements.txt
 COPY . .
 
