@@ -24,26 +24,19 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
   const {
     submissionTitle,
     submissionDescription,
-    submissionCommunities,
     submissionSourceUrl,
     submissionIsAnonymous,
     submissionCommunity,
-    submissionMode,
-    submissionId,
-    submissionIncomingConnections,
-    submissionRedirectUrl,
-    submissionUsername,
-    submissionLastModified,
-    submissionDate,
     setSubmissionProps
   } = useSubmissionStore();
 
 
   useEffect(() => {
-    console.log(data)
+
     setSubmissionProps({ submissionTitle: data.submission.explanation });
     setSubmissionProps({ originalTitle: data.submission.explanation });
     setSubmissionProps({ submissionType: data.submission.type })
+    setSubmissionProps({ submissionCanDelete: data.submission.can_delete });
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
     setSubmissionProps({ originalDescription: data.submission.highlighted_text });
     setSubmissionProps({ submissionCommunities: data.submission.communities });

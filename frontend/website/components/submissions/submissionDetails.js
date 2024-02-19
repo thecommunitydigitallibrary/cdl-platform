@@ -1,5 +1,5 @@
 import jsCookie from "js-cookie";
-import { ContentCopy, Delete, LocalLibraryOutlined, LocalLibraryRounded, LocalLibraryTwoTone, Save, Edit, CloseOutlined, Close } from '@mui/icons-material';
+import { ContentCopy, Delete, Save, Edit, CloseOutlined, Close } from '@mui/icons-material';
 import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField } from '@mui/material';
 import { React, useState, useEffect } from 'react';
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, SEARCH_ENDPOINT, WEBSITE_URL } from '../../static/constants';
@@ -15,15 +15,13 @@ export default function SubmissionDetails(subData) {
         submissionTitle,
         submissionDescription,
         submissionSourceUrl,
-        submissionCommunity,
-        submissionCommunities,
         submissionIsAnonymous,
         submissionMode,
+        submissionCanDelete,
         originalDescription,
         originalTitle,
         submissionType,
         submissionId,
-        submissionIncomingConnections,
         submissionCommunitiesNamesList,
         submissionRemoveCommunityID,
         submissionSaveCommunityID,
@@ -32,7 +30,6 @@ export default function SubmissionDetails(subData) {
         submissionSaveCommunityIDList,
         submissionUsername,
         submissionDisplayUrl,
-        submissionLastModified,
         submissionDate,
         submisssionRedirectUrl,
         isAConnection,
@@ -124,7 +121,6 @@ export default function SubmissionDetails(subData) {
         setOpenDelete(true);
     };
 
-
     async function copyPageUrl() {
         const linkToCopy = WEBSITE_URL + 'submissions/' + submissionId;
         try {
@@ -205,20 +201,6 @@ export default function SubmissionDetails(subData) {
                                 textDecoration: "none",
                                 background: "aliceblue",
                             }}
-
-                        // style={{
-                        //     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-                        //     fontWeight: "750",
-                        //     fontSize: "0.75rem",
-                        //     letterSpacing: "0.02857em",
-                        //     textTransform: "uppercase",
-                        //     color: "white",
-                        //     padding: "5px 7px",
-                        //     marginRight: "5px",
-                        //     textDecoration: "none",
-                        //     background: "#1976d2",
-                        //     borderRadius: '1rem'
-                        // }}
                         >
                             {submissionData.submission.communities_part_of[key]}
                         </a>
@@ -489,39 +471,46 @@ export default function SubmissionDetails(subData) {
                             </Grid>
                             <Grid item>
 
-                                {submissionType != "webpage" &&
-                                    (submissionMode == "edit" ?
-
+                                {
+                                    submissionCanDelete && (
                                         <>
-                                            <Button onClick={submitSubmissionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
-                                                Save
-                                            </Button>
-                                            <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
-                                                Delete
-                                            </Button>
+                                            {submissionType != "webpage" &&
+                                                (submissionMode == "edit" ?
 
+                                                    <>
+                                                        <Button onClick={submitSubmissionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
+                                                            Save
+                                                        </Button>
+                                                        <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
+                                                            Delete
+                                                        </Button>
+
+                                                    </>
+                                                    :
+                                                    <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
+                                                        Edit
+                                                    </Button>
+                                                )
+
+                                            }
+
+                                            {submissionMode == "edit" &&
+                                                <Tooltip title="Cancel">
+                                                    <IconButton
+                                                        size="small" color="gray"
+                                                        onClick={changeMode}
+                                                        label="cancel"
+                                                        aria-label="close"
+                                                        variant="outlined"
+                                                    >
+                                                        <CloseOutlined />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            }
                                         </>
-                                        :
-                                        <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
-                                            Edit
-                                        </Button>
                                     )
                                 }
 
-                                {submissionMode == "edit" &&
-                                    <Tooltip title="Cancel">
-                                        <IconButton
-                                            size="small" color="gray"
-                                            onClick={changeMode}
-                                            label="cancel"
-                                            aria-label="close"
-                                            variant="outlined"
-                                        >
-                                            <CloseOutlined />
-                                        </IconButton>
-                                    </Tooltip>
-
-                                }
                                 <IconButton
                                     aria-label="more"
                                     id="long-button"

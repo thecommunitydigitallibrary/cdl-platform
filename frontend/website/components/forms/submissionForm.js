@@ -175,41 +175,6 @@ export default function SubmissionForm(props) {
         }
     }
 
-    // const setDescriptionListener = async (text) => {
-
-    //     if (props.isAConnection) {
-    //         setDescription(text)
-
-    //         const regex = /\[\[([^\]]+)\]\]/g;
-    //         const matches = [];
-    //         let match;
-
-    //         while ((match = regex.exec(description)) !== null) {
-    //             matches.push(match[1]);
-    //         }
-
-    //         if (matches.length == 1) {
-    //             var words_in_match = matches[0]
-    //             getSuggestions(words_in_match)
-    //         }
-    //     }
-    //     else {
-    //         setSubmissionProps({ submissionDescription: text })
-    //         const regex = /\[\[([^\]]+)\]\]/g;
-    //         const matches = [];
-    //         let match;
-
-    //         while ((match = regex.exec(submissionDescription)) !== null) {
-    //             matches.push(match[1]);
-    //         }
-
-    //         if (matches.length == 1) {
-    //             var words_in_match = matches[0]
-    //             getSuggestions(words_in_match)
-    //         }
-    //     }
-    // }
-
     const setDescriptionListener = async (text) => {
 
         if (props.isAConnection) {
@@ -380,7 +345,6 @@ export default function SubmissionForm(props) {
             <div style={{ border: "1px solid #ccc", borderRadius: "4px", order: 2, elevation: 2 }}>
                 {/* for submission mode create, set all params to empty string? */}
                 {document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true)}
-
                 <DialogContent>
 
                     <IconButton
@@ -536,6 +500,8 @@ export default function SubmissionForm(props) {
                 <>
                     {submissionMode == "edit" &&
                         <div>
+                            {document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true)}
+
                             <TextField
                                 margin="dense"
                                 id="submissionURL"
@@ -630,6 +596,7 @@ export default function SubmissionForm(props) {
                         <div>
                             <div data-color-mode="light">
                                 <MDEditor
+                                    hideToolbar={true}
                                     id="submissionDescription"
                                     label="Submission Description"
                                     variant="standard"

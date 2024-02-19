@@ -19,6 +19,7 @@ const useSubmissionStore = create((set) => ({
     submissionSuggestions: null,
     submissionHashtags: [],
     submissionStats: {},
+    submissionCanDelete: false,
 
 
     submissionCommunitiesNameMap: {},
@@ -30,7 +31,7 @@ const useSubmissionStore = create((set) => ({
 
 
 
-    isAConnection: false, //not needed actually
+    isAConnection: false,
 
     setSubmissionProps: (props) => set((state) => ({ ...state, ...props })),
 }));
