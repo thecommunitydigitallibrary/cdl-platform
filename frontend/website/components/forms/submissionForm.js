@@ -108,10 +108,10 @@ export default function SubmissionForm(props) {
 
         const regex = /\[\[([^\]]+)\]\]/i;
         var replacement_text = "[" + event.target.title + "](" + SUB_WEB_ENDPOINT + event.target.id + ")"
-        console.log(props)
+        // console.log(props)
 
         if (props.isAConnection) {
-            console.log(description)
+            // console.log(description)
             var new_desc = description.replace(regex, replacement_text)
             setDescription(new_desc)
         }
@@ -165,7 +165,7 @@ export default function SubmissionForm(props) {
 
             setCurrentQuery(text)
         } else {
-            console.log(response.message)
+            // console.log(response.message, 'SET!!!!!!!!!')
 
             if (props.isAConnection) {
                 setSuggestions(null)
@@ -175,9 +175,46 @@ export default function SubmissionForm(props) {
         }
     }
 
+    // const setDescriptionListener = async (text) => {
+
+    //     if (props.isAConnection) {
+    //         setDescription(text)
+
+    //         const regex = /\[\[([^\]]+)\]\]/g;
+    //         const matches = [];
+    //         let match;
+
+    //         while ((match = regex.exec(description)) !== null) {
+    //             matches.push(match[1]);
+    //         }
+
+    //         if (matches.length == 1) {
+    //             var words_in_match = matches[0]
+    //             getSuggestions(words_in_match)
+    //         }
+    //     }
+    //     else {
+    //         setSubmissionProps({ submissionDescription: text })
+    //         const regex = /\[\[([^\]]+)\]\]/g;
+    //         const matches = [];
+    //         let match;
+
+    //         while ((match = regex.exec(submissionDescription)) !== null) {
+    //             matches.push(match[1]);
+    //         }
+
+    //         if (matches.length == 1) {
+    //             var words_in_match = matches[0]
+    //             getSuggestions(words_in_match)
+    //         }
+    //     }
+    // }
+
     const setDescriptionListener = async (text) => {
 
         if (props.isAConnection) {
+            // console.log('2')
+
             setDescription(text)
 
             const regex = /\[\[([^\]]+)\]\]/g;
@@ -192,8 +229,14 @@ export default function SubmissionForm(props) {
                 var words_in_match = matches[0]
                 getSuggestions(words_in_match)
             }
+
+            else {
+                setSuggestions("Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms.");
+            }
         }
         else {
+            // console.log('3')
+
             setSubmissionProps({ submissionDescription: text })
             const regex = /\[\[([^\]]+)\]\]/g;
             const matches = [];
@@ -204,8 +247,14 @@ export default function SubmissionForm(props) {
             }
 
             if (matches.length == 1) {
+                // console.log('4')
+
                 var words_in_match = matches[0]
                 getSuggestions(words_in_match)
+            }
+            else {
+                // console.log('5')
+                setSubmissionProps({ submissionSuggestions: "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms." });
             }
         }
     }
