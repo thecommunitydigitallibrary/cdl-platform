@@ -13,7 +13,7 @@ import requests
 
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
     format_time_for_display, validate_submission, hydrate_with_hash_url, create_page, hydrate_with_hashtags, \
-    deduplicate, combine_pages, standardize_url, extract_hashtags, sanitize_input
+    deduplicate, combine_pages, standardize_url, extract_hashtags, format_url, build_display_url
 from app.helpers import response
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
@@ -413,7 +413,6 @@ def submission(current_user, id):
                 insert_obj["communities"] = submission_communities
 
 
-            # TODO as written, one cannot make source_url empty with it now being optional
             if highlighted_text != None or explanation != None or source_url != None:
 
                 # check highlighted text, explanation, and url to make sure proper formatting
@@ -546,7 +545,21 @@ def submission(current_user, id):
 
                 if "communities" in insert_obj:
                     log_community_action(ip, user_id, community_id, "ADD", submission_id=submission.id)
-                return response.success({"message": "Submission successfully edited."}, Status.OK)
+
+
+                # format source url to display new on frontend
+                formattted_url = format_url(submission.source_url, str(submission.id))
+                display_url = build_display_url(formattted_url)
+                submission_username = None
+
+                # if submission PATCHed to non-anonymous, get username
+                if not submission.anonymous:
+                    cdl_users = Users()
+                    creator = cdl_users.find_one({"_id": ObjectId(submission.user_id)})
+                    if creator:
+                        submission_username = creator.username
+
+                return response.success({"message": "Submission successfully edited.", "display_url": display_url, "hashtags": hashtags, "username": submission_username }, Status.OK)
             else:
                 return response.error("Unable to edit submission.", Status.INTERNAL_SERVER_ERROR)
 
@@ -782,10 +795,14 @@ def generate(current_user):
         if resp.status_code == 200:
             output = resp_json["output"]
 
-            if mode in ["contextual_qa", "gen_questions"]:
-                output = re.sub("[0-9].", "", output)
-                output = re.sub("\"", "", output)
-                output = "\n".join([x for x in output.split("\n") if len(x) > 5])
+            try:
+                output = json.loads(output)
+                q1 = output.get("1", "")
+                q2 = output.get("2", "")
+                q3 = output.get("3", "")
+                output = "\n".join([x for x in [q1, q2, q3] if x])
+            except:
+                pass
 
             log_recommendation_request(ip, user_id, user_communities, method=mode, metadata={"context": context, "query": query, "output": output, "version": "0.1", "url": url})
             return response.success({"output": output}, Status.OK)
