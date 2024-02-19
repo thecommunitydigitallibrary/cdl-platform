@@ -1,5 +1,5 @@
 import jsCookie from "js-cookie";
-import { ContentCopy, Delete, LocalLibraryOutlined, LocalLibraryRounded, LocalLibraryTwoTone, Save, Edit, CloseOutlined, Close } from '@mui/icons-material';
+import { ContentCopy, Delete, Save, Edit, CloseOutlined, Close } from '@mui/icons-material';
 import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField } from '@mui/material';
 import { React, useState, useEffect } from 'react';
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, SEARCH_ENDPOINT, WEBSITE_URL } from '../../static/constants';
@@ -15,15 +15,13 @@ export default function SubmissionDetails(subData) {
         submissionTitle,
         submissionDescription,
         submissionSourceUrl,
-        submissionCommunity,
-        submissionCommunities,
         submissionIsAnonymous,
         submissionMode,
+        submissionCanDelete,
         originalDescription,
         originalTitle,
         submissionType,
         submissionId,
-        submissionIncomingConnections,
         submissionCommunitiesNamesList,
         submissionRemoveCommunityID,
         submissionSaveCommunityID,
@@ -32,10 +30,10 @@ export default function SubmissionDetails(subData) {
         submissionSaveCommunityIDList,
         submissionUsername,
         submissionDisplayUrl,
-        submissionLastModified,
         submissionDate,
         submisssionRedirectUrl,
         isAConnection,
+        submissionHashtags,
         setSubmissionProps
     } = useSubmissionStore();
 
@@ -123,7 +121,6 @@ export default function SubmissionDetails(subData) {
         setOpenDelete(true);
     };
 
-
     async function copyPageUrl() {
         const linkToCopy = WEBSITE_URL + 'submissions/' + submissionId;
         try {
@@ -204,20 +201,6 @@ export default function SubmissionDetails(subData) {
                                 textDecoration: "none",
                                 background: "aliceblue",
                             }}
-
-                        // style={{
-                        //     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-                        //     fontWeight: "750",
-                        //     fontSize: "0.75rem",
-                        //     letterSpacing: "0.02857em",
-                        //     textTransform: "uppercase",
-                        //     color: "white",
-                        //     padding: "5px 7px",
-                        //     marginRight: "5px",
-                        //     textDecoration: "none",
-                        //     background: "#1976d2",
-                        //     borderRadius: '1rem'
-                        // }}
                         >
                             {submissionData.submission.communities_part_of[key]}
                         </a>
@@ -352,7 +335,6 @@ export default function SubmissionDetails(subData) {
     const handleSubmit = async (event) => {
 
         var DATA = {
-            // community: submissionCommunity, we have option to edit communities in the page itself
             source_url: submissionSourceUrl,
             title: submissionTitle,
             description: submissionDescription,
@@ -371,22 +353,26 @@ export default function SubmissionDetails(subData) {
             }),
         });
         const response = await res.json();
+
         if (res.status == 200) {
             console.log('Saved successfully')
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'success' });
             setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
-            // change display url
-            // in response get submission dispaly irl and set it herE?
-            // TODO
-            setSubmissionProps({ submissionDisplayUrl: submissionSourceUrl })
+            setSubmissionProps({ submissionDisplayUrl: response.display_url ? response.display_url : submissionSourceUrl })
+            setSubmissionProps({ submissionHashtags: response.hashtags ? response.hashtags : submissionHashtags })
+            setSubmissionProps({ submissionUsername: response.username ? response.username : submissionUsername })
+
             // window.location.reload();
         }
         else {
 
+            setSubmissionProps({ submissionTitle: originalTitle })
+            console.log('resetting to:', originalTitle)
+
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'error' });
-            setSnackBarProps({ snackBarMessage: 'Could not save changes' })
+            setSnackBarProps({ snackBarMessage: response.message })
         }
     };
 
@@ -485,39 +471,46 @@ export default function SubmissionDetails(subData) {
                             </Grid>
                             <Grid item>
 
-                                {submissionType != "webpage" &&
-                                    (submissionMode == "edit" ?
-
+                                {
+                                    submissionCanDelete && (
                                         <>
-                                            <Button onClick={submitSubmissionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
-                                                Save
-                                            </Button>
-                                            <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
-                                                Delete
-                                            </Button>
+                                            {submissionType != "webpage" &&
+                                                (submissionMode == "edit" ?
 
+                                                    <>
+                                                        <Button onClick={submitSubmissionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
+                                                            Save
+                                                        </Button>
+                                                        <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
+                                                            Delete
+                                                        </Button>
+
+                                                    </>
+                                                    :
+                                                    <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
+                                                        Edit
+                                                    </Button>
+                                                )
+
+                                            }
+
+                                            {submissionMode == "edit" &&
+                                                <Tooltip title="Cancel">
+                                                    <IconButton
+                                                        size="small" color="gray"
+                                                        onClick={changeMode}
+                                                        label="cancel"
+                                                        aria-label="close"
+                                                        variant="outlined"
+                                                    >
+                                                        <CloseOutlined />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            }
                                         </>
-                                        :
-                                        <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
-                                            Edit
-                                        </Button>
                                     )
                                 }
 
-                                {submissionMode == "edit" &&
-                                    <Tooltip title="Cancel">
-                                        <IconButton
-                                            size="small" color="gray"
-                                            onClick={changeMode}
-                                            label="cancel"
-                                            aria-label="close"
-                                            variant="outlined"
-                                        >
-                                            <CloseOutlined />
-                                        </IconButton>
-                                    </Tooltip>
-
-                                }
                                 <IconButton
                                     aria-label="more"
                                     id="long-button"
@@ -648,7 +641,7 @@ export default function SubmissionDetails(subData) {
                                     {"Submitted"}
                                 </Typography>
 
-                                {submissionUsername &&
+                                {!submissionIsAnonymous &&
                                     <>
                                         <Typography color="grey" variant="subtitle2">
                                             {"by"}
@@ -658,7 +651,6 @@ export default function SubmissionDetails(subData) {
                                                 fontStyle: 'italic',
                                                 textDecoration: 'underline',
                                             }}>
-                                            {/* {submissionData.submission.username} */}
                                             {submissionUsername}
                                         </Typography></>
                                 }
@@ -699,21 +691,11 @@ export default function SubmissionDetails(subData) {
                             overflowX: "auto",
                             overflowY: "hidden",
                             whiteSpace: "nowrap",
-                            borderRadius: "50px"
                         }}
                         >
                             <div style={{
                                 float: "left",
                             }}>
-
-                                {/* {submissionCommunitiesNamesList.length > 0 && submissionData.submission.type === "user_submission"
-                                    ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
-                                    : ""}
-                                {submissionData.submission.type === "webpage" &&
-                                    <Typography>
-                                        "Webpage"
-                                    </Typography>
-                                } */}
 
                                 {submissionCommunitiesNamesList.length > 0 && submissionData.submission.type === "user_submission"
                                     ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
@@ -723,11 +705,12 @@ export default function SubmissionDetails(subData) {
                                         style={{
                                             fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
                                             fontWeight: "500",
-                                            fontSize: "0.8125rem",
+                                            fontSize: "0.7125rem",
                                             lineHeight: "1.75",
                                             letterSpacing: "0.02857em",
                                             textTransform: "uppercase",
                                             // color: "#1976D2",
+                                            borderRadius: "50px",
                                             padding: "3px 7px",
                                             marginRight: "5px",
                                             textDecoration: "none",
@@ -741,7 +724,7 @@ export default function SubmissionDetails(subData) {
 
                         </div>
 
-                        {submissionData.submission.type !== "webpage" && <>
+                        {submissionData.submission.type !== "webpage" ? <>
                             <div style={{
                                 display: "flex",
                                 flex: 1,
@@ -861,14 +844,26 @@ export default function SubmissionDetails(subData) {
                                     </IconButton>
                                 </Tooltip>
                             </div>
-                        </>}
+                        </>
+                            :
+                            <>
+                                <div style={{
+                                    display: "flex",
+                                    flex: 1,
+                                }}></div>
+                                <div style={{
+                                    display: "flex",
+                                    flex: 1,
+                                }}></div>
+                            </>
+                        }
+
 
 
                         <div style={{
                             display: "flex",
                             flex: 5,
                         }}>
-
                         </div>
 
                         <div style={{
