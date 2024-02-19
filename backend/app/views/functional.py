@@ -786,14 +786,12 @@ def generate(current_user):
         if resp.status_code == 200:
             output = resp_json["output"]
 
-            print("OUTPUT", output)
-
             try:
                 output = json.loads(output)
                 q1 = output.get("1", "")
                 q2 = output.get("2", "")
                 q3 = output.get("3", "")
-                output = "\n".join([q1, q2, q3])
+                output = "\n".join([x for x in [q1, q2, q3] if x])
             except:
                 pass
 
