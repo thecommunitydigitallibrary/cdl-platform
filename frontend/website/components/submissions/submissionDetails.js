@@ -356,7 +356,7 @@ export default function SubmissionDetails(subData) {
         const response = await res.json();
 
         if (res.status == 200) {
-            console.log('Saved successfully')
+            console.log('Saved successfully', response)
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'success' });
             setSnackBarProps({ snackBarMessage: response.message })
