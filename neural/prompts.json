@@ -1,0 +1,68 @@
+{
+    "qgen_context": {
+        "prefix": "Given the context:",
+        "suffix": ". Just output the JSON File of the three generated questions, only a single JSON entry, and nothing else.",
+        "instruction": "Please ask three questions about the context. Here are some context and question examples:",
+        "examples": [
+             {
+                 "context": "The Eiffel Tower was originally intended to be dismantled after 20 years.",
+                 "q1": "Why was the Eiffel Tower intended to be dismantled after 20 years?",
+                 "q2": "What changed the decision to keep the Eiffel Tower standing?",
+                 "q3": "How has the purpose of the Eiffel Tower evolved since its original construction?"
+             },
+             {
+                 "context": "Honey never spoils and has been found in edible condition in ancient tombs.",
+                 "q1": "What properties of honey prevent it from spoiling?",
+                 "q2": "In which ancient tombs has edible honey been found?",
+                 "q3": "How can honey remain edible for thousands of years?"
+             },
+             {
+                 "context": "Octopuses have three hearts and blue blood.",
+                 "q1": "Why do octopuses have three hearts?",
+                 "q2": "What causes the blood of an octopus to be blue?",
+                 "q3": "How do the three hearts of an octopus function together?"
+             },
+             {
+                 "context": "The Great Wall of China is longer than previously thought, extending over 21,000 kilometers.",
+                 "q1": "How was the new length of the Great Wall of China determined?",
+                 "q2": "What challenges are faced in maintaining such a long structure?",
+                 "q3": "What historical events led to the continuous expansion of the Great Wall?"
+             },
+             {
+                 "context": "Shakespeare invented over 1,700 words that we use today.",
+                 "q1": "Can you provide some examples of words invented by Shakespeare?",
+                 "q2": "How did Shakespeare contribute to the development of the English language?",
+                 "q3": "What impact has Shakespeare's vocabulary had on modern English?"
+             },
+             {
+                 "context": "The heart of a blue whale is as large as a small car.",
+                 "q1": "How does the size of a blue whale's heart compare to other animals?",
+                 "q2": "What are the implications of having such a large heart for a blue whale?",
+                 "q3": "How much blood can a blue whale's heart pump in a single beat?"
+             },
+             {
+                 "context": "Venus rotates in the opposite direction to most planets in our solar system.",
+                 "q1": "What causes Venus to rotate in the opposite direction?",
+                 "q2": "How does this retrograde rotation affect Venus' environment?",
+                 "q3": "Are there any other planets in our solar system that rotate similarly to Venus?"
+             },
+             {
+                 "context": "The Library of Alexandria was one of the largest and most significant libraries of the ancient world.",
+                 "q1": "What made the Library of Alexandria so significant in the ancient world?",
+                 "q2": "What kinds of works were housed in the Library of Alexandria?",
+                 "q3": "How did the destruction of the Library of Alexandria impact historical knowledge?"
+             },
+             {
+                 "context": "Polar bear fur is not white; it is actually transparent and hollow.",
+                 "q1": "How does the transparent and hollow nature of polar bear fur help them in their environment?",
+                 "q2": "What is the purpose of the hollow structure in polar bear fur?",
+                 "q3": "How does the fur appear white if it is actually transparent?"
+             },
+             {
+                 "context": "The Internet was invented in the late 1960s and initially called ARPANET.",
+                 "q1": "What was the original purpose of ARPANET?",
+                 "q2": "How did ARPANET evolve into the modern Internet?",
+                 "q3": "What were some of the key milestones in the development of the Internet?"
+             }]
+        }
+}
