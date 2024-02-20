@@ -123,7 +123,7 @@ export default function SubmissionForm(props) {
         if (props.isAConnection) {
             setSuggestions(null)
         } else {
-            setSubmissionProps({ suggestions: null })
+            setSubmissionProps({ submissionSuggestions: null })
         }
     }
 

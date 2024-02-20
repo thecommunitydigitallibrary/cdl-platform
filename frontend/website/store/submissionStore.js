@@ -7,6 +7,7 @@ const useSubmissionStore = create((set) => ({
     submissionDescription: "",
     originalDescription: null,
     submissionDisplayUrl: "",
+    originalSourceUrl: "",
     submissionSourceUrl: "",
     submissionCommunity: "",
     submissionCommunities: [],
@@ -21,15 +22,12 @@ const useSubmissionStore = create((set) => ({
     submissionStats: {},
     submissionCanDelete: false,
 
-
     submissionCommunitiesNameMap: {},
     submissionCommunitiesNamesList: {},
     submissionRemoveCommunityID: [],
     submissionSaveCommunityID: [],
     submissionRemoveCommunityIDList: [],
     submissionSaveCommunityIDList: [],
-
-
 
     isAConnection: false,
 
