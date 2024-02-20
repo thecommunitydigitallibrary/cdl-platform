@@ -51,16 +51,60 @@ export default function ImgMediaCard({ setUrlState }) {
     setOpen(false);
   };
 
-  const handleAnonymous = async (event) => {
-    if (isAnonymous) {
-      setAnonymous(false)
-    } else {
-      setAnonymous(true)
-    }
-  }
+  const handleAnonymous = async (e) => {
+    setAnonymous(e.target.checked);
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+      let url = tabs[0].url;
+      // Get cache data
+      let cacheJson = JSON.parse(localStorage.getItem("extCachedData"));
+      // Search for the current url in the cacheData
+      let flag = 0;
+      for(let ele of cacheJson) {
+        if(ele['url'] === url) {
+          ele['anonymous'] = e.target.checked;
+          flag = 1;
+          break;
+        }
+      }
+      if(flag === 0) {
+        if(cacheJson.length === 10) {
+          cacheJson = removeCachedData(cacheJson);
+        }
+        cacheJson.push({"url": url, "title": "", "description": "", "community": "", "anonymous": e.target.checked});
+        localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+      }
+      else {
+        localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+      }
+    });
+}
 
-  const handleChange = (event) => {
-    setCommunity(event.target.value);
+  const handleChange = (e) => {
+    setCommunity(e.target.value);
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+      let url = tabs[0].url;
+      // Get cache data
+      let cacheJson = JSON.parse(localStorage.getItem("extCachedData"));
+      // Search for the current url in the cacheData
+      let flag = 0;
+      for(let ele of cacheJson) {
+        if(ele['url'] === url) {
+          ele['community'] = e.target.value;
+          flag = 1;
+          break;
+        }
+      }
+      if(flag === 0) {
+        if(cacheJson.length === 10) {
+          cacheJson = removeCachedData(cacheJson);
+        }
+        cacheJson.push({"url": url, "title": "", "description": "", "community": e.target.value, "anonymous": false});
+        localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+      }
+      else {
+        localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+      }
+    });
   };
 
   let getSelectionText = () => {
@@ -80,12 +124,15 @@ export default function ImgMediaCard({ setUrlState }) {
           function: () => getSelection().toString(),
         },
         (result) => {
+          getCachedData(url);
           if (result === undefined) {
             setDesciption("");
-          } else {
+          }
+          else if (result[0].result !== '') {
             setUrlState(url, result[0].result);
             setDesciption(result[0].result);
             setUrl(url);
+            updateDesc(url, result[0].result);
           }
         }
       );
@@ -117,20 +164,110 @@ export default function ImgMediaCard({ setUrlState }) {
     }
   };
 
+  const getCachedData = (u) => {
+      // Get cache data
+      let cacheJson = JSON.parse(localStorage.getItem("extCachedData"));
+      // Search for the current url in the cacheData
+      if (cacheJson.length > 0) {
+        for (let ele of cacheJson) {
+          if (ele['url'] === u) {
+            setTitle(ele['title']);
+            setDesciption(ele['description']);
+            setCommunity(ele['community']);
+            setAnonymous(ele['anonymous']);
+            break;
+          }
+        }
+        localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+      }
+  }
 
   React.useEffect(() => {
     getCommunities();
     getSelectionText();
   }, []);
 
-  const onChangeDescription = (e) => setDesciption(e.target.value);
+  const removeCachedData = (cacheJson) => {
+    //  Remove obj at first index
+    let newCacheJson = cacheJson.slice(1);
+    return newCacheJson;
+  }
 
-  const onChangeTitle = (e) => setTitle(e.target.value);
+  const updateDesc = (url, desc) => {
+    // Get cache data
+    let cacheJson = JSON.parse(localStorage.getItem("extCachedData"));
+    // Search for the current url in the cacheData
+    let flag = 0;
+    for (let ele of cacheJson) {
+      if (ele['url'] === url) {
+        ele['description'] = desc;
+        flag = 1;
+        break;
+      }
+    }
+    if (flag === 0) {
+      if (cacheJson.length === 10) {
+        cacheJson = removeCachedData(cacheJson);
+      }
+      cacheJson.push({"url": url, "title": "", "description": desc, "community": "", "anonymous": false});
+      localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+    } else {
+      localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+    }
+  }
+
+  const onChangeDescription = (e) => {
+    setDesciption(e.target.value);
+    updateDesc(url, e.target.value);
+  }
+
+  const onChangeTitle = (e) => {
+    setTitle(e.target.value);
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+      let url = tabs[0].url;
+      // Get cache data
+      let cacheJson = JSON.parse(localStorage.getItem("extCachedData"));
+      // Search for the current url in the cacheData
+      let flag = 0;
+      for (let ele of cacheJson) {
+        if (ele['url'] === url) {
+          ele['title'] = e.target.value;
+          flag = 1;
+          break;
+        }
+      }
+      if (flag === 0) {
+        if (cacheJson.length === 10) {
+          cacheJson = removeCachedData(cacheJson);
+        }
+        cacheJson.push({"url": url, "title": e.target.value, "description": "", "community": "", "anonymous": false});
+        localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+      } else {
+        localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+      }
+    });
+  }
 
   const onClear = () => {
     setTitle("");
     setDesciption("");
     setCommunity("");
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+      let url = tabs[0].url;
+      // Get cache data
+      let cacheJson = JSON.parse(localStorage.getItem("extCachedData"));
+      // Search for the current url in the cacheData
+      for (let ele of cacheJson) {
+        if (ele['url'] === url) {
+          ele['title'] = "";
+          ele['description'] = "";
+          ele['community'] = "";
+          ele['anonymous'] = "";
+          break;
+        }
+      }
+      localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
+    });
   }
 
 
@@ -157,8 +294,8 @@ export default function ImgMediaCard({ setUrlState }) {
         return;
       }
 
-      // In the submission schema, the user entered title is named as explanation and 
-      // user highlighted text and/or description on the source url is named as highlighted_text. 
+      // In the submission schema, the user entered title is named as explanation and
+      // user highlighted text and/or description on the source url is named as highlighted_text.
       data.append("explanation", title);
       data.append("source_url", url);
       data.append("highlighted_text", description);
@@ -226,7 +363,7 @@ export default function ImgMediaCard({ setUrlState }) {
         <MDEditor
           variant="standard"
           value={description}
-          onChange={setDesciption}
+          onChange={onChangeDescription}
           highlightEnable={false}
           preview="live"
           height={200}
@@ -307,7 +444,7 @@ export default function ImgMediaCard({ setUrlState }) {
         </FormControl>
       </Box>
       <FormGroup>
-        <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
+          <FormControlLabel control={<Checkbox checked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
       </FormGroup>
       <div style={{ display: "flex", marginTop: "20px" }}>
         <Button variant="contained" style={{ padding: 14, width: "48%", marginRight: "20px" }}
