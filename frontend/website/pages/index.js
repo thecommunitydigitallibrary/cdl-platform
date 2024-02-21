@@ -173,14 +173,14 @@ function Home({ data, community_joined_data }) {
           direction="column"
           justifyContent={"center"}
           alignItems={"center"}
-          // width={"100%"}
+        // width={"100%"}
         >
           <Grid item>
             <div style={{ textAlign: 'center' }}>
               <h1>TextData</h1>
             </div>
           </Grid>
-          <br/>
+          <br />
           <Grid
             container
             direction="row"
@@ -214,27 +214,27 @@ function Home({ data, community_joined_data }) {
         </Grid>
 
         <Grid item marginX="20%">
-          <Divider sx={{ border: 0.5}} />
+          <Divider sx={{ border: 0.5 }} />
         </Grid>
-        <br/>
+        <br />
         <Grid
           container
           display={"flex"}
           justifyContent={"center"}
           alignItems={"center"}
-          >
+        >
           <InfiniteScroll
             dataLength={items.length}
             next={fetchNextPage}
             hasMore={!endOfRecommendations}
             loader={!endOfRecommendations && <h6 style={{ textAlign: 'center' }} >Loading...</h6>}
-            endMessage={endOfRecommendations && items.length > 0? 
-            <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4> 
-            : 
+            endMessage={endOfRecommendations && items.length > 0 ?
+              <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4>
+              :
               <>
-              <h6 style={{ textAlign: 'center' }}> Thanks for creating or joining a new community! Create a submission to get recommendations. <br/> <br/>
-              {/* Currently is : href needs to be updated to make new submission model open*/}
-              <a variant="outline" href={"/communities"}>{" Click here to create a new submission!"}</a></h6>
+                <h6 style={{ textAlign: 'center' }}> Thanks for creating or joining a new community! Create a submission to get recommendations. <br /> <br />
+                  {/* Currently is : href needs to be updated to make new submission model open*/}
+                  <a variant="outline" href={"/communities"}>{" Click here to create a new submission!"}</a></h6>
               </>}
           >
             <Grid item>
@@ -263,15 +263,19 @@ function Home({ data, community_joined_data }) {
             </Grid>
           </InfiniteScroll>
         </Grid>
-    
-                {visible && <IconButton
-                  variant="extended"
-                  onClick={scrollToTop}
-                  sx={{ width: '50px', height: '50px', ml: "85%", position: 'sticky', border: 'solid', bottom: '10px', "&:hover": {
-                    backgroundColor: "#1976d2", color: 'white'} }}>
-                  <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
-                </IconButton>}
-      </div>
+
+        {visible && <IconButton
+          variant="extended"
+          onClick={scrollToTop}
+          sx={{
+            width: '50px', height: '50px', ml: "85%", position: 'sticky', border: 'solid', bottom: '10px', "&:hover": {
+              backgroundColor: "#1976d2", color: 'white'
+            }
+          }}>
+          <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
+        </IconButton>}
+        <Footer alt={true} />
+      </div>     
     );
   }
 
@@ -285,7 +289,6 @@ function Home({ data, community_joined_data }) {
         </Head>
         <Header />
         {homePageContent}
-        <Footer alt={true} />
       </div>
     </>
   );
@@ -345,3 +348,5 @@ export async function getServerSideProps(context) {
 }
 
 export default Home;
+
+//<Footer alt={true} />
