@@ -59,10 +59,10 @@ function Home({ data, community_joined_data }) {
       if (community_joined_data.community_info.length > 0) {
         if (!(endOfRecommendations && items.length > 0)) {
           //if user has created community but no submission
-          setOnboardingStep(4);
+          setOnboardingStep(3);
         }
       } else {
-        setOnboardingStep(3);
+        setOnboardingStep(2);
       }
     }
   }

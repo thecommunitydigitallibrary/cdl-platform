@@ -61,16 +61,7 @@ export default function VerticalLinearStepper(props) {
           </Step>
         ))}
       </Stepper>
-      {activeStep === props.steps.length && (
-        <Paper square elevation={0} sx={{ pt: 2 }}>
-          <Typography>
-            We are looking forward to you joining TextData!
-          </Typography>
-          <Button onClick={handleReset} sx={{ p: 0 }}>
-            Restart
-          </Button>
-        </Paper>
-      )}
+    {activeStep === props.steps.length && (window.location.reload())}
     </Box>
   );
 }
