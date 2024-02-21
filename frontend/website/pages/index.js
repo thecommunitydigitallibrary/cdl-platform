@@ -21,8 +21,9 @@ const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const recommendationsEndPoint = "recommend";
 const getCommunitiesEndpoint = "getCommunities";
+const searchEndpoint = "search?";
 
-function Home({ data, community_joined_data }) {
+function Home({ data, community_joined_data, user_own_submissions }) {
 
   const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
@@ -54,7 +55,13 @@ function Home({ data, community_joined_data }) {
   async function checkOnboarding() {
     const img = await checkExtension();
     if (!img) {
-      setOnboardingStep(1);
+      if (user_own_submissions.total_num_results > 10) {
+        //user is using website for submissions and doesn't intend to install extension
+        setOnboardingStep(4);
+      } else {
+        setOnboardingStep(1);
+      }
+      
     } else {
       if (community_joined_data.community_info.length > 0) {
         if (!(endOfRecommendations && items.length > 0)) {
@@ -321,17 +328,29 @@ export async function getServerSideProps(context) {
       }),
     });
 
+    var searchURL = baseURL_server + searchEndpoint;
+    searchURL += "own_submissions=True" + "&community=all";
+    const userOwnSubmissions = await fetch(searchURL, {
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
+
     const data = await res.json();
     const community_joined_data = await fetchCommunities.json();
+    const user_own_submissions = await userOwnSubmissions.json();
     if (fetchCommunities.status == 200) {
       if (res.status == 200) {
-        // Pass data to the page via props
-        if (context.query.page == undefined) {
-          data.current_page = "0";
-        } else {
-          data.current_page = context.query.page;
+        if (userOwnSubmissions.status == 200) {
+          // Pass data to the page via props
+          if (context.query.page == undefined) {
+            data.current_page = "0";
+          } else {
+            data.current_page = context.query.page;
+          }
+          return { props: { data, community_joined_data, user_own_submissions } };
         }
-        return { props: { data, community_joined_data } };
+
       }
     } else if (res.status == 404) {
       return {
@@ -348,5 +367,3 @@ export async function getServerSideProps(context) {
 }
 
 export default Home;
-
-//<Footer alt={true} />
