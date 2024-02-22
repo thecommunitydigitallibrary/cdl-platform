@@ -41,6 +41,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     setSubmissionProps({ originalDescription: data.submission.highlighted_text });
     setSubmissionProps({ submissionCommunities: data.submission.communities });
     setSubmissionProps({ submissionSourceUrl: data.submission.raw_source_url });
+    setSubmissionProps({ originalSourceUrl: data.submission.raw_source_url });
     setSubmissionProps({ submissionDisplayUrl: data.submission.display_url });
     setSubmissionProps({ submissionRedirectUrl: data.submission.redirect_url });
     setSubmissionProps({ submissionIsAnonymous: data.submission.anonymous });
