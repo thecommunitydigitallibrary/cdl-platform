@@ -5,15 +5,17 @@ import Slide from '@material-ui/core/Slide';
 import { Typography } from '@mui/material';
 import SubmissionForm from '../forms/submissionForm';
 import useSubmissionStore from '../../store/submissionStore';
+import { ReplyAllOutlined } from '@mui/icons-material';
+import { GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from '../../static/constants';
 
 const AddConnectionsButton = ({ setSelectedOption }) => {
     const [isTextBoxVisible, setTextBoxVisible] = useState(false);
-    const { submissionTitle, submissionCommunitiesNameMap, submissionRedirectUrl, setSubmissionProps }
+    const { submissionTitle, submissionId, submissionCommunitiesNameMap, submissionRedirectUrl, submissionDisplayUrl, setSubmissionProps }
         = useSubmissionStore();
 
     const { connectionDescription, setConnectionDescription } =
-        useState(`Reply to [${submissionTitle}](${submissionRedirectUrl})`);
-    // useState(`Reply to [[${submissionTitle}]]` + ' ');
+        useState(`[${submissionTitle}](${WEBSITE_URL}+'submissions/'+${submissionId}})`);
+    // useState(`[[${submissionTitle}]]` + ' ');
 
     const handleButtonClick = () => {
         // setSubmissionProps({ submissionMode: "create" });
@@ -26,18 +28,15 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
 
     return (
         <>
-            <Box>
+            <Box minWidth={'750px'}>
                 <Button
-                    // sx={{
-                    //     color: 'black',
-                    //     backgroundColor: 'black',
-                    //     '&:hover': {
-                    //         color: 'white',
-                    //     },
-                    // }}
-                    onClick={handleButtonClick} variant="contained" size="small">
-                    {/* startIcon={<EditIcon />} */}
-                    Add Incoming Connection
+                    onClick={handleButtonClick}
+                    variant="contained"
+                    size="small"
+                    endIcon={<ReplyAllOutlined />}
+                    style={{ textTransform: 'none' }}
+                >
+                    Make Submission with Mention
                 </Button>
 
                 <Slide direction="left" in={isTextBoxVisible} mountOnEnter unmountOnExit>
@@ -45,10 +44,10 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                         <SubmissionForm
                             isAConnection={true}
                             isTextBoxVisible={isTextBoxVisible}
-                            setTextBoxVisible = {setTextBoxVisible}
+                            setTextBoxVisible={setTextBoxVisible}
                             source_url=""
                             title=""
-                            description={`Reply to [${submissionTitle}](${submissionRedirectUrl})`}
+                            description={`[${submissionTitle}](${WEBSITE_URL}submissions/${submissionId})`}
                             communitiesNameMap={submissionCommunitiesNameMap}
                         />
 

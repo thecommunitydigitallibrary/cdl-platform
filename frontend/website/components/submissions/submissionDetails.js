@@ -1,6 +1,6 @@
 import jsCookie from "js-cookie";
-import { ContentCopy, Delete, LocalLibraryOutlined, LocalLibraryRounded, LocalLibraryTwoTone, Save, Edit } from '@mui/icons-material';
-import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { ContentCopy, Delete, Save, Edit, CloseOutlined, Close } from '@mui/icons-material';
+import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField } from '@mui/material';
 import { React, useState, useEffect } from 'react';
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, SEARCH_ENDPOINT, WEBSITE_URL } from '../../static/constants';
 import SubmissionStatistics from "./stats";
@@ -15,13 +15,13 @@ export default function SubmissionDetails(subData) {
         submissionTitle,
         submissionDescription,
         submissionSourceUrl,
-        submissionCommunity,
-        submissionCommunities,
         submissionIsAnonymous,
         submissionMode,
+        submissionCanDelete,
+        originalDescription,
+        originalTitle,
         submissionType,
         submissionId,
-        submissionIncomingConnections,
         submissionCommunitiesNamesList,
         submissionRemoveCommunityID,
         submissionSaveCommunityID,
@@ -30,9 +30,10 @@ export default function SubmissionDetails(subData) {
         submissionSaveCommunityIDList,
         submissionUsername,
         submissionDisplayUrl,
-        submissionLastModified,
         submissionDate,
+        submisssionRedirectUrl,
         isAConnection,
+        submissionHashtags,
         setSubmissionProps
     } = useSubmissionStore();
 
@@ -44,26 +45,6 @@ export default function SubmissionDetails(subData) {
     const [message, setMessage] = useState("");
     const [severity, setSeverity] = useState("error");
     const [openDelete, setOpenDelete] = useState(false);
-
-    // useEffect(() => {
-    //     console.log(
-    //         'removeCommunityID: ', submissionRemoveCommunityID,
-    //         'saveCommunityID: ', submissionSaveCommunityID,
-    //         'removeCommunityIDList: ', submissionRemoveCommunityIDList,
-    //         'saveCommunityIDList: ', submissionSaveCommunityIDList,
-    //     )
-    // }, [
-    //     submissionRemoveCommunityID,
-    //     submissionSaveCommunityID,
-    //     submissionRemoveCommunityIDList,
-    //     submissionSaveCommunityIDList,
-    // ])
-
-    // const [removeCommunityID, setRemoveCommunityID] = useState([]);
-    // const [saveCommunityID, setSaveCommunityID] = useState([]);
-    // const [removeCommunityIDList, setRemoveCommunityIDList] = useState([]);
-    // const [saveCommunityIDList, setSaveCommunityIDList] = useState([]);
-    // const [communityNameMap, setCommunityNameMap] = useState({});
 
     const mapCommunitiesToNames = (commResponse) => {
         let idNameMap = {};
@@ -140,9 +121,8 @@ export default function SubmissionDetails(subData) {
         setOpenDelete(true);
     };
 
-
     async function copyPageUrl() {
-        const linkToCopy = WEBSITE_URL + GET_SUBMISSION_ENDPOINT + "/" + submissionId;
+        const linkToCopy = WEBSITE_URL + 'submissions/' + submissionId;
         try {
             await navigator.clipboard
                 .writeText(linkToCopy)
@@ -285,6 +265,12 @@ export default function SubmissionDetails(subData) {
 
             const response = await res.json();
             if (response.status == "ok") {
+
+
+                setSnackBarProps({ isSnackBarOpen: true })
+                setSnackBarProps({ snackBarSeverity: 'success' });
+                setSnackBarProps({ snackBarMessage: 'Submission removed from community!' })
+
                 setSeverity("success");
                 setMessage("Submission removed from community.");
                 handleClick();
@@ -307,8 +293,11 @@ export default function SubmissionDetails(subData) {
 
                 // window.location.reload();
             } else {
-                setSeverity("error");
-                setMessage(response.message);
+
+                setSnackBarProps({ isSnackBarOpen: true })
+                setSnackBarProps({ snackBarSeverity: 'error' });
+                setSnackBarProps({ snackBarMessage: response.message })
+
                 handleClick();
             }
         }
@@ -401,7 +390,6 @@ export default function SubmissionDetails(subData) {
     const handleSubmit = async (event) => {
 
         var DATA = {
-            // community: submissionCommunity, we have option to edit communities in the page itself
             source_url: submissionSourceUrl,
             title: submissionTitle,
             description: submissionDescription,
@@ -420,29 +408,94 @@ export default function SubmissionDetails(subData) {
             }),
         });
         const response = await res.json();
+
         if (res.status == 200) {
             console.log('Saved successfully')
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'success' });
             setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
+            setSubmissionProps({ submissionDisplayUrl: response.display_url ? response.display_url : submissionSourceUrl })
+            setSubmissionProps({ submissionHashtags: response.hashtags ? response.hashtags : submissionHashtags })
+            setSubmissionProps({ submissionUsername: response.username ? response.username : submissionUsername })
+
             // window.location.reload();
         }
         else {
+
+            setSubmissionProps({ submissionTitle: originalTitle })
+            console.log('resetting to:', originalTitle)
+
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'error' });
-            setSnackBarProps({ snackBarMessage: 'Could not save changes' })
+            setSnackBarProps({ snackBarMessage: response.message })
         }
     };
 
     const changeMode = () => {
+
         if (submissionMode === "edit") {
-            // first save the changes
-            handleSubmit()
+            let temp = originalDescription
+            if (originalDescription) {
+                setSubmissionProps({ submissionDescription: temp })
+            }
+            let tempTitle = originalTitle
+            if (originalTitle) {
+                setSubmissionProps({ submissionTitle: tempTitle })
+            }
             setSubmissionProps({ ...submissionMode, submissionMode: "view" });
         } else {
             setSubmissionProps({ ...submissionMode, submissionMode: "edit" });
         }
     }
+
+    const submitSubmissionChanges = () => {
+
+        let tempTitle = submissionTitle
+        setSubmissionProps({ originalTitle: tempTitle })
+
+        let tempDesc = submissionDescription
+        setSubmissionProps({ originalDescription: tempDesc })
+        handleSubmit()
+        setSubmissionProps({ ...submissionMode, submissionMode: "view" });
+    }
+
+
+    const [feedbackMessage, setFeedbackMessage] = useState("");
+
+    const [openFeedbackForm, setOpenFeedbackForm] = useState(false);
+
+    const handleClickOpenFeedbackForm = () => {
+        setOpenFeedbackForm(true);
+    };
+    const handleMessageType = (event) => {
+        setFeedbackMessage(event.target.value);
+    };
+
+    const handleCancelFeedbackForm = () => {
+        setFeedbackMessage("");
+        setOpenFeedbackForm(false);
+        handleCloseOtherOptionsMenu();
+    };
+
+    const handleCreateFeedbackForm = async (event) => {
+        //send feedback
+        var URL = BASE_URL_CLIENT + "feedback" + "/";
+        const res = await fetch(URL, {
+            method: "POST",
+            body: JSON.stringify({
+                submission_id: submissionId,
+                message: feedbackMessage,
+            }),
+            headers: new Headers({
+                Authorization: jsCookie.get("token"),
+                "Content-Type": "application/json",
+            }),
+        });
+        const response = await res.json();
+        setOpenFeedbackForm(false);
+        setFeedbackMessage("");
+        handleCloseOtherOptionsMenu();
+    };
 
     useEffect(() => {
         getSubmissionData();
@@ -465,29 +518,120 @@ export default function SubmissionDetails(subData) {
                                         maxWidth: '95ch',
                                     }}>
                                     <Link target="_blank" color="inherit" href={submissionData.submission.redirect_url}>
-                                        {/* {submissionData.submission.explanation} HERE*/}
-                                        {/* {subData.title} */}
-                                        {submissionTitle}
+                                        {/* {submissionTitle} */}
+                                        {originalTitle ? originalTitle : submissionTitle}
                                     </Link>
 
                                 </Typography>
                             </Grid>
                             <Grid item>
-                                {submissionType != "webpage" &&
-                                    (submissionMode == "edit" ?
-                                        <ButtonGroup>
-                                            <Button onClick={changeMode} variant="outlined" startIcon={<Save />} size="small" color="success">
-                                                Save
-                                            </Button>
-                                            <Button onClick={handleClickDelete} variant="outlined" startIcon={<Delete />} size="small" color="error">
-                                                Delete
-                                            </Button>
-                                        </ButtonGroup>
-                                        : <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
-                                            Edit
-                                        </Button>
+
+                                {
+                                    submissionCanDelete && (
+                                        <>
+                                            {submissionType != "webpage" &&
+                                                (submissionMode == "edit" ?
+
+                                                    <>
+                                                        <Button onClick={submitSubmissionChanges} variant="outlined" startIcon={<Save />} size="small" color="success">
+                                                            Save
+                                                        </Button>
+                                                        <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
+                                                            Delete
+                                                        </Button>
+
+                                                    </>
+                                                    :
+                                                    <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
+                                                        Edit
+                                                    </Button>
+                                                )
+
+                                            }
+
+                                            {submissionMode == "edit" &&
+                                                <Tooltip title="Cancel">
+                                                    <IconButton
+                                                        size="small" color="gray"
+                                                        onClick={changeMode}
+                                                        label="cancel"
+                                                        aria-label="close"
+                                                        variant="outlined"
+                                                    >
+                                                        <CloseOutlined />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            }
+                                        </>
                                     )
                                 }
+
+                                <IconButton
+                                    aria-label="more"
+                                    id="long-button"
+                                    size="small"
+                                    aria-controls={open ? 'long-menu' : undefined}
+                                    aria-expanded={open ? 'true' : undefined}
+                                    aria-haspopup="true"
+                                    onClick={handleClickOtherOptionsMenu}
+                                >
+                                    <MoreVertIcon />
+                                </IconButton>
+
+                                <Menu
+                                    id="long-menu"
+                                    MenuListProps={{
+                                        'aria-labelledby': 'long-button',
+                                    }}
+                                    anchorEl={otherMenuAnchor}
+                                    open={openOtherOptionsMenu}
+                                    onClose={handleCloseOtherOptionsMenu}
+                                    PaperProps={{
+                                        style: {
+                                            maxHeight: ITEM_HEIGHT * 4.5,
+                                            width: '20ch',
+                                        },
+                                    }}
+                                >
+                                    {otherMenuOptions.map((option) => (
+                                        <MenuItem key={option} selected={option === 'Report Submission'} onClick={handleClickOpenFeedbackForm}>
+                                            {option}
+                                        </MenuItem>
+                                    ))}
+                                </Menu>
+                                <Dialog open={openFeedbackForm}>
+                                    <DialogTitle>
+                                        {" "}
+                                        Report submission: {" "}
+                                        <a
+                                            style={{ fontSize: "20px" }}
+                                            href={submisssionRedirectUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            {submissionTitle}
+                                        </a>
+                                    </DialogTitle>
+                                    <DialogContent>
+                                        <DialogContentText>
+                                        </DialogContentText>
+                                        <TextField
+                                            autoFocus
+                                            margin="dense"
+                                            id="message"
+                                            name="message"
+                                            value={feedbackMessage}
+                                            onChange={handleMessageType}
+                                            label="Why are you reporting this submission?"
+                                            fullWidth
+                                            variant="standard"
+                                        />
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={handleCancelFeedbackForm}>Cancel</Button>
+                                        <Button onClick={handleCreateFeedbackForm}>Send</Button>
+                                    </DialogActions>
+                                </Dialog>
                                 <Dialog open={openDelete} onClose={handleCloseDelete}>
                                     <DialogTitle style={{ width: "500px" }}>
                                         {" "}
@@ -511,37 +655,7 @@ export default function SubmissionDetails(subData) {
                                     </DialogActions>
                                 </Dialog>
 
-                                <IconButton
-                                    aria-label="more"
-                                    id="long-button"
-                                    aria-controls={open ? 'long-menu' : undefined}
-                                    aria-expanded={open ? 'true' : undefined}
-                                    aria-haspopup="true"
-                                    onClick={handleClickOtherOptionsMenu}
-                                >
-                                    <MoreVertIcon />
-                                </IconButton>
-                                <Menu
-                                    id="long-menu"
-                                    MenuListProps={{
-                                        'aria-labelledby': 'long-button',
-                                    }}
-                                    anchorEl={otherMenuAnchor}
-                                    open={openOtherOptionsMenu}
-                                    onClose={handleCloseOtherOptionsMenu}
-                                    PaperProps={{
-                                        style: {
-                                            maxHeight: ITEM_HEIGHT * 4.5,
-                                            width: '20ch',
-                                        },
-                                    }}
-                                >
-                                    {otherMenuOptions.map((option) => (
-                                        <MenuItem key={option} selected={option === 'Report Submission'} onClick={() => { console.log('need to report'); handleCloseOtherOptionsMenu(); }}>
-                                            {option}
-                                        </MenuItem>
-                                    ))}
-                                </Menu>
+
 
                             </Grid>
 
@@ -582,7 +696,7 @@ export default function SubmissionDetails(subData) {
                                     {"Submitted"}
                                 </Typography>
 
-                                {submissionUsername &&
+                                {!submissionIsAnonymous &&
                                     <>
                                         <Typography color="grey" variant="subtitle2">
                                             {"by"}
@@ -592,7 +706,6 @@ export default function SubmissionDetails(subData) {
                                                 fontStyle: 'italic',
                                                 textDecoration: 'underline',
                                             }}>
-                                            {/* {submissionData.submission.username} */}
                                             {submissionUsername}
                                         </Typography></>
                                 }
@@ -633,162 +746,179 @@ export default function SubmissionDetails(subData) {
                             overflowX: "auto",
                             overflowY: "hidden",
                             whiteSpace: "nowrap",
-                            borderRadius: "50px"
                         }}
                         >
                             <div style={{
                                 float: "left",
                             }}>
 
-                                {/* {submissionCommunitiesNamesList.length > 0 && submissionData.submission.type === "user_submission"
-                                    ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
-                                    : ""}
-                                {submissionData.submission.type === "webpage" &&
-                                    <Typography>
-                                        "Webpage"
-                                    </Typography>
-                                } */}
-
                                 {submissionCommunitiesNamesList.length > 0 && submissionData.submission.type === "user_submission"
                                     ? submissionCommunitiesNamesList.map((link, i) => [i > 0, link])
                                     : ""}
                                 {submissionData.submission.type === "webpage" &&
-                                    <Typography>
-                                        "Webpage"
+                                    <Typography
+                                        style={{
+                                            fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                                            fontWeight: "500",
+                                            fontSize: "0.7125rem",
+                                            lineHeight: "1.75",
+                                            letterSpacing: "0.02857em",
+                                            textTransform: "uppercase",
+                                            // color: "#1976D2",
+                                            borderRadius: "50px",
+                                            padding: "3px 7px",
+                                            marginRight: "5px",
+                                            textDecoration: "none",
+                                            background: "#DCDCDC",
+                                        }}
+                                    >
+                                        Webpage
                                     </Typography>
                                 }
                             </div>
 
                         </div>
 
-                        <div style={{
-                            display: "flex",
-                            flex: 1,
-                        }}>
-                            <FormControl
-                                sx={{ width: "100px" }}
-                                size="small"
-                            >
-                                <InputLabel
-                                    id="demo-multiple-checkbox-label"
-                                    sx={{ width: 150, fontSize: "0.8rem" }} // Adjusting label width and font size
-                                >
-                                    Add
-                                </InputLabel>
-
-                                <Select
-                                    labelId="demo-multiple-checkbox-label"
-                                    id="demo-multiple-checkbox"
-                                    value={submissionSaveCommunityIDList}
-                                    // value={saveCommunityIDList}
-                                    onChange={handleSaveDropdownChange}
-                                    sx={{ borderRadius: "4px 0 0 4px", fontSize: "0.8rem" }} // Adjusting border radius and font size
-                                    input={
-                                        <OutlinedInput label="Add Community" />
-                                    }
-                                    renderValue={(selected) =>
-                                        selected
-                                            .map((x) => submissionCommunitiesNameMap[x])
-                                            .join(", ")
-                                    }
-                                    MenuProps={MenuProps}
-                                >
-                                    {/* {saveCommunityID.map((item) => ( */}
-                                    {submissionSaveCommunityID && submissionSaveCommunityID.map((item) => (
-                                        <MenuItem key={item} value={item}
-                                        >
-                                            <Checkbox
-                                                size="small"
-                                                checked={
-                                                    submissionSaveCommunityIDList.indexOf(item) > -1
-                                                }
-                                            />
-                                            <ListItemText
-                                                primaryTypographyProps={{ fontSize: '0.8rem' }}
-                                                primary={submissionCommunitiesNameMap[item]}
-                                            />
-                                        </MenuItem>
-
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <Tooltip title="Add to community">
-                                <IconButton
+                        {submissionData.submission.type !== "webpage" ? <>
+                            <div style={{
+                                display: "flex",
+                                flex: 1,
+                            }}>
+                                <FormControl
+                                    sx={{ width: "100px" }}
                                     size="small"
-                                    sx={{ padding: "4px", borderColor: "green", borderRadius: "0 5px 5px 0", borderWidth: "1px", borderStyle: "solid" }}
-                                    onClick={saveSubmission}>
-                                    <Save fontSize="small" /> {/* Adjusting icon size */}
-                                </IconButton>
-                            </Tooltip>
-                        </div>
-
-
-
-                        <div style={{
-                            display: "flex",
-                            flex: 1,
-                        }}>
-                            <FormControl
-                                sx={{ width: "100px" }}
-                                size="small"
-                            >
-                                <InputLabel
-                                    id="demo-multiple-checkbox-label"
-                                    sx={{ fontSize: "0.8rem" }}
                                 >
-                                    Remove
-                                </InputLabel>
-                                <Select
-                                    labelId="demo-multiple-checkbox-label"
-                                    id="demo-multiple-checkbox"
-                                    // value={removeCommunityIDList}
-                                    value={submissionRemoveCommunityIDList}
-                                    onChange={handleRemoveDropdownChange}
-                                    input={
-                                        <OutlinedInput label="Remove Community" />
-                                    }
-                                    sx={{ borderRadius: "4px 0 0 4px", fontSize: "0.8rem" }}
-                                    renderValue={(selected) =>
-                                        selected
-                                            .map((x) => submissionCommunitiesNameMap[x])
-                                            .join(", ")
-                                    }
-                                    MenuProps={MenuProps}>
-                                    {/* {removeCommunityID.map((item) => ( */}
-                                    {submissionRemoveCommunityID && submissionRemoveCommunityID.map((item) => (
-                                        <MenuItem key={item} value={item}
-                                        >
-                                            <Checkbox
-                                                size="small"
-                                                checked={submissionRemoveCommunityIDList.indexOf(item) > -1}
-                                            />
-                                            <ListItemText
-                                                primaryTypographyProps={{ fontSize: '0.8rem' }}
-                                                primary={submissionCommunitiesNameMap[item]}
-                                            />
-                                        </MenuItem>
+                                    <InputLabel
+                                        id="demo-multiple-checkbox-label"
+                                        sx={{ width: 150, fontSize: "0.8rem" }} // Adjusting label width and font size
+                                    >
+                                        Add
+                                    </InputLabel>
 
+                                    <Select
+                                        labelId="demo-multiple-checkbox-label"
+                                        id="demo-multiple-checkbox"
+                                        value={submissionSaveCommunityIDList}
+                                        // value={saveCommunityIDList}
+                                        onChange={handleSaveDropdownChange}
+                                        sx={{ borderRadius: "4px 0 0 4px", fontSize: "0.8rem" }} // Adjusting border radius and font size
+                                        input={
+                                            <OutlinedInput label="Add Community" />
+                                        }
+                                        renderValue={(selected) =>
+                                            selected
+                                                .map((x) => submissionCommunitiesNameMap[x])
+                                                .join(", ")
+                                        }
+                                        MenuProps={MenuProps}
+                                    >
+                                        {/* {saveCommunityID.map((item) => ( */}
+                                        {submissionSaveCommunityID && submissionSaveCommunityID.map((item) => (
+                                            <MenuItem key={item} value={item}
+                                            >
+                                                <Checkbox
+                                                    size="small"
+                                                    checked={
+                                                        submissionSaveCommunityIDList.indexOf(item) > -1
+                                                    }
+                                                />
+                                                <ListItemText
+                                                    primaryTypographyProps={{ fontSize: '0.8rem' }}
+                                                    primary={submissionCommunitiesNameMap[item]}
+                                                />
+                                            </MenuItem>
 
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <Tooltip title="Remove from community">
-                                <IconButton
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <Tooltip title="Add to community">
+                                    <IconButton
+                                        size="small"
+                                        sx={{ padding: "4px", borderColor: "green", borderRadius: "0 5px 5px 0", borderWidth: "1px", borderStyle: "solid" }}
+                                        onClick={saveSubmission}>
+                                        <Save fontSize="small" /> {/* Adjusting icon size */}
+                                    </IconButton>
+                                </Tooltip>
+                            </div>
+
+                            <div style={{
+                                display: "flex",
+                                flex: 1,
+                            }}>
+                                <FormControl
+                                    sx={{ width: "100px" }}
                                     size="small"
-                                    sx={{ padding: "4px", borderColor: "red", borderRadius: "0 5px 5px 0", borderWidth: "1px", borderStyle: "solid" }}
-                                    onClick={deleteSubmissionfromCommunity}
                                 >
-                                    <Delete fontSize="small" /> {/* Adjusting icon size */}
-                                </IconButton>
-                            </Tooltip>
-                        </div>
+                                    <InputLabel
+                                        id="demo-multiple-checkbox-label"
+                                        sx={{ fontSize: "0.8rem" }}
+                                    >
+                                        Remove
+                                    </InputLabel>
+                                    <Select
+                                        labelId="demo-multiple-checkbox-label"
+                                        id="demo-multiple-checkbox"
+                                        // value={removeCommunityIDList}
+                                        value={submissionRemoveCommunityIDList}
+                                        onChange={handleRemoveDropdownChange}
+                                        input={
+                                            <OutlinedInput label="Remove Community" />
+                                        }
+                                        sx={{ borderRadius: "4px 0 0 4px", fontSize: "0.8rem" }}
+                                        renderValue={(selected) =>
+                                            selected
+                                                .map((x) => submissionCommunitiesNameMap[x])
+                                                .join(", ")
+                                        }
+                                        MenuProps={MenuProps}>
+                                        {/* {removeCommunityID.map((item) => ( */}
+                                        {submissionRemoveCommunityID && submissionRemoveCommunityID.map((item) => (
+                                            <MenuItem key={item} value={item}
+                                            >
+                                                <Checkbox
+                                                    size="small"
+                                                    checked={submissionRemoveCommunityIDList.indexOf(item) > -1}
+                                                />
+                                                <ListItemText
+                                                    primaryTypographyProps={{ fontSize: '0.8rem' }}
+                                                    primary={submissionCommunitiesNameMap[item]}
+                                                />
+                                            </MenuItem>
+
+
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <Tooltip title="Remove from community">
+                                    <IconButton
+                                        size="small"
+                                        sx={{ padding: "4px", borderColor: "red", borderRadius: "0 5px 5px 0", borderWidth: "1px", borderStyle: "solid" }}
+                                        onClick={deleteSubmissionfromCommunity}
+                                    >
+                                        <Delete fontSize="small" /> {/* Adjusting icon size */}
+                                    </IconButton>
+                                </Tooltip>
+                            </div>
+                        </>
+                            :
+                            <>
+                                <div style={{
+                                    display: "flex",
+                                    flex: 1,
+                                }}></div>
+                                <div style={{
+                                    display: "flex",
+                                    flex: 1,
+                                }}></div>
+                            </>
+                        }
+
 
 
                         <div style={{
                             display: "flex",
                             flex: 5,
                         }}>
-
                         </div>
 
                         <div style={{
@@ -807,7 +937,7 @@ export default function SubmissionDetails(subData) {
                     autoHideDuration={1000}
                     onClick={closeSnackbar}
                     message={snackBarMessage}
-                    severity={snackBarSeverity}
+                    severity={"red"}
                     onClose={closeSnackbar}
                 />
 

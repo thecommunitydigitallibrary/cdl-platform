@@ -9,19 +9,17 @@ import "katex/dist/katex.css";
 
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
-import { Box, Button, Grid, IconButton } from "@mui/material";
+import { Box, Button, Grid, IconButton, Skeleton } from "@mui/material";
 import dynamic from "next/dynamic";
 import Hashtags from "./hashtags";
 import SubmissionForm from "../forms/submissionForm";
 import useSubmissionStore from "../../store/submissionStore";
 
-const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
-
-
 const NoteEditor = (props) => {
 
     const {
         submissionTitle,
+        originalDescription,
         submissionDescription,
         submissionCommunities,
         submissionSourceUrl,

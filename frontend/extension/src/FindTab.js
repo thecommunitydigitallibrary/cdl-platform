@@ -105,9 +105,7 @@ export default function FindTab() {
         return;
       }
     }
-
-    //        "comparison": comparisonResults,
-
+    
     var context = ""
     if (ht === null || ht === undefined) {
       context = highlightedText
@@ -142,10 +140,10 @@ export default function FindTab() {
                                                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                                                     <Button style={{ marginRight: '10px' }} 
                                                             onClick={() => onAskWeb(item)}
-                                                    >Ask the Web</Button>
+                                                    >Search the Web</Button>
                                                     <Button style={{ marginRight: '10px' }} 
                                                             onClick={() => onAskLLM(item)}
-                                                    >Ask the LLM</Button>
+                                                    >Generate Answer</Button>
                                                   </div>
                                                 </div>
                               );
@@ -335,7 +333,7 @@ export default function FindTab() {
             sx={{ ml: 1, flex: 1 }}
             value={text}
             onChange={onChange}
-            placeholder="Search your communities"
+            placeholder="What would you like to know?"
             id="margin-none"
             required
             InputProps={{
@@ -410,22 +408,25 @@ export default function FindTab() {
         </div>
       )}
 
+      
+
       {!isUserQueried && comparisonResults && (
         <div>
+          <Button variant="contained" style={{ padding: 14, width: "22%", marginRight: "5px" }} onClick={() => onAskWeb(text)}>
+            Search the Web
+          </Button>
           <Button variant="contained" style={{ padding: 14, width: "22%", marginRight: "5px" }} onClick={onQA}>
-            Ask a Question
+            Generate Answer
           </Button>
           <Button variant="contained" style={{ padding: 14, width: "22%", marginRight: "5px" }} onClick={onCQA}>
             Ask in Context
           </Button>
           <Button variant="contained" style={{ padding: 14, width: "22%", marginRight: "5px" }} onClick={onQG}>
-            Generate Questions
-          </Button>
-          <Button variant="contained" style={{ padding: 14, width: "22%", marginRight: "5px" }} onClick={() => onAskWeb(text)}>
-            Ask the Web
+            Regenerate Questions
           </Button>
         </div>
       )}
+      
 
 
       {!isUserQueried && !generationSpinner && generationResults && (

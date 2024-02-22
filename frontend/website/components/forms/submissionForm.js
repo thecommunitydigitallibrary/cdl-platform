@@ -9,7 +9,7 @@ import jsCookie from "js-cookie";
 import React, { useState, useEffect, useRef } from "react";
 
 import dynamic from 'next/dynamic'
-import { FormControl, InputLabel, List, ListItem, Paper, Select } from "@mui/material";
+import { DialogTitle, FormControl, IconButton, InputLabel, List, ListItem, Paper, Select } from "@mui/material";
 import Button from "@mui/material/Button";
 
 import TextField from "@mui/material/TextField";
@@ -27,6 +27,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from '@mui/material/Box';
 import useSubmissionStore from "../../store/submissionStore";
 import { BASE_URL_CLIENT, BASE_URL_SERVER, GET_SUBMISSION_ENDPOINT } from "../../static/constants";
+import { CloseFullscreenOutlined, CloseOutlined } from "@mui/icons-material";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -107,16 +108,17 @@ export default function SubmissionForm(props) {
 
         const regex = /\[\[([^\]]+)\]\]/i;
         var replacement_text = "[" + event.target.title + "](" + SUB_WEB_ENDPOINT + event.target.id + ")"
-        var new_desc = submissionDescription.replace(regex, replacement_text)
+        // console.log(props)
 
         if (props.isAConnection) {
+            // console.log(description)
+            var new_desc = description.replace(regex, replacement_text)
             setDescription(new_desc)
         }
         else {
+            var new_desc = submissionDescription.replace(regex, replacement_text)
             setSubmissionProps({ submissionDescription: new_desc })
         }
-        // setSubmissionProps({ submissionDescription: replacement_text })
-        // setDescription(new_desc)
         setCurrentQuery("")
         if (props.isAConnection) {
             setSuggestions(null)
@@ -138,12 +140,11 @@ export default function SubmissionForm(props) {
             }),
         });
         const response = await res.json();
-        console.log(text)
+
         if (res.status == 200) {
 
             if (props.isAConnection) {
 
-                console.log('shoudl be setting noe')
                 setSuggestions(response.suggestions.map((x) =>
                     <Button onClick={handleAutoSuggestClick} id={x.id} title={x.label}>
                         {x.label}
@@ -151,11 +152,10 @@ export default function SubmissionForm(props) {
                 ));
             }
             else {
-                console.log('looking for suggestiong for : ', text)
 
                 setSubmissionProps({
                     submissionSuggestions:
-                        ((x) =>
+                        response.suggestions.map((x) =>
                             <Button onClick={handleAutoSuggestClick} id={x.id} title={x.label}>
                                 {x.label}
                             </Button>
@@ -165,7 +165,7 @@ export default function SubmissionForm(props) {
 
             setCurrentQuery(text)
         } else {
-            console.log(response.message)
+            // console.log(response.message, 'SET!!!!!!!!!')
 
             if (props.isAConnection) {
                 setSuggestions(null)
@@ -178,6 +178,8 @@ export default function SubmissionForm(props) {
     const setDescriptionListener = async (text) => {
 
         if (props.isAConnection) {
+            // console.log('2')
+
             setDescription(text)
 
             const regex = /\[\[([^\]]+)\]\]/g;
@@ -192,8 +194,14 @@ export default function SubmissionForm(props) {
                 var words_in_match = matches[0]
                 getSuggestions(words_in_match)
             }
+
+            else {
+                setSuggestions("Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms.");
+            }
         }
         else {
+            // console.log('3')
+
             setSubmissionProps({ submissionDescription: text })
             const regex = /\[\[([^\]]+)\]\]/g;
             const matches = [];
@@ -204,8 +212,14 @@ export default function SubmissionForm(props) {
             }
 
             if (matches.length == 1) {
+                // console.log('4')
+
                 var words_in_match = matches[0]
                 getSuggestions(words_in_match)
+            }
+            else {
+                // console.log('5')
+                setSubmissionProps({ submissionSuggestions: "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms." });
             }
         }
     }
@@ -240,12 +254,12 @@ export default function SubmissionForm(props) {
             });
 
             const response = await res.json();
+
             if (res.status == 200) {
                 setSeverity("success");
                 setMessage(response.message);
                 props.setTextBoxVisible(false)
                 setOpenSnackbar(true);
-
                 URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + response.submission_id;
 
                 const newSubmissionRes = await fetch(URL, {
@@ -262,13 +276,11 @@ export default function SubmissionForm(props) {
                     let newIncomingSubs = [...submissionIncomingConnections, newConnection.submission];
                     setSubmissionProps({ submissionIncomingConnections: newIncomingSubs });
                 }
-                // window.location.reload(); not needed if we change connectiosn state
             }
             else {
                 setSeverity("error");
                 setMessage(response.message);
                 setOpenSnackbar(true);
-                alert('error')
             }
         }
         else {
@@ -325,23 +337,27 @@ export default function SubmissionForm(props) {
 
     };
 
-    useEffect(() => {
-
-        console.log('submissionIncomingConnections has changed: ', submissionIncomingConnections)
-
-    }, [submissionIncomingConnections]);
-
-    // document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true);
-    // document.querySelectorAll('w-md-editor-text').forEach(field => field.style = {"min-height": "200px"});
+    useEffect(() => { }, [submissionIncomingConnections]);
 
     return (
 
         props.isAConnection ? // if props.isConnection si true, then this is a CONNECTION-submission so use the local states for inputs
-            <div>
+            <div style={{ border: "1px solid #ccc", borderRadius: "4px", order: 2, elevation: 2 }}>
                 {/* for submission mode create, set all params to empty string? */}
-
+                {document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true)}
                 <DialogContent>
-                    <Button style={{ float: 'right' }} onClick={() => { handleCancel() }}>Cancel</Button>
+
+                    <IconButton
+                        style={{ float: 'right' }}
+                        edge="end"
+                        color="gray"
+                        onClick={handleCancel}
+                        aria-label="close"
+                    >
+                        <CloseOutlined />
+                    </IconButton>
+
+
                     <TextField
                         margin="dense"
                         id="submissionURL"
@@ -355,11 +371,48 @@ export default function SubmissionForm(props) {
                         margin="dense"
                         id="submissionTitle"
                         label="Submission Title"
-                        fullWidth
                         variant="standard"
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
+                        style={{ width: "50%" }} // Increase the width to 100%
                     />
+
+                    <FormControl
+                        sx={{ float: 'right', minWidth: 200, maxHeight: 150 }}
+                    >
+                        <InputLabel id="demo-simple-select-label">
+                            Select Community
+                        </InputLabel>
+
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            style={{ backgroundColor: "white" }}
+                            label="Select Community"
+                            value={community}
+                            onChange={(event) => setCommunity(event.target.value)}
+                        >
+                            {props.communitiesNameMap && Array.isArray(props.communitiesNameMap) &&
+                                props.communitiesNameMap.map(function (d, idx) {
+                                    return (
+                                        <MenuItem key={idx} value={d.community_id}>
+                                            {d.name}
+                                        </MenuItem>
+                                    );
+                                })
+                            }
+
+                            {props.communitiesNameMap && !Array.isArray(props.communitiesNameMap) && Object.keys(submissionCommunitiesNameMap).map(function (key, index) {
+                                return (
+                                    <MenuItem key={index} value={key}>
+                                        {props.communitiesNameMap[key]}
+                                    </MenuItem>
+                                );
+                            })}
+
+                        </Select>
+
+                    </FormControl>
                     <br />
                     <div data-color-mode="light">
                         <MDEditor
@@ -422,49 +475,11 @@ export default function SubmissionForm(props) {
                     </div>
                     <Box sx={{ bgcolor: 'background.paper' }}>
                         {suggestions ? suggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
+                        <FormGroup>
+                            <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
+                        </FormGroup>
                     </Box>
 
-                    <FormGroup>
-                        <FormControlLabel control={<Checkbox defaultChecked={isAnonymous} onChange={handleAnonymous} />} label="Anonymous" />
-                    </FormGroup>
-
-                    <br />
-
-                    <FormControl
-                        sx={{ minWidth: 200, marginTop: "20px", maxHeight: 150 }}
-                    >
-                        <InputLabel id="demo-simple-select-label">
-                            Select Community
-                        </InputLabel>
-
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            style={{ backgroundColor: "white" }}
-                            label="Select Community"
-                            value={community}
-                            onChange={(event) => setCommunity(event.target.value)}
-                        >
-                            {props.communitiesNameMap && Array.isArray(props.communitiesNameMap) &&
-                                props.communitiesNameMap.map(function (d, idx) {
-                                    return (
-                                        <MenuItem key={idx} value={d.community_id}>
-                                            {d.name}
-                                        </MenuItem>
-                                    );
-                                })
-                            }
-
-                            {props.communitiesNameMap && !Array.isArray(props.communitiesNameMap) && Object.keys(submissionCommunitiesNameMap).map(function (key, index) {
-                                return (
-                                    <MenuItem key={index} value={key}>
-                                        {props.communitiesNameMap[key]}
-                                    </MenuItem>
-                                );
-                            })}
-
-                        </Select>
-                    </FormControl>
                 </DialogContent>
 
                 <DialogActions>
@@ -485,6 +500,8 @@ export default function SubmissionForm(props) {
                 <>
                     {submissionMode == "edit" &&
                         <div>
+                            {document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true)}
+
                             <TextField
                                 margin="dense"
                                 id="submissionURL"
@@ -579,6 +596,7 @@ export default function SubmissionForm(props) {
                         <div>
                             <div data-color-mode="light">
                                 <MDEditor
+                                    hideToolbar={true}
                                     id="submissionDescription"
                                     label="Submission Description"
                                     variant="standard"

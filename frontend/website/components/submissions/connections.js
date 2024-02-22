@@ -10,25 +10,18 @@ import { BASE_URL_CLIENT, BASE_URL_SERVER, SEARCH_ENDPOINT } from '../../static/
 
 export default function Connections({ submissionDataResponse, id }) {
     const { submissionId, submissionIncomingConnections, submissionOutgoingConnections, setSubmissionProps } = useSubmissionStore();
-    const [count, setCount] = useState(0);
 
     useEffect(() => {
     }, [submissionIncomingConnections]);
 
     useEffect(() => {
-        console.log('called :' + count)
-        console.log(submissionId)
-        setCount(count + 1);
-        getIncomingConnections();
+        // getIncomingConnections();
     }, [submissionId])
 
     async function getIncomingConnections() {
 
-        // var searchURL = BASE_URL_SERVER + SEARCH_ENDPOINT;
+        // var searchURL = BASE_URL_CLIENT + SEARCH_ENDPOINT + "?";
 
-        var searchURL = BASE_URL_CLIENT + SEARCH_ENDPOINT + "?";
-
-        console.log(searchURL, id)
         if (id) {
             searchURL += "query=" + encodeURIComponent(submissionId);
 
@@ -36,11 +29,6 @@ export default function Connections({ submissionDataResponse, id }) {
 
             searchURL += "&page=0";
         }
-        // else {
-        //     searchURL += "query=" + "";
-        // }
-
-        console.log(searchURL)
 
         const res = await fetch(searchURL, {
             headers: new Headers({
@@ -49,7 +37,7 @@ export default function Connections({ submissionDataResponse, id }) {
         });
 
         if (res.status == 200) {
-            console.log(res)
+
             const data = await res.json();
             setSubmissionProps({ submissionIncomingConnections: data.search_results_page })
         } else {
@@ -62,42 +50,42 @@ export default function Connections({ submissionDataResponse, id }) {
         <>
             <Stack flexDirection='column' alignItems={'center'}>
                 <Typography variant='h4' gutterBottom>
-                    Connections
+                    Mentions
                 </Typography>
 
                 <Grid container rowSpacing={1} columnSpacing={1} justifyContent={'space-between'}>
 
                     <Grid item style={{ padding: '3ch' }} >
-                        {/* style={{ border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }} */}
                         <Typography variant='h6' gutterBottom>
 
-                            {"Incoming connections" + " "}
+                            {"Submissions that mention this one" + " "}
 
-                            <Tooltip title="Explanation of the title">
+                            <Tooltip title="A Mention is where another submission references this one.">
                                 <InfoOutlined fontSize="xs" />
                             </Tooltip>
                         </Typography>
+
                         {submissionIncomingConnections ?
-                            (<Box display="flex" flexDirection="column" gap={2}>
+                            (<Box display="flex" flexDirection="column" gap={1}>
                                 {submissionIncomingConnections.map((d, index) => (
-                                    <Paper key={index} elevation={3} style={{ padding: '10px' }}>
-                                        <SearchResult
-                                            search_idx={index}
-                                            redirect_url={d.redirect_url}
-                                            display_url={d.display_url}
-                                            submission_id={d.submission_id}
-                                            result_hash={d.result_hash}
-                                            highlighted_text={d.highlighted_text}
-                                            explanation={d.explanation}
-                                            hashtags={d.hashtags}
-                                            time={d.time}
-                                            communities_part_of={d.communities_part_of}
-                                            auth_token={jsCookie.get('token')}
-                                            show_relevant={true}
-                                            paperWidth={'100%'}
-                                            paperMarginX={'0%'}
-                                        ></SearchResult>
-                                    </Paper>
+
+                                    <SearchResult
+                                        search_idx={index}
+                                        redirect_url={d.redirect_url}
+                                        display_url={d.display_url}
+                                        submission_id={d.submission_id}
+                                        result_hash={d.result_hash}
+                                        highlighted_text={d.highlighted_text}
+                                        explanation={d.explanation}
+                                        hashtags={d.hashtags}
+                                        time={d.time}
+                                        communities_part_of={d.communities_part_of}
+                                        auth_token={jsCookie.get('token')}
+                                        show_relevant={true}
+                                        paperWidth={'100%'}
+                                        paperMarginX={'0%'}
+                                    ></SearchResult>
+
                                 ))}
                             </Box>
                             ) : (

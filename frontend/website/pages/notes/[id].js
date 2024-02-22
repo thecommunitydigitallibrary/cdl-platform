@@ -163,7 +163,6 @@ function Notes({ data }) {
       const response = await res.json();
       if (res.status != 200) {
         try {
-          alert(response.message);
         } catch (error) {
           alert("Something went wrong. Please try again later");
         }
