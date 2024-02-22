@@ -20,6 +20,7 @@ export default function SubmissionDetails(subData) {
         submissionCanDelete,
         originalDescription,
         originalTitle,
+        originalSourceUrl,
         submissionType,
         submissionId,
         submissionCommunitiesNamesList,
@@ -31,7 +32,7 @@ export default function SubmissionDetails(subData) {
         submissionUsername,
         submissionDisplayUrl,
         submissionDate,
-        submisssionRedirectUrl,
+        submissionRedirectUrl,
         isAConnection,
         submissionHashtags,
         setSubmissionProps
@@ -410,10 +411,10 @@ export default function SubmissionDetails(subData) {
         const response = await res.json();
 
         if (res.status == 200) {
-            console.log('Saved successfully')
+            console.log('Saved successfully', response)
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'success' });
-            setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
+            setSnackBarProps({ snackBarMessage: response.message })
             setSubmissionProps({ submissionDisplayUrl: response.display_url ? response.display_url : submissionSourceUrl })
             setSubmissionProps({ submissionHashtags: response.hashtags ? response.hashtags : submissionHashtags })
             setSubmissionProps({ submissionUsername: response.username ? response.username : submissionUsername })
@@ -423,11 +424,14 @@ export default function SubmissionDetails(subData) {
         else {
 
             setSubmissionProps({ submissionTitle: originalTitle })
-            console.log('resetting to:', originalTitle)
+            setSubmissionProps({ submissionDescription: originalDescription })
+            setSubmissionProps({ submissionSourceUrl: originalSourceUrl })
 
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'error' });
-            setSnackBarProps({ snackBarMessage: response.message })
+            setSnackBarProps({ snackBarMessage: 'Changes not saved: ' + response.message })
+
+
         }
     };
 
@@ -442,8 +446,23 @@ export default function SubmissionDetails(subData) {
             if (originalTitle) {
                 setSubmissionProps({ submissionTitle: tempTitle })
             }
+
+            let tempSourceUrl = originalSourceUrl
+            setSubmissionProps({ submissionSourceUrl: tempSourceUrl })
+
+
             setSubmissionProps({ ...submissionMode, submissionMode: "view" });
         } else {
+            let tempDesc = submissionDescription
+            setSubmissionProps({ originalDescription: tempDesc })
+
+            let temp = submissionTitle
+            setSubmissionProps({ originalTitle: temp })
+
+            let tempSourceUrl = submissionSourceUrl
+            setSubmissionProps({ originalSourceUrl: tempSourceUrl })
+
+
             setSubmissionProps({ ...submissionMode, submissionMode: "edit" });
         }
     }
@@ -455,6 +474,10 @@ export default function SubmissionDetails(subData) {
 
         let tempDesc = submissionDescription
         setSubmissionProps({ originalDescription: tempDesc })
+
+        let tempSourceUrl = submissionSourceUrl
+        setSubmissionProps({ originalSourceUrl: tempSourceUrl })
+
         handleSubmit()
         setSubmissionProps({ ...submissionMode, submissionMode: "view" });
     }
@@ -539,7 +562,17 @@ export default function SubmissionDetails(subData) {
                                                         <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
                                                             Delete
                                                         </Button>
-
+                                                        <Tooltip title="Cancel">
+                                                            <IconButton
+                                                                size="small" color="gray"
+                                                                onClick={changeMode}
+                                                                label="cancel"
+                                                                aria-label="close"
+                                                                variant="outlined"
+                                                            >
+                                                                <CloseOutlined />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     </>
                                                     :
                                                     <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
@@ -549,7 +582,7 @@ export default function SubmissionDetails(subData) {
 
                                             }
 
-                                            {submissionMode == "edit" &&
+                                            {/* {submissionMode == "edit" &&
                                                 <Tooltip title="Cancel">
                                                     <IconButton
                                                         size="small" color="gray"
@@ -561,7 +594,7 @@ export default function SubmissionDetails(subData) {
                                                         <CloseOutlined />
                                                     </IconButton>
                                                 </Tooltip>
-                                            }
+                                            } */}
                                         </>
                                     )
                                 }
@@ -605,7 +638,7 @@ export default function SubmissionDetails(subData) {
                                         Report submission: {" "}
                                         <a
                                             style={{ fontSize: "20px" }}
-                                            href={submisssionRedirectUrl}
+                                            href={submissionRedirectUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
