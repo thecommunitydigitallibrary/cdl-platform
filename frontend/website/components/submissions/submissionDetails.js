@@ -247,7 +247,7 @@ export default function SubmissionDetails(subData) {
     const deleteSubmissionfromCommunity = async (event) => {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
-        console.log("removing from these communities", submissionRemoveCommunityIDList);
+        // console.log("removing from these communities", submissionRemoveCommunityIDList);
         // Get the searchId required for POST request
         for (let i = 0; i < submissionRemoveCommunityIDList.length; ++i) {
             var URL =
@@ -267,16 +267,13 @@ export default function SubmissionDetails(subData) {
             const response = await res.json();
             if (response.status == "ok") {
 
-
                 setSnackBarProps({ isSnackBarOpen: true })
                 setSnackBarProps({ snackBarSeverity: 'success' });
-                setSnackBarProps({ snackBarMessage: 'Submission removed from community!' })
+                console.log('Submission removed from community!')
+                setSnackBarProps({ snackBarMessage: response.message })
 
-                setSeverity("success");
-                setMessage("Submission removed from community.");
                 handleClick();
                 handleCloseDelete();
-                console.log("removed!!")
 
                 let temp = [...submissionCommunitiesNamesList];
                 temp = temp.filter((x) => x.key != submissionRemoveCommunityIDList[i]);
@@ -307,7 +304,7 @@ export default function SubmissionDetails(subData) {
     const saveSubmission = async (event) => {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
-        console.log("adding to these communities", submissionSaveCommunityIDList);
+        // console.log("adding to these communities", submissionSaveCommunityIDList);
         var i;
         for (i = 0; i < submissionSaveCommunityIDList.length; i++) {
             //addToNewCommunity(saveCommunityIDList[i])
