@@ -299,6 +299,7 @@ export default function SubmissionDetails(subData) {
                 handleClick();
             }
         }
+        setSubmissionProps({ submissionRemoveCommunityIDList: [] })
     };
 
     const saveSubmission = async (event) => {
@@ -367,13 +368,13 @@ export default function SubmissionDetails(subData) {
                 tempSubmissionRemoveCommunityID.push(submissionSaveCommunityIDList[i]);
                 setSubmissionProps({ submissionRemoveCommunityID: tempSubmissionRemoveCommunityID })
 
-                // window.location.reload();
             } else {
                 setSeverity("error");
                 setMessage(response.message);
                 handleClick();
             }
         }
+        setSubmissionProps({ submissionSaveCommunityIDList: [] })
     };
 
     const [otherMenuAnchor, setOtherMenuAnchor] = useState(null);
@@ -578,20 +579,6 @@ export default function SubmissionDetails(subData) {
                                                 )
 
                                             }
-
-                                            {/* {submissionMode == "edit" &&
-                                                <Tooltip title="Cancel">
-                                                    <IconButton
-                                                        size="small" color="gray"
-                                                        onClick={changeMode}
-                                                        label="cancel"
-                                                        aria-label="close"
-                                                        variant="outlined"
-                                                    >
-                                                        <CloseOutlined />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            } */}
                                         </>
                                     )
                                 }
