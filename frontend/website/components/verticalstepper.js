@@ -9,7 +9,6 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
 export default function VerticalLinearStepper(props) {
-  console.log(props.updateStepper);
   const [activeStep, setActiveStep] = React.useState(0);
 
   React.useEffect(() => {
@@ -75,18 +74,3 @@ export default function VerticalLinearStepper(props) {
     </Box>
   );
 }
-
-//{activeStep === props.steps.length && (window.location.reload())}
-
-// {
-//   (activeStep === props.steps.length && props.updateStepper > 0) ? window.location.reload() : (
-//     <Paper square elevation={0} sx={{ pt: 2 }}>
-//       <Typography>
-//         We are looking forward to you joining TextData!
-//       </Typography>
-//       <Button onClick={handleReset} sx={{ p: 0 }}>
-//         Restart
-//       </Button>
-//     </Paper>
-//   )
-// }
