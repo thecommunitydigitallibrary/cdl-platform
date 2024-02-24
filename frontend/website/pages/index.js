@@ -55,7 +55,7 @@ function Home({ data, community_joined_data, user_own_submissions }) {
   async function checkOnboarding() {
     const img = await checkExtension();
     if (!img) {
-      if (user_own_submissions.total_num_results > 10) {
+      if (user_own_submissions.total_num_results > 3) {
         //user is using website for submissions and doesn't intend to install extension
         setOnboardingStep(4);
       } else {
