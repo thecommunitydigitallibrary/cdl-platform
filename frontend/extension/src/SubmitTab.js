@@ -124,6 +124,7 @@ export default function ImgMediaCard({ setUrlState }) {
           function: () => getSelection().toString(),
         },
         (result) => {
+          setUrl(url);
           getCachedData(url);
           if (result === undefined) {
             setDesciption("");
@@ -216,9 +217,9 @@ export default function ImgMediaCard({ setUrlState }) {
     }
   }
 
-  const onChangeDescription = (e) => {
-    setDesciption(e.target.value);
-    updateDesc(url, e.target.value);
+  const onChangeDescription = (str) => {
+    setDesciption(str);
+    updateDesc(url, str);
   }
 
   const onChangeTitle = (e) => {
