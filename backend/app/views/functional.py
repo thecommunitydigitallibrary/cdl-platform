@@ -1464,8 +1464,16 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
     # Use elastic cache when we don't need to do any reranking or dedup
     if query == "":
         # Case where we are viewing own submissions
+        """
+        If the length of requested communities is 1, then add the additional filter of the community id
+        Used for finding all submissions in a community that are submitted by the user
+        """
         if own_submissions:
-            number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
+            req_communities = list(communities.keys())
+            if len(req_communities) == 1:
+                number_of_hits, hits = elastic_manager.get_submissions(user_id, community_id=req_communities[0], page=index)
+            else:
+                number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
         
         # Case where we are viewing all submissions to a community
         else:
