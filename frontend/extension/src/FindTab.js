@@ -130,7 +130,6 @@ export default function FindTab() {
     var output = ""
 
     if (mode == "contextual_qa" || mode == "gen_questions") {
-      console.log(response.output)
       let resultArray = response.output.split('\n');
       output = resultArray.map((item, index) => <div>
                                                   <p key={index}>
