@@ -437,9 +437,9 @@ export default function SubmissionDetails(subData) {
 
         if (submissionMode === "edit") {
             let temp = originalDescription
-            if (originalDescription) {
-                setSubmissionProps({ submissionDescription: temp })
-            }
+            // if (originalDescription) {
+            setSubmissionProps({ submissionDescription: temp })
+            // }
             let tempTitle = originalTitle
             if (originalTitle) {
                 setSubmissionProps({ submissionTitle: tempTitle })
