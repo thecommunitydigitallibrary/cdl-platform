@@ -57,7 +57,7 @@ function Home({ data, community_joined_data, user_own_submissions }) {
     if (!img) {
       if (user_own_submissions.total_num_results > 3) {
         //user is using website for submissions and doesn't intend to install extension
-        setOnboardingStep(4);
+        setOnboardingStep(0);
       } else {
         setOnboardingStep(1);
       }
@@ -78,8 +78,12 @@ function Home({ data, community_joined_data, user_own_submissions }) {
     await checkOnboarding();
   }, []);
 
+  const handleIndexFinish = (data) => {
+    window.location.reload();
+  }
+  
   if(onboardingStep > 0){
-    homePageContent = <Setup head="Onboarding" updateStep={onboardingStep}></Setup>;
+    homePageContent = <Setup head="Onboarding" updateStep={onboardingStep} setupFinish={handleIndexFinish}></Setup>;
   }
 
   const fetchNextPage = async () => {

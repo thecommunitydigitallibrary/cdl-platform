@@ -70,6 +70,12 @@ const steps = [
 ];
 
 export default function Setup(props) {
+
+  const handleSetupFinish = (data) => {
+    if(props.setupFinish){
+      props.setupFinish();
+    }  
+  };
   return (
    <>
     <Head>
@@ -93,7 +99,7 @@ export default function Setup(props) {
         Setting up TextData{" "}
       </h1>
       The following instructions will walk you through account creation and Chrome extension setup.
-      <VerticalLinearStepper steps={steps} updateStepper={props.updateStep ? props.updateStep : 0} />
+      <VerticalLinearStepper steps={steps} updateStepper={props.updateStep ? props.updateStep : 0} extensionFinish={handleSetupFinish} />
     </Paper>
     <Footer/>
    </>

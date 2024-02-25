@@ -16,8 +16,11 @@ export default function VerticalLinearStepper(props) {
   }, [props.updateStepper])
 
   const handleNext = () => {
+    if(activeStep === props.steps.length-1) {
+      props.extensionFinish();
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+  }
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -61,7 +64,7 @@ export default function VerticalLinearStepper(props) {
           </Step>
         ))}
       </Stepper>
-      {activeStep === props.steps.length && (props.updateStepper > 0 ? window.location.reload() : (
+      {activeStep === props.steps.length && ((
         <Paper square elevation={0} sx={{ pt: 2 }}>
           <Typography>
             We are looking forward to you joining TextData!
