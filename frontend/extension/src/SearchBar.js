@@ -6,11 +6,14 @@ import IconButton from "@mui/material/IconButton";
 import { FormControl, MenuItem, Select } from "@mui/material";
 
 
-export default function SearchBar({ allCommunities, onSearch }) {
+export default function SearchBar({ allCommunities, onSearch, searchBarTextChanged }) {
 
     const [text, setText] = React.useState("");
 
-    const onChange = (e) => setText(e.target.value);
+    const onChange = (e) => {
+        searchBarTextChanged(e.target.value);
+        setText(e.target.value);
+    }
 
     const search = (e) => {
         e.preventDefault();

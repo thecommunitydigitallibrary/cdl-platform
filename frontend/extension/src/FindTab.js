@@ -130,6 +130,7 @@ export default function FindTab() {
     var output = ""
 
     if (mode == "contextual_qa" || mode == "gen_questions") {
+      console.log(response.output)
       let resultArray = response.output.split('\n');
       output = resultArray.map((item, index) => <div>
                                                   <p key={index}>
@@ -323,12 +324,17 @@ export default function FindTab() {
     setText(query.searchText);
     search(query);
   }
+
+  const setTextChanged = (data) => {
+    setText(data);
+  }
   
   return (
     <div>
       <SearchBar
         allCommunities={allCommunities}
         onSearch={onSearch}
+        searchBarTextChanged={setTextChanged}
       ></SearchBar>
       {!searchStart && searchResults && (
         <div>
