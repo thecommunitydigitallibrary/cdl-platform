@@ -148,7 +148,7 @@ function Home({ data }) {
             direction="row"
             justifyContent="space-between"
             alignItems="center"
-            width="57%">
+            width="67%">
             <Grid item width={'50%'}>
               <h4>Recommended for you</h4>
             </Grid>
@@ -175,15 +175,18 @@ function Home({ data }) {
           </Grid>
         </Grid>
 
-        <Grid item marginX="20%">
+        <Grid item marginX="12%" margin-left="15%">
           <Divider sx={{ border: 0.5}} />
         </Grid>
         <br/>
-        <Grid
+        <Grid 
+          height={'1000px'}
+          width={'1400px'}
           container
           display={"flex"}
           justifyContent={"center"}
           alignItems={"center"}
+          style={{ overflowY: 'scroll'}}
           >
           <InfiniteScroll
             dataLength={items.length}
