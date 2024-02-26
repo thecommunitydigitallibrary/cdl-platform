@@ -97,9 +97,6 @@ export default function ImgMediaCard({setUrlState}) {
     }
   };
 
-  console.log(defaultTab)
-  console.log(selectedValue)
-
   return (
     <ThemeProvider theme={theme}>
       <Box
