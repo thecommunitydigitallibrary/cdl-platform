@@ -98,7 +98,7 @@ export default function ImgMediaCard({ setUrlState }) {
         if(cacheJson.length === 10) {
           cacheJson = removeCachedData(cacheJson);
         }
-        cacheJson.push({"url": url, "title": "", "description": "", "community": e.target.value, "anonymous": false});
+        cacheJson.push({"url": url, "title": "", "description": "", "community": e.target.value, "anonymous": true});
         localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
       }
       else {
@@ -210,7 +210,7 @@ export default function ImgMediaCard({ setUrlState }) {
       if (cacheJson.length === 10) {
         cacheJson = removeCachedData(cacheJson);
       }
-      cacheJson.push({"url": url, "title": "", "description": desc, "community": "", "anonymous": false});
+      cacheJson.push({"url": url, "title": "", "description": desc, "community": "", "anonymous": true});
       localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
     } else {
       localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
@@ -241,7 +241,7 @@ export default function ImgMediaCard({ setUrlState }) {
         if (cacheJson.length === 10) {
           cacheJson = removeCachedData(cacheJson);
         }
-        cacheJson.push({"url": url, "title": e.target.value, "description": "", "community": "", "anonymous": false});
+        cacheJson.push({"url": url, "title": e.target.value, "description": "", "community": "", "anonymous": true});
         localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
       } else {
         localStorage.setItem("extCachedData", JSON.stringify(cacheJson));
@@ -253,6 +253,7 @@ export default function ImgMediaCard({ setUrlState }) {
     setTitle("");
     setDesciption("");
     setCommunity("");
+    setAnonymous(true);
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
       let url = tabs[0].url;
       // Get cache data
@@ -263,7 +264,7 @@ export default function ImgMediaCard({ setUrlState }) {
           ele['title'] = "";
           ele['description'] = "";
           ele['community'] = "";
-          ele['anonymous'] = "";
+          ele['anonymous'] = true;
           break;
         }
       }
@@ -331,6 +332,8 @@ export default function ImgMediaCard({ setUrlState }) {
       setSever("error");
       setMessage("Error occurred. Please submit again!");
       handleClick();
+    } finally {
+      onClear();
     }
   };
 
