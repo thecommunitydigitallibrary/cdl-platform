@@ -22,13 +22,9 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
         setTextBoxVisible(true);
     };
 
-    const handleViewConnectionsClick = () => {
-        setSelectedOption('graph');
-    }
-
     return (
         <>
-            <Box minWidth={'750px'}>
+            <Box style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Button
                     onClick={handleButtonClick}
                     variant="contained"
@@ -39,7 +35,44 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                     Make Submission with Mention
                 </Button>
 
-                <Slide direction="left" in={isTextBoxVisible} mountOnEnter unmountOnExit>
+                <Slide
+                    direction="right"
+                    in={isTextBoxVisible}
+                    mountOnEnter
+                    unmountOnExit
+                    style={{
+                        width: '100%',
+                        padding: 2,
+                        marginTop: 10,
+                        alignSelf: 'flex-end',
+                    }}
+                >
+                    <div>
+                        <SubmissionForm
+                            isAConnection={true}
+                            isTextBoxVisible={isTextBoxVisible}
+                            setTextBoxVisible={setTextBoxVisible}
+                            source_url=""
+                            title=""
+                            description={`[${submissionTitle}](${WEBSITE_URL}submissions/${submissionId})`}
+                            communitiesNameMap={submissionCommunitiesNameMap}
+                        />
+                    </div>
+                </Slide>
+            </Box>
+
+            {/* <Box>
+                <Button
+                    onClick={handleButtonClick}
+                    variant="contained"
+                    size="small"
+                    endIcon={<ReplyAllOutlined />}
+                    style={{ textTransform: 'none' }}
+                >
+                    Make Submission with Mention
+                </Button>
+
+                <Slide direction="right" in={isTextBoxVisible} mountOnEnter unmountOnExit>
                     <div style={{ padding: 2 }}>
                         <SubmissionForm
                             isAConnection={true}
@@ -53,7 +86,7 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
 
                     </div>
                 </Slide>
-            </Box>
+            </Box> */}
         </>
     );
 

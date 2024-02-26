@@ -49,21 +49,23 @@ export default function Connections({ submissionDataResponse, id }) {
     return (
         <>
             <Stack flexDirection='column' alignItems={'center'}>
-                <Typography variant='h4' gutterBottom>
-                    Mentions
+                <Typography variant='h5' gutterBottom>
+                    Mentions {" "}
+
+                    <Tooltip title="Submissions that mention this one">
+                        <InfoOutlined fontSize="xs" />
+                    </Tooltip>
                 </Typography>
+
 
                 <Grid container rowSpacing={1} columnSpacing={1} justifyContent={'space-between'}>
 
                     <Grid item style={{ padding: '3ch' }} >
-                        <Typography variant='h6' gutterBottom>
+                        {/* <Typography variant='h6' gutterBottom>
 
                             {"Submissions that mention this one" + " "}
 
-                            <Tooltip title="A Mention is where another submission references this one.">
-                                <InfoOutlined fontSize="xs" />
-                            </Tooltip>
-                        </Typography>
+                        </Typography> */}
 
                         {submissionIncomingConnections ?
                             (<Box display="flex" flexDirection="column" gap={1}>
