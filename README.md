@@ -206,7 +206,7 @@ For a longer-term collaboration, big feature, or large change, please send an em
 
 - [Kevin Ros](https://kevinros.github.io/) is a 4th year Ph.D. student at the University of Illinois Urbana Champaign. This is the main component of his thesis project. He built the initial version of the platform and has led its development since its beginning (September 2022). 
 - [ChengXiang Zhai](https://czhai.cs.illinois.edu/) is Kevin's advisor, and he has played a crucial role in shaping the vision. Moreover, he has provided the grant funding to support the infrastructure, the research, and the development.
-- Current contributors: Rakshana Jayaprakash, Dhyey Pandya, Kedar Takwane, and Sharath Chandra.
+- Current contributors: [Rakshana Jayaprakash](https://rakshanaj17.github.io/), Dhyey Pandya, Kedar Takwane, and Sharath Chandra.
 - Past contributors: Ashwin Patil, Alvin Zhang, Nikhitha Reddeddy, Heth Gala
 
 
