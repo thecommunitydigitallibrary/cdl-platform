@@ -180,8 +180,10 @@ function Home({ data }) {
         </Grid>
         <br/>
         <Grid 
-          height={'1000px'}
+          height={'400px'}
           width={'1400px'}
+          maxWidth={'1400px'}
+          margin={'auto'}
           container
           display={"flex"}
           justifyContent={"center"}
