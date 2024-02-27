@@ -108,21 +108,22 @@ export default function SubmissionForm(props) {
 
         const regex = /\[\[([^\]]+)\]\]/i;
         var replacement_text = "[" + event.target.title + "](" + SUB_WEB_ENDPOINT + event.target.id + ")"
-        var new_desc = submissionDescription.replace(regex, replacement_text)
+        // console.log(props)
 
         if (props.isAConnection) {
+            // console.log(description)
+            var new_desc = description.replace(regex, replacement_text)
             setDescription(new_desc)
         }
         else {
+            var new_desc = submissionDescription.replace(regex, replacement_text)
             setSubmissionProps({ submissionDescription: new_desc })
         }
-        // setSubmissionProps({ submissionDescription: replacement_text })
-        // setDescription(new_desc)
         setCurrentQuery("")
         if (props.isAConnection) {
             setSuggestions(null)
         } else {
-            setSubmissionProps({ suggestions: null })
+            setSubmissionProps({ submissionSuggestions: null })
         }
     }
 
@@ -164,7 +165,7 @@ export default function SubmissionForm(props) {
 
             setCurrentQuery(text)
         } else {
-            console.log(response.message)
+            // console.log(response.message, 'SET!!!!!!!!!')
 
             if (props.isAConnection) {
                 setSuggestions(null)
@@ -177,6 +178,8 @@ export default function SubmissionForm(props) {
     const setDescriptionListener = async (text) => {
 
         if (props.isAConnection) {
+            // console.log('2')
+
             setDescription(text)
 
             const regex = /\[\[([^\]]+)\]\]/g;
@@ -191,8 +194,14 @@ export default function SubmissionForm(props) {
                 var words_in_match = matches[0]
                 getSuggestions(words_in_match)
             }
+
+            else {
+                setSuggestions("Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms.");
+            }
         }
         else {
+            // console.log('3')
+
             setSubmissionProps({ submissionDescription: text })
             const regex = /\[\[([^\]]+)\]\]/g;
             const matches = [];
@@ -203,8 +212,14 @@ export default function SubmissionForm(props) {
             }
 
             if (matches.length == 1) {
+                // console.log('4')
+
                 var words_in_match = matches[0]
                 getSuggestions(words_in_match)
+            }
+            else {
+                // console.log('5')
+                setSubmissionProps({ submissionSuggestions: "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms." });
             }
         }
     }
@@ -239,34 +254,28 @@ export default function SubmissionForm(props) {
             });
 
             const response = await res.json();
+
             if (res.status == 200) {
                 setSeverity("success");
                 setMessage(response.message);
                 props.setTextBoxVisible(false)
                 setOpenSnackbar(true);
+                URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + response.submission_id;
 
-                // URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + submissionId;
+                const newSubmissionRes = await fetch(URL, {
+                    method: "GET",
+                    headers: new Headers({
+                        Authorization: jsCookie.get("token"),
+                    }),
+                });
+                const newConnection = await newSubmissionRes.json();
 
-                // const newSubmissionRes = await fetch(URL, {
-                //     method: "GET",
-                //     headers: new Headers({
-                //         Authorization: jsCookie.get("token"),
-                //     }),
-                // });
-                // const newConnection = await newSubmissionRes.json();
-                // console.log(newConnection)
+                const errorCode = newSubmissionRes.ok ? false : newSubmissionRes.status;
 
-                // const errorCode = newSubmissionRes.ok ? false : newSubmissionRes.status;
-
-                // if (!errorCode) {
-                //     let newIncomingSubs = [submissionIncomingConnections, newConnection.submission.mentions];
-                //     console.log(newIncomingSubs)
-                //     setSubmissionProps({ submissionIncomingConnections: newIncomingSubs });
-                // }
-
-                // window.location.reload();
-                // might want to chage this so tht window reload is avoaided!
-                // not needed if we change connectiosn state
+                if (!errorCode) {
+                    let newIncomingSubs = [...submissionIncomingConnections, newConnection.submission];
+                    setSubmissionProps({ submissionIncomingConnections: newIncomingSubs });
+                }
             }
             else {
                 setSeverity("error");
@@ -328,19 +337,14 @@ export default function SubmissionForm(props) {
 
     };
 
-    useEffect(() => {
-
-        // console.log('submissionIncomingConnections has changed: ', submissionIncomingConnections)
-
-    }, [submissionIncomingConnections]);
-
+    useEffect(() => { }, [submissionIncomingConnections]);
 
     return (
 
         props.isAConnection ? // if props.isConnection si true, then this is a CONNECTION-submission so use the local states for inputs
             <div style={{ border: "1px solid #ccc", borderRadius: "4px", order: 2, elevation: 2 }}>
                 {/* for submission mode create, set all params to empty string? */}
-
+                {document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true)}
                 <DialogContent>
 
                     <IconButton
@@ -496,6 +500,8 @@ export default function SubmissionForm(props) {
                 <>
                     {submissionMode == "edit" &&
                         <div>
+                            {document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true)}
+
                             <TextField
                                 margin="dense"
                                 id="submissionURL"
@@ -590,6 +596,7 @@ export default function SubmissionForm(props) {
                         <div>
                             <div data-color-mode="light">
                                 <MDEditor
+                                    hideToolbar={true}
                                     id="submissionDescription"
                                     label="Submission Description"
                                     variant="standard"

@@ -215,6 +215,7 @@ function Header(props) {
   };
 
   const handleNewSubmissionRequest = async (event) => {
+    console.log(submissionMode)
     if (newSubTitle == "") {
       setSeverity("error");
       setMessage("Title cannot be empty!");
@@ -250,13 +251,15 @@ function Header(props) {
 
     const response = await res.json();
     if (res.status == 200) {
-      setSubmissionProps({ submissionMode: "edit" });
       setCommunity("");
       setSelectedCommunity("");
       handleCancelNewSubTitleDialog();
       // Open a new tab
       window.open(WEBSITE_URL + 'submissions/' + response.submission_id, '_blank');
     }
+
+    console.log(submissionMode)
+
   }
 
   const handleCloseSubmission = (event, reason) => {
@@ -666,19 +669,6 @@ function Header(props) {
             </DialogActions>
           </Dialog>
           <Dialog open={openSubmission} onClose={handleCloseSubmission} fullWidth maxWidth="md">
-
-            {/* {!batch ? (
-              <SubmissionForm
-                dialog_title="Create a New Submission"
-                method="create"
-                source_url=""
-                title=""
-                description=""
-                submission_id=""
-                communityNameMap={dropdowndata.community_info}
-                handle_close={handleCloseSubmission}
-              />
-            ) :  */}
             (
             <div>
               <DialogContent>

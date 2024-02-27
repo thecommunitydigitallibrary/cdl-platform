@@ -23,4 +23,16 @@
 			"matches": ["*://localhost/*","*://textdata.org/*"]
 		}
 	  ]
+	"host_permissions": [
+		"http://*/",
+        "https://*/"
+	],
+	"commands": {
+		"_execute_action": {
+			"suggested_key": {
+				"default": "Alt+S",
+				"mac": "Alt+S"
+			}
+		}
+	}
 }

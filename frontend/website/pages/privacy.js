@@ -42,9 +42,9 @@ export default function PrivacyPolicy() {
             <p style={{ fontWeight: "bold", display: "inline" }}>
               Content that you submit.
             </p>{" "}
-            This includes submissions (URL, title, highlighted text),
+            This includes submissions (URL, title, description),
             communities (name, description, membership status), feedback and
-            relevance judgments, notes, queries, and recommendation requests.
+            relevance judgments, queries, and recommendation requests.
           </li>
           <li>
             <p style={{ fontWeight: "bold", display: "inline" }}>
@@ -69,7 +69,7 @@ export default function PrivacyPolicy() {
         <ul>
           <li>
             <p style={{ fontWeight: "bold", display: "inline" }}>
-              Provide, maintain, and improve the services.
+              Provide, maintain, debug, and improve the services.
             </p>{" "}
             This includes keeping you logged in into the extension and website,
             measuring the performance of our search and recommendation models,
@@ -77,31 +77,22 @@ export default function PrivacyPolicy() {
           </li>
           <li>
             <p style={{ fontWeight: "bold", display: "inline" }}>
-              Personalize search and recommendation results.
-            </p>
+              Personalize search and recommendation results. 
+            </p> {" "}
+            Our backend algorithms use the data that you save to TextData to provide you with relevant information tailored to your interests.
           </li>
         </ul>
         <h3>How Do We Share Information?</h3>
         <ul>
           <li>
             <p style={{ fontWeight: "bold", display: "inline" }}>
-              With other users.
-            </p>{" "}
-            Much of the information that we collect is available to you or to
-            other members of your communities by design of TextData. This
-            includes the submission titles, descriptions, and URLs, and the
-            community names and descriptions.{" "}
-          </li>
-          <li>
-            <p style={{ fontWeight: "bold", display: "inline" }}>
-              With researchers (de-identified, and with consent).
+              With researchers (de-identified).
             </p>{" "}
             The long-term goal of TextData is to research the information needs
             of individuals in specific contexts so that we can better resolve
             these needs. Thus, a significant component of TextData is researching
             the usage patterns of users. If we perform research (beyond the use
-            of improving the platform), then we will (1) ask for your consent,
-            and (2) de-identify the data before analysis.
+            of improving the platform), then we will de-identify the data before analysis.
           </li>
           <li>
             <p style={{ fontWeight: "bold", display: "inline" }}>

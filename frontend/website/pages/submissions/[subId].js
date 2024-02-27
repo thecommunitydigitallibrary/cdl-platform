@@ -24,30 +24,27 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
   const {
     submissionTitle,
     submissionDescription,
-    submissionCommunities,
     submissionSourceUrl,
     submissionIsAnonymous,
     submissionCommunity,
-    submissionMode,
-    submissionId,
-    submissionIncomingConnections,
-    submissionRedirectUrl,
-    submissionUsername,
-    submissionLastModified,
-    submissionDate,
     setSubmissionProps
   } = useSubmissionStore();
 
 
   useEffect(() => {
+
     setSubmissionProps({ submissionTitle: data.submission.explanation });
+    setSubmissionProps({ originalTitle: data.submission.explanation });
     setSubmissionProps({ submissionType: data.submission.type })
+    setSubmissionProps({ submissionCanDelete: data.submission.can_delete });
     setSubmissionProps({ submissionDescription: data.submission.highlighted_text });
+    setSubmissionProps({ originalDescription: data.submission.highlighted_text });
     setSubmissionProps({ submissionCommunities: data.submission.communities });
     setSubmissionProps({ submissionSourceUrl: data.submission.raw_source_url });
+    setSubmissionProps({ originalSourceUrl: data.submission.raw_source_url });
     setSubmissionProps({ submissionDisplayUrl: data.submission.display_url });
     setSubmissionProps({ submissionRedirectUrl: data.submission.redirect_url });
-    setSubmissionProps({ submissionIsAnonymous: data.submission.username == undefined });
+    setSubmissionProps({ submissionIsAnonymous: data.submission.anonymous });
     setSubmissionProps({ submissionMode: "view" });
     setSubmissionProps({ submissionId: data.submission.submission_id });
     setSubmissionProps({ submissionUsername: data.submission.username });
@@ -135,7 +132,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
   return (<>
 
     <Head>
-      <title>{`${submissionTitle} - Textdata`}</title>
+      <title>{`${submissionTitle} - TextData`}</title>
       <link rel="icon" href="/images/tree32.png" />
     </Head>
 

@@ -33,7 +33,7 @@ export default function ImgMediaCard({setUrlState}) {
   const [selectedValue, setSelectedValue] = React.useState((backendSource === null || backendSource === TEXTDATA_URL) ? TEXTDATA_URL : 'other');
   const [disabled, setDisabled] = React.useState(selectedValue !== "other");
   const [source, setSource] = React.useState(selectedValue === "other" ? backendSource : LOCALHOST_DEFAULT);
-  const [detaultTab, setDefaultTab] = React.useState(localStorage.getItem('defaultTab') === null ? "submit" : "find");
+  const [defaultTab, setDefaultTab] = React.useState(localStorage.getItem('defaultTab') === null ? "save" : localStorage.getItem('defaultTab'));
   const handleClick = () => {
     setOpen(true);
   };
@@ -82,7 +82,7 @@ export default function ImgMediaCard({setUrlState}) {
     try {
       const backend = selectedValue === "other" ? source : selectedValue;
       localStorage.setItem('backendSource', backend);
-      localStorage.setItem('defaultTab', detaultTab);
+      localStorage.setItem('defaultTab', defaultTab);
       setSeverity("success");
       setMessage("Extension Settings Saved!");
       if (backendSource !== backend) {
@@ -96,7 +96,6 @@ export default function ImgMediaCard({setUrlState}) {
       handleClick();
     }
   };
-
 
   return (
     <ThemeProvider theme={theme}>
@@ -114,10 +113,10 @@ export default function ImgMediaCard({setUrlState}) {
           <RadioGroup
             aria-labelledby="demo-controlled-radio-buttons-group"
             name="controlled-radio-buttons-group"
-            value={detaultTab}
+            value={defaultTab}
             onChange={handleDefaultTabChange}
           >
-            <FormControlLabel value="submit" control={<Radio/>} label="Submit"/>
+            <FormControlLabel value="save" control={<Radio/>} label="Save"/>
             <FormControlLabel value="find" control={<Radio/>} label="Find"/>
           </RadioGroup>
           <FormLabel id="demo-controlled-radio-buttons-group">Backend Source</FormLabel>

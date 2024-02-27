@@ -32,6 +32,51 @@ export default function ReleaseLog() {
         Release Log
       </h1>
 
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        February 19th, 2024
+      </h2>
+      
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Removed toolbar from submission preview</li>
+            <li className="list-item">Better state management for real-time updating of submission</li>
+            <li className="list-item">Removed edit button when not own submission</li>
+            <li className="list-item">Added back spellcheck to submission</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Return display URL on submission PATCH</li>
+            <li className="list-item">Improved question generation experience in extension</li>
+        </ul>
+
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        February 10, 2024
+      </h2>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Submission page redesign</li>
+        </ul>
+      
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Login button(s) on small screen now not cut off</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Reorganized buttons in the extension</li>
+        </ul>
+
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         January 28, 2024
