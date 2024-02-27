@@ -55,13 +55,16 @@ function Home({ data, community_joined_data, user_own_submissions }) {
   async function checkOnboarding() {
     const img = await checkExtension();
     if (!img) {
-      if (user_own_submissions.total_num_results > 3) {
-        //user is using website for submissions and doesn't intend to install extension
-        setOnboardingStep(0);
-      } else {
+      if (community_joined_data.community_info.length > 0) {
+        if (user_own_submissions.total_num_results >= 1) {
+          setOnboardingStep(0);
+        } else {
+          setOnboardingStep(3);
+        }
+      }
+      else {
         setOnboardingStep(1);
       }
-      
     } else {
       if (community_joined_data.community_info.length > 0) {
         if (!(endOfRecommendations && items.length > 0)) {
