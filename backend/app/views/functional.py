@@ -2,7 +2,7 @@ import json
 import os
 import re
 
-from bson import ObjectId
+from bson import ObjectId, json_util
 from flask import Blueprint, request, redirect
 from flask_cors import CORS
 from textblob import TextBlob
@@ -1350,6 +1350,84 @@ def get_recommendations(current_user, toggle_webpage_results = True):
         print(e)
         traceback.print_exc()
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
+
+@functional.route("/api/submission/recentlyaccessed",methods=["GET"])
+#@token_required
+def get_recently_accessed_submissions():
+    try:
+        user_id = ObjectId("65dfc82c419ce8bd30586856")
+        query = [   
+                    {
+                        '$match': {
+                            'user_id': user_id, 
+                            'type': 'submission_view'
+                        }
+                    }, {
+                        '$group': {
+                            '_id': '$submission_id', 
+                            'mostRecentTime': {
+                                '$max': '$time'
+                            }
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'logs', 
+                            'localField': '_id', 
+                            'foreignField': '_id', 
+                            'as': 'logs_info'
+                        }
+                    }, {
+                        '$match': {
+                            'logs_info': {
+                                '$not': {
+                                    '$elemMatch': {
+                                        'deleted': {
+                                            '$exists': True
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }, {
+                        '$sort': {
+                            'mostRecentTime': -1
+                        }
+                    }, {
+                        '$project': {
+                            '_id': 0, 
+                            'submission_id': '$_id'
+                        }
+                    }, {
+                        '$limit': 10
+                    }
+                ]
+        query1 = [
+            {
+                '$match': {
+                    'user_id': user_id
+                },
+            },
+            {
+                '$project' : {
+                    '_id' : 0
+                }
+            }
+        ]        
+        cdl_logs = Logs()
+        user_recent_submissions = cdl_logs.aggregate(query1)
+        user_recent_submissions_list = list(user_recent_submissions)
+        # for document in user_recent_submissions:
+        #     print(document)
+        #print(user_recent_submissions)
+        return json.loads(json_util.dumps(user_recent_submissions_list))
+        #return ()
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return response.error("Failed to get recently accessed submissions, please try again later.", Status.INTERNAL_SERVER_ERROR)
+    #str = "Hi OJ"
+    #return str
+    
 
 ### HELPERS that cannot be removed (yet)###
 
