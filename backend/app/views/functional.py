@@ -1404,7 +1404,8 @@ def get_recently_accessed_submissions():
         query1 = [
             {
                 '$match': {
-                    'user_id': user_id
+                    'user_id': user_id,
+                    'type': 'submission_view'
                 },
             },
             {
@@ -1412,15 +1413,75 @@ def get_recently_accessed_submissions():
                     '_id' : 0
                 }
             }
-        ]        
-        cdl_logs = Logs()
-        user_recent_submissions = cdl_logs.aggregate(query1)
+        ]
+        query2 =[
+                    {
+                        '$match': {
+                            'user_id': ObjectId('65dfc82c419ce8bd30586856'), 
+                            'type': 'submission_view'
+                        }
+                    }, {
+                        '$group': {
+                            '_id': '$submission_id', 
+                            'mostRecentTime': {
+                                '$max': '$time'
+                            }
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'logs', 
+                            'localField': '_id', 
+                            'foreignField': '_id', 
+                            'as': 'logs_info'
+                        }
+                    }, {
+                        '$match': {
+                            'logs_info': {
+                                '$not': {
+                                    '$elemMatch': {
+                                        'deleted': {
+                                            '$exists': True
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }, {
+                        '$sort': {
+                            'mostRecentTime': -1
+                        }
+                    }, {
+                        '$project': {
+                            '_id': 0, 
+                            'submission_id': '$_id', 
+                            'source_url': '$logs_info.source_url', 
+                            'explanation': '$logs_info.explanation', 
+                            'communities': '$logs_info.communities'
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$explanation', 
+                            'preserveNullAndEmptyArrays': True
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$source_url', 
+                            'preserveNullAndEmptyArrays': True
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$community', 
+                            'preserveNullAndEmptyArrays': True
+                        }
+                    }, {
+                        '$limit': 10
+                    }
+                ]        
+        cdl_logs = SearchesClicks()
+        user_recent_submissions = cdl_logs.aggregate(query2)
         user_recent_submissions_list = list(user_recent_submissions)
-        # for document in user_recent_submissions:
-        #     print(document)
-        #print(user_recent_submissions)
         return json.loads(json_util.dumps(user_recent_submissions_list))
-        #return ()
+
     except Exception as e:
         print(e)
         traceback.print_exc()
