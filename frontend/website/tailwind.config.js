@@ -31,6 +31,9 @@ module.exports = {
       sans: ["Inter", ...defaultTheme.fontFamily.sans],
       stock: [defaultTheme.fontFamily.sans],
     },
+    // fontFamily: {
+    //   sans: ["var(--font-sans)", ...fontFamily.sans],
+    // },
   },
   variants: {
     extend: {},
