@@ -136,7 +136,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
       <link rel="icon" href="/images/tree32.png" />
     </Head>
 
-    <Header />
+    {/* <Header /> */}
 
     <div className="allResults">
       {

@@ -28,7 +28,7 @@ export default function About({ loggedOut }) {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header />
+      {/* {<Header />} */}
       <div className="allResults">
         <Hero />
         <SectionTitle

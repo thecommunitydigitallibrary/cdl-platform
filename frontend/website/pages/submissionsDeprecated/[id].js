@@ -637,7 +637,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                 <title>{page_title}</title>
                 <link rel="icon" href="/images/tree32.png" />
             </Head>
-            <Header />
+            {/* <Header /> */}
             <div className="allResults" style={{ display: "flex" }}>
                 {submissionDataResponse.submission && (
                     <Paper

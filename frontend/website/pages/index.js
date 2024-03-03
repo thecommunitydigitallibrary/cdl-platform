@@ -44,7 +44,7 @@ function Home({ data }) {
       );
       const content = await response.json();
       var tempItems = content.recommendation_results_page
-      if( tempItems < 10){
+      if (tempItems < 10) {
         setEndOfRecommendations(true)
       }
       setItems([...items, ...tempItems]);
@@ -70,7 +70,7 @@ function Home({ data }) {
       });
     const content = await response.json();
     let response_rec_id = content.recommendation_id;
-    if(content.recommendation_results_page < 10){ //0 to 10
+    if (content.recommendation_results_page < 10) { //0 to 10
       setEndOfRecommendations(true)
     }
     setLatestRecommendationId(response_rec_id);
@@ -88,7 +88,7 @@ function Home({ data }) {
   useEffect(() => {
   }, [latestRecommendationId])
 
-  
+
   useEffect(() => {
   }, [endOfRecommendations])
 
@@ -128,21 +128,21 @@ function Home({ data }) {
           <link rel="icon" href="/images/tree32.png" />
         </Head>
 
-        <Header />
+        {/* <Header /> */}
         <Grid
           container
           display={"flex"}
           direction="column"
           justifyContent={"center"}
           alignItems={"center"}
-          // width={"100%"}
+        // width={"100%"}
         >
           <Grid item>
             <div style={{ textAlign: 'center' }}>
               <h1>TextData</h1>
             </div>
           </Grid>
-          <br/>
+          <br />
           <Grid
             container
             direction="row"
@@ -176,26 +176,26 @@ function Home({ data }) {
         </Grid>
 
         <Grid item marginX="20%">
-          <Divider sx={{ border: 0.5}} />
+          <Divider sx={{ border: 0.5 }} />
         </Grid>
-        <br/>
+        <br />
         <Grid
           container
           display={"flex"}
           justifyContent={"center"}
           alignItems={"center"}
-          >
+        >
           <InfiniteScroll
             dataLength={items.length}
             next={fetchNextPage}
             hasMore={!endOfRecommendations}
             loader={!endOfRecommendations && <h6 style={{ textAlign: 'center' }} >Loading...</h6>}
-            endMessage={endOfRecommendations && items.length > 0? 
-            <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4> 
-            : 
+            endMessage={endOfRecommendations && items.length > 0 ?
+              <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4>
+              :
               <>
-              <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> <br/>
-              <a variant="outline" href={"/communities"}>{" Click here to join or create a community!"}</a></h6>
+                <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br /> <br />
+                  <a variant="outline" href={"/communities"}>{" Click here to join or create a community!"}</a></h6>
               </>}
           >
             <Grid item>
@@ -224,14 +224,17 @@ function Home({ data }) {
             </Grid>
           </InfiniteScroll>
         </Grid>
-    
-                {visible && <IconButton
-                  variant="extended"
-                  onClick={scrollToTop}
-                  sx={{ width: '50px', height: '50px', ml: "85%", position: 'sticky', border: 'solid', bottom: '10px', "&:hover": {
-                    backgroundColor: "#1976d2", color: 'white'} }}>
-                  <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
-                </IconButton>}
+
+        {visible && <IconButton
+          variant="extended"
+          onClick={scrollToTop}
+          sx={{
+            width: '50px', height: '50px', ml: "85%", position: 'sticky', border: 'solid', bottom: '10px', "&:hover": {
+              backgroundColor: "#1976d2", color: 'white'
+            }
+          }}>
+          <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
+        </IconButton>}
         <Footer alt={true} />
       </div>
     </>

@@ -155,8 +155,8 @@ function Communities({ data, history_data }, props) {
               information regarding communities and their relationship with
               submissions, please see the usage information on the{" "}
               <a href="/about">About</a> page.
-            </p> 
-            
+            </p>
+
           </div>
           <TabsUnstyled defaultValue={0}>
             <TabsList>
@@ -165,11 +165,11 @@ function Communities({ data, history_data }, props) {
             </TabsList>
             <TabPanel value={0}>
               {" "}
-              <Header />
+              {/* <Header /> */}
               <CommunitiesDeck community_info={data.community_info} />
             </TabPanel>
             <TabPanel value={1}>
-              <Header />
+              {/* <Header /> */}
               <CommunityHistory
                 auth={jsCookie.get("token")}
                 data={history_data}

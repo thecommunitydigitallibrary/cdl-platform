@@ -105,7 +105,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
           <link rel="icon" href="/images/tree32.png" />
         </Head>
         <div className="searchR">
-          <Header />
+          {/* <Header /> */}
         </div>
         <hr />
 
@@ -134,7 +134,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         <link rel="icon" href="/images/tree32.png" />
       </Head>
 
-      <Header />
+      {/* <Header /> */}
 
       <Grid container display={"flex"} direction={"column"} justifyContent={"center"} alignItems={"center"}>
 
