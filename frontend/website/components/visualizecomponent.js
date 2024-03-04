@@ -85,6 +85,7 @@ const VisualizeMap = () => {
     });
     const {communities, hashtags, topics, metadescs, ownSubmissions} = checkState;
     const [filterOrder, setFilterOrder] = useState(arr);
+    const [leafNode, setLeafNode] = useState(filterOrder[filterOrder.length-1]);
     const error = [communities, hashtags, topics, metadescs, ownSubmissions].filter((v) => v).length < 1;
     const [levelView, setLevelView] = useState("")
 
@@ -102,7 +103,7 @@ const VisualizeMap = () => {
         setOpen(false);
     };
 
-    const updateFilterOrderList = () => {
+    const updateCheckState = () => {
         let newState = {};
         Object.keys(checkState).forEach(key => {
             newState[key] = checkState[key];
@@ -111,7 +112,6 @@ const VisualizeMap = () => {
             newState[fil] = true;
         }
         setCheckState(newState);
-        updateLevelView();
     };
 
     const updateLevelView = () => {
@@ -173,7 +173,8 @@ const VisualizeMap = () => {
     useEffect(() => {
         setIsClient(true);
         if (jsCookie.get("token") != undefined) {
-            updateFilterOrderList();
+            setLeafNode(filterOrder[filterOrder.length-1]);
+            updateCheckState();
             getCommunityDocuments();
             setHeight(window.innerHeight);
             let canvasWidth = window.innerWidth; //- 0.01 * window.innerWidth
@@ -190,6 +191,10 @@ const VisualizeMap = () => {
     useEffect(() => {
         updateLevelView();
     }, [checkState]);
+
+    useEffect(() => {
+        updateCheckState();
+    }, [filterOrder]);
 
     const getPrunedTree = useCallback(() => {
         const visibleNodes = [];
@@ -241,7 +246,7 @@ const VisualizeMap = () => {
         };
 
         const handleNodeClick = useCallback((node) => {
-            if (node.type === filterOrder[filterOrder.length-1]) {
+            if (node.type === leafNode) {
                 if (prevNodeId == undefined) {
                     if (!isModalOpen) {
                         setIsModalOpen(true);
@@ -373,6 +378,7 @@ const VisualizeMap = () => {
             let l = [...filterOrder];
             setFilterOrder(l.filter(function(i) { return i !== e.target.name }));
         }
+
         //Update the state of the checkbox
         setCheckState({
             ...checkState,
