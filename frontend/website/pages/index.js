@@ -29,6 +29,7 @@ function Home({ data }) {
   const [endOfRecommendations, setEndOfRecommendations] = useState((data.recommendation_results_page.length) < 10)
   // set 'explore_similar_extension' as default method
   const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
+  console.log(data)
 
   const fetchNextPage = async () => {
     let pg = page
@@ -175,16 +176,14 @@ function Home({ data }) {
           </Grid>
         </Grid>
 
-        <Grid item marginX="12%" margin-left="15%">
+        <Grid item marginX="13%">
           <Divider sx={{ border: 0.5}} />
         </Grid>
         <br/>
-        <Grid 
-          height={'400px'}
-          width={'1400px'}
-          maxWidth={'1400px'}
-          margin={'auto'}
+        <Grid
           container
+          height={'700px'}
+          margin={'auto'}
           display={"flex"}
           justifyContent={"center"}
           alignItems={"center"}
