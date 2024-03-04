@@ -29,7 +29,6 @@ function Home({ data }) {
   const [endOfRecommendations, setEndOfRecommendations] = useState((data.recommendation_results_page.length) < 10)
   // set 'explore_similar_extension' as default method
   const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
-  console.log(data)
 
   const fetchNextPage = async () => {
     let pg = page
