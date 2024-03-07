@@ -988,6 +988,9 @@ def search(current_user):
         requested_communities = request.args.get("community")
         own_submissions = request.args.get("own_submissions", False)
 
+        if own_submissions:
+            toggle_webpage_results = False
+
 
 
         if query == "" and requested_communities == "all" and own_submissions == False and source in ["webpage_search", "extension_search", "visualize"]:
