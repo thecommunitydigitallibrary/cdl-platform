@@ -1352,72 +1352,73 @@ def get_recommendations(current_user, toggle_webpage_results = True):
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 @functional.route("/api/submission/recentlyaccessed",methods=["GET"])
-#@token_required
-def get_recently_accessed_submissions():
+@token_required
+def get_recently_accessed_submissions(current_user):
     try:
-        user_id = ObjectId("65dfc82c419ce8bd30586856")
-        query = [   
-                    {
-                        '$match': {
-                            'user_id': user_id, 
-                            'type': 'submission_view'
-                        }
-                    }, {
-                        '$group': {
-                            '_id': '$submission_id', 
-                            'mostRecentTime': {
-                                '$max': '$time'
-                            }
-                        }
-                    }, {
-                        '$lookup': {
-                            'from': 'logs', 
-                            'localField': '_id', 
-                            'foreignField': '_id', 
-                            'as': 'logs_info'
-                        }
-                    }, {
-                        '$match': {
-                            'logs_info': {
-                                '$not': {
-                                    '$elemMatch': {
-                                        'deleted': {
-                                            '$exists': True
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }, {
-                        '$sort': {
-                            'mostRecentTime': -1
-                        }
-                    }, {
-                        '$project': {
-                            '_id': 0, 
-                            'submission_id': '$_id'
-                        }
-                    }, {
-                        '$limit': 10
-                    }
-                ]
-        query1 = [
-            {
-                '$match': {
-                    'user_id': user_id,
-                    'type': 'submission_view'
-                },
-            },
-            {
-                '$project' : {
-                    '_id' : 0
-                }
-            }
-        ]
+        #user_id = ObjectId("65e50d1e779d87b1ede1ec73")
+        user_id = current_user.id
+        # query = [   
+        #             {
+        #                 '$match': {
+        #                     'user_id': user_id, 
+        #                     'type': 'submission_view'
+        #                 }
+        #             }, {
+        #                 '$group': {
+        #                     '_id': '$submission_id', 
+        #                     'mostRecentTime': {
+        #                         '$max': '$time'
+        #                     }
+        #                 }
+        #             }, {
+        #                 '$lookup': {
+        #                     'from': 'logs', 
+        #                     'localField': '_id', 
+        #                     'foreignField': '_id', 
+        #                     'as': 'logs_info'
+        #                 }
+        #             }, {
+        #                 '$match': {
+        #                     'logs_info': {
+        #                         '$not': {
+        #                             '$elemMatch': {
+        #                                 'deleted': {
+        #                                     '$exists': True
+        #                                 }
+        #                             }
+        #                         }
+        #                     }
+        #                 }
+        #             }, {
+        #                 '$sort': {
+        #                     'mostRecentTime': -1
+        #                 }
+        #             }, {
+        #                 '$project': {
+        #                     '_id': 0, 
+        #                     'submission_id': '$_id'
+        #                 }
+        #             }, {
+        #                 '$limit': 10
+        #             }
+        #         ]
+        # query1 = [
+        #     {
+        #         '$match': {
+        #             'user_id': user_id,
+        #             'type': 'submission_view'
+        #         },
+        #     },
+        #     {
+        #         '$project' : {
+        #             '_id' : 0
+        #         }
+        #     }
+        # ]
         query2 =[
                     {
                         '$match': {
-                            'user_id': ObjectId('65dfc82c419ce8bd30586856'), 
+                            'user_id': user_id, 
                             'type': 'submission_view'
                         }
                     }, {

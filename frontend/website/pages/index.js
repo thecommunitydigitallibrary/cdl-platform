@@ -19,8 +19,9 @@ import { Router, useRouter } from "next/router";
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const recommendationsEndPoint = "recommend";
+const recentlyAccessedSubmissionsEndpoint = "submission/recentlyaccessed";
 
-function Home({ data }) {
+function Home({ data, recently_accessed_submissions }) {
 
   const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
@@ -29,6 +30,7 @@ function Home({ data }) {
   const [endOfRecommendations, setEndOfRecommendations] = useState((data.recommendation_results_page.length) < 10)
   // set 'explore_similar_extension' as default method
   const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
+  console.log(recently_accessed_submissions);
 
   const fetchNextPage = async () => {
     let pg = page
@@ -258,15 +260,25 @@ export async function getServerSideProps(context) {
       }),
     });
 
+    var recentlyAccessedSubmissionsURL = baseURL_server + recentlyAccessedSubmissionsEndpoint;
+    const recentlyAccessedSubmissions = await fetch(recentlyAccessedSubmissionsURL,{
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
+
     const data = await res.json();
+    const recently_accessed_submissions = await recentlyAccessedSubmissions.json();
     if (res.status == 200) {
+      if(recentlyAccessedSubmissions.status == 200) {
       // Pass data to the page via props
       if (context.query.page == undefined) {
         data.current_page = "0";
       } else {
         data.current_page = context.query.page;
       }
-      return { props: { data } };
+      return { props: { data, recently_accessed_submissions } };
+      }
     } else if (res.status == 404) {
       return {
         redirect: {
