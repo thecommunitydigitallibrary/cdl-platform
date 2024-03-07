@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { Button, IconButton } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
 import { Router, useRouter } from "next/router";
+import RecentlyAccessedSubmissions from "../components/recentlyAccessedSubmissions";
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -145,6 +146,7 @@ function Home({ data, recently_accessed_submissions }) {
             </div>
           </Grid>
           <br/>
+          <RecentlyAccessedSubmissions/>
           <Grid
             container
             direction="row"
@@ -277,8 +279,8 @@ export async function getServerSideProps(context) {
       } else {
         data.current_page = context.query.page;
       }
-      return { props: { data, recently_accessed_submissions } };
-      }
+      return { props: { data , recently_accessed_submissions} };
+     }
     } else if (res.status == 404) {
       return {
         redirect: {
