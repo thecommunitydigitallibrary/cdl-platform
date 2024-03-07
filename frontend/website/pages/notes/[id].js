@@ -391,7 +391,7 @@ function Notes({ data }) {
           </div>
         );
       })}
-      <Footer alt={true} />
+      {/* <Footer alt={true} /> */}
     </div>
   );
 }

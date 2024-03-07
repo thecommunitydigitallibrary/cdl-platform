@@ -1234,7 +1234,7 @@ export default function SubmissionResult({ errorCode, data, id, target }) {
                     />
                 </Paper>
             </div>
-            <Footer />
+            {/* <Footer /> */}
         </>
     );
 }

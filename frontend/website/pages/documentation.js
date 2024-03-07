@@ -502,7 +502,7 @@ export default function Documentation() {
                         </Paper>
                     </div>
                 </div>
-                <Footer />
+                {/* <Footer /> */}
             </div>
         </>
     );

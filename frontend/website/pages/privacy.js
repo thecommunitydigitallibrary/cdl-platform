@@ -119,7 +119,7 @@ export default function PrivacyPolicy() {
           </li>
         </ul>
       </div>
-      <Footer alt={true} />
+      {/* <Footer alt={true} /> */}
     </>
   );
 }

@@ -150,7 +150,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
             <NoteEditor
             />
             <SubmissionExtensions data={data} id={id} target={target} />
-            <Footer />
+            {/* <Footer /> */}
           </Stack>
 
         ) : (

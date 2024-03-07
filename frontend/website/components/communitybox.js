@@ -18,8 +18,10 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useState } from "react";
 import jsCookie from "js-cookie";
-import Router, {useRouter} from 'next/router';
+import Router, { useRouter } from 'next/router';
 import BubbleChartIcon from '@mui/icons-material/BubbleChart';
+import useCommunitiesStore from "../store/communitiesStore";
+import useUserDataStore from "../store/userData";
 
 // API Endpoints
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -32,6 +34,9 @@ export default function CommunityBox(props) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState("error");
+
+  const { setUserDataStoreProps } = useUserDataStore();
+
   const handleClick = () => {
     setOpen(true);
   };
@@ -64,6 +69,8 @@ export default function CommunityBox(props) {
       }),
     });
     const responseComm = await resp.json();
+
+    setUserDataStoreProps({ userCommunities: responseComm.community_info });
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
   };
 
@@ -182,8 +189,8 @@ export default function CommunityBox(props) {
       }}
     >
       <h3 style={{ fontSize: "28px" }} color="blue" >
-        <a href={props.link}>{props.children.slice(0,35)}</a>
-        {props.children.length > 35?"..":""}
+        <a href={props.link}>{props.children.slice(0, 35)}</a>
+        {props.children.length > 35 ? ".." : ""}
       </h3>
       <Tooltip
         title={
@@ -263,9 +270,9 @@ export default function CommunityBox(props) {
         {
           <Tooltip title={<Typography>Visualize Community</Typography>}>
             <BubbleChartIcon
-                style={{marginLeft: "5px", marginRight: "5px"}}
-                size="medium"
-                onClick={handleVisualizeCommunity}
+              style={{ marginLeft: "5px", marginRight: "5px" }}
+              size="medium"
+              onClick={handleVisualizeCommunity}
             >
             </BubbleChartIcon>
           </Tooltip>

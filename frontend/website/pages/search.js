@@ -109,7 +109,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         </div>
         <hr />
 
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', height: '300px' }}>
           <div>
             <h6>Search Results</h6>{" "}
             {data.query == "" ? (
@@ -122,7 +122,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
             )}
           </div>
         </div>
-        <Footer alt={true} />
+        {/* <Footer alt={true} /> */}
       </div>
     );
   }
@@ -228,7 +228,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         </Grid>
 
       </Grid>
-      <Footer alt={true} />
+      {/* <Footer alt={true} /> */}
     </div>
   );
 }

@@ -366,6 +366,7 @@ function Header(props) {
 
 
   const getCommunitiesEndpoint = "getCommunities";
+
   const updateDropDownSearch = async () => {
     let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
       method: "GET",

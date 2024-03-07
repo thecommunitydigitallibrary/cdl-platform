@@ -137,7 +137,7 @@ function Home({ data }) {
           alignItems={"center"}
         // width={"100%"}
         >
-          <Grid item>
+          <Grid item marginTop={'2%'}>
             <div style={{ textAlign: 'center' }}>
               <h1>TextData</h1>
             </div>
@@ -235,7 +235,7 @@ function Home({ data }) {
           }}>
           <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
         </IconButton>}
-        <Footer alt={true} />
+        {/* <Footer alt={true} /> */}
       </div>
     </>
   );

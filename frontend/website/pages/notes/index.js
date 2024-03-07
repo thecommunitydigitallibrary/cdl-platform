@@ -139,7 +139,7 @@ function Notes({ data }) {
           )}
         </div>
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

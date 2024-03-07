@@ -57,7 +57,7 @@ export default function About({ loggedOut }) {
         </SectionTitle>
         <FrequentlyAskedQuestions />
         <Cta />
-        <Footer />
+        {/* <Footer /> */}
 
       </div>
     </>);

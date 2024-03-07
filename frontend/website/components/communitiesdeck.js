@@ -3,8 +3,17 @@ import jsCookie from "js-cookie";
 import JoinCommunityForm from "./forms/joinCommunityForm";
 import CreateCommunityForm from "./forms/createCommunityForm";
 import CommunityBox from "./communitybox";
+import { useEffect } from "react";
+import useUserDataStore from "../store/userData";
 let gap = "25px";
 export default function CommunitiesDeck(props) {
+
+  const { setUserDataStoreProps } = useUserDataStore();
+
+  useEffect(() => {
+    setUserDataStoreProps({ userCommunities: props.community_info });
+  }, [props.community_info])
+
   return (
     <div>
       <h1> Your Communities</h1>
