@@ -3,27 +3,38 @@ import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import React, { useState, useContext, useEffect } from "react";
 import Box from '@mui/material/Box';
 import Grid from "@mui/material/Grid";
+import Divider from "@mui/material/Divider";
 
 export default function RecentlyAccessedSubmissions(recently_accessed_submissions) {
     //console.log(recently_accessed_submissions);
     return (
-        
         <Grid
             container
             display={"flex"}
             justifyContent={"center"}
             alignItems={"center"}
-            width={'80%'}
+            //width={'65%'}
+            maxWidth={'60%'}
         >
+            
+            <Grid item width={'95%'}>
+                <h4>Recently Accessed Submissions</h4>
+            </Grid>
+
+            <Grid item width={'100%'} marginY="0.5%">
+                <Divider sx={{ height: '100px', border: '0.5px'}} />
+            </Grid>
+            
             <Box
                 sx={{
-                    width: '100%',
-                    maxWidth: '1450px',
+                    width: '90%',
+                    //maxWidth: '1450px',
+                    flex: '1 1 auto',
                     display: 'flex',
                     flexWrap: 'wrap',
                     '& > :not(style)': {
                         m: 1,
-                        width: 345,
+                        width: 342,
                         height: 128,
                     },
                 }}
@@ -70,7 +81,7 @@ export default function RecentlyAccessedSubmissions(recently_accessed_submission
                     sx={{
                         //width: "15%",
                         padding: "20px",
-                        border:"1px solid #ddd",
+                        border: "1px solid #ddd",
                         //margin: "15px 10px",
                         //marginX: "2%",
                         wordBreak: 'break-word'
@@ -120,7 +131,7 @@ export default function RecentlyAccessedSubmissions(recently_accessed_submission
                 </Paper>
 
             </Box>
-        
+
         </Grid>
     );
 }
@@ -138,3 +149,5 @@ export default function RecentlyAccessedSubmissions(recently_accessed_submission
                             {props.explanation}
                         </a>
                     </Tooltip> */}
+
+                    //<Divider sx={{ height: '100px', border: '0.5px'}} />
