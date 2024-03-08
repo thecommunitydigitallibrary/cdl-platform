@@ -6,96 +6,97 @@ import useUserDataStore from '../store/userData';
 import { BASE_URL_CLIENT, SEARCH_ENDPOINT } from '../static/constants';
 import jsCookie from 'js-cookie';
 
-import { CollapsibleDemo } from './communitycollapsible';
-import { Grid } from '@mui/material';
+import { CollapsibleCommunity } from './communitycollapsible';
+import { Grid, Paper } from '@mui/material';
+import useQuickAccessStore from '../store/quickAccessStore';
 
 
 export default function SideNav() {
     const { userCommunities, fetchUserCommunities } = useUserDataStore();
-
-    const getSideBarData = async () => {
-
-        for (let i = 0; i < userCommunities.length; i++) {
-            const res = await fetch(BASE_URL_CLIENT + SEARCH_ENDPOINT + "?own_submissions=True&community=" + userCommunities[i].community_id, {
-                method: "GET",
-                headers: new Headers({
-                    Authorization: jsCookie.get("token"),
-                }),
-            });
-            const response = await res.json();
-            if (res.status == 200) {
-                console.log("success for " + userCommunities[i].name)
-                console.log(response)
-            } else {
-                console.log(response)
-            }
-        }
-    }
+    const { communityData } = useQuickAccessStore();
+    const { isOpen, setIsOpen } = useQuickAccessStore();
 
     return (
-        <Grid container>
+        <div>
+            {!isOpen ?
+                <div>
+                    <IconButton
+                        variant="extended"
+                        onClick={() => {
+                            // getSideBarData();
+                            setIsOpen(true);
+                        }}
+                        sx={{
+                            position: 'fixed',
+                            width: '10px',
+                            height: '10px',
+                            left: '0',
+                            top: '50%',
+                            transform: 'translateY(-50%) rotate(-90deg)',
+                            border: 'solid',
+                            color: '#1976d2',
+                            "&:hover": {
+                                backgroundColor: "#1976d2",
+                                color: 'white'
+                            }
+                        }}
+                    >
+                        <ExpandCircleDownIcon color="inherit" />
+                    </IconButton >
+                </div>
+                :
+                <div style={{
+                    minWidth: '250px',
 
-            <Grid item>
-                <h3 className="text-sm font-bold">
-                    Quick Access
-                </h3>
-            </Grid>
+                    // border: 'none',
+                    // borderRight: '1px solid #e0e0e0',
+                }}>
+                    <Grid container direction={'column'}>
 
-            <Grid style={{ height: '100vh' }}>
-                <div style={{ marginBottom: '10px' }}></div>
+                        <Grid item textAlign={'center'}>
+                            <h5 className="text-sm font ">
+                                Quick Access
+                            </h5>
+                        </Grid>
 
-                <CollapsibleDemo />
+                        <Grid item>
+                            {communityData.map((item, index) => (
+                                <div key={index}>
+                                    <div style={{ marginBottom: '2px' }}></div>
+                                    <CollapsibleCommunity community={item} />
+                                </div>
+                            ))}
 
-                <div style={{ marginBottom: '10px' }}></div>
+                        </Grid>
 
-                <CollapsibleDemo />
+                    </Grid>
 
-                <div style={{ marginBottom: '10px' }}></div>
-
-                <CollapsibleDemo />
-                <div style={{ marginBottom: '10px' }}></div>
-
-                <CollapsibleDemo />
-
-                <div style={{ marginBottom: '10px' }}></div>
-
-                <CollapsibleDemo />
-
-                <div style={{ marginBottom: '10px' }}></div>
-
-                <CollapsibleDemo /><div style={{ marginBottom: '10px' }}></div>
-
-                <CollapsibleDemo />
-
-                <div style={{ marginBottom: '10px' }}></div>
-
-                <CollapsibleDemo />
-
-                <div style={{ marginBottom: '10px' }}></div>
-
-                <CollapsibleDemo />
-            </Grid>
-
-            {/* <IconButton
-                variant="extended"
-                onClick={() => {
-                    getSideBarData();
-                }}
-                sx={{
-                    width: '10px',
-                    height: '10px',
-                    left: '50%',
-                    transform: 'translateY(-50%) ',
-                    border: 'solid',
-                    color: '#1976d2',
-                    "&:hover": {
-                        backgroundColor: "#1976d2",
-                        color: 'white'
-                    }
-                }}
-            >
-                <ExpandCircleDownIcon color="inherit" />
-            </IconButton > */}
-        </Grid>
+                    <IconButton
+                        variant="extended"
+                        onClick={() => {
+                            // getSideBarData();
+                            setIsOpen(false);
+                        }}
+                        zindex={50}
+                        sx={{
+                            position: 'fixed',
+                            width: '10px',
+                            height: '10px',
+                            left: '241px',
+                            top: '50%',
+                            transform: 'translateY(-50%) rotate(90deg)',
+                            border: 'solid',
+                            color: '#1976d2',
+                            "&:hover": {
+                                backgroundColor: "#1976d2",
+                                color: 'white'
+                            }
+                        }}
+                    >
+                        <ExpandCircleDownIcon color="inherit" />
+                    </IconButton >
+                </div>
+            }
+        </div>
     );
 }

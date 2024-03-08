@@ -2,6 +2,7 @@ import create from 'zustand';
 
 const useUserDataStore = create((set) => ({
 
+    user_id: null,
     username: 'username',
     email: 'email',
     isLoggedIn: true,

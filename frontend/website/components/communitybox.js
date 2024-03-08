@@ -22,6 +22,7 @@ import Router, { useRouter } from 'next/router';
 import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 import useCommunitiesStore from "../store/communitiesStore";
 import useUserDataStore from "../store/userData";
+import useQuickAccessStore from "../store/quickAccessStore";
 
 // API Endpoints
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -36,6 +37,8 @@ export default function CommunityBox(props) {
   const [severity, setSeverity] = useState("error");
 
   const { setUserDataStoreProps } = useUserDataStore();
+
+  const { communityData, setcommunityData } = useQuickAccessStore();
 
   const handleClick = () => {
     setOpen(true);
@@ -71,6 +74,7 @@ export default function CommunityBox(props) {
     const responseComm = await resp.json();
 
     setUserDataStoreProps({ userCommunities: responseComm.community_info });
+    setcommunityData(responseComm.community_info);
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
   };
 

@@ -48,6 +48,7 @@ import Image from "next/image";
 import useSubmissionStore from "../store/submissionStore";
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from "../static/constants";
 import useUserDataStore from "../store/userData";
+import useQuickAccessStore from "../store/quickAccessStore";
 
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -356,6 +357,7 @@ function Header(props) {
     },
   });
   const [loggedOut, setLoggedOut] = useState(false);
+  const { communityData, setcommunityData } = useQuickAccessStore();
   const [dropdowndata, setDropDownData] = useState({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -382,13 +384,15 @@ function Header(props) {
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
 
     setDropDownData(responseComm);
+    setcommunityData(responseComm.community_info);
+
   };
 
   useEffect(() => {
     if (window.localStorage.getItem("dropdowndata")) {
       var responseComm = JSON.parse(window.localStorage.getItem("dropdowndata"))
       setDropDownData(responseComm);
-
+      setcommunityData(responseComm.community_info);
       setUserDataStoreProps({ userCommunities: responseComm.community_info });
       setUserDataStoreProps({ username: responseComm.username });
 
