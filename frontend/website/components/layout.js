@@ -4,6 +4,17 @@ import Footer from "./footer";
 import SideNav from "./sidenav";
 import { ResizablePanelGroup, ResizableHandle, ResizablePanel } from "../components/ui/ui/resizable";
 
+
+// interface LayoutProps {
+//     accounts: {
+//       label: string
+//       email: string
+//     }[]
+//     defaultLayout: number[] | undefined
+//     defaultCollapsed?: boolean
+//     navCollapsedSize: number
+//   }
+
 export default function Layout({ children }) {
 
     const defaultLayout = [265, 440, 655]
@@ -17,8 +28,15 @@ export default function Layout({ children }) {
                 <Header />
             </div>
             <div style={{ marginTop: '70px', display: 'flex' }}>
-                <ResizablePanelGroup direction="horizontal" id={0}
-                    className="h-full max-h-[600px] items-stretch">
+                <ResizablePanelGroup
+                    direction="horizontal"
+                    onLayout={(sizes) => {
+                        document.cookie = `react-resizable-panels:layout=${JSON.stringify(
+                            sizes
+                        )}`
+                    }}
+                    className="h-full max-h-[800px] items-stretch"
+                >
                     <ResizablePanel
                         id={0}
                         defaultSize={265}
@@ -34,6 +52,7 @@ export default function Layout({ children }) {
                         style={{ overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'gray white' }}>
                         <SideNav />
                     </ResizablePanel>
+
                     <ResizableHandle withHandle id={1} />
                     <ResizablePanel
                         id={2}

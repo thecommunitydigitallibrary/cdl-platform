@@ -7,6 +7,7 @@ import { BASE_URL_CLIENT, SEARCH_ENDPOINT } from '../static/constants';
 import jsCookie from 'js-cookie';
 
 import { CollapsibleDemo } from './communitycollapsible';
+import { Grid } from '@mui/material';
 
 
 export default function SideNav() {
@@ -32,27 +33,50 @@ export default function SideNav() {
     }
 
     return (
-        <>
+        <Grid container>
 
-            <div>
+            <Grid item>
                 <h3 className="text-sm font-bold">
                     Quick Access
                 </h3>
-            </div>
+            </Grid>
 
-            <div style={{ marginBottom: '10px' }}></div>
+            <Grid style={{ height: '100vh' }}>
+                <div style={{ marginBottom: '10px' }}></div>
 
-            <CollapsibleDemo />
+                <CollapsibleDemo />
 
-            <div style={{ marginBottom: '10px' }}></div>
+                <div style={{ marginBottom: '10px' }}></div>
 
-            <CollapsibleDemo />
+                <CollapsibleDemo />
 
-            <div style={{ marginBottom: '10px' }}></div>
+                <div style={{ marginBottom: '10px' }}></div>
 
-            <CollapsibleDemo />
+                <CollapsibleDemo />
+                <div style={{ marginBottom: '10px' }}></div>
 
-            <IconButton
+                <CollapsibleDemo />
+
+                <div style={{ marginBottom: '10px' }}></div>
+
+                <CollapsibleDemo />
+
+                <div style={{ marginBottom: '10px' }}></div>
+
+                <CollapsibleDemo /><div style={{ marginBottom: '10px' }}></div>
+
+                <CollapsibleDemo />
+
+                <div style={{ marginBottom: '10px' }}></div>
+
+                <CollapsibleDemo />
+
+                <div style={{ marginBottom: '10px' }}></div>
+
+                <CollapsibleDemo />
+            </Grid>
+
+            {/* <IconButton
                 variant="extended"
                 onClick={() => {
                     getSideBarData();
@@ -71,7 +95,7 @@ export default function SideNav() {
                 }}
             >
                 <ExpandCircleDownIcon color="inherit" />
-            </IconButton >
-        </>
+            </IconButton > */}
+        </Grid>
     );
 }
