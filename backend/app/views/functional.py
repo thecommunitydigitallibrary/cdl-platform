@@ -961,6 +961,7 @@ def search(current_user):
 			query : (string) : the typed query of the user.
 			community: (string) : the community currently being searched.
 			page : (int) : the page number of be returned (if not included, sets to 0)
+            own_submissions : (boolean) : true to search only over your own submissions
 	Returns:
 		200 : output of search_helper, results and metadata.
 
@@ -986,6 +987,9 @@ def search(current_user):
         
         requested_communities = request.args.get("community")
         own_submissions = request.args.get("own_submissions", False)
+
+        if own_submissions:
+            toggle_webpage_results = False
 
 
 
