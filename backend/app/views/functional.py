@@ -962,6 +962,15 @@ def search(current_user):
 			community: (string) : the community currently being searched.
 			page : (int) : the page number of be returned (if not included, sets to 0)
             own_submissions : (boolean) : true to search only over your own submissions
+            source : (str) : indicates the type of search
+                webpage_search
+                extension_search
+                visualize
+                note_automatic
+                extension_open
+                sidebar
+
+                
 	Returns:
 		200 : output of search_helper, results and metadata.
 
