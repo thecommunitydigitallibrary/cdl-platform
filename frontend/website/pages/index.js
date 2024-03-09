@@ -146,7 +146,7 @@ function Home({ data, recently_accessed_submissions }) {
             </div>
           </Grid>
           <br/>
-          <RecentlyAccessedSubmissions/>
+          <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions}/>
           <Grid item style={{ width : '60%' }} >
             <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>

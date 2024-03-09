@@ -5,8 +5,8 @@ import Box from '@mui/material/Box';
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 
-export default function RecentlyAccessedSubmissions(recently_accessed_submissions) {
-    //console.log(recently_accessed_submissions);
+export default function RecentlyAccessedSubmissions({rec_acc_sub_data}) {
+    console.log(rec_acc_sub_data[0]["explanation"]);
     return (
         <Grid
             container
@@ -16,11 +16,9 @@ export default function RecentlyAccessedSubmissions(recently_accessed_submission
             //width={'65%'}
             maxWidth={'60%'}
         >
-            
             <Grid item width={'95%'}>
                 <h4>Recently Accessed Submissions</h4>
             </Grid>
-            
             <Box
                 sx={{
                     width: '90%',
@@ -35,9 +33,10 @@ export default function RecentlyAccessedSubmissions(recently_accessed_submission
                     },
                 }}
             >
+            
                 <Paper
                     elevation={0}
-                    id={"0"}
+                    //id={"rec_sub_id" + props.rec_sub_id}
                     sx={{
                         //width: "25%",
                         padding: "20px",
@@ -49,85 +48,11 @@ export default function RecentlyAccessedSubmissions(recently_accessed_submission
                 >
                     <div style={{ display: "flex" }}>
                         <div style={{ margin: "0px 0px 0px 0px" }}>
-                            Hi0
+                            {rec_acc_sub_data.explanation} 
                         </div>
                     </div>
                 </Paper>
-                <Paper
-                    elevation={0}
-                    id={"0"}
-                    sx={{
-                        //width: "15%",
-                        padding: "20px",
-                        border: "1px solid #ddd",
-                        //margin: "15px 10px",
-                        //marginX: "2%",
-                        wordBreak: 'break-word'
-                    }}
-                >
-                    <div style={{ display: "flex" }}>
-                        <div style={{ margin: "0px 0px 0px 0px" }}>
-                            Hi1
-                        </div>
-                    </div>
-                </Paper>
-                <Paper
-                    elevation={0}
-                    id={"2"}
-                    sx={{
-                        //width: "15%",
-                        padding: "20px",
-                        border: "1px solid #ddd",
-                        //margin: "15px 10px",
-                        //marginX: "2%",
-                        wordBreak: 'break-word'
-                    }}
-                >
-                    <div style={{ display: "flex" }}>
-                        <div style={{ margin: "0px 0px 0px 0px" }}>
-                            Hi2
-                        </div>
-                    </div>
-                </Paper>
-                <Paper
-                    elevation={0}
-                    id={"3"}
-                    sx={{
-                        //width: "15%",
-                        padding: "20px",
-                        border: "1px solid #ddd",
-                        //margin: "15px 10px",
-                        //marginX: "2%",
-                        wordBreak: 'break-word'
-                    }}
-                >
-                    <div style={{ display: "flex" }}>
-                        <div style={{ margin: "0px 0px 0px 0px" }}>
-                            Hi3
-                        </div>
-                    </div>
-                </Paper>
-                <Paper
-                    elevation={0}
-                    id={"3"}
-                    sx={{
-                        //width: "15%",
-                        padding: "20px",
-                        border: "1px solid #ddd",
-                        //margin: "15px 10px",
-                        //marginX: "2%",
-                        wordBreak: 'break-word'
-                    }}
-                >
-                    <div style={{ display: "flex" }}>
-                        <div style={{ margin: "0px 0px 0px 0px" }}>
-                            Hi3
-                        </div>
-                    </div>
-                </Paper>
-
             </Box>
-
         </Grid>
     );
 }
