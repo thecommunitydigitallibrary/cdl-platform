@@ -147,6 +147,9 @@ function Home({ data, recently_accessed_submissions }) {
           </Grid>
           <br/>
           <RecentlyAccessedSubmissions/>
+          <Grid item style={{ width : '60%' }} >
+            <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
+          </Grid>
           <Grid
             container
             direction="row"
@@ -178,11 +181,6 @@ function Home({ data, recently_accessed_submissions }) {
             </Grid>
           </Grid>
         </Grid>
-
-        <Grid item marginX="20%">
-          <Divider sx={{ border: 0.5}} />
-        </Grid>
-        <br/>
         <Grid
           container
           display={"flex"}

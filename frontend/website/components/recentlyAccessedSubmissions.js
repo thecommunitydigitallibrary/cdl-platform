@@ -20,10 +20,6 @@ export default function RecentlyAccessedSubmissions(recently_accessed_submission
             <Grid item width={'95%'}>
                 <h4>Recently Accessed Submissions</h4>
             </Grid>
-
-            <Grid item width={'100%'} marginY="0.5%">
-                <Divider sx={{ height: '100px', border: '0.5px'}} />
-            </Grid>
             
             <Box
                 sx={{
