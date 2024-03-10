@@ -6,14 +6,12 @@ import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 
 export default function RecentlyAccessedSubmissions({rec_acc_sub_data}) {
-    console.log(rec_acc_sub_data[0]["explanation"]);
     return (
         <Grid
             container
             display={"flex"}
             justifyContent={"center"}
             alignItems={"center"}
-            //width={'65%'}
             maxWidth={'60%'}
         >
             <Grid item width={'95%'}>
@@ -22,7 +20,6 @@ export default function RecentlyAccessedSubmissions({rec_acc_sub_data}) {
             <Box
                 sx={{
                     width: '90%',
-                    //maxWidth: '1450px',
                     flex: '1 1 auto',
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -38,13 +35,9 @@ export default function RecentlyAccessedSubmissions({rec_acc_sub_data}) {
                         key={index}
                         id={index}
                         elevation={0}
-                        //id={"rec_sub_id" + props.rec_sub_id}
                         sx={{
-                            //width: "25%",
                             padding: "20px",
                             border: "1px solid #ddd",
-                            //margin: "15px 10px",
-                            //marginX: "2%",
                             wordBreak: 'break-word'
                         }}
                     >
