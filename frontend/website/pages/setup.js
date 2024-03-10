@@ -20,20 +20,41 @@ const steps = [
     ),
   },
   {
-    label: "Install the Chrome Extension",
+    label: "Install and Log In to the Chrome Extension",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
-        The Chrome extension can be downloaded from <a href="https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0">the Chrome Web Store</a>. After installing, don't forget to pin the newly-added extension to your browser.
+        The Chrome extension can be downloaded from <a href="https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0">the Chrome Web Store</a>. Post installation, don't forget to pin the newly-added extension to your browser.
+        After opening the extension, you should see a login screen. Please log
+        in to the extension with the same credentials that you used for the
+        website account you created in Step 1.
       </p>
     ),
   },
   {
-    label: "Log in to the Chrome Extension",
+    label: "Create your First Community!",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
-        After opening the extension, you should see a login screen. Please log
-        in to the extension with the same credentials as you used for the
-        website account that you created in Step 2.
+        Much like a group chat, a subreddit, or a folder, a community is place for you and your peers to save organize content. 
+        You can create, join, or leave communities, and any member of a community can search for or browse all content present in the community.
+        Click <a variant="outline" href={"/communities"}>{"here"}</a>  to join or create a community!
+      </p>
+    ),
+  },
+  {
+    label: "Create your First Submission!",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+        A submission is the fundamental building block of TextData. Submissions are user-created, and consist of an optional source URL, a title, and a description which can be added to or removed from communities.
+        You can create a submission by using either Chrome extension's "Save" tab or by clicking the "+" on the TextData website header.
+      </p>
+    ),
+  },
+  {
+    label: "Interact with Submissions",
+    description: (
+      <p style={{ margin: "10px 0px 0px 0px" }}>
+        Visit a submission's TextData-specific page to read, mention, visualize, share.You can edit a submission, add or remove it from a community, delete it entirely, or provide feedback.
+        Make submission with mention will create another submission tagging the current submission and display it beneath the description. See how similar submissions are related by interacting with the graph.
       </p>
     ),
   },
@@ -41,18 +62,24 @@ const steps = [
     label: "Start using TextData!",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
-        Once you are logged in to the Chrome extension and to the website, you are ready to go! More details about submission, connections, and communities
-        can be found on the <a target="_blank" and rel="noopener noreferrer" href="/documentation">Documentation</a> page.
+        That's all for the onboarding, you are ready to go! More details about submission, recommendations, and communities
+        can be found on the <a target="_blank" and rel="noopener noreferrer" href="/about">About</a> page and the <a target="_blank" and rel="noopener noreferrer" href="/documentation">Documentation</a> page.
       </p>
     ),
   },
 ];
 
-export default function Setup() {
+export default function Setup(props) {
+
+  const handleSetupFinish = (data) => {
+    if(props.setupFinish){
+      props.setupFinish();
+    }  
+  };
   return (
    <>
     <Head>
-        <title>Setup - TextData</title>
+        {!(props.head) ? <title>Setup - TextData</title> : <title>{props.head} - TextData</title>}
         <link rel="icon" href="/images/tree32.png" />
     </Head>
     <Header/>
@@ -72,7 +99,7 @@ export default function Setup() {
         Setting up TextData{" "}
       </h1>
       The following instructions will walk you through account creation and Chrome extension setup.
-      <VerticalLinearStepper steps={steps} />
+      <VerticalLinearStepper steps={steps} updateStepper={props.updateStep ? props.updateStep : 0} extensionFinish={handleSetupFinish} />
     </Paper>
     <Footer/>
    </>

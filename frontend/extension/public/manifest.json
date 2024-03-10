@@ -17,6 +17,12 @@
 		"tabs",
 		"scripting"
 	],
+	"web_accessible_resources": [
+		{
+			"resources": ["tree48.png"],
+			"matches": ["*://localhost/*","*://textdata.org/*"]
+		}
+	  ]
 	"host_permissions": [
 		"http://*/",
         "https://*/"

@@ -15,12 +15,15 @@ import { useEffect, useState } from "react";
 import { Button, IconButton } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
 import { Router, useRouter } from "next/router";
+import Setup from "./setup";
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const recommendationsEndPoint = "recommend";
+const getCommunitiesEndpoint = "getCommunities";
+const searchEndpoint = "search?";
 
-function Home({ data }) {
+function Home({ data, community_joined_data, user_own_submissions }) {
 
   const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
@@ -29,6 +32,62 @@ function Home({ data }) {
   const [endOfRecommendations, setEndOfRecommendations] = useState((data.recommendation_results_page.length) < 10)
   // set 'explore_similar_extension' as default method
   const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
+  const [onboardingStep, setOnboardingStep] = useState(0);
+  let extensionId = "aafcjihpcjlagambenogkhobogekppgp";
+  let imgSrc = "/tree48.png";
+
+  let homePageContent = <Setup head="Onboarding" updateStep={onboardingStep}></Setup>;
+
+  function checkExtension(){
+    const isImagePresent = new Promise((resolve, _) => {
+      const img = new Image();
+      img.src = "chrome-extension://" + extensionId + imgSrc;
+      img.onload = () => {
+        resolve(true);
+      }
+      img.onerror = () =>  {
+        resolve(false);
+      }
+    });
+    return isImagePresent;
+  }
+
+  async function checkOnboarding() {
+    const img = await checkExtension();
+    if (!img) {
+      if (community_joined_data.community_info.length > 0) {
+        if (user_own_submissions.total_num_results >= 1) {
+          setOnboardingStep(0);
+        } else {
+          setOnboardingStep(3);
+        }
+      }
+      else {
+        setOnboardingStep(1);
+      }
+    } else {
+      if (community_joined_data.community_info.length > 0) {
+        if (!(endOfRecommendations && items.length > 0)) {
+          //if user has created community but no submission
+          setOnboardingStep(3);
+        }
+      } else {
+        setOnboardingStep(2);
+      }
+    }
+  }
+  
+  useEffect(async () => {
+    await checkOnboarding();
+  }, []);
+
+  const handleIndexFinish = (data) => {
+    window.location.reload();
+  }
+  
+  if(onboardingStep > 0){
+    homePageContent = <Setup head="Onboarding" updateStep={onboardingStep} setupFinish={handleIndexFinish}></Setup>;
+  }
 
   const fetchNextPage = async () => {
     let pg = page
@@ -119,30 +178,23 @@ function Home({ data }) {
     });
   };
 
-  return (
-    <>
-      <div className="allResults">
-
-        <Head>
-          <title>TextData</title>
-          <link rel="icon" href="/images/tree32.png" />
-        </Head>
-
-        <Header />
+  if (onboardingStep == 0) {
+    homePageContent = (
+      <div>
         <Grid
           container
           display={"flex"}
           direction="column"
           justifyContent={"center"}
           alignItems={"center"}
-          // width={"100%"}
+        // width={"100%"}
         >
           <Grid item>
             <div style={{ textAlign: 'center' }}>
               <h1>TextData</h1>
             </div>
           </Grid>
-          <br/>
+          <br />
           <Grid
             container
             direction="row"
@@ -176,26 +228,27 @@ function Home({ data }) {
         </Grid>
 
         <Grid item marginX="20%">
-          <Divider sx={{ border: 0.5}} />
+          <Divider sx={{ border: 0.5 }} />
         </Grid>
-        <br/>
+        <br />
         <Grid
           container
           display={"flex"}
           justifyContent={"center"}
           alignItems={"center"}
-          >
+        >
           <InfiniteScroll
             dataLength={items.length}
             next={fetchNextPage}
             hasMore={!endOfRecommendations}
             loader={!endOfRecommendations && <h6 style={{ textAlign: 'center' }} >Loading...</h6>}
-            endMessage={endOfRecommendations && items.length > 0? 
-            <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4> 
-            : 
+            endMessage={endOfRecommendations && items.length > 0 ?
+              <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4>
+              :
               <>
-              <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br/> <br/>
-              <a variant="outline" href={"/communities"}>{" Click here to join or create a community!"}</a></h6>
+                <h6 style={{ textAlign: 'center' }}> Thanks for creating or joining a new community! Create a submission to get recommendations. <br /> <br />
+                  {/* Currently is : href needs to be updated to make new submission model open*/}
+                  <a variant="outline" href={"/communities"}>{" Click here to create a new submission!"}</a></h6>
               </>}
           >
             <Grid item>
@@ -224,15 +277,32 @@ function Home({ data }) {
             </Grid>
           </InfiniteScroll>
         </Grid>
-    
-                {visible && <IconButton
-                  variant="extended"
-                  onClick={scrollToTop}
-                  sx={{ width: '50px', height: '50px', ml: "85%", position: 'sticky', border: 'solid', bottom: '10px', "&:hover": {
-                    backgroundColor: "#1976d2", color: 'white'} }}>
-                  <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
-                </IconButton>}
+
+        {visible && <IconButton
+          variant="extended"
+          onClick={scrollToTop}
+          sx={{
+            width: '50px', height: '50px', ml: "85%", position: 'sticky', border: 'solid', bottom: '10px', "&:hover": {
+              backgroundColor: "#1976d2", color: 'white'
+            }
+          }}>
+          <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
+        </IconButton>}
         <Footer alt={true} />
+      </div>     
+    );
+  }
+
+  return (
+    <>
+      <div className="allResults">
+
+        <Head>
+          <title>TextData</title>
+          <link rel="icon" href="/images/tree32.png" />
+        </Head>
+        <Header />
+        {homePageContent}
       </div>
     </>
   );
@@ -258,15 +328,37 @@ export async function getServerSideProps(context) {
       }),
     });
 
+    var communityURL = baseURL_server + getCommunitiesEndpoint;
+    const fetchCommunities = await fetch(communityURL, {
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
+
+    var searchURL = baseURL_server + searchEndpoint;
+    searchURL += "own_submissions=True" + "&community=all";
+    const userOwnSubmissions = await fetch(searchURL, {
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
+
     const data = await res.json();
-    if (res.status == 200) {
-      // Pass data to the page via props
-      if (context.query.page == undefined) {
-        data.current_page = "0";
-      } else {
-        data.current_page = context.query.page;
+    const community_joined_data = await fetchCommunities.json();
+    const user_own_submissions = await userOwnSubmissions.json();
+    if (fetchCommunities.status == 200) {
+      if (res.status == 200) {
+        if (userOwnSubmissions.status == 200) {
+          // Pass data to the page via props
+          if (context.query.page == undefined) {
+            data.current_page = "0";
+          } else {
+            data.current_page = context.query.page;
+          }
+          return { props: { data, community_joined_data, user_own_submissions } };
+        }
+
       }
-      return { props: { data } };
     } else if (res.status == 404) {
       return {
         redirect: {
@@ -274,8 +366,9 @@ export async function getServerSideProps(context) {
           permanent: false,
         },
       };
-    } else {
-      return { props: { error: "error" } };
+    }else {
+      const error_data = { error: "Something went wrong. Please try again later" };
+      return { props: { error: {error_data} } };
     }
   }
 }

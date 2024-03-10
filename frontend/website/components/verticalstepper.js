@@ -11,9 +11,16 @@ import Typography from "@mui/material/Typography";
 export default function VerticalLinearStepper(props) {
   const [activeStep, setActiveStep] = React.useState(0);
 
+  React.useEffect(() => {
+    setActiveStep(props.updateStepper);
+  }, [props.updateStepper])
+
   const handleNext = () => {
+    if(activeStep === props.steps.length-1) {
+      props.extensionFinish();
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+  }
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -36,7 +43,7 @@ export default function VerticalLinearStepper(props) {
               <Box sx={{ mb: 2 }}>
                 <div>
                   <Button
-                  className="bg-blue-500"
+                    className="bg-blue-500"
                     variant="contained"
                     onClick={handleNext}
                     sx={{ mt: 1, mr: 1 }}
@@ -57,7 +64,7 @@ export default function VerticalLinearStepper(props) {
           </Step>
         ))}
       </Stepper>
-      {activeStep === props.steps.length && (
+      {activeStep === props.steps.length && ((
         <Paper square elevation={0} sx={{ pt: 2 }}>
           <Typography>
             We are looking forward to you joining TextData!
@@ -66,7 +73,7 @@ export default function VerticalLinearStepper(props) {
             Restart
           </Button>
         </Paper>
-      )}
+      ))}
     </Box>
   );
 }
