@@ -220,7 +220,6 @@ function Home({ data, recently_accessed_submissions }) {
                         hashtags={d.hashtags}
                       ></SearchResult>
                     </div>
-
                   );
                 })}
             </Grid>

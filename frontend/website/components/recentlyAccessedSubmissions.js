@@ -33,42 +33,31 @@ export default function RecentlyAccessedSubmissions({rec_acc_sub_data}) {
                     },
                 }}
             >
-            
-                <Paper
-                    elevation={0}
-                    //id={"rec_sub_id" + props.rec_sub_id}
-                    sx={{
-                        //width: "25%",
-                        padding: "20px",
-                        border: "1px solid #ddd",
-                        //margin: "15px 10px",
-                        //marginX: "2%",
-                        wordBreak: 'break-word'
-                    }}
-                >
-                    <div style={{ display: "flex" }}>
-                        <div style={{ margin: "0px 0px 0px 0px" }}>
-                            {rec_acc_sub_data.explanation} 
-                        </div>
-                    </div>
-                </Paper>
+                {rec_acc_sub_data.map((item, index) => (
+                    <Paper
+                        key={index}
+                        id={index}
+                        elevation={0}
+                        //id={"rec_sub_id" + props.rec_sub_id}
+                        sx={{
+                            //width: "25%",
+                            padding: "20px",
+                            border: "1px solid #ddd",
+                            //margin: "15px 10px",
+                            //marginX: "2%",
+                            wordBreak: 'break-word'
+                        }}
+                    >
+                        <a href={item.submission_url}>
+                            <div style={{ display: "flex" }}>
+                                <div style={{ margin: "0px 0px 0px 0px" }}>
+                                    {item.explanation}
+                                </div>
+                            </div>
+                        </a>
+                    </Paper>
+                ))}
             </Box>
         </Grid>
     );
 }
-
-{/* <Tooltip title={props.explanation}>
-                        <a
-                            style={{
-                                fontSize: "20px", maxWidth: '100%', display: '-webkit-box', WebkitBoxOrient: 'vertical',
-                                WebkitLineClamp: '1', overflow: 'hidden', textOverflow: 'ellipsis'
-                            }}
-                            href={props.redirect_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            {props.explanation}
-                        </a>
-                    </Tooltip> */}
-
-                    //<Divider sx={{ height: '100px', border: '0.5px'}} />
