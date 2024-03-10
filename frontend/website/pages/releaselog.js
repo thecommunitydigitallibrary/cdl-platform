@@ -44,6 +44,7 @@ export default function ReleaseLog() {
             <li className="list-item">Friendlier user onboarding</li>
             <li className="list-item">Log in with username or email in extension</li>
             <li className="list-item">Clicking autocomplete redirects to submission page</li>
+            <li className="list-item">Increased submission description length to 5,000 words / 50,000 characters</li>
         </ul>
       
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
