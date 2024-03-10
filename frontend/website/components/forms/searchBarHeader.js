@@ -28,6 +28,15 @@ function searchBarHeader(props) {
     const [inputValue, setInputValue] = useState(initQuery);
 
 
+    function handleSuggestionClick(option){
+        for (let i = 0; i < suggestions.length; i++) {
+            if (suggestions[i].label == option){
+                window.open(suggestions[i].url)
+            }
+        }
+    }
+
+
 
     const handleSearch = async (event) => {
         // Stop the form from submitting and refreshing the page.
@@ -109,6 +118,9 @@ function searchBarHeader(props) {
                         freeSolo
                         filterOptions={(x) => x}
                         options={suggestions.map((option) => option.label)}
+                        onChange={(event, option) => {
+                            handleSuggestionClick(option);
+                          }}
                         onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
                         value={inputValue}
                         renderInput={(params) => 

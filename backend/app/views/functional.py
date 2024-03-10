@@ -700,11 +700,12 @@ def autocomplete(current_user):
         for x in submissions_hits:
             label = x["_source"]["explanation"]
             id = x["_id"]
+            url = format_url("", id)
             if label in seen_titles:
                 continue
             else:
                 seen_titles[label] = True
-            suggestions.append({"label": label, "id": id})
+            suggestions.append({"label": label, "id": id, "url": url})
             if len(suggestions) >= topn:
                 break
 

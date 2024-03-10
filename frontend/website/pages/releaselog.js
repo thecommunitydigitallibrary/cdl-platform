@@ -33,6 +33,38 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        ??, 2024
+      </h2>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Extension caching for taking notes on webpage</li>
+            <li className="list-item">Friendlier user onboarding</li>
+            <li className="list-item">Log in with username or email in extension</li>
+            <li className="list-item">Clicking autocomplete redirects to submission page</li>
+        </ul>
+      
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">State updates for submission page</li>
+            <li className="list-item">Accidental edit when creating new submission from existing page</li>
+            <li className="list-item">Extension save/find page toggle no longer stuck on find</li>
+            <li className="list-item">Visualization filter change now doesn't throw application error</li>
+
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Refactored search bar in extension</li>
+            <li className="list-item">Fixed markdown in extension to be only light mode</li>
+        </ul>
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         February 19th, 2024
       </h2>
       

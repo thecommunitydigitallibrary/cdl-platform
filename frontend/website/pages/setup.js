@@ -12,50 +12,48 @@ const steps = [
     label: "Create an Account",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
-        An account can be created <a href="/auth">here</a>. 
-        Please create an account using a valid email address. Please write
-        down your password! Once you create an account, 
-        navigate back to this step and continue the setup.
+        An account can be created <a target="_blank" and rel="noopener noreferrer" href="/auth">here</a>. 
+        Once you create an account, navigate back to this step and continue the setup.
       </p>
     ),
   },
   {
-    label: "Install and Log In to the Chrome Extension",
+    label: "(Optional) Install and Log In to the Chrome Extension",
     description: (
+      <div>
       <p style={{ margin: "10px 0px 0px 0px" }}>
-        The Chrome extension can be downloaded from <a href="https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0">the Chrome Web Store</a>. Post installation, don't forget to pin the newly-added extension to your browser.
+        The Chrome extension can be downloaded from <a target="_blank" and rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0">the Chrome Web Store</a>. After installing, don't forget to pin the newly-added extension to your browser.
         After opening the extension, you should see a login screen. Please log
         in to the extension with the same credentials that you used for the
         website account you created in Step 1.
       </p>
+      <p>
+        Installation of the Chrome extension is optional - TextData works best with it installed, but you can still use the basic functionality of the platform without the Chrome extension.
+      </p>
+      </div>
     ),
   },
   {
-    label: "Create your First Community!",
+    label: "Create your First Community",
     description: (
       <p style={{ margin: "10px 0px 0px 0px" }}>
-        Much like a group chat, a subreddit, or a folder, a community is place for you and your peers to save organize content. 
+        Much like a group chat, a subreddit, or a folder, a community is place for you and your peers to save and organize notes. 
         You can create, join, or leave communities, and any member of a community can search for or browse all content present in the community.
-        Click <a variant="outline" href={"/communities"}>{"here"}</a>  to join or create a community!
+        Click <a target="_blank" and rel="noopener noreferrer" href="/communities">here</a> to join or create a community.
       </p>
     ),
   },
   {
-    label: "Create your First Submission!",
+    label: "Create your First Submission",
     description: (
+      <div>
       <p style={{ margin: "10px 0px 0px 0px" }}>
-        A submission is the fundamental building block of TextData. Submissions are user-created, and consist of an optional source URL, a title, and a description which can be added to or removed from communities.
-        You can create a submission by using either Chrome extension's "Save" tab or by clicking the "+" on the TextData website header.
+        You can think of a submission like a bookmark or note page. Submissions are saved to a particular community and are accessible by any member of the community. Each submission consists of a title, an optional source URL, and a markdown-based description. You can create a submission by clicking the "+" button in the header or by the Chrome extension's "Save" tab.
       </p>
-    ),
-  },
-  {
-    label: "Interact with Submissions",
-    description: (
-      <p style={{ margin: "10px 0px 0px 0px" }}>
-        Visit a submission's TextData-specific page to read, mention, visualize, share.You can edit a submission, add or remove it from a community, delete it entirely, or provide feedback.
-        Make submission with mention will create another submission tagging the current submission and display it beneath the description. See how similar submissions are related by interacting with the graph.
+      <p>
+        Once you create your first submission, you can refresh this page to view the full TextData homepage. But don't worry, you can still revisit these setup instructions by clicking "Setup Instruction" in the footer. Enjoy TextData!
       </p>
+      </div>
     ),
   },
   {
@@ -96,9 +94,9 @@ export default function Setup(props) {
     >
       <h1 style={{ margin: "10px 0px 10px 0px" }}>
         {" "}
-        Setting up TextData{" "}
+        Welcome to TextData{" "}
       </h1>
-      The following instructions will walk you through account creation and Chrome extension setup.
+      The following instructions will walk you through account creation, Chrome extension setup, and creating your first community and submission.
       <VerticalLinearStepper steps={steps} updateStepper={props.updateStep ? props.updateStep : 0} extensionFinish={handleSetupFinish} />
     </Paper>
     <Footer/>
