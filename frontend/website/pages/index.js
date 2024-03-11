@@ -198,6 +198,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
           </Grid>
           <br/>
           <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions}/>
+          <br/>
           <Grid item style={{ width : '60%' }} >
             <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>

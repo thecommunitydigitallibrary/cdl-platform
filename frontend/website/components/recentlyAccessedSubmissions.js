@@ -25,8 +25,8 @@ export default function RecentlyAccessedSubmissions({ rec_acc_sub_data }) {
                     flexWrap: 'wrap',
                     '& > :not(style)': {
                         m: 1,
-                        width: 342,
-                        height: 64,
+                        width: 200,
+                        height: 38,
                     },
                 }}
             >
@@ -36,7 +36,7 @@ export default function RecentlyAccessedSubmissions({ rec_acc_sub_data }) {
                         id={index}
                         elevation={0}
                         sx={{
-                            padding: "20px",
+                            padding: "5px",
                             border: "1px solid #ddd",
                             wordBreak: 'break-word'
                         }}
@@ -48,7 +48,7 @@ export default function RecentlyAccessedSubmissions({ rec_acc_sub_data }) {
                                 textAlign: 'center'
                             }}>
                                 <div title={item.explanation} style={{ margin: "0px 0px 0px 0px" }}>
-                                    {item.explanation.length >= 40 ? item.explanation.substring(0, 38) + '...' : item.explanation}
+                                    {item.explanation.length >= 20 ? item.explanation.substring(0, 20) + '...' : item.explanation}
                                 </div>
                             </div>
                         </a>
