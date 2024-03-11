@@ -55,6 +55,87 @@ webpages_elastic_manager = ElasticManager(
     None,
     "webpages")
 
+@functional.route("/api/export", methods=["GET"])
+@token_required
+def export(current_user):
+    search_id = request.args.get("search_id", "")
+    user_id = str(current_user.id)
+
+    all_results = []
+    index = 0
+    try:
+        cache = Cache()
+    except Exception as e:
+        print(e)
+        cache = None
+
+    cdl_searches_clicks = SearchesClicks()
+    cdl_logs = Logs()
+    cdl_webpages = Webpages()
+
+
+
+    prior_search = cdl_searches_clicks.find_one({"_id": ObjectId(search_id)})
+    if prior_search:
+        query = prior_search.query
+        own_submissions = prior_search.own_submissions
+        requested_communities = [str(x) for x in prior_search.community]
+        search_time = prior_search.time
+    else:
+        print("Could not find prior search")
+
+    if cache: 
+        number_of_hits, page = cache.search(user_id, search_id, index)
+        all_results += page
+        number_of_hits = int(number_of_hits)
+        while number_of_hits > (index * 10) + 10:
+            index += 1
+            number_of_hits, page = cache.search(user_id, search_id, index)
+            all_results += page
+    for result in all_results:
+        del result["redirect_url"]
+        del result["display_url"]
+
+        # submission_url is the textdata url to the submission
+        # source_url is the external website (empty is there is none)
+        result["submission_url"] = format_url("", result["submission_id"])
+        if result["orig_url"] == result["submission_url"]:
+            result["source_url"] = ""
+        else:
+            result["source_url"] = result["orig_url"]
+
+
+
+        del result["orig_url"]
+
+        del result["result_hash"]
+
+        if result["type"] == "submission":
+            full_sub = cdl_logs.find_one({"_id": ObjectId(result["submission_id"])})
+            result["description"] = full_sub.highlighted_text
+        else:
+            full_sub = cdl_webpages.find_one({"_id": ObjectId(result["submission_id"])})
+            result["description"] = full_sub.webpage["metadata"]["description"]
+        
+        del result["highlighted_text"]
+
+        result["title"] = result["explanation"]
+        del result["explanation"]
+
+        del result["username"]
+        del result["children"]
+        del result["hashtags"]
+
+
+    return response.success({
+            "query": query,
+            "own_submissions": own_submissions,
+            "search_time": search_time,
+            "requested_communities": requested_communities,
+            "data": all_results,
+        }, Status.OK)
+
+
 
 @functional.route("/api/submission/", methods=["POST"])
 @token_required
@@ -1475,52 +1556,48 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
 
     print("\tSearch start time: ", start_time)
 
-    # Use elastic cache when we don't need to do any reranking or dedup
-    if query == "":
-        # Case where we are viewing own submissions
-        """
-        If the length of requested communities is 1, then add the additional filter of the community id
-        Used for finding all submissions in a community that are submitted by the user
-        """
-        if own_submissions:
-            req_communities = list(communities.keys())
-            if len(req_communities) == 1:
-                number_of_hits, hits = elastic_manager.get_submissions(user_id, community_id=req_communities[0], page=index)
-            else:
-                number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
-        
-        # Case where we are viewing all submissions to a community
-        else:
-            number_of_hits, hits = elastic_manager.get_community(list(communities.keys())[0], page=index)
-        
-        results = create_page(hits, communities)
-        results = hydrate_with_hash_url(results, search_id, page=index)
-        results = hydrate_with_hashtags(results)
-        return number_of_hits, results
+    
+    page = []
+    number_of_hits = -1
+    try:
+        cache = Cache()
+    except Exception as e:
+        print(e)
+        cache = None
+    print("\tcache start time: ", time.time() - start_time)
 
+    if cache:
+        print("\t\tLooking in cache...")
+        number_of_hits, page = cache.search(user_id, search_id, index)
     else:
-        page = []
-        number_of_hits = -1
-        try:
-            cache = Cache()
-        except Exception as e:
-            print(e)
-            cache = None
-        print("\tcache start time: ", time.time() - start_time)
+        print("\t\tCannot find cache")
+        
+    print("\tcache end time: ", time.time() - start_time)
 
-        if cache:
-            print("\t\tLooking in cache...")
-            number_of_hits, page = cache.search(user_id, search_id, index)
-        else:
-            print("\t\tCannot find cache")
+    print("\t\tCache page status: ", number_of_hits)
+
+
+    # If we cannot find cache page, (re)do the search
+    if number_of_hits == -1:
+
+        if query == "":
+            # Case where we are viewing own submissions
+            """
+            If the length of requested communities is 1, then add the additional filter of the community id
+            Used for finding all submissions in a community that are submitted by the user
+            """
+            if own_submissions:
+                req_communities = list(communities.keys())
+                if len(req_communities) == 1:
+                    number_of_hits, hits = elastic_manager.get_submissions(user_id, community_id=req_communities[0], page=index)
+                else:
+                    number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
             
-        print("\tcache end time: ", time.time() - start_time)
-
-        print("\t\tCache page status: ", number_of_hits)
-
-
-        # If we cannot find cache page, (re)do the search
-        if number_of_hits == -1:
+            # Case where we are viewing all submissions to a community
+            else:
+                number_of_hits, hits = elastic_manager.get_community(list(communities.keys())[0], page=index)
+            submission_pages = create_page(hits, communities)
+        else:
             if toggle_submission_results:
                 # when query is not empty and own_submissions is true, send user id to search to scope it
                 if own_submissions:
@@ -1572,7 +1649,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                 print("\tCombined search: ", time.time() - start_time)
 
 
-           
+            
             # removing this for now because we are adding llama chat on neural, and it is a bit slow
             # will reinstate once we can run this independently as to not slow down main search
             if False: #"neural_api" in os.environ:
@@ -1592,20 +1669,20 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                 print("\t Neural Rerank not available")
 
 
-            pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
+            submission_pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
 
-            pages = deduplicate(pages)
-            print("\tDedup: ", time.time() - start_time)
+        pages = deduplicate(submission_pages)
+        print("\tDedup: ", time.time() - start_time)
 
-            pages = hydrate_with_hash_url(pages, search_id, page=index, method=method)
-            print("\tURL: ", time.time() - start_time)
+        pages = hydrate_with_hash_url(pages, search_id, page=index, method=method)
+        print("\tURL: ", time.time() - start_time)
 
-            pages = hydrate_with_hashtags(pages)
-            print("\tHash: ", time.time() - start_time)
+        pages = hydrate_with_hashtags(pages)
+        print("\tHash: ", time.time() - start_time)
 
-            number_of_hits = len(pages)
-            page = cache.insert(user_id, search_id, pages, index)
-            print("\tCache: ", time.time() - start_time)
+        number_of_hits = len(pages)
+        page = cache.insert(user_id, search_id, pages, index)
+        print("\tCache: ", time.time() - start_time)
 
 
     return number_of_hits, page

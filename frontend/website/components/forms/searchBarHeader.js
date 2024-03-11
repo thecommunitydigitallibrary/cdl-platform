@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FormControl, MenuItem, Select, Tooltip } from "@mui/material";
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import { white } from '@mui/material/colors';
+
 import Router, { useRouter } from 'next/router';
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
@@ -26,6 +30,12 @@ function searchBarHeader(props) {
     }
 
     const [inputValue, setInputValue] = useState(initQuery);
+    const [ownSubmissionToggle, setOwnSubmissionToggle] = useState(true)
+
+    const updateOwnSubmissionToggle = async (event) => {
+        const { value, checked } = event.target;
+        setOwnSubmissionToggle(checked)
+    }
 
 
     function handleSuggestionClick(option){
@@ -42,17 +52,21 @@ function searchBarHeader(props) {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
 
+        var q = "/search?query=" +
+        encodeURIComponent(inputValue) +
+        "&community=" +
+        event.target.community.value +
+        "&page=0"
+
+        if (ownSubmissionToggle) {
+            q = q + "&own_submissions=True"
+        }
+
         //No submit on empty query
         if (inputValue.length == 0) {
             return
         } else {
-            Router.push(
-                "/search?query=" +
-                encodeURIComponent(inputValue) +
-                "&community=" +
-                event.target.community.value +
-                "&page=0"
-            );
+            Router.push(q);
         }
     };
 
@@ -102,6 +116,8 @@ function searchBarHeader(props) {
             "&levelfilter=topics"
         );
     }
+
+
 
     return (
         <>
@@ -236,6 +252,20 @@ function searchBarHeader(props) {
                             );
                         })}
                     </Select>
+                </FormControl>
+                <FormControl
+                    sx={{ m: 1, maxWidth: '15%', borderRadius: '5px', float: "left"}}
+                    size="small"
+                >
+                    <FormControlLabel sx={{color: "white"}} 
+                                    control={
+                                        <Checkbox 
+                                            checked={ownSubmissionToggle} 
+                                            sx={{color: "white",'&.Mui-checked': {color: "white",},}}
+                                            onChange={updateOwnSubmissionToggle}
+                                        />
+                                    } 
+                                    label="Only My Submissions"/>
                 </FormControl>
             </form>
         </>
