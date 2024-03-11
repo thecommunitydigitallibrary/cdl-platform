@@ -2,7 +2,7 @@ import json
 import os
 import re
 
-from bson import ObjectId
+from bson import ObjectId, json_util
 from flask import Blueprint, request, redirect
 from flask_cors import CORS
 from textblob import TextBlob
@@ -1445,6 +1445,95 @@ def get_recommendations(current_user, toggle_webpage_results = True):
         print(e)
         traceback.print_exc()
         return response.error("Failed to get recommendation, please try again later.", Status.INTERNAL_SERVER_ERROR)
+
+@functional.route("/api/submission/recentlyaccessed",methods=["GET"])
+@token_required
+def get_recently_accessed_submissions(current_user):
+    try:
+        user_id = current_user.id
+        query =[
+                    {
+                        '$match': {
+                            'user_id': user_id, 
+                            'type': 'submission_view'
+                        }
+                    }, {
+                        '$group': {
+                            '_id': '$submission_id', 
+                            'mostRecentTime': {
+                                '$max': '$time'
+                            }
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'logs', 
+                            'localField': '_id', 
+                            'foreignField': '_id', 
+                            'as': 'logs_info'
+                        }
+                    }, {
+                        '$match': {
+                            'logs_info': {
+                                '$not': {
+                                    '$elemMatch': {
+                                        'deleted': {
+                                            '$exists': True
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }, {
+                        '$sort': {
+                            'mostRecentTime': -1
+                        }
+                    }, {
+                        '$project': {
+                            '_id': 0, 
+                            'submission_id': '$_id', 
+                            'source_url': '$logs_info.source_url', 
+                            'explanation': '$logs_info.explanation', 
+                            'communities': '$logs_info.communities'
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$explanation', 
+                            'preserveNullAndEmptyArrays': True
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$source_url', 
+                            'preserveNullAndEmptyArrays': True
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$community', 
+                            'preserveNullAndEmptyArrays': True
+                        }
+                    }, {
+                        '$limit': 10
+                    }
+                ]        
+        cdl_logs = SearchesClicks()
+        user_recent_submissions = cdl_logs.aggregate(query)
+        user_recent_submissions_list = list(user_recent_submissions)
+        json_user_recent_submissions_list = json.loads(json_util.dumps(user_recent_submissions_list))
+        updated_user_recent_submissions_list = []
+        for item in json_user_recent_submissions_list:
+            submission_id_value = item["submission_id"]["$oid"]
+            submission_url = format_url("",submission_id_value)
+            updated_item = {
+                "explanation" : item["explanation"],
+                "submission_url" : submission_url
+            }
+            updated_user_recent_submissions_list.append(updated_item)
+        return updated_user_recent_submissions_list
+
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return response.error("Failed to get recently accessed submissions, please try again later.", Status.INTERNAL_SERVER_ERROR)
+    
 
 ### HELPERS that cannot be removed (yet)###
 

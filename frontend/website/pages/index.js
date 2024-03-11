@@ -15,15 +15,17 @@ import { useEffect, useState } from "react";
 import { Button, IconButton } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
 import { Router, useRouter } from "next/router";
+import RecentlyAccessedSubmissions from "../components/recentlyAccessedSubmissions";
 import Setup from "./setup";
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const recommendationsEndPoint = "recommend";
+const recentlyAccessedSubmissionsEndpoint = "submission/recentlyaccessed";
 const getCommunitiesEndpoint = "getCommunities";
 const searchEndpoint = "search?";
 
-function Home({ data, community_joined_data, user_own_submissions }) {
+function Home({ data, community_joined_data, user_own_submissions,recently_accessed_submissions }) {
 
   const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
@@ -194,7 +196,12 @@ function Home({ data, community_joined_data, user_own_submissions }) {
               <h1>TextData</h1>
             </div>
           </Grid>
-          <br />
+          <br/>
+          <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions}/>
+          <br/>
+          <Grid item style={{ width : '60%' }} >
+            <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
+          </Grid>
           <Grid
             container
             direction="row"
@@ -226,11 +233,6 @@ function Home({ data, community_joined_data, user_own_submissions }) {
             </Grid>
           </Grid>
         </Grid>
-
-        <Grid item marginX="20%">
-          <Divider sx={{ border: 0.5 }} />
-        </Grid>
-        <br />
         <Grid
           container
           display={"flex"}
@@ -271,7 +273,6 @@ function Home({ data, community_joined_data, user_own_submissions }) {
                         hashtags={d.hashtags}
                       ></SearchResult>
                     </div>
-
                   );
                 })}
             </Grid>
@@ -327,6 +328,12 @@ export async function getServerSideProps(context) {
         Authorization: context.req.cookies.token,
       }),
     });
+    var recentlyAccessedSubmissionsURL = baseURL_server + recentlyAccessedSubmissionsEndpoint;
+    const recentlyAccessedSubmissions = await fetch(recentlyAccessedSubmissionsURL,{
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
 
     var communityURL = baseURL_server + getCommunitiesEndpoint;
     const fetchCommunities = await fetch(communityURL, {
@@ -344,22 +351,23 @@ export async function getServerSideProps(context) {
     });
 
     const data = await res.json();
+    const recently_accessed_submissions = await recentlyAccessedSubmissions.json();
     const community_joined_data = await fetchCommunities.json();
     const user_own_submissions = await userOwnSubmissions.json();
     if (fetchCommunities.status == 200) {
       if (res.status == 200) {
         if (userOwnSubmissions.status == 200) {
-          // Pass data to the page via props
-          if (context.query.page == undefined) {
-            data.current_page = "0";
-          } else {
-            data.current_page = context.query.page;
-          }
-          return { props: { data, community_joined_data, user_own_submissions } };
+          if(recentlyAccessedSubmissions.status == 200) {
+            if (context.query.page == undefined) {
+              data.current_page = "0";
+            } else {
+              data.current_page = context.query.page;
+            }
+            return { props: { data , community_joined_data, user_own_submissions, recently_accessed_submissions} };
         }
-
       }
-    } else if (res.status == 404) {
+    }
+  } else if (res.status == 404) {
       return {
         redirect: {
           destination: "/auth",
