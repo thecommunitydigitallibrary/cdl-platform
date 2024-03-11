@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 
-export default function RecentlyAccessedSubmissions({rec_acc_sub_data}) {
+export default function RecentlyAccessedSubmissions({ rec_acc_sub_data }) {
     return (
         <Grid
             container
@@ -26,7 +26,7 @@ export default function RecentlyAccessedSubmissions({rec_acc_sub_data}) {
                     '& > :not(style)': {
                         m: 1,
                         width: 342,
-                        height: 128,
+                        height: 64,
                     },
                 }}
             >
@@ -42,9 +42,13 @@ export default function RecentlyAccessedSubmissions({rec_acc_sub_data}) {
                         }}
                     >
                         <a href={item.submission_url}>
-                            <div style={{ display: "flex" }}>
-                                <div style={{ margin: "0px 0px 0px 0px" }}>
-                                    {item.explanation}
+                            <div style={{
+                                display: "flex", alignItems: 'center',
+                                justifyContent: 'center',
+                                textAlign: 'center'
+                            }}>
+                                <div title={item.explanation} style={{ margin: "0px 0px 0px 0px" }}>
+                                    {item.explanation.length >= 40 ? item.explanation.substring(0, 38) + '...' : item.explanation}
                                 </div>
                             </div>
                         </a>
