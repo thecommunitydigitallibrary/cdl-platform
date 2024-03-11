@@ -248,9 +248,9 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
               <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4>
               :
               <>
-                <h6 style={{ textAlign: 'center' }}> Thanks for creating or joining a new community! Create a submission to get recommendations. <br /> <br />
+                <h6 style={{ textAlign: 'center' }}> No recommendations to display. Try creating a few submissions to see recommendations. <br /> <br />
                   {/* Currently is : href needs to be updated to make new submission model open*/}
-                  <a variant="outline" href={"/communities"}>{" Click here to create a new submission!"}</a></h6>
+                  <a variant="outline" href={"/communities"}>{" Click here to create a community!"}</a></h6>
               </>}
           >
             <Grid item>
