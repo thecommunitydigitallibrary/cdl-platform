@@ -55,7 +55,7 @@ export default function SideNav() {
 
                         <Grid item textAlign={'center'}>
                             <h5 className="text-sm font ">
-                                Quick Access
+                                Your Recent Submissions
                             </h5>
                         </Grid>
 

@@ -12,9 +12,15 @@ import Typography from "@mui/material/Typography";
 import Footer from "../components/footer";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useEffect, useState } from "react";
-import { Button, IconButton } from "@mui/material";
+import { Button, IconButton, Paper } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
 import { Router, useRouter } from "next/router";
+
+import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -128,7 +134,6 @@ function Home({ data }) {
           <link rel="icon" href="/images/tree32.png" />
         </Head>
 
-        {/* <Header /> */}
         <Grid
           container
           display={"flex"}
@@ -137,12 +142,38 @@ function Home({ data }) {
           alignItems={"center"}
         // width={"100%"}
         >
-          <Grid item marginTop={'2%'}>
+
+          <Grid item marginTop={'1%'}>
             <div style={{ textAlign: 'center' }}>
               <h1>TextData</h1>
             </div>
           </Grid>
-          <br />
+          <Grid item>
+            <Paper
+              style={{ width: "100%", height: "50%", padding: "20px", margin: "20px", borderRadius: "20px" }}
+            >
+              <div>
+                <Accordion defaultExpanded>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel3-content"
+                    id="panel3-header"
+                  >
+                    Chat Window
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+                    malesuada lacus ex, sit amet blandit leo lobortis eget.
+                  </AccordionDetails>
+                  {/* <AccordionActions>
+                <Button>Cancel</Button>
+                <Button>Agree</Button>
+              </AccordionActions> */}
+                </Accordion>
+              </div>
+            </Paper>
+
+          </Grid>
           <Grid
             container
             direction="row"

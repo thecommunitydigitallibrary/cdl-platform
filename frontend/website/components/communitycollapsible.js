@@ -27,7 +27,8 @@ export function CollapsibleCommunity({ community }) {
 
     const handleCommunityClick = async () => {
 
-        const res = await fetch(BASE_URL_CLIENT + SEARCH_ENDPOINT + "?own_submissions=True&community=" + community.community_id, {
+        // added source=sidebar to the url
+        const res = await fetch(BASE_URL_CLIENT + SEARCH_ENDPOINT + "?source=sidebar&own_submissions=True&community=" + community.community_id, {
             method: "GET",
             headers: new Headers({
                 Authorization: jsCookie.get("token"),
