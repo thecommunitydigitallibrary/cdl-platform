@@ -339,6 +339,7 @@ export default function ImgMediaCard({ setUrlState }) {
 
   return (
     <div>
+      {document.querySelectorAll('input[type=text], textarea').forEach(field => field.spellcheck = true)}
       <Box
         component="form"
         sx={{

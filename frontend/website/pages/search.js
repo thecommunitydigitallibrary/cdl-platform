@@ -107,19 +107,16 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         <div className="searchR">
           {/* <Header /> */}
         </div>
-        <hr />
 
         <div style={{ textAlign: 'center', height: '300px' }}>
           <div>
-            <h6>Search Results</h6>{" "}
-            {data.query == "" ? (
-              <h6>No results found.</h6>
-            ) : (
-              <h6>
-                {" "}
-                No results found for <i>"{data.query}" </i> in {searchedCommunity}
-              </h6>
-            )}
+            <Grid item sx={{ textAlign: 'center' }}>
+              <h4>Search Results</h4>{" "}
+              {<h6>Community: {searchedCommunity}</h6>}
+              {own_submissions && <h6>Filtered by your own submissions</h6>}
+            </Grid>
+            <hr />
+            <h5>No results found.</h5>
           </div>
         </div>
         {/* <Footer alt={true} /> */}
@@ -138,27 +135,14 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
 
       <Grid container display={"flex"} direction={"column"} justifyContent={"center"} alignItems={"center"}>
 
-        {own_submissions && (
-          <>
-            <Grid item sx={{ textAlign: 'center' }}>
-              <h4>Your Submissions</h4>
-            </Grid>
+        
 
-            <Grid item sx={{ textAlign: 'center' }}>
-              <h6>Total Submissions: {data.total_num_results}</h6>
-            </Grid>
-          </>
-        )}
-        {!own_submissions && (
-
-          <Grid item sx={{ textAlign: 'center' }}>
-            {data.query == "" ? (
-              <h6>Search Results (Total: {data.total_num_results})</h6>
-            ) : (
-              <h6>Search Results for "{data.query}" in {searchedCommunity} (Total: {data.total_num_results})</h6>
-            )}
-          </Grid>
-        )}
+        <Grid item sx={{ textAlign: 'center' }}>
+          <h4>Search Results (Total: {data.total_num_results})</h4>
+          {<h6>Community: {searchedCommunity}</h6>}
+          {own_submissions && <h6>Filtered by your own submissions</h6>}
+          <a target="_blank" and rel="noopener noreferrer" href={"/export?search_id=" + data.search_id}>Export Search Results</a>
+        </Grid>
 
         <Grid item sx={{ textAlign: 'center' }}>
         </Grid>

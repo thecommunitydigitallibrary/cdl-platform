@@ -281,14 +281,14 @@ export default function ({ data }) {
             </h3>
 
             <div className="form-group mt-3">
-              <label>Username</label>
+              <label>Username or Email</label>
               <input
                 type="text"
                 className="form-control mt-1"
                 name="username"
                 onChange={(e) => setUsername(e.target.value)}
                 value={username}
-                placeholder="Enter Username"
+                placeholder="Enter Username or Email"
               />
             </div>
             <div className="form-group mt-3">

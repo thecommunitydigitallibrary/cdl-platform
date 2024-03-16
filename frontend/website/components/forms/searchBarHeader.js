@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FormControl, MenuItem, Select, Tooltip } from "@mui/material";
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import { white } from '@mui/material/colors';
+
 import Router, { useRouter } from 'next/router';
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
@@ -26,6 +30,21 @@ function searchBarHeader(props) {
     }
 
     const [inputValue, setInputValue] = useState(initQuery);
+    const [ownSubmissionToggle, setOwnSubmissionToggle] = useState(true)
+
+    const updateOwnSubmissionToggle = async (event) => {
+        const { value, checked } = event.target;
+        setOwnSubmissionToggle(checked)
+    }
+
+
+    function handleSuggestionClick(option){
+        for (let i = 0; i < suggestions.length; i++) {
+            if (suggestions[i].label == option){
+                window.open(suggestions[i].url)
+            }
+        }
+    }
 
 
 
@@ -33,17 +52,21 @@ function searchBarHeader(props) {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
 
+        var q = "/search?query=" +
+        encodeURIComponent(inputValue) +
+        "&community=" +
+        event.target.community.value +
+        "&page=0"
+
+        if (ownSubmissionToggle) {
+            q = q + "&own_submissions=True"
+        }
+
         //No submit on empty query
         if (inputValue.length == 0) {
             return
         } else {
-            Router.push(
-                "/search?query=" +
-                encodeURIComponent(inputValue) +
-                "&community=" +
-                event.target.community.value +
-                "&page=0"
-            );
+            Router.push(q);
         }
     };
 
@@ -94,6 +117,8 @@ function searchBarHeader(props) {
         );
     }
 
+
+
     return (
         <>
             <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center' }}>
@@ -109,6 +134,9 @@ function searchBarHeader(props) {
                         freeSolo
                         filterOptions={(x) => x}
                         options={suggestions.map((option) => option.label)}
+                        onChange={(event, option) => {
+                            handleSuggestionClick(option);
+                          }}
                         onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
                         value={inputValue}
                         renderInput={(params) => 
@@ -224,6 +252,20 @@ function searchBarHeader(props) {
                             );
                         })}
                     </Select>
+                </FormControl>
+                <FormControl
+                    sx={{ m: 1, maxWidth: '15%', borderRadius: '5px', float: "left"}}
+                    size="small"
+                >
+                    <FormControlLabel sx={{color: "white"}} 
+                                    control={
+                                        <Checkbox 
+                                            checked={ownSubmissionToggle} 
+                                            sx={{color: "white",'&.Mui-checked': {color: "white",},}}
+                                            onChange={updateOwnSubmissionToggle}
+                                        />
+                                    } 
+                                    label="Only My Submissions"/>
                 </FormControl>
             </form>
         </>

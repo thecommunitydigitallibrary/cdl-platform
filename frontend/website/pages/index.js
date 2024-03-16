@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import { Button, IconButton, Paper } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
 import { Router, useRouter } from "next/router";
+import RecentlyAccessedSubmissions from "../components/recentlyAccessedSubmissions";
+import Setup from "./setup";
 
 import Accordion from '@mui/material/Accordion';
 import AccordionActions from '@mui/material/AccordionActions';
@@ -25,8 +27,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const recommendationsEndPoint = "recommend";
+const recentlyAccessedSubmissionsEndpoint = "submission/recentlyaccessed";
+const getCommunitiesEndpoint = "getCommunities";
+const searchEndpoint = "search?";
 
-function Home({ data }) {
+function Home({ data, community_joined_data, user_own_submissions, recently_accessed_submissions }) {
 
   const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
@@ -35,6 +40,62 @@ function Home({ data }) {
   const [endOfRecommendations, setEndOfRecommendations] = useState((data.recommendation_results_page.length) < 10)
   // set 'explore_similar_extension' as default method
   const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
+  const [onboardingStep, setOnboardingStep] = useState(0);
+  let extensionId = "aafcjihpcjlagambenogkhobogekppgp";
+  let imgSrc = "/tree48.png";
+
+  let homePageContent = <Setup head="Onboarding" updateStep={onboardingStep}></Setup>;
+
+  function checkExtension() {
+    const isImagePresent = new Promise((resolve, _) => {
+      const img = new Image();
+      img.src = "chrome-extension://" + extensionId + imgSrc;
+      img.onload = () => {
+        resolve(true);
+      }
+      img.onerror = () => {
+        resolve(false);
+      }
+    });
+    return isImagePresent;
+  }
+
+  async function checkOnboarding() {
+    const img = await checkExtension();
+    if (!img) {
+      if (community_joined_data.community_info.length > 0) {
+        if (user_own_submissions.total_num_results >= 1) {
+          setOnboardingStep(0);
+        } else {
+          setOnboardingStep(3);
+        }
+      }
+      else {
+        setOnboardingStep(1);
+      }
+    } else {
+      if (community_joined_data.community_info.length > 0) {
+        if (!(endOfRecommendations && items.length > 0)) {
+          //if user has created community but no submission
+          setOnboardingStep(3);
+        }
+      } else {
+        setOnboardingStep(2);
+      }
+    }
+  }
+
+  useEffect(async () => {
+    await checkOnboarding();
+  }, []);
+
+  const handleIndexFinish = (data) => {
+    window.location.reload();
+  }
+
+  if (onboardingStep > 0) {
+    homePageContent = <Setup head="Onboarding" updateStep={onboardingStep} setupFinish={handleIndexFinish}></Setup>;
+  }
 
   const fetchNextPage = async () => {
     let pg = page
@@ -125,15 +186,9 @@ function Home({ data }) {
     });
   };
 
-  return (
-    <>
-      <div className="allResults">
-
-        <Head>
-          <title>TextData</title>
-          <link rel="icon" href="/images/tree32.png" />
-        </Head>
-
+  if (onboardingStep == 0) {
+    homePageContent = (
+      <div>
         <Grid
           container
           display={"flex"}
@@ -148,31 +203,11 @@ function Home({ data }) {
               <h1>TextData</h1>
             </div>
           </Grid>
-          <Grid item>
-            <Paper
-              style={{ width: "100%", height: "50%", padding: "20px", margin: "20px", borderRadius: "20px" }}
-            >
-              <div>
-                <Accordion defaultExpanded>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel3-content"
-                    id="panel3-header"
-                  >
-                    Chat Window
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                    malesuada lacus ex, sit amet blandit leo lobortis eget.
-                  </AccordionDetails>
-                  {/* <AccordionActions>
-                <Button>Cancel</Button>
-                <Button>Agree</Button>
-              </AccordionActions> */}
-                </Accordion>
-              </div>
-            </Paper>
-
+          <br />
+          <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions} />
+          <br />
+          <Grid item style={{ width: '60%' }} >
+            <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>
           <Grid
             container
@@ -205,11 +240,6 @@ function Home({ data }) {
             </Grid>
           </Grid>
         </Grid>
-
-        <Grid item marginX="20%">
-          <Divider sx={{ border: 0.5 }} />
-        </Grid>
-        <br />
         <Grid
           container
           display={"flex"}
@@ -225,8 +255,9 @@ function Home({ data }) {
               <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4>
               :
               <>
-                <h6 style={{ textAlign: 'center' }}> There are no new recommendations to show you from your communities. <br /> <br />
-                  <a variant="outline" href={"/communities"}>{" Click here to join or create a community!"}</a></h6>
+                <h6 style={{ textAlign: 'center' }}> No recommendations to display. Try creating a few submissions to see recommendations. <br /> <br />
+                  {/* Currently is : href needs to be updated to make new submission model open*/}
+                  <a variant="outline" href={"/communities"}>{" Click here to create a community!"}</a></h6>
               </>}
           >
             <Grid item>
@@ -249,7 +280,6 @@ function Home({ data }) {
                         hashtags={d.hashtags}
                       ></SearchResult>
                     </div>
-
                   );
                 })}
             </Grid>
@@ -266,7 +296,21 @@ function Home({ data }) {
           }}>
           <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
         </IconButton>}
-        {/* <Footer alt={true} /> */}
+        <Footer alt={true} />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="allResults">
+
+        <Head>
+          <title>TextData</title>
+          <link rel="icon" href="/images/tree32.png" />
+        </Head>
+        <Header />
+        {homePageContent}
       </div>
     </>
   );
@@ -291,16 +335,45 @@ export async function getServerSideProps(context) {
         Authorization: context.req.cookies.token,
       }),
     });
+    var recentlyAccessedSubmissionsURL = baseURL_server + recentlyAccessedSubmissionsEndpoint;
+    const recentlyAccessedSubmissions = await fetch(recentlyAccessedSubmissionsURL, {
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
+
+    var communityURL = baseURL_server + getCommunitiesEndpoint;
+    const fetchCommunities = await fetch(communityURL, {
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
+
+    var searchURL = baseURL_server + searchEndpoint;
+    searchURL += "own_submissions=True" + "&community=all";
+    const userOwnSubmissions = await fetch(searchURL, {
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
 
     const data = await res.json();
-    if (res.status == 200) {
-      // Pass data to the page via props
-      if (context.query.page == undefined) {
-        data.current_page = "0";
-      } else {
-        data.current_page = context.query.page;
+    const recently_accessed_submissions = await recentlyAccessedSubmissions.json();
+    const community_joined_data = await fetchCommunities.json();
+    const user_own_submissions = await userOwnSubmissions.json();
+    if (fetchCommunities.status == 200) {
+      if (res.status == 200) {
+        if (userOwnSubmissions.status == 200) {
+          if (recentlyAccessedSubmissions.status == 200) {
+            if (context.query.page == undefined) {
+              data.current_page = "0";
+            } else {
+              data.current_page = context.query.page;
+            }
+            return { props: { data, community_joined_data, user_own_submissions, recently_accessed_submissions } };
+          }
+        }
       }
-      return { props: { data } };
     } else if (res.status == 404) {
       return {
         redirect: {
@@ -309,7 +382,8 @@ export async function getServerSideProps(context) {
         },
       };
     } else {
-      return { props: { error: "error" } };
+      const error_data = { error: "Something went wrong. Please try again later" };
+      return { props: { error: { error_data } } };
     }
   }
 }
