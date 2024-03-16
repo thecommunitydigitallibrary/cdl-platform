@@ -60,33 +60,6 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                     </div>
                 </Slide>
             </Box>
-
-            {/* <Box>
-                <Button
-                    onClick={handleButtonClick}
-                    variant="contained"
-                    size="small"
-                    endIcon={<ReplyAllOutlined />}
-                    style={{ textTransform: 'none' }}
-                >
-                    Make Submission with Mention
-                </Button>
-
-                <Slide direction="right" in={isTextBoxVisible} mountOnEnter unmountOnExit>
-                    <div style={{ padding: 2 }}>
-                        <SubmissionForm
-                            isAConnection={true}
-                            isTextBoxVisible={isTextBoxVisible}
-                            setTextBoxVisible={setTextBoxVisible}
-                            source_url=""
-                            title=""
-                            description={`[${submissionTitle}](${WEBSITE_URL}submissions/${submissionId})`}
-                            communitiesNameMap={submissionCommunitiesNameMap}
-                        />
-
-                    </div>
-                </Slide>
-            </Box> */}
         </>
     );
 
