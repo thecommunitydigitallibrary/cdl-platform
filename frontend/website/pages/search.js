@@ -135,7 +135,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
 
       <Grid container display={"flex"} direction={"column"} justifyContent={"center"} alignItems={"center"}>
 
-        
+
 
         <Grid item sx={{ textAlign: 'center' }}>
           <h4>Search Results (Total: {data.total_num_results})</h4>

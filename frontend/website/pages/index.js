@@ -296,7 +296,6 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
           }}>
           <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
         </IconButton>}
-        <Footer alt={true} />
       </div>
     );
   }
@@ -309,7 +308,6 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
           <title>TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
-        <Header />
         {homePageContent}
       </div>
     </>
