@@ -15,6 +15,7 @@ from app.helpers.helpers import token_required, build_display_url, build_result_
     format_time_for_display, validate_submission, hydrate_with_hash_url, create_page, hydrate_with_hashtags, \
     deduplicate, combine_pages, standardize_url, extract_hashtags, format_url, build_display_url
 from app.helpers import response
+from app.helpers.helper_constants import RE_URL_DESC
 from app.helpers.status import Status
 from app.helpers.scraper import ScrapeWorker
 from app.helpers.topic_map import TopicMap
@@ -1196,13 +1197,22 @@ def search(current_user):
         if source == "visualizeConnections":
             # Call export with this `search_id` -> list of submissions for that search -> exported_list
             submissions = export_helper(user_id_str, search_id)
+
+            # Prepare a dict to map where a submission is mentioned
+            sub_mentions = {}
+            for obj in submissions['data']:
+                mentions = re.findall(RE_URL_DESC, obj['description'])
+                for mention in mentions:
+                    par_sub_id = mention.split('/')[-1]
+                    if sub_mentions.get(par_sub_id):
+                        sub_mentions[par_sub_id].append(obj['submission_id'])
+                    else:
+                        sub_mentions[par_sub_id] = [obj['submission_id']]
+
+            # Using sub_mentions dict to create mentions
             for obj in submissions['data']:
                 curr_id = obj['submission_id']
-                mentions = []
-                for mention in submissions['data']:
-                    if mention['submission_id'] != curr_id and curr_id in mention['description']:
-                        mentions.append(mention['submission_id'])
-                obj["mentions"] = mentions
+                obj["mentions"] = sub_mentions.get(curr_id, [])
 
             graph_data = prep_subs_viz_conns(submissions['data'])
             return response.success(graph_data, Status.OK)
