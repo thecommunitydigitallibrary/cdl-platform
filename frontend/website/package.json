@@ -27,6 +27,7 @@
     "next-themes": "^0.2.1",
     "react-bootstrap": "^2.7.2",
     "react-client-session": "0.0.8",
+    "react-graph-vis": "^1.0.7",
     "react-force-graph-2d": "^1.23.1",
     "react-force-graph-3d": "^1.23.1",
     "react-infinite-scroll-component": "^6.1.0",

@@ -11,13 +11,17 @@ import Select from "@mui/material/Select";
 import Typography from "@mui/material/Typography";
 import Footer from "../components/footer";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, IconButton } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
 import { Router, useRouter } from "next/router";
 import RecentlyAccessedSubmissions from "../components/recentlyAccessedSubmissions";
 import Setup from "./setup";
+import dynamic from "next/dynamic";
 
+const HomeConnections = dynamic(() => import("./homeconnections"), {
+  ssr: false,
+});
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const recommendationsEndPoint = "recommend";
@@ -26,7 +30,6 @@ const getCommunitiesEndpoint = "getCommunities";
 const searchEndpoint = "search?";
 
 function Home({ data, community_joined_data, user_own_submissions,recently_accessed_submissions }) {
-
   const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
   const [page, setPage] = useState(parseInt(data.current_page) + 1);
@@ -58,7 +61,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
     const img = await checkExtension();
     if (!img) {
       if (community_joined_data.community_info.length > 0) {
-        if (user_own_submissions.total_num_results >= 1) {
+        if (user_own_submissions['nodes'].length >= 1) {
           setOnboardingStep(0);
         } else {
           setOnboardingStep(3);
@@ -199,7 +202,15 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
           <br/>
           <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions}/>
           <br/>
-          <Grid item style={{ width : '60%' }} >
+          <Grid
+            style={{display: "flex", width: "60%", height: "450px", flexDirection: "column"}}>
+              <Grid item width={'95%'}>
+                <h4 style={{marginLeft: "3%"}}>Your Submissions</h4>
+              </Grid>
+              <HomeConnections nds={user_own_submissions['nodes']}
+                               eds={user_own_submissions['edges']}/>
+          </Grid>
+          <Grid item style={{ width : '60%', marginTop: '10px' }} >
             <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>
           <Grid
@@ -343,7 +354,7 @@ export async function getServerSideProps(context) {
     });
 
     var searchURL = baseURL_server + searchEndpoint;
-    searchURL += "own_submissions=True" + "&community=all";
+    searchURL += "own_submissions=True" + "&community=all&source=visualizeConnections";
     const userOwnSubmissions = await fetch(searchURL, {
       headers: new Headers({
         Authorization: context.req.cookies.token,
