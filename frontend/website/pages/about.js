@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import FrequentlyAskedQuestions from "./faq";
-import Header from "../components/header";
-import Footer from "../components/footer";
 import Head from "next/head";
 import Hero from "../components/homepage/hero";
 import SectionTitle from "../components/homepage/sectionTitle";
@@ -9,10 +7,6 @@ import { benefitOne, benefitTwo, benefitThree, benefitFour } from "../components
 import Benefits from "../components/homepage/benefits";
 import Testimonials from "../components/homepage/testimonials";
 import Cta from "../components/homepage/cta";
-import { Chat } from "@mui/icons-material";
-import ChatWindow from "../components/chatwindow";
-import { Accordion, AccordionDetails, AccordionSummary, Paper } from "@mui/material";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 export default function About({ loggedOut }) {
   const [value, setValue] = React.useState(0);
@@ -31,30 +25,7 @@ export default function About({ loggedOut }) {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* {<Header />} */}
       <div className="allResults">
-        <Paper
-          style={{ width: "50%", height: "50%", padding: "20px", margin: "auto", borderRadius: "20px", }}
-        >
-          <div>
-            <Accordion defaultExpanded>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel3-content"
-                id="panel3-header"
-              >
-                Chat Window
-              </AccordionSummary>
-              <AccordionDetails>
-                <ChatWindow />
-              </AccordionDetails>
-              {/* <AccordionActions>
-                <Button>Cancel</Button>
-                <Button>Agree</Button>
-              </AccordionActions> */}
-            </Accordion>
-          </div>
-        </Paper>
         <Hero />
         <SectionTitle
           pretitle="Why TextData?"

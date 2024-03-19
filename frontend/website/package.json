@@ -8,6 +8,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
+    "@fortawesome/fontawesome-free": "^6.5.1",
     "@material-ui/icons": "^4.11.3",
     "@material-ui/utils": "^4.11.3",
     "@mui/base": "5.0.0-alpha.123",

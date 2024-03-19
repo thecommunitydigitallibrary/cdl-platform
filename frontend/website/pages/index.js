@@ -1,6 +1,5 @@
 import Head from "next/head";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Header from "../components/header";
 import SearchResult from "../components/searchresult";
 import jsCookie from "js-cookie";
 import Divider from "@mui/material/Divider";
@@ -8,21 +7,19 @@ import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import Typography from "@mui/material/Typography";
-import Footer from "../components/footer";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useEffect, useState } from "react";
-import { Button, IconButton, Paper } from "@mui/material";
+import { IconButton, Paper } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
 import { Router, useRouter } from "next/router";
 import RecentlyAccessedSubmissions from "../components/recentlyAccessedSubmissions";
 import Setup from "./setup";
 
 import Accordion from '@mui/material/Accordion';
-import AccordionActions from '@mui/material/AccordionActions';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChatWindow from "../components/chatwindow";
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -205,8 +202,29 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
           </Grid>
           <br />
           <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions} />
-          <br />
-          <Grid item style={{ width: '60%' }} >
+
+          {/* for now, adding chatwindow component as part of this accordian, feel free to use jyst the component anywhere else */}
+
+          {/* <ChatWindow /> */}
+
+          <Paper
+            style={{ width: "60%", height: "50%", padding: "15px", margin: "auto", borderRadius: "20px", }}
+          >
+            <Accordion defaultExpanded>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel3-content"
+                id="panel3-header"
+              >
+                Chat with TextData
+              </AccordionSummary>
+              <AccordionDetails>
+                <ChatWindow />
+              </AccordionDetails>
+            </Accordion>
+
+          </Paper>
+          <Grid item style={{ width: '60%', marginTop: '25px' }} >
             <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>
           <Grid
