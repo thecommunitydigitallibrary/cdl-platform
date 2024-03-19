@@ -206,7 +206,7 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
           {/* for now, adding chatwindow component as part of this accordian, feel free to use jyst the component anywhere else */}
 
           {/* <ChatWindow /> */}
-
+  {/*
           <Paper
             style={{ width: "60%", height: "50%", padding: "15px", margin: "auto", borderRadius: "20px", }}
           >
@@ -224,6 +224,7 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
             </Accordion>
 
           </Paper>
+           */}
           <Grid item style={{ width: '60%', marginTop: '25px' }} >
             <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>
