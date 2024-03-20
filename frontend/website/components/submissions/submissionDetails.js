@@ -271,7 +271,6 @@ export default function SubmissionDetails(subData) {
                 setSnackBarProps({ snackBarSeverity: 'success' });
                 console.log('Submission removed from community!')
                 setSnackBarProps({ snackBarMessage: response.message })
-                console.log(snackBarSeverity);
 
                 handleClick();
                 handleCloseDelete();
@@ -296,7 +295,6 @@ export default function SubmissionDetails(subData) {
                 setSnackBarProps({ isSnackBarOpen: true })
                 setSnackBarProps({ snackBarSeverity: 'error' });
                 setSnackBarProps({ snackBarMessage: response.message })
-                console.log(snackBarSeverity);
 
                 handleClick();
             }
