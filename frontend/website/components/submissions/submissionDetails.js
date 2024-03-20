@@ -8,6 +8,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import LocalLibraryRoundedIcon from '@mui/icons-material/LocalLibraryRounded';
 import useSubmissionStore from "../../store/submissionStore";
 import useSnackbarStore from "../../store/snackBar";
+import Alert from '@mui/material/Alert';
 
 export default function SubmissionDetails(subData) {
 
@@ -39,7 +40,6 @@ export default function SubmissionDetails(subData) {
     } = useSubmissionStore();
 
     const { isSnackBarOpen, snackBarMessage, snackBarSeverity, openSnackbar, closeSnackbar, setSnackBarProps } = useSnackbarStore();
-
     const submissionData = subData.data;
 
     const [open, setOpen] = useState(false);
@@ -271,6 +271,7 @@ export default function SubmissionDetails(subData) {
                 setSnackBarProps({ snackBarSeverity: 'success' });
                 console.log('Submission removed from community!')
                 setSnackBarProps({ snackBarMessage: response.message })
+                console.log(snackBarSeverity);
 
                 handleClick();
                 handleCloseDelete();
@@ -295,6 +296,7 @@ export default function SubmissionDetails(subData) {
                 setSnackBarProps({ isSnackBarOpen: true })
                 setSnackBarProps({ snackBarSeverity: 'error' });
                 setSnackBarProps({ snackBarMessage: response.message })
+                console.log(snackBarSeverity);
 
                 handleClick();
             }
@@ -952,12 +954,17 @@ export default function SubmissionDetails(subData) {
                 <Snackbar
                     open={isSnackBarOpen}
                     autoHideDuration={1000}
-                    onClick={closeSnackbar}
-                    message={snackBarMessage}
-                    severity={"red"}
                     onClose={closeSnackbar}
-                />
-
+                    onClick={closeSnackbar}
+                >
+                    <Alert
+                        onClose={closeSnackbar}
+                        severity={snackBarSeverity}
+                        sx={{ width: '100%' }}
+                    >
+                        {snackBarMessage}
+                    </Alert>
+                </Snackbar>
             </Box >
         </>
     )
