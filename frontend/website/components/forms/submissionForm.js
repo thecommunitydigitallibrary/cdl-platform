@@ -72,6 +72,8 @@ export default function SubmissionForm(props) {
     const [sourceURL, setSourceURL] = useState(props?.source_url)
     const [title, setTitle] = useState(props?.title)
     const [description, setDescription] = useState(props?.description)
+    const [mainSubCharCount, setMainSubCharCount] = useState(submissionDescription.length);
+    const [replySubcharCount, setReplySubCharCount] = useState(props.description ? props.description.length : 0);
 
     const [suggestions, setSuggestions] = useState(null)
 
@@ -176,11 +178,13 @@ export default function SubmissionForm(props) {
     }
 
     const setDescriptionListener = async (text) => {
+        
 
         if (props.isAConnection) {
             // console.log('2')
 
             setDescription(text)
+            setReplySubCharCount(text.length);
 
             const regex = /\[\[([^\]]+)\]\]/g;
             const matches = [];
@@ -203,6 +207,7 @@ export default function SubmissionForm(props) {
             // console.log('3')
 
             setSubmissionProps({ submissionDescription: text })
+            setMainSubCharCount(text.length);
             const regex = /\[\[([^\]]+)\]\]/g;
             const matches = [];
             let match;
@@ -473,6 +478,7 @@ export default function SubmissionForm(props) {
                             }}
                         />
                     </div>
+                    <div  style={{ marginLeft: '1250px'}}>{replySubcharCount} / 50000 char typed </div>
                     <Box sx={{ bgcolor: 'background.paper' }}>
                         {suggestions ? suggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                         <FormGroup>
@@ -579,6 +585,7 @@ export default function SubmissionForm(props) {
                                         },
                                     }}
                                 />
+                               <div  style={{ marginLeft: '1682px'}}>{mainSubCharCount} / 50000 char typed </div>
                                 <Box sx={{ bgcolor: 'background.paper' }}>
                                     {submissionSuggestions ? submissionSuggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                                 </Box>
@@ -654,6 +661,7 @@ export default function SubmissionForm(props) {
                                     }}
                                 />
                             </div>
+                            <div  style={{ marginLeft: '1682px'}}>{mainSubCharCount} / 50000 char typed </div>
                         </div>
                     }
 
@@ -745,6 +753,7 @@ export default function SubmissionForm(props) {
                                     }}
                                 />
                             </div>
+                            <div  style={{ marginLeft: '1682px'}}>{mainSubCharCount} / 50000 char typed </div>
                             <Box sx={{ bgcolor: 'background.paper' }}>
                                 {submissionSuggestions ? submissionSuggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                             </Box>
