@@ -41,6 +41,7 @@ export default function ReleaseLog() {
       </h5>
         <ul className="list-disc pl-6">
             <li className="list-item">Extension caching for taking notes on webpage</li>
+            <li className="list-item">Homepage recently accessed submissions</li>
             <li className="list-item">Friendlier user onboarding</li>
             <li className="list-item">Log in with username or email in extension</li>
             <li className="list-item">Clicking autocomplete redirects to submission page</li>
