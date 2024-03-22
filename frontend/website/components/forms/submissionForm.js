@@ -585,7 +585,7 @@ export default function SubmissionForm(props) {
                                         },
                                     }}
                                 />
-                               <div  style={{ marginLeft: '1682px'}}>{mainSubCharCount} / 50000 char typed </div>
+                               <div  style={{ marginLeft: '1682px'}}>{submissionDescription.length} / 50000 char typed </div>
                                 <Box sx={{ bgcolor: 'background.paper' }}>
                                     {submissionSuggestions ? submissionSuggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                                 </Box>
@@ -661,7 +661,7 @@ export default function SubmissionForm(props) {
                                     }}
                                 />
                             </div>
-                            <div  style={{ marginLeft: '1682px'}}>{mainSubCharCount} / 50000 char typed </div>
+                            <div  style={{ marginLeft: '1682px'}}>{submissionDescription.length} / 50000 char typed </div>
                         </div>
                     }
 
@@ -753,7 +753,7 @@ export default function SubmissionForm(props) {
                                     }}
                                 />
                             </div>
-                            <div  style={{ marginLeft: '1682px'}}>{mainSubCharCount} / 50000 char typed </div>
+                            <div  style={{ marginLeft: '1682px'}}>{submissionDescription.length} / 50000 char typed </div>
                             <Box sx={{ bgcolor: 'background.paper' }}>
                                 {submissionSuggestions ? submissionSuggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                             </Box>
