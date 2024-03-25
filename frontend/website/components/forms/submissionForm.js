@@ -824,7 +824,7 @@ export default function SubmissionForm(props) {
                             <Button onClick={props.handle_close}>Cancel</Button>
                             <Button onClick={handleSubmit}>Save</Button>
                         </DialogActions>
-                        <Snackbar open={openSnackbar} autoHideDuration={6000} >
+                        <Snackbar open={openSnackbar} autoHideDuration={10000} >
                             <Alert
                                 severity={severity}
                                 sx={{ width: "100%" }}
