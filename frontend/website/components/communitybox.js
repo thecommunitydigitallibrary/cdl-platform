@@ -129,7 +129,8 @@ export default function CommunityBox(props) {
       query: {
         community: props.communityId,
         communityName: props.name,
-        levelfilter: "hashtags;topics;metadescs"
+        levelfilter: "hashtags;topics;metadescs",
+        source: "visualizeConnections"
       }
     });
   }

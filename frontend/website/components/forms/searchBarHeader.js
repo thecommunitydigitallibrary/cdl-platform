@@ -107,14 +107,17 @@ function searchBarHeader(props) {
         if (inputValue.length == 0) {
             return
         }
-        if(router.asPath.includes("visualizemap"))
-            window.location = "/visualizemap?query=" + encodeURIComponent(inputValue) + "&community=all&levelfilter=topics";
-        Router.push(
-            "/visualizemap?query=" +
+
+        let url = "/visualizemap?query=" +
             encodeURIComponent(inputValue) +
             "&community=all" +
-            "&levelfilter=topics"
-        );
+            "&levelfilter=topics" +
+            "&source=visualizeConnections";
+
+        if(ownSubmissionToggle)
+            url += "&own_submissions=True"
+
+        Router.push(url);
     }
 
 
