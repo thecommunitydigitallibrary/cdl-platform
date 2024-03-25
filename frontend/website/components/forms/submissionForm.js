@@ -361,7 +361,7 @@ export default function SubmissionForm(props) {
                     <TextField
                         margin="dense"
                         id="submissionURL"
-                        label="Submission URL (optional)"
+                        label="Source URL (optional)"
                         fullWidth
                         variant="standard"
                         value={sourceURL}
@@ -505,7 +505,7 @@ export default function SubmissionForm(props) {
                             <TextField
                                 margin="dense"
                                 id="submissionURL"
-                                label="Submission URL (optional)"
+                                label="Source URL (optional)"
                                 fullWidth
                                 variant="standard"
                                 value={submissionSourceUrl}
@@ -666,7 +666,7 @@ export default function SubmissionForm(props) {
                             <TextField
                                 margin="dense"
                                 id="submissionURL"
-                                label="Submission URL (optional)"
+                                label="Source URL (optional)"
                                 fullWidth
                                 variant="standard"
                                 value={submissionSourceUrl}
