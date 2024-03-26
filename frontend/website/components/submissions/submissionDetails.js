@@ -416,18 +416,20 @@ export default function SubmissionDetails(subData) {
             setSubmissionProps({ submissionDisplayUrl: response.display_url ? response.display_url : submissionSourceUrl })
             setSubmissionProps({ submissionHashtags: response.hashtags ? response.hashtags : submissionHashtags })
             setSubmissionProps({ submissionUsername: response.username ? response.username : submissionUsername })
+            return true
 
             // window.location.reload();
         }
         else {
-
-            setSubmissionProps({ submissionTitle: originalTitle })
-            setSubmissionProps({ submissionDescription: originalDescription })
-            setSubmissionProps({ submissionSourceUrl: originalSourceUrl })
+            //if we fail, want to keep the text so that the user can make the necessary changes
+            //setSubmissionProps({ submissionTitle: originalTitle })
+            //setSubmissionProps({ submissionDescription: originalDescription })
+            //setSubmissionProps({ submissionSourceUrl: originalSourceUrl })
 
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'error' });
             setSnackBarProps({ snackBarMessage: 'Changes not saved: ' + response.message })
+            return false
 
 
         }
@@ -467,17 +469,22 @@ export default function SubmissionDetails(subData) {
 
     const submitSubmissionChanges = () => {
 
-        let tempTitle = submissionTitle
-        setSubmissionProps({ originalTitle: tempTitle })
+        
 
-        let tempDesc = submissionDescription
-        setSubmissionProps({ originalDescription: tempDesc })
+        handleSubmit().then(isSuccessful => {
+            if(isSuccessful){
+                let tempTitle = submissionTitle
+                setSubmissionProps({ originalTitle: tempTitle })
 
-        let tempSourceUrl = submissionSourceUrl
-        setSubmissionProps({ originalSourceUrl: tempSourceUrl })
+                let tempDesc = submissionDescription
+                setSubmissionProps({ originalDescription: tempDesc })
 
-        handleSubmit()
-        setSubmissionProps({ ...submissionMode, submissionMode: "view" });
+                let tempSourceUrl = submissionSourceUrl
+                setSubmissionProps({ originalSourceUrl: tempSourceUrl })
+                setSubmissionProps({ ...submissionMode, submissionMode: "view" })
+            }
+        })
+        
     }
 
 
@@ -951,7 +958,7 @@ export default function SubmissionDetails(subData) {
 
                 <Snackbar
                     open={isSnackBarOpen}
-                    autoHideDuration={1000}
+                    autoHideDuration={6000}
                     onClose={closeSnackbar}
                     onClick={closeSnackbar}
                 >

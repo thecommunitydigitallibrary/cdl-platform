@@ -283,7 +283,7 @@ export default function Footer(props) {
 
         <Snackbar
           open={showSnackbar}
-          autoHideDuration={2000}
+          autoHideDuration={6000}
           onClose={handleCloseSnackbar}
         >
           <Alert

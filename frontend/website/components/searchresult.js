@@ -380,7 +380,7 @@ function SearchResult(props) {
           </Tooltip>
           <Snackbar
             open={openShareUrlSuccess}
-            autoHideDuration={2000}
+            autoHideDuration={6000}
             onClick={handleCloseSnackbar}
             message={snackBarMessage} //"Link copied: "+shareUrlLink
             action={action}

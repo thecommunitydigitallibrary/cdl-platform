@@ -120,13 +120,18 @@ def get_communities_helper(current_user, return_dict=False):
 					is_admin = True
 			except:
 				pass
-		community_struct.append({
+
+		comm_item = {
 			"community_id": str(community.id),
 			"name": community.name,
 			"description": community.description,
-			"join_key": community.join_key,
 			"is_admin": is_admin
-		})
+		}
+
+		if is_admin:
+			comm_item["join_key"] = community.join_key
+
+		community_struct.append(comm_item)
 
 	if return_dict:
 		new_community_struct = {}
