@@ -36,7 +36,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
   const [latestRecommendationId, setLatestRecommendationId] = useState(data.recommendation_id)
   const [endOfRecommendations, setEndOfRecommendations] = useState((data.recommendation_results_page.length) < 10)
   // set 'explore_similar_extension' as default method
-  const [selectedRecOption, setSelectedRecOption] = useState("explore_similar_extension");
+  const [selectedRecOption, setSelectedRecOption] = useState("recent");
   const [onboardingStep, setOnboardingStep] = useState(0);
   let extensionId = "aafcjihpcjlagambenogkhobogekppgp";
   let imgSrc = "/tree48.png";
@@ -202,10 +202,13 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
           <br/>
           <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions}/>
           <br/>
+          <Grid item style={{ width : '60%', marginTop: '10px' }} >
+            <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
+          </Grid>
           <Grid
             style={{display: "flex", width: "60%", height: "450px", flexDirection: "column"}}>
               <Grid item width={'95%'}>
-                <h4 style={{marginLeft: "3%"}}>Your Submissions</h4>
+                <h4 style={{marginLeft: "3%"}}>Visualizing Your Submissions</h4>
               </Grid>
               <HomeConnections nds={user_own_submissions['nodes']}
                                eds={user_own_submissions['edges']}/>
@@ -232,13 +235,13 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
                   labelId="select-small"
                   id="select-recommendation-type"
                   name="method"
-                  defaultValue={"explore_similar_extension"}
+                  defaultValue={"recent"}
                   value={selectedRecOption}
                   onChange={handleRecTypeChange}
                 >
                   {/* Currently is : User Submission History + Extension opens searches*/}
                   <MenuItem value="explore_similar_extension">Explore</MenuItem>
-                  <MenuItem value="recent">Most Recent</MenuItem>
+                  <MenuItem value="recent">New Submissions</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -259,9 +262,9 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
               <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4>
               :
               <>
-                <h6 style={{ textAlign: 'center' }}> No recommendations to display. Try creating a few submissions to see recommendations. <br /> <br />
+                <h6 style={{ textAlign: 'center' }}> No recommendations to display. <br /> <br />
                   {/* Currently is : href needs to be updated to make new submission model open*/}
-                  <a variant="outline" href={"/communities"}>{" Click here to create a community!"}</a></h6>
+                  <a variant="outline" href={"/communities"}>{" Click here to create or join a community!"}</a></h6>
               </>}
           >
             <Grid item>
@@ -333,7 +336,7 @@ export async function getServerSideProps(context) {
     };
   } else {
     var recommendationURL = baseURL_server + recommendationsEndPoint;
-    recommendationURL += "?method=" + "explore_similar_extension" + "&page=0";
+    recommendationURL += "?method=" + "recent" + "&page=0";
     const res = await fetch(recommendationURL, {
       headers: new Headers({
         Authorization: context.req.cookies.token,
