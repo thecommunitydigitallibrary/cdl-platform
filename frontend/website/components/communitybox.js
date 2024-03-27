@@ -140,7 +140,8 @@ export default function CommunityBox(props) {
       query: {
         community: props.communityId,
         communityName: props.name,
-        levelfilter: "hashtags;topics;metadescs"
+        levelfilter: "hashtags;topics;metadescs",
+        source: "visualizeConnections"
       }
     });
   }
@@ -226,15 +227,18 @@ export default function CommunityBox(props) {
           display: "flex",
         }}
       >
-        <Tooltip title={<Typography>Copy Join Key</Typography>}>
-          <IconButton
-            style={{ marginRight: "5px" }}
-            size="small"
-            onClick={copyJoinKey}
-          >
-            <Key />
-          </IconButton>
-        </Tooltip>
+        {props.isAdmin ? (
+          <Tooltip title={<Typography>Copy Join Key</Typography>}>
+            <IconButton
+              style={{ marginRight: "5px" }}
+              size="small"
+              onClick={copyJoinKey}
+            >
+              <Key />
+            </IconButton>
+          </Tooltip>
+        ) : null}
+        
         {/* // Visibility toggle not intended for next release
           <Tooltip title="Toggle Permissions">
             <IconButton size="small">
@@ -342,7 +346,7 @@ export default function CommunityBox(props) {
           </Button>
         </DialogActions>
       </Dialog>
-      <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
           {message}
         </Alert>

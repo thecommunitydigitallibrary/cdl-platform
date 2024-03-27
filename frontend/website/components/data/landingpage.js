@@ -52,7 +52,7 @@ const benefitTwo = {
   bullets: [
     {
       title: "Optionally Add an External URL",
-      desc: "Adding a Submission URL will link your notes to an external webpage. Use this to take notes with respect to something online (e.g., a lecture video).",
+      desc: "Adding a Source URL will link your notes to an external webpage. Use this to take notes with respect to something online (e.g., a lecture video).",
       icon: <CreateIcon />,
     },
     {

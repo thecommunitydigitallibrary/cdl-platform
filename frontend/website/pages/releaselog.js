@@ -41,12 +41,16 @@ export default function ReleaseLog() {
       </h5>
         <ul className="list-disc pl-6">
             <li className="list-item">Extension caching for taking notes on webpage</li>
+            <li className="list-item">Homepage recently accessed submissions</li>
             <li className="list-item">Friendlier user onboarding</li>
             <li className="list-item">Log in with username or email in extension</li>
             <li className="list-item">Clicking autocomplete redirects to submission page</li>
             <li className="list-item">Increased submission description length to 5,000 words / 50,000 characters</li>
             <li className="list-item">Export JSON of search results</li>
             <li className="list-item">Restrict search to only your submissions</li>
+            <li className="list-item">Connection-based visualizations on the homepage, search, and community</li>
+            <li className="list-item">Character counter (max 50,000) on submission description</li>
+            <li className="list-item">Sidebar drawer for a user's most recently made submissions per community</li>
         </ul>
       
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
@@ -56,8 +60,8 @@ export default function ReleaseLog() {
             <li className="list-item">State updates for submission page</li>
             <li className="list-item">Accidental edit when creating new submission from existing page</li>
             <li className="list-item">Extension save/find page toggle no longer stuck on find</li>
-            <li className="list-item">Visualization filter change now doesn't throw application error</li>
-
+            <li className="list-item">Original visualization filter change now doesn't throw application error</li>
+            <li className="list-item">Save and error on submission does not discard changes</li>
         </ul>
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
         Miscellaneous
@@ -65,6 +69,8 @@ export default function ReleaseLog() {
         <ul className="list-disc pl-6">
             <li className="list-item">Refactored search bar in extension</li>
             <li className="list-item">Fixed markdown in extension to be only light mode</li>
+            <li className="list-item">Homepage recommendation default is now most recent</li>
+            <li className="list-item">Remove join key for non-admins</li>
         </ul>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>

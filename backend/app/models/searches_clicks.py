@@ -13,7 +13,7 @@ class SearchesClicks(Mongo):
 
 	def convert(self, click_db):
 
-		if click_db["type"] == "webpage_search":
+		if click_db["type"] in ["webpage_search", "visualizeConnections"]:
 			return SearchClickWebpageSearch(
 				click_db["_id"],
 				click_db["ip"],

@@ -176,7 +176,7 @@ function Communities({ data, history_data }, props) {
               />
             </TabPanel>
           </TabsUnstyled>
-          <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
+          <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
             <Alert
               onClose={handleClose}
               severity={severity}

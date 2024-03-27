@@ -36,16 +36,14 @@ def validate_submission(highlighted_text, explanation, source_url=None):
                 return False, "Error: You cannot submit content on URL " + source_url
 
     char_max_desc = 50000
-    word_max_desc = 5000
 
     char_max_title = 1000
-    word_max_title = 100
 
     # cap highlighted text, explanation length
-    if highlighted_text and (len(highlighted_text) > char_max_desc or len(highlighted_text.split()) > word_max_desc):
-        return False, "The description is too long. Please limit to 5,000 words and 50,000 characters"
-    if explanation and (len(explanation) > char_max_title or len(explanation.split()) > word_max_title):
-        return False, "The title is too long. Please limit to 100 words and 1,000 characters"
+    if highlighted_text and (len(highlighted_text) > char_max_desc):
+        return False, "The description is too long. Please limit to 50,000 characters"
+    if explanation and (len(explanation) > char_max_title):
+        return False, "The title is too long. Please limit to 1,000 characters"
     
     if explanation == "":
         return False, "The title cannot be empty"
