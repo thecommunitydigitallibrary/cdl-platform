@@ -253,7 +253,7 @@ function SearchResult(props) {
       function (key) {
         return (
           <>
-            <CommunityDisplay k={key} communities_part_of={props.communities_part_of} />
+            <CommunityDisplay k={key} />
           </>
         );
       }
@@ -275,6 +275,7 @@ function SearchResult(props) {
     <Paper
       elevation={0}
       id={"card_id" + props.search_idx}
+      className="mt-2"
       sx={{
         width: '85%',
         padding: "15px",
@@ -438,15 +439,6 @@ function SearchResult(props) {
             </Menu>
           </ButtonGroup>
         </div>
-        {/* <p
-          style={{
-            fontSize: "12px",
-            color: "#808080",
-            margin: "0",
-          }}
-        >
-          {props.display_url} | {new Date(parseInt(props.time)).toLocaleDateString("en-us")} {props.username && " | " + props.username}
-        </p> */}
 
         {/* restricting text to only 500 characters per result to make it more uniform */}
         <p style={{

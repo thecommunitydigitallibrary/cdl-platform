@@ -105,7 +105,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
           <link rel="icon" href="/images/tree32.png" />
         </Head>
         <div className="searchR">
-          {/* <Header /> */}
+
         </div>
 
         <div style={{ textAlign: 'center', height: '300px' }}>
@@ -113,7 +113,10 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
             <Grid item sx={{ textAlign: 'center' }}>
               <h4>Search Results</h4>{" "}
               {<h6>Community: {searchedCommunity}</h6>}
-              <CommunityDisplay k={community.id} communities_part_of={data.communities_part_of} />
+              <Typography>
+                Community: <CommunityDisplay k={community} communities_part_of={Object} />
+              </Typography>
+
               {own_submissions && <h6>Filtered by your own submissions</h6>}
             </Grid>
             <hr />
@@ -132,17 +135,31 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         <link rel="icon" href="/images/tree32.png" />
       </Head>
 
-      {/* <Header /> */}
 
       <Grid id={'searchResultsBlock'} container display={"flex"} direction={"column"} justifyContent={"center"} alignItems={"center"}>
 
+        <Grid container sx={{ position: 'relative' }} justifyContent={'center'}>
+          <Grid item xs={12} sx={{ textAlign: 'center' }}>
+            <h4>Search Results (Total: {data.total_num_results})</h4>
+            {own_submissions && <Typography textAlign={'center'} variant="caption">Filtered by your own submissions</Typography>}
+          </Grid>
+          <Grid item>
 
+            <Typography variant="subtitle2">
+              Community: <CommunityDisplay k={community} />
+            </Typography>
 
-        <Grid item sx={{ textAlign: 'center' }}>
-          <h4>Search Results (Total: {data.total_num_results})</h4>
-          {<h6>Community: {searchedCommunity}</h6>}
-          {own_submissions && <h6>Filtered by your own submissions</h6>}
-          <a target="_blank" and rel="noopener noreferrer" href={"/export?search_id=" + data.search_id}>Export Search Results</a>
+          </Grid>
+          <Grid item sx={{ position: 'absolute', top: 0, right: 0 }}>
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href={"/export?search_id=" + data.search_id}
+              style={{ color: '#1976d2' }}
+            >
+              Export Search Results
+            </a>
+          </Grid>
         </Grid>
 
         <Grid item sx={{ textAlign: 'center' }}>
