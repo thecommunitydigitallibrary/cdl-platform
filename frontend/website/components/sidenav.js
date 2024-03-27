@@ -47,15 +47,12 @@ export default function SideNav() {
                 :
                 <div style={{
                     minWidth: '250px',
-
-                    // border: 'none',
-                    // borderRight: '1px solid #e0e0e0',
                 }}>
                     <Grid container direction={'column'}>
 
                         <Grid item textAlign={'center'}>
                             <h5 className="text-sm font ">
-                                Your Recent Submissions
+                                Your Submissions
                             </h5>
                         </Grid>
 

@@ -58,23 +58,9 @@ export default function Layout({ children }) {
                 <Header />
             </div>
 
-
-            {/* (jsCookie.get("token") == "" || jsCookie.get("token") == undefined) ?
-                <>
-                    {/* <div style={{ marginLeft: '50vh', marginRight: '50vh', marginTop: '15vh', marginBottom: '10vh' }}> 
-                    <Paper style={{ marginLeft: '55vh', marginRight: '55vh', padding: '5vh', marginTop: '15vh', marginBottom: '10vh' }}>
-                        <main>
-                            {children ? children : <div>Nothing to see here</div>}
-                        </main>
-                    </Paper>
-                     </div> 
-                </> */}
-
-
             <div className="h-full max-h-[600px] items-stretch" style={{ marginTop: '70px', display: 'flex' }}>
-                <div style={{ overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'gray white' }}>
+                <div style={{ overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'gray white' }} className='bg-gray-100'>
                     <div>
-                        {/* Include any additional styling or components for SideNav if needed */}
                         <SideNav />
                     </div>
                 </div>
@@ -87,50 +73,9 @@ export default function Layout({ children }) {
                 </div>
             </div>
 
-
             <div>
                 <Footer />
             </div>
-
-
-
-            {/* <ResizablePanelGroup
-                    direction="horizontal"
-                    onLayout={(sizes) => {
-                        document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-                            sizes
-                        )}`
-                    }}
-                    className="h-full max-h-[800px] items-stretch"
-                >
-                    <ResizablePanel
-                        id={0}
-                        defaultSize={265}
-                        collapsedSize={1}
-                        collapsible={true}
-                        minSize={10}
-                        maxSize={15}
-                        onCollapse={(collapsed) => {
-                            setIsCollapsed(collapsed);
-                            document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(collapsed)}`;
-                        }}
-                        className={isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out"}
-                        style={{ overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'gray white' }}>
-                        <SideNav />
-                    </ResizablePanel>
-
-                    <ResizableHandle withHandle id={1} />
-                    <ResizablePanel
-                        id={2}
-                        style={{ scrollbarWidth: 'thin', scrollbarColor: 'transparent transparent' }}
-                        defaultSize={440}
-                        minSize={30}>
-                        <main>
-                            {children ? children : <div>Nothing to see here</div>}
-                        </main>
-                    </ResizablePanel>
-                </ResizablePanelGroup> */}
-
         </>
     );
 }

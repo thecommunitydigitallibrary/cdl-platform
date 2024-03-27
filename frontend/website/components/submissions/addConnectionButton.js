@@ -26,6 +26,7 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
         <>
             <Box style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Button
+                    className='my-1 bg-blue-500 hover:bg-blue-700 cursor-pointer'
                     onClick={handleButtonClick}
                     variant="contained"
                     size="small"

@@ -12,6 +12,7 @@ import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import Divider from "@mui/material/Divider";
 import Footer from "../components/footer";
+import CommunityDisplay from "../components/communityDisplay";
 
 
 
@@ -85,10 +86,9 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
   }
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    var innerDiv = document.querySelector('#searchResultsBlock');
+    innerDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   };
 
 
@@ -113,6 +113,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
             <Grid item sx={{ textAlign: 'center' }}>
               <h4>Search Results</h4>{" "}
               {<h6>Community: {searchedCommunity}</h6>}
+              <CommunityDisplay k={community.id} communities_part_of={data.communities_part_of} />
               {own_submissions && <h6>Filtered by your own submissions</h6>}
             </Grid>
             <hr />
@@ -133,7 +134,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
 
       {/* <Header /> */}
 
-      <Grid container display={"flex"} direction={"column"} justifyContent={"center"} alignItems={"center"}>
+      <Grid id={'searchResultsBlock'} container display={"flex"} direction={"column"} justifyContent={"center"} alignItems={"center"}>
 
 
 
@@ -185,7 +186,9 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
             <div style={{
               textAlign: 'center'
             }}>
-              <Fab variant="extended" sx={{ color: 'white', backgroundColor: '#1976d2' }} onClick={loadMoreResults}> Load More
+              <Fab variant="extended"
+                className="my-1 bg-blue-500 hover:bg-blue-700 cursor-pointer"
+                sx={{ color: 'white', backgroundColor: '#1976d2' }} onClick={loadMoreResults}> Load More
               </Fab>
             </div>}
 
@@ -201,7 +204,8 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
                 </Typography>
 
                 <h1>
-                  <Fab variant="extended" onClick={scrollToTop} sx={{ backgroundColor: '#1976d2' }} >
+                  <Fab
+                    className='my-1 bg-blue-500 hover:bg-blue-700 cursor-pointer' variant="extended" onClick={scrollToTop} sx={{ backgroundColor: '#1976d2' }} >
                     <Typography color={"white"}>
                       Back to top
                     </Typography>

@@ -192,7 +192,6 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
           direction="column"
           justifyContent={"center"}
           alignItems={"center"}
-        // width={"100%"}
         >
 
           <Grid item marginTop={'1%'}>
@@ -206,8 +205,8 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
           {/* for now, adding chatwindow component as part of this accordian, feel free to use jyst the component anywhere else */}
 
           {/* <ChatWindow /> */}
-  {/*
-          <Paper
+
+          {/* <Paper
             style={{ width: "60%", height: "50%", padding: "15px", margin: "auto", borderRadius: "20px", }}
           >
             <Accordion defaultExpanded>
@@ -223,8 +222,8 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
               </AccordionDetails>
             </Accordion>
 
-          </Paper>
-           */}
+          </Paper> */}
+
           <Grid item style={{ width: '60%', marginTop: '25px' }} >
             <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>
@@ -271,7 +270,7 @@ function Home({ data, community_joined_data, user_own_submissions, recently_acce
             hasMore={!endOfRecommendations}
             loader={!endOfRecommendations && <h6 style={{ textAlign: 'center' }} >Loading...</h6>}
             endMessage={endOfRecommendations && items.length > 0 ?
-              <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4>
+              <h4 style={{ textAlign: 'center', marginTop: '15px' }} > You've reached the end of your recommendations.</h4>
               :
               <>
                 <h6 style={{ textAlign: 'center' }}> No recommendations to display. Try creating a few submissions to see recommendations. <br /> <br />

@@ -49,11 +49,11 @@ const ChatWindow = () => {
         //     style={{ width: "60%", height: "50%", padding: "15px", margin: "auto", borderRadius: "20px", }}
         // >
         <div className="flex" style={{ height: '50vh' }}>
-            {/* Conversations List */}
+
             <div className="overflow-auto border-r  p-1" >
 
                 <Button
-                    className="my-1"
+                    className="my-1 bg-blue-500 hover:bg-blue-700 cursor-pointer "
                     variant="contained"
                     onClick={handleButtonClick}
                     startIcon={<ControlPointDuplicateIcon />}
@@ -62,7 +62,6 @@ const ChatWindow = () => {
                 </Button>
 
                 <div className="flex flex-col h-full">
-                    {/* Scrollable Conversations List */}
                     <div className="flex-grow overflow-auto">
                         {conversations.map((conv) => (
                             <div key={conv.id} className={`p-1 hover:bg-gray-100 cursor-pointer ${selectedSource === conv.title ? 'bg-gray-100' : ''}`} onClick={() => setSelectedSource(conv.title)}>
@@ -79,8 +78,6 @@ const ChatWindow = () => {
                 </div>
             </div>
 
-
-            {/* Chat Window */}
             <div className="flex-grow p-2 flex flex-col">
                 <div className="flex-grow overflow-auto">
                     {messages.map((msg) => (

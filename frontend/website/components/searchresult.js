@@ -23,12 +23,13 @@ import TagIcon from '@mui/icons-material/Tag';
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import ShareIcon from "@mui/icons-material/Share";
 
-import { Snackbar, Alert, Box } from "@mui/material";
+import { Snackbar, Alert, Box, Typography } from "@mui/material";
 import React, { useState, useContext, useEffect } from "react";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { Bookmark, BookmarkAddOutlined, Close, Launch } from "@mui/icons-material";
 
 import rehypeSanitize from "rehype-sanitize";
+import CommunityDisplay from "./communityDisplay";
 
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -239,7 +240,7 @@ function SearchResult(props) {
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            fontSize: "15px",
+            fontSize: "14px",
             display: "inline", paddingRight: "15px"
           }}
         >{item}</a>
@@ -251,33 +252,9 @@ function SearchResult(props) {
     var communityNamesList = Object.keys(props.communities_part_of).map(
       function (key) {
         return (
-          <Tooltip title={props.communities_part_of[key]}>
-            <a
-              href={websiteURL + searchEndpoint + "?community=" + key + "&page=0"}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-                fontWeight: "500",
-                fontSize: "0.8125rem",
-                lineHeight: "1.75",
-                letterSpacing: "0.02857em",
-                textTransform: "uppercase",
-                color: "#1976d2",
-                padding: "3px 7px",
-                marginRight: "5px",
-                textDecoration: "none",
-                background: "aliceblue",
-              }}
-            >
-
-              {props.communities_part_of[key].length > 25 ?
-                props.communities_part_of[key].slice(0, 23) + ".."
-                :
-                props.communities_part_of[key]}
-
-            </a>
-          </Tooltip>
+          <>
+            <CommunityDisplay k={key} communities_part_of={props.communities_part_of} />
+          </>
         );
       }
     );
@@ -300,7 +277,7 @@ function SearchResult(props) {
       id={"card_id" + props.search_idx}
       sx={{
         width: '85%',
-        padding: "20px",
+        padding: "15px",
         border: "1px solid #ddd",
         margin: 'auto',
         wordBreak: 'break-word'
@@ -318,28 +295,40 @@ function SearchResult(props) {
             <div>
               <img
                 style={{
-                  width: "20px",
-                  height: "20px",
+                  width: "18px",
+                  height: "18px",
                   verticalAlign: "baseline",
                 }}
                 src={image_url}
               />
             </div>
           </div>
-          <div style={{ margin: "0px 0px 0px 0px" }}>
-            <Tooltip title={props.explanation}>
-              <a
-                style={{
-                  fontSize: "20px", maxWidth: '100%', display: '-webkit-box', WebkitBoxOrient: 'vertical',
-                  WebkitLineClamp: '1', overflow: 'hidden', textOverflow: 'ellipsis'
-                }}
-                href={props.redirect_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {props.explanation}
-              </a>
-            </Tooltip>
+          <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            <div>
+              <Tooltip title={props.explanation}>
+                <a
+                  style={{
+                    fontSize: "18px", maxWidth: '100%', display: '-webkit-box', WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: '1', overflow: 'hidden', textOverflow: 'ellipsis'
+                  }}
+                  href={props.redirect_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {props.explanation}
+                </a>
+              </Tooltip>
+            </div>
+
+            <p
+              style={{
+                fontSize: "12px",
+                color: "#808080",
+                margin: "0",
+              }}
+            >
+              {props.display_url} | {new Date(parseInt(props.time)).toLocaleDateString("en-us")} {props.username && " | " + props.username}
+            </p>
           </div>
 
           <ButtonGroup sx={{ marginLeft: "auto", height: "35px" }}>
@@ -449,38 +438,34 @@ function SearchResult(props) {
             </Menu>
           </ButtonGroup>
         </div>
-        <p
+        {/* <p
           style={{
             fontSize: "12px",
             color: "#808080",
-            margin: "0px 0px 1px 0px",
+            margin: "0",
           }}
         >
           {props.display_url} | {new Date(parseInt(props.time)).toLocaleDateString("en-us")} {props.username && " | " + props.username}
-        </p>
+        </p> */}
 
         {/* restricting text to only 500 characters per result to make it more uniform */}
         <p style={{
-          fontSize: '15px', marginTop: '1%', textAlign: 'justify', maxWidth: '100%',
+          fontSize: '14px', marginTop: '1%', marginBottom: '1%', textAlign: 'justify', maxWidth: '100%',
           display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: '5', overflow: 'hidden', textOverflow: 'ellipsis'
         }}>
           {props.highlighted_text && props.highlighted_text.length > 0 && (
-            // props.highlighted_text
             <span dangerouslySetInnerHTML={{ __html: props.highlighted_text }}></span>
           )}
         </p>
 
         {props.hashtags !== undefined && props.hashtags.length !== 0 &&
-          <div style={{ display: "flex", width: "100%" }}>
-            <div style={{ marginRight: '5px' }}>
-              <Tooltip title="Hashtags">
-                <TagIcon style={{ height: "20px", color: "#1976d2" }} />
-              </Tooltip>
-            </div>
-            <div style={{ overflowX: "auto" }}>
-              <p margin-bottom='auto'>{hashtag_results}</p>
-            </div>
-          </div>}
+          <div style={{ display: "flex", alignItems: "center", marginBottom: '1%' }}>
+            <Tooltip title="Hashtags">
+              <TagIcon style={{ height: "20px", color: "#1976d2", marginRight: '5px' }} />
+            </Tooltip>
+            <Typography variant="body2">{hashtag_results}</Typography>
+          </div>
+        }
 
         <div
           style={{
@@ -553,7 +538,7 @@ function SearchResult(props) {
           </Alert>
         </Snackbar>
       </a>
-    </Paper>
+    </Paper >
   );
 }
 
