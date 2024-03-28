@@ -17,7 +17,8 @@ class Communities(Mongo):
 			join_key=community_db["join_key"],
 			id=community_db["_id"]
 		)
-
+	## TODO update here with community_homepage_url and is_public
+	## just like is_deleted
 	def insert(self, community):
 		community_db = {
 			"name": community.name,

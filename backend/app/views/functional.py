@@ -668,6 +668,9 @@ def submission(current_user, id):
                 community_submissions = {str(cid) for uid in submission.communities for cid in
                                          submission.communities[uid]}
 
+
+                # TODO: check to see if any of the submission's communities are public. if so, break into log and format
+
                 for community in communities:
                     if str(community) in community_submissions:
                         search_id = log_submission_view(ip, user_id, submission.id).inserted_id
@@ -681,7 +684,7 @@ def submission(current_user, id):
                     submission = format_submission_for_display(submission, current_user, search_id)
                     submission["mentions"] = find_mentions(ObjectId(id), rc_dict, current_user, search_id)
                     return response.success({"submission": submission}, Status.OK)
-
+                
                 return response.error("You do not have access to this submission.", Status.FORBIDDEN)
             elif not submission:
                 try:
@@ -1139,6 +1142,7 @@ def search(current_user):
                 except:
                     # need to return community_info for search bar option render
                     return response.error("Community ID is invalid.", Status.INTERNAL_SERVER_ERROR)
+                ## TODO if community is public, allow search
                 if requested_communities[0] not in user_communities:
                     return response.error("You do not have access to this community.", Status.FORBIDDEN)
             # convert communities to str for elastic
@@ -1531,7 +1535,7 @@ def get_recently_accessed_submissions(current_user):
                     'preserveNullAndEmptyArrays': True
                 }
             }, {
-                '$limit': 10
+                '$limit': 12
             }
         ]
         cdl_logs = SearchesClicks()
@@ -1897,6 +1901,8 @@ def format_submission_for_display(submission, current_user, search_id):
     all_added_communities = {str(x): True for all_user in submission["communities"] for x in
                              submission["communities"][all_user]}
 
+    ## TODO create all_public_communities
+
     # need to reconstruct user , but username does not matter
     hydrated_user_communities = \
         get_communities_helper(current_user, return_dict=True)[
@@ -1919,6 +1925,9 @@ def format_submission_for_display(submission, current_user, search_id):
     submission["communities_part_of"] = {str(x): hydrated_user_communities[x]["name"]
                                          for x in hydrated_user_communities
                                          if hydrated_user_communities[x]["valid_action"] != "save"}
+    
+    ## TODO have submission['public_communities_part_of] or, just add the community to communities_part_of
+
 
     # convert some ObjectIDs to strings for serialization
     submission["submission_id"] = str(submission["_id"])
