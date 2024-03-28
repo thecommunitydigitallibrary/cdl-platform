@@ -4,7 +4,7 @@ export default function Hashtags() {
     const { submissionHashtags } = useSubmissionStore();
     if (Array.isArray(submissionHashtags)) {
         return (
-            <div className="flex flex-wrap justify-end">
+            <div className="flex flex-wrap" >
                 {/* justify-end */}
                 {submissionHashtags.map((tag, index) => (
                     <a
@@ -13,7 +13,7 @@ export default function Hashtags() {
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
-                            marginRight: '8px',
+                            marginLeft: '8px',
                             fontSize: 'small',
                         }}
                     >

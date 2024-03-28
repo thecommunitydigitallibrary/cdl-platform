@@ -72,6 +72,9 @@ export default function SubmissionForm(props) {
     const [sourceURL, setSourceURL] = useState(props?.source_url)
     const [title, setTitle] = useState(props?.title)
     const [description, setDescription] = useState(props?.description)
+    const [mainSubCharCount, setMainSubCharCount] = useState(submissionDescription.length);
+    const [replySubcharCount, setReplySubCharCount] = useState(props.description ? props.description.length : 0);
+    const [replySubWordCount, setreplySubWordCount] = useState(props.description ? props.description.split(/\s+/).filter(Boolean).length : 0)
 
     const [suggestions, setSuggestions] = useState(null)
 
@@ -83,6 +86,13 @@ export default function SubmissionForm(props) {
 
     const [isAnonymous, setAnonymous] = useState(props?.username == undefined)
 
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === "clickaway") {
+          return;
+        }
+        setOpenSnackbar(false);
+      };
+    
     const handleAnonymous = async (event) => {
 
         if (props.isAConnection) {
@@ -176,11 +186,19 @@ export default function SubmissionForm(props) {
     }
 
     const setDescriptionListener = async (text) => {
+        
 
         if (props.isAConnection) {
             // console.log('2')
 
             setDescription(text)
+            setReplySubCharCount(text.length);
+            setreplySubWordCount(text.split(/\s+/).filter(Boolean).length);
+            if(text.split(/\s+/).filter(Boolean).length > 5000 || text.length > 50000) {
+                setSeverity("error");
+                setMessage("The description is too long. Please limit to 5,000 words and 50,000 characters");
+                setOpenSnackbar(true);
+            }
 
             const regex = /\[\[([^\]]+)\]\]/g;
             const matches = [];
@@ -203,6 +221,12 @@ export default function SubmissionForm(props) {
             // console.log('3')
 
             setSubmissionProps({ submissionDescription: text })
+            setMainSubCharCount(text.length);
+            if(text.split(/\s+/).filter(Boolean).length > 5000 || text.length > 50000) {
+                setSeverity("error");
+                setMessage("The description is too long. Please limit to 5,000 words and 50,000 characters");
+                setOpenSnackbar(true);
+            }
             const regex = /\[\[([^\]]+)\]\]/g;
             const matches = [];
             let match;
@@ -473,6 +497,7 @@ export default function SubmissionForm(props) {
                             }}
                         />
                     </div>
+                    <div  style={{ marginLeft: '1050px'}}>{replySubWordCount} / 5000 words typed and {replySubcharCount} / 50000 char typed </div>
                     <Box sx={{ bgcolor: 'background.paper' }}>
                         {suggestions ? suggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                         <FormGroup>
@@ -579,6 +604,15 @@ export default function SubmissionForm(props) {
                                         },
                                     }}
                                 />
+                               <div  style={{ marginLeft: '1500px'}}> {submissionDescription.split(/\s+/).filter(Boolean).length} / 5000 words typed and {submissionDescription.length} / 50000 char typed </div>
+                                <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose} >
+                                    <Alert
+                                        severity={severity}
+                                        sx={{ width: "100%" }}
+                                    >
+                                        {message}
+                                    </Alert>
+                                </Snackbar>
                                 <Box sx={{ bgcolor: 'background.paper' }}>
                                     {submissionSuggestions ? submissionSuggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                                 </Box>
@@ -654,6 +688,15 @@ export default function SubmissionForm(props) {
                                     }}
                                 />
                             </div>
+                            <div  style={{ marginLeft: '1500px'}}> {submissionDescription.split(/\s+/).filter(Boolean).length} / 5000 words typed and {submissionDescription.length} / 50000 char typed </div>
+                            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose} >
+                                <Alert
+                                    severity={severity}
+                                    sx={{ width: "100%" }}
+                                >
+                                    {message}
+                                </Alert>
+                            </Snackbar>
                         </div>
                     }
 
@@ -745,6 +788,7 @@ export default function SubmissionForm(props) {
                                     }}
                                 />
                             </div>
+                            <div  style={{ marginLeft: '1500px'}}> {submissionDescription.split(/\s+/).filter(Boolean).length} / 5000 words typed and {submissionDescription.length} / 50000 char typed </div>
                             <Box sx={{ bgcolor: 'background.paper' }}>
                                 {submissionSuggestions ? submissionSuggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
                             </Box>
