@@ -143,8 +143,8 @@ export default function Footer(props) {
   }
   return (
     <>
-      <Container sx={{ position: 'absolute', bottom: 0 }}>
-        <div className="grid max-w-screen-xl grid-cols-1 gap-10 pt-10 mx-auto mt-5 border-t border-gray-100 dark:border-trueGray-700 lg:grid-cols-5">
+      <div sx={{ position: 'absolute', bottom: 0 }}>
+        <div className="grid max-w-screen-xl grid-cols-1 gap-10 pt-10 mx-auto border-t border-gray-100 dark:border-trueGray-700 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <div>
               {" "}
@@ -161,7 +161,7 @@ export default function Footer(props) {
             </div>
 
             <div className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
-            TextData is an online and open-source platform that helps you save what you know and find what you don't. We offer a stand-alone website and a Chrome extension, all for free.
+              TextData is an online and open-source platform that helps you save what you know and find what you don't. We offer a stand-alone website and a Chrome extension, all for free.
             </div>
 
 
@@ -211,15 +211,15 @@ export default function Footer(props) {
           <div className="">
             <div>Social Media links</div>
             <div className="flex mt-3 space-x-5 text-gray-400 dark:text-gray-500">
-              <a
+              {/* <a
                 href="https://github.com/thecommunitydigitallibrary/cdl-platform"
                 target="_blank"
                 rel="noopener">
                 <span className="sr-only">Twitter</span>
                 <Twitter />
-              </a>
+              </a> */}
               <a
-                href="https://github.com/thecommunitydigitallibrary/cdl-platform"
+                href="https://www.linkedin.com/company/text-data/"
                 target="_blank"
                 rel="noopener">
                 <span className="sr-only">Linkedin</span>
@@ -294,7 +294,7 @@ export default function Footer(props) {
             {message}
           </Alert>
         </Snackbar>
-      </Container>
+      </div>
     </>
   );
 }

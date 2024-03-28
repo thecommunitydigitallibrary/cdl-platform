@@ -1,6 +1,5 @@
 import Head from "next/head";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Header from "../components/header";
 import SearchResult from "../components/searchresult";
 import jsCookie from "js-cookie";
 import Divider from "@mui/material/Divider";
@@ -8,16 +7,20 @@ import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import Typography from "@mui/material/Typography";
-import Footer from "../components/footer";
 import InfiniteScroll from "react-infinite-scroll-component";
 import React, { useEffect, useState } from "react";
-import { Button, IconButton } from "@mui/material";
+import { Paper, Button, IconButton } from "@mui/material";
 import { ArrowUpwardOutlined } from "@mui/icons-material";
 import { Router, useRouter } from "next/router";
 import RecentlyAccessedSubmissions from "../components/recentlyAccessedSubmissions";
 import Setup from "./setup";
 import dynamic from "next/dynamic";
+
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChatWindow from "../components/chatwindow";
 
 const HomeConnections = dynamic(() => import("./homeconnections"), {
   ssr: false,
@@ -29,7 +32,7 @@ const recentlyAccessedSubmissionsEndpoint = "submission/recentlyaccessed";
 const getCommunitiesEndpoint = "getCommunities";
 const searchEndpoint = "search?";
 
-function Home({ data, community_joined_data, user_own_submissions,recently_accessed_submissions }) {
+function Home({ data, community_joined_data, user_own_submissions, recently_accessed_submissions }) {
   const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
   const [page, setPage] = useState(parseInt(data.current_page) + 1);
@@ -43,14 +46,14 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
 
   let homePageContent = <Setup head="Onboarding" updateStep={onboardingStep}></Setup>;
 
-  function checkExtension(){
+  function checkExtension() {
     const isImagePresent = new Promise((resolve, _) => {
       const img = new Image();
       img.src = "chrome-extension://" + extensionId + imgSrc;
       img.onload = () => {
         resolve(true);
       }
-      img.onerror = () =>  {
+      img.onerror = () => {
         resolve(false);
       }
     });
@@ -81,7 +84,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
       }
     }
   }
-  
+
   useEffect(async () => {
     await checkOnboarding();
   }, []);
@@ -89,8 +92,8 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
   const handleIndexFinish = (data) => {
     window.location.reload();
   }
-  
-  if(onboardingStep > 0){
+
+  if (onboardingStep > 0) {
     homePageContent = <Setup head="Onboarding" updateStep={onboardingStep} setupFinish={handleIndexFinish}></Setup>;
   }
 
@@ -108,7 +111,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
       );
       const content = await response.json();
       var tempItems = content.recommendation_results_page
-      if( tempItems < 10){
+      if (tempItems < 10) {
         setEndOfRecommendations(true)
       }
       setItems([...items, ...tempItems]);
@@ -134,7 +137,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
       });
     const content = await response.json();
     let response_rec_id = content.recommendation_id;
-    if(content.recommendation_results_page < 10){ //0 to 10
+    if (content.recommendation_results_page < 10) { //0 to 10
       setEndOfRecommendations(true)
     }
     setLatestRecommendationId(response_rec_id);
@@ -152,7 +155,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
   useEffect(() => {
   }, [latestRecommendationId])
 
-  
+
   useEffect(() => {
   }, [endOfRecommendations])
 
@@ -192,28 +195,28 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
           direction="column"
           justifyContent={"center"}
           alignItems={"center"}
-        // width={"100%"}
         >
-          <Grid item>
+
+          <Grid item marginTop={'1%'}>
             <div style={{ textAlign: 'center' }}>
               <h1>TextData</h1>
             </div>
           </Grid>
-          <br/>
-          <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions}/>
-          <br/>
-          <Grid item style={{ width : '60%', marginTop: '10px' }} >
+          <br />
+          <RecentlyAccessedSubmissions rec_acc_sub_data={recently_accessed_submissions} />
+
+          <Grid item style={{ width: '60%', marginTop: '25px' }} >
             <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>
           <Grid
-            style={{display: "flex", width: "60%", height: "450px", flexDirection: "column"}}>
-              <Grid item width={'95%'}>
-                <h4 style={{marginLeft: "3%"}}>Visualizing Your Submissions</h4>
-              </Grid>
-              <HomeConnections nds={user_own_submissions['nodes']}
-                               eds={user_own_submissions['edges']}/>
+            style={{ display: "flex", width: "60%", height: "450px", flexDirection: "column" }}>
+            <Grid item width={'95%'}>
+              <h4 style={{ marginLeft: "3%" }}>Visualizing Your Submissions</h4>
+            </Grid>
+            <HomeConnections nds={user_own_submissions['nodes']}
+              eds={user_own_submissions['edges']} />
           </Grid>
-          <Grid item style={{ width : '60%', marginTop: '10px' }} >
+          <Grid item style={{ width: '60%', marginTop: '10px' }} >
             <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
           </Grid>
           <Grid
@@ -259,7 +262,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
             hasMore={!endOfRecommendations}
             loader={!endOfRecommendations && <h6 style={{ textAlign: 'center' }} >Loading...</h6>}
             endMessage={endOfRecommendations && items.length > 0 ?
-              <h4 style={{ textAlign: 'center' }} > You've reached the end of your recommendations.</h4>
+              <h4 style={{ textAlign: 'center', marginTop: '15px' }} > You've reached the end of your recommendations.</h4>
               :
               <>
                 <h6 style={{ textAlign: 'center' }}> No recommendations to display. <br /> <br />
@@ -303,8 +306,7 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
           }}>
           <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
         </IconButton>}
-        <Footer alt={true} />
-      </div>     
+      </div>
     );
   }
 
@@ -316,7 +318,6 @@ function Home({ data, community_joined_data, user_own_submissions,recently_acces
           <title>TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
-        <Header />
         {homePageContent}
       </div>
     </>
@@ -343,7 +344,7 @@ export async function getServerSideProps(context) {
       }),
     });
     var recentlyAccessedSubmissionsURL = baseURL_server + recentlyAccessedSubmissionsEndpoint;
-    const recentlyAccessedSubmissions = await fetch(recentlyAccessedSubmissionsURL,{
+    const recentlyAccessedSubmissions = await fetch(recentlyAccessedSubmissionsURL, {
       headers: new Headers({
         Authorization: context.req.cookies.token,
       }),
@@ -371,26 +372,26 @@ export async function getServerSideProps(context) {
     if (fetchCommunities.status == 200) {
       if (res.status == 200) {
         if (userOwnSubmissions.status == 200) {
-          if(recentlyAccessedSubmissions.status == 200) {
+          if (recentlyAccessedSubmissions.status == 200) {
             if (context.query.page == undefined) {
               data.current_page = "0";
             } else {
               data.current_page = context.query.page;
             }
-            return { props: { data , community_joined_data, user_own_submissions, recently_accessed_submissions} };
+            return { props: { data, community_joined_data, user_own_submissions, recently_accessed_submissions } };
+          }
         }
       }
-    }
-  } else if (res.status == 404) {
+    } else if (res.status == 404) {
       return {
         redirect: {
           destination: "/auth",
           permanent: false,
         },
       };
-    }else {
+    } else {
       const error_data = { error: "Something went wrong. Please try again later" };
-      return { props: { error: {error_data} } };
+      return { props: { error: { error_data } } };
     }
   }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FormControl, MenuItem, Select, Tooltip } from "@mui/material";
+import { FormControl, MenuItem, Select, Tooltip, Typography } from "@mui/material";
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { white } from '@mui/material/colors';
@@ -38,9 +38,9 @@ function searchBarHeader(props) {
     }
 
 
-    function handleSuggestionClick(option){
+    function handleSuggestionClick(option) {
         for (let i = 0; i < suggestions.length; i++) {
-            if (suggestions[i].label == option){
+            if (suggestions[i].label == option) {
                 window.open(suggestions[i].url)
             }
         }
@@ -53,10 +53,10 @@ function searchBarHeader(props) {
         event.preventDefault();
 
         var q = "/search?query=" +
-        encodeURIComponent(inputValue) +
-        "&community=" +
-        event.target.community.value +
-        "&page=0"
+            encodeURIComponent(inputValue) +
+            "&community=" +
+            event.target.community.value +
+            "&page=0"
 
         if (ownSubmissionToggle) {
             q = q + "&own_submissions=True"
@@ -70,7 +70,7 @@ function searchBarHeader(props) {
         }
     };
 
-    
+
 
     const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
     const AUTOCOMPLETE_ENDPOINT = baseURL_client + "autocomplete"
@@ -81,16 +81,16 @@ function searchBarHeader(props) {
             const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + inputValue, {
                 method: "GET",
                 headers: new Headers({
-                  Authorization: jsCookie.get("token"),
+                    Authorization: jsCookie.get("token"),
                 }),
-              });
-              const response = await res.json();
-              if (res.status == 200) {
+            });
+            const response = await res.json();
+            if (res.status == 200) {
                 setSuggestions(response.suggestions);
-              } else {
+            } else {
                 console.log(response.message)
                 setSuggestions([])
-              }
+            }
         };
 
         if (inputValue !== '') {
@@ -114,7 +114,7 @@ function searchBarHeader(props) {
             "&levelfilter=topics" +
             "&source=visualizeConnections";
 
-        if(ownSubmissionToggle)
+        if (ownSubmissionToggle)
             url += "&own_submissions=True"
 
         Router.push(url);
@@ -126,7 +126,7 @@ function searchBarHeader(props) {
         <>
             <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center' }}>
 
-                <Stack spacing={2} 
+                <Stack spacing={2}
                     style={{
                         width: props.isSmall ? '260px' : '60%', borderRadius: '5px',
                         position: "relative", paddingRight: "5px"
@@ -139,14 +139,14 @@ function searchBarHeader(props) {
                         options={suggestions.map((option) => option.label)}
                         onChange={(event, option) => {
                             handleSuggestionClick(option);
-                          }}
+                        }}
                         onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
                         value={inputValue}
-                        renderInput={(params) => 
+                        renderInput={(params) =>
                             <TextField {...params}
                                 required
                                 variant="outlined"
-                                sx={{ m:1 }}
+                                sx={{ m: 1 }}
                                 style={{
                                     backgroundColor: 'white', borderRadius: '5px',
                                     position: "relative"
@@ -160,56 +160,56 @@ function searchBarHeader(props) {
                                     ...params.InputProps,
                                     endAdornment: (
                                         <>
-                                           <IconButton type="submit"
-                                            variant="contained"
-                                            sx={{
-                                                border: "1px solid #efffff",
-                                                bgcolor: '#eceff1',
-                                                borderRadius: 1,
-                                                transition: "transform 0.3s ease, width 0.3s ease",
-                                                transform: "translateZ(0)",
-                                                width: '40px',
-                                                "&:hover": {
-                                                    border: "1px solid #eceff1",
-                                                    bgcolor: "#F5F5F5",
-                                                    color: '#696969',
-                                                    transform: "translateZ(30px)",
-                                                    width: '60px'
-                                                },
-                                            }}
+                                            <IconButton type="submit"
+                                                variant="contained"
+                                                sx={{
+                                                    border: "1px solid #efffff",
+                                                    bgcolor: '#eceff1',
+                                                    borderRadius: 1,
+                                                    transition: "transform 0.3s ease, width 0.3s ease",
+                                                    transform: "translateZ(0)",
+                                                    width: '40px',
+                                                    "&:hover": {
+                                                        border: "1px solid #eceff1",
+                                                        bgcolor: "#F5F5F5",
+                                                        color: '#696969',
+                                                        transform: "translateZ(30px)",
+                                                        width: '60px'
+                                                    },
+                                                }}
                                             >
                                                 <Tooltip title={"Search"}>
                                                     <SearchIcon />
                                                 </Tooltip>
                                             </IconButton>
                                             <IconButton
-                                            variant="contained"
-                                            onClick={handleVisualizeCommunity}
-                                            sx={{
-                                                border: "1px solid #efffff",
-                                                bgcolor: '#eceff1',
-                                                borderRadius: 1,
-                                                transition: "transform 0.3s ease, width 0.3s ease",
-                                                transform: "translateZ(0)",
-                                                width: '40px',
-                                                "&:hover": {
-                                                    border: "1px solid #eceff1",
-                                                    bgcolor: "#F5F5F5",
-                                                    color: '#696969',
-                                                    transform: "translateZ(30px)",
-                                                    width: '60px'
-                                                },
-                                            }}
+                                                variant="contained"
+                                                onClick={handleVisualizeCommunity}
+                                                sx={{
+                                                    border: "1px solid #efffff",
+                                                    bgcolor: '#eceff1',
+                                                    borderRadius: 1,
+                                                    transition: "transform 0.3s ease, width 0.3s ease",
+                                                    transform: "translateZ(0)",
+                                                    width: '40px',
+                                                    "&:hover": {
+                                                        border: "1px solid #eceff1",
+                                                        bgcolor: "#F5F5F5",
+                                                        color: '#696969',
+                                                        transform: "translateZ(30px)",
+                                                        width: '60px'
+                                                    },
+                                                }}
                                             >
                                                 <Tooltip title={"Visualize"}>
                                                     <BubbleChartIcon
-                                                    style={{marginLeft: "5px", marginRight: "5px"}}
-                                                    size="medium"
+                                                        style={{ marginLeft: "5px", marginRight: "5px" }}
+                                                        size="medium"
 
-                                                 />
+                                                    />
                                                 </Tooltip>
                                             </IconButton>
-                                            
+
                                         </>
                                     ),
                                     style: {
@@ -219,7 +219,7 @@ function searchBarHeader(props) {
                                 }}
                             />
                         }
-                        
+
                     />
 
 
@@ -227,7 +227,7 @@ function searchBarHeader(props) {
 
 
                 <FormControl
-                    sx={{ m: 1, maxWidth: '25%', backgroundColor: 'white', borderRadius: '5px', float: "left"}}
+                    sx={{ m: 1, maxWidth: '25%', backgroundColor: 'white', borderRadius: '5px', float: "left" }}
                     size="small">
                     <Select
                         style={{ backgroundColor: "white" }}
@@ -257,18 +257,18 @@ function searchBarHeader(props) {
                     </Select>
                 </FormControl>
                 <FormControl
-                    sx={{ m: 1, maxWidth: '15%', borderRadius: '5px', float: "left"}}
-                    size="small"
+                    sx={{ m: 1, maxWidth: '15%', borderRadius: '5px', float: "left" }}
                 >
-                    <FormControlLabel sx={{color: "white"}} 
-                                    control={
-                                        <Checkbox 
-                                            checked={ownSubmissionToggle} 
-                                            sx={{color: "white",'&.Mui-checked': {color: "white",},}}
-                                            onChange={updateOwnSubmissionToggle}
-                                        />
-                                    } 
-                                    label="Only My Submissions"/>
+                    <FormControlLabel sx={{ color: "white" }}
+                        control={
+                            <Checkbox
+                                checked={ownSubmissionToggle}
+                                sx={{ color: "white", '&.Mui-checked': { color: "white", }, }}
+                                onChange={updateOwnSubmissionToggle}
+                            />
+                        }
+
+                        label={<Typography fontSize={'0.8rem'}>Only My Submissions</Typography>} />
                 </FormControl>
             </form>
         </>

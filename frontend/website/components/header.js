@@ -48,6 +48,7 @@ import Image from "next/image";
 import useSubmissionStore from "../store/submissionStore";
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from "../static/constants";
 import useUserDataStore from "../store/userData";
+import useQuickAccessStore from "../store/quickAccessStore";
 
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -356,6 +357,7 @@ function Header(props) {
     },
   });
   const [loggedOut, setLoggedOut] = useState(false);
+  const { communityData, setcommunityData } = useQuickAccessStore();
   const [dropdowndata, setDropDownData] = useState({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -366,6 +368,7 @@ function Header(props) {
 
 
   const getCommunitiesEndpoint = "getCommunities";
+
   const updateDropDownSearch = async () => {
     let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
       method: "GET",
@@ -381,13 +384,15 @@ function Header(props) {
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
 
     setDropDownData(responseComm);
+    setcommunityData(responseComm.community_info);
+
   };
 
   useEffect(() => {
     if (window.localStorage.getItem("dropdowndata")) {
       var responseComm = JSON.parse(window.localStorage.getItem("dropdowndata"))
       setDropDownData(responseComm);
-
+      setcommunityData(responseComm.community_info);
       setUserDataStoreProps({ userCommunities: responseComm.community_info });
       setUserDataStoreProps({ username: responseComm.username });
 
@@ -832,24 +837,6 @@ function Header(props) {
                 <span className="mb-2">TextData</span>
               </div>
 
-              {/* Add links below based on what to show on About page when logged out */}
-
-              {/* Desktop Menu */}
-              {/* <div className="hidden text-center lg:flex lg:items-center">
-                <ul className="items-center justify-end flex-1 pt-6 list-none lg:pt-0 lg:flex">
-                  {Object.entries(loggedOutSettings).map(([key, item]) => (
-
-                    <li key={key}>
-                      <a className="no-underline" href={`/${item.value}`}>
-                        <a className="block px-4 py-2 text-white rounded-md dark:text-white-300 hover:text-white-500 focus:text-white-500 focus:bg-white-100 dark:focus:bg-white-800 focus:outline-none no-underline">
-                          {item.label}
-                        </a>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div> */}
-
               <div className="mr-3 space-x-4 lg:flex nav__item ">
                 {!loggedOut ? (
                   <a href="/" className="w-full px-6 py-2 text-center text-white bg-blue-500 rounded-md lg:ml-5 no-underline">
@@ -865,20 +852,6 @@ function Header(props) {
                 {/* <ThemeChanger /> */}
 
               </div>
-
-              {/* If we decide to add more links to the header, we'll need a collapsabel drawer but not rn. So commenting it out: */}
-
-              {/* {isMedium ? (
-                <Grid item>
-                  <DrawerComp
-                    settings={loggedOutSettings}
-                    handleUserClickMenu={handleUserClickMenu}
-                    handleClickSubmission={handleClickSubmission}
-                    username={dropdowndata.username}
-                    style={{ position: 'sticky', top: '0', right: '0' }}
-                  />
-                </Grid>
-              ) : <></>} */}
             </nav>
           </div>
 

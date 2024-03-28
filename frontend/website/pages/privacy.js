@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
         <title>Privacy Policy - TextData</title>
         <link rel="icon" href="/images/tree32.png" />
       </Head>
-      <Header />
+      {/* <Header /> */}
       <div style={{ padding: "0px 25px" }}>
         <br />
         <br />
@@ -77,7 +77,7 @@ export default function PrivacyPolicy() {
           </li>
           <li>
             <p style={{ fontWeight: "bold", display: "inline" }}>
-              Personalize search and recommendation results. 
+              Personalize search and recommendation results.
             </p> {" "}
             Our backend algorithms use the data that you save to TextData to provide you with relevant information tailored to your interests.
           </li>
@@ -119,7 +119,7 @@ export default function PrivacyPolicy() {
           </li>
         </ul>
       </div>
-      <Footer alt={true} />
+      {/* <Footer alt={true} /> */}
     </>
   );
 }

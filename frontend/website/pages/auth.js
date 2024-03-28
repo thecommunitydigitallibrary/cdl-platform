@@ -11,6 +11,9 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Head from "next/head";
 import { CircularProgress, LinearProgress } from "@mui/material";
+import useCommunitiesStore from "../store/communitiesStore";
+import useUserDataStore from "../store/userData";
+import useQuickAccessStore from "../store/quickAccessStore";
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const getCommunitiesEndpoint = "getCommunities";
@@ -58,7 +61,10 @@ export default function ({ data }) {
   const [authMessage, setAuthMessage] = useState("");
 
 
+  const { communityData, setcommunityData } = useQuickAccessStore();
   const [showProgress, setShowProgress] = useState(false);
+
+  const { setUserDataStoreProps } = useUserDataStore();
 
   const handleClick = () => {
     setOpen(true);
@@ -80,6 +86,10 @@ export default function ({ data }) {
       }),
     });
     const responseComm = await resp.json();
+    // community_info
+
+    setUserDataStoreProps({ userCommunities: responseComm.community_info });
+    setcommunityData(responseComm.community_info);
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
   };
 
@@ -611,4 +621,5 @@ export default function ({ data }) {
         </div>
       </div>
     );
+  else return <div>Refresh</div>;
 }

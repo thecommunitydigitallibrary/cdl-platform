@@ -147,7 +147,7 @@ function Communities({ data, history_data }, props) {
           <title>Manage Communities - TextData</title>
           <link rel="icon" href="/images/tree32.png" />
         </Head>
-        <Box sx={{ width: "100%", paddingTop: "75px" }}>
+        <Box sx={{ width: "100%" }}>
           <div style={{ margin: "25px" }}>
             <p>
               Communities are a way for users to save, search, and share
@@ -155,8 +155,8 @@ function Communities({ data, history_data }, props) {
               information regarding communities and their relationship with
               submissions, please see the usage information on the{" "}
               <a href="/about">About</a> page.
-            </p> 
-            
+            </p>
+
           </div>
           <TabsUnstyled defaultValue={0}>
             <TabsList>
@@ -165,11 +165,11 @@ function Communities({ data, history_data }, props) {
             </TabsList>
             <TabPanel value={0}>
               {" "}
-              <Header />
+              {/* <Header /> */}
               <CommunitiesDeck community_info={data.community_info} />
             </TabPanel>
             <TabPanel value={1}>
-              <Header />
+              {/* <Header /> */}
               <CommunityHistory
                 auth={jsCookie.get("token")}
                 data={history_data}
@@ -186,7 +186,7 @@ function Communities({ data, history_data }, props) {
             </Alert>
           </Snackbar>
         </Box>
-        <Footer alt={true} />
+        {/* <Footer alt={true} /> */}
       </div>
     );
   }

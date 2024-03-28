@@ -3,6 +3,9 @@ import jsCookie from "js-cookie";
 import { Start, Key, VerifiedUser, Person } from "@mui/icons-material";
 import { Card, Tooltip, IconButton, Typography } from "@mui/material";
 import { Snackbar, Alert } from "@mui/material";
+import useCommunitiesStore from "../store/communitiesStore";
+import useUserDataStore from "../store/userData";
+import useQuickAccessStore from "../store/quickAccessStore";
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const getCommunityHistoryEndpoint = "communityHistory";
@@ -13,6 +16,12 @@ function CommunityHistoryEntry(props) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState("error");
+
+
+  const { setUserDataStoreProps } = useUserDataStore();
+
+  const { communityData, setcommunityData } = useQuickAccessStore();
+
   const handleClick = () => {
     setOpen(true);
   };
@@ -35,8 +44,8 @@ function CommunityHistoryEntry(props) {
       handleClick();
     }
   };
-  
-  const updateDropDownSearch = async ()=>{
+
+  const updateDropDownSearch = async () => {
     let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
       method: "GET",
       headers: new Headers({
@@ -45,6 +54,9 @@ function CommunityHistoryEntry(props) {
       }),
     });
     const responseComm = await resp.json();
+
+    setUserDataStoreProps({ userCommunities: responseComm.community_info });
+    setcommunityData(responseComm.community_info);
     localStorage.setItem('dropdowndata', JSON.stringify(responseComm))
   }
 
