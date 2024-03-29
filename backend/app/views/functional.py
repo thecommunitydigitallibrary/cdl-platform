@@ -1787,8 +1787,10 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             submission_pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
 
 
-        pages = deduplicate(submission_pages)
-        print("\tDedup: ", time.time() - start_time)
+            # issue is now that note pages can have same source url but different content
+            # moved inside search
+            submission_pages = deduplicate(submission_pages)
+            print("\tDedup: ", time.time() - start_time)
 
         pages = hydrate_with_hash_url(pages, search_id, page=index, method=method)
         print("\tURL: ", time.time() - start_time)
