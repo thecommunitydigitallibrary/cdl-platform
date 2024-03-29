@@ -1546,11 +1546,15 @@ def get_recently_accessed_submissions(current_user):
         for item in json_user_recent_submissions_list:
             submission_id_value = item["submission_id"]["$oid"]
             submission_url = format_url("", submission_id_value)
-            updated_item = {
-                "explanation": item["explanation"],
-                "submission_url": submission_url
-            }
-            updated_user_recent_submissions_list.append(updated_item)
+            try:
+                updated_item = {
+                    "explanation": item["explanation"],
+                    "submission_url": submission_url
+                }
+                updated_user_recent_submissions_list.append(updated_item)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
         return updated_user_recent_submissions_list
 
     except Exception as e:
@@ -1703,13 +1707,13 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                 req_communities = list(communities.keys())
                 if len(req_communities) == 1:
                     number_of_hits, hits = elastic_manager.get_submissions(user_id, community_id=req_communities[0],
-                                                                           page=index)
+                                                                           page=0, page_size=10000)
                 else:
-                    number_of_hits, hits = elastic_manager.get_submissions(user_id, page=index)
+                    number_of_hits, hits = elastic_manager.get_submissions(user_id, page=0, page_size=10000)
 
             # Case where we are viewing all submissions to a community
             else:
-                number_of_hits, hits = elastic_manager.get_community(list(communities.keys())[0], page=index)
+                number_of_hits, hits = elastic_manager.get_community(list(communities.keys())[0], page=0, page_size=10000)
             submission_pages = create_page(hits, communities)
         else:
             if toggle_submission_results:
@@ -1781,6 +1785,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
                 print("\t Neural Rerank not available")
 
             submission_pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
+
 
         pages = deduplicate(submission_pages)
         print("\tDedup: ", time.time() - start_time)
@@ -1917,7 +1922,8 @@ def format_submission_for_display(submission, current_user, search_id):
             hydrated_user_communities[community_id]["valid_action"] = "save"
 
         del hydrated_user_communities[community_id]["is_admin"]
-        del hydrated_user_communities[community_id]["join_key"]
+        if "join_key" in hydrated_user_communities[community_id]:
+            del hydrated_user_communities[community_id]["join_key"]
         del hydrated_user_communities[community_id]["community_id"]
 
     submission["communities"] = hydrated_user_communities
