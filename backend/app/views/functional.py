@@ -119,7 +119,7 @@ def export_helper(user_id, search_id):
         del result["explanation"]
 
         del result["username"]
-        del result["children"]
+        #del result["children"]
         del result["hashtags"]
 
     return {
