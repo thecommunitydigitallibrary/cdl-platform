@@ -1205,9 +1205,9 @@ def search(current_user):
             # Prepare a dict to map where a submission is mentioned
             sub_mentions = {}
             for obj in submissions['data']:
-                mentions = re.findall(RE_URL_DESC, obj['description'])
+                mentions = re.finditer(RE_URL_DESC, obj['description'])
                 for mention in mentions:
-                    par_sub_id = mention.split('/')[-1]
+                    par_sub_id = mention.group(0)[-24:]
                     if sub_mentions.get(par_sub_id):
                         sub_mentions[par_sub_id].append(obj['submission_id'])
                     else:

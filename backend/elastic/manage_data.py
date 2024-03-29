@@ -135,7 +135,6 @@ class ElasticManager:
             query["query"]["bool"]["must"].append({"match": {"communities": community_id}})
 
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
-        print(r.text)
 
         hits_total_value, hits = self.postprocess(r.text)
         return hits_total_value, hits

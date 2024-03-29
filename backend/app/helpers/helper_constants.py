@@ -27,7 +27,7 @@ SCRAPECODE_TO_MESSAGE_MAP = {
 }
 
 # Visualize Map Constants
-RE_URL_DESC = "\[[a-zA-Z0-9 ]+\]\((.*?)\)"
+RE_URL_DESC = "(\/submissions\/).{24}"
 RE_LECTURE_TAG = "[#][\w]*[\d.\d]*[,]*[1-9]*[.\d]*"
 RE_LECTURE_WITHOUT_TAG = "[Ll][\w ]*[1-9][\d.\d]*[,]*[1-9]*[.\d]*"
 RE_LECTURE_NUM = "[1-9][\d.]*\d*"
