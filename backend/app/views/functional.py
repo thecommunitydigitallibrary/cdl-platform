@@ -1792,7 +1792,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             submission_pages = deduplicate(submission_pages)
             print("\tDedup: ", time.time() - start_time)
 
-        pages = hydrate_with_hash_url(pages, search_id, page=index, method=method)
+        pages = hydrate_with_hash_url(submission_pages, search_id, page=index, method=method)
         print("\tURL: ", time.time() - start_time)
 
         pages = hydrate_with_hashtags(pages)
