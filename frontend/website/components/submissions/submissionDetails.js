@@ -8,6 +8,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import LocalLibraryRoundedIcon from '@mui/icons-material/LocalLibraryRounded';
 import useSubmissionStore from "../../store/submissionStore";
 import useSnackbarStore from "../../store/snackBar";
+import Alert from '@mui/material/Alert';
 
 export default function SubmissionDetails(subData) {
 
@@ -20,6 +21,7 @@ export default function SubmissionDetails(subData) {
         submissionCanDelete,
         originalDescription,
         originalTitle,
+        originalSourceUrl,
         submissionType,
         submissionId,
         submissionCommunitiesNamesList,
@@ -31,14 +33,13 @@ export default function SubmissionDetails(subData) {
         submissionUsername,
         submissionDisplayUrl,
         submissionDate,
-        submisssionRedirectUrl,
+        submissionRedirectUrl,
         isAConnection,
         submissionHashtags,
         setSubmissionProps
     } = useSubmissionStore();
 
     const { isSnackBarOpen, snackBarMessage, snackBarSeverity, openSnackbar, closeSnackbar, setSnackBarProps } = useSnackbarStore();
-
     const submissionData = subData.data;
 
     const [open, setOpen] = useState(false);
@@ -182,7 +183,7 @@ export default function SubmissionDetails(subData) {
                 return (
                     // <Tooltip title={"Go to " + submissionData.submission.communities_part_of[key]}>
 
-                    <Tooltip title={"Go to community"}>
+                    <Tooltip key={key} title={"Go to community"}>
                         <a
                             href={'/' + SEARCH_ENDPOINT + "?community=" + key + "&page=0"}
                             target="_blank"
@@ -246,7 +247,7 @@ export default function SubmissionDetails(subData) {
     const deleteSubmissionfromCommunity = async (event) => {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
-        console.log("removing from these communities", submissionRemoveCommunityIDList);
+        // console.log("removing from these communities", submissionRemoveCommunityIDList);
         // Get the searchId required for POST request
         for (let i = 0; i < submissionRemoveCommunityIDList.length; ++i) {
             var URL =
@@ -266,16 +267,29 @@ export default function SubmissionDetails(subData) {
             const response = await res.json();
             if (response.status == "ok") {
 
-
                 setSnackBarProps({ isSnackBarOpen: true })
                 setSnackBarProps({ snackBarSeverity: 'success' });
-                setSnackBarProps({ snackBarMessage: 'Submission removed from community!' })
+                console.log('Submission removed from community!')
+                setSnackBarProps({ snackBarMessage: response.message })
 
-                setSeverity("success");
-                setMessage("Submission removed from community.");
                 handleClick();
                 handleCloseDelete();
-                window.location.reload();
+
+                let temp = [...submissionCommunitiesNamesList];
+                temp = temp.filter((x) => x.key != submissionRemoveCommunityIDList[i]);
+                setSubmissionProps({ submissionCommunitiesNamesList: temp })
+
+                // add to 'add' dropdown
+                let tempSubmissionSaveCommunityID = submissionSaveCommunityID;
+                tempSubmissionSaveCommunityID.push(submissionRemoveCommunityIDList[i]);
+                setSubmissionProps({ submissionSaveCommunityID: tempSubmissionSaveCommunityID })
+
+                // remove from 'add' dropdown
+                let tempSubmissionRemoveCommunityID = submissionRemoveCommunityID;
+                tempSubmissionRemoveCommunityID = tempSubmissionRemoveCommunityID.filter((x) => x != submissionRemoveCommunityIDList[i]);
+                setSubmissionProps({ submissionRemoveCommunityID: tempSubmissionRemoveCommunityID })
+
+                // window.location.reload();
             } else {
 
                 setSnackBarProps({ isSnackBarOpen: true })
@@ -285,12 +299,13 @@ export default function SubmissionDetails(subData) {
                 handleClick();
             }
         }
+        setSubmissionProps({ submissionRemoveCommunityIDList: [] })
     };
 
     const saveSubmission = async (event) => {
         // Stop the form from submitting and refreshing the page.
         event.preventDefault();
-        console.log("adding to these communities", submissionSaveCommunityIDList);
+        // console.log("adding to these communities", submissionSaveCommunityIDList);
         var i;
         for (i = 0; i < submissionSaveCommunityIDList.length; i++) {
             //addToNewCommunity(saveCommunityIDList[i])
@@ -314,13 +329,52 @@ export default function SubmissionDetails(subData) {
                 setSeverity("success");
                 setMessage("Saved submission successfully!");
                 handleClick();
-                window.location.reload();
+                console.log('Added to community!')
+
+                let temp = submissionCommunitiesNamesList;
+
+                temp.push(<Tooltip key={submissionSaveCommunityIDList[i]} title={"Go to community"}>
+                    <a
+                        href={'/' + SEARCH_ENDPOINT + "?community=" + submissionSaveCommunityIDList[i] + "&page=0"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+
+                        style={{
+                            fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                            fontWeight: "500",
+                            fontSize: "0.8125rem",
+                            lineHeight: "1.75",
+                            letterSpacing: "0.02857em",
+                            textTransform: "uppercase",
+                            color: "#1976D2",
+                            padding: "3px 7px",
+                            marginRight: "5px",
+                            textDecoration: "none",
+                            background: "aliceblue",
+                        }}
+                    >
+                        {submissionCommunitiesNameMap[submissionSaveCommunityIDList[i]]}
+                    </a>
+                </Tooltip>)
+                setSubmissionProps({ submissionCommunitiesNamesList: temp })
+
+                // remove from 'add' dropdown
+                let tempSubmissionSaveCommunityID = submissionSaveCommunityID;
+                tempSubmissionSaveCommunityID = tempSubmissionSaveCommunityID.filter((x) => x != submissionSaveCommunityIDList[i]);
+                setSubmissionProps({ submissionSaveCommunityID: tempSubmissionSaveCommunityID })
+
+                // add to 'remove' dropdown
+                let tempSubmissionRemoveCommunityID = submissionRemoveCommunityID;
+                tempSubmissionRemoveCommunityID.push(submissionSaveCommunityIDList[i]);
+                setSubmissionProps({ submissionRemoveCommunityID: tempSubmissionRemoveCommunityID })
+
             } else {
                 setSeverity("error");
                 setMessage(response.message);
                 handleClick();
             }
         }
+        setSubmissionProps({ submissionSaveCommunityIDList: [] })
     };
 
     const [otherMenuAnchor, setOtherMenuAnchor] = useState(null);
@@ -355,24 +409,29 @@ export default function SubmissionDetails(subData) {
         const response = await res.json();
 
         if (res.status == 200) {
-            console.log('Saved successfully')
+            console.log('Saved successfully', response)
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'success' });
-            setSnackBarProps({ snackBarMessage: 'Saved successfully!' })
+            setSnackBarProps({ snackBarMessage: response.message })
             setSubmissionProps({ submissionDisplayUrl: response.display_url ? response.display_url : submissionSourceUrl })
             setSubmissionProps({ submissionHashtags: response.hashtags ? response.hashtags : submissionHashtags })
             setSubmissionProps({ submissionUsername: response.username ? response.username : submissionUsername })
+            return true
 
             // window.location.reload();
         }
         else {
-
-            setSubmissionProps({ submissionTitle: originalTitle })
-            console.log('resetting to:', originalTitle)
+            //if we fail, want to keep the text so that the user can make the necessary changes
+            //setSubmissionProps({ submissionTitle: originalTitle })
+            //setSubmissionProps({ submissionDescription: originalDescription })
+            //setSubmissionProps({ submissionSourceUrl: originalSourceUrl })
 
             setSnackBarProps({ isSnackBarOpen: true })
             setSnackBarProps({ snackBarSeverity: 'error' });
-            setSnackBarProps({ snackBarMessage: response.message })
+            setSnackBarProps({ snackBarMessage: 'Changes not saved: ' + response.message })
+            return false
+
+
         }
     };
 
@@ -380,28 +439,52 @@ export default function SubmissionDetails(subData) {
 
         if (submissionMode === "edit") {
             let temp = originalDescription
-            if (originalDescription) {
-                setSubmissionProps({ submissionDescription: temp })
-            }
+            // if (originalDescription) {
+            setSubmissionProps({ submissionDescription: temp })
+            // }
             let tempTitle = originalTitle
             if (originalTitle) {
                 setSubmissionProps({ submissionTitle: tempTitle })
             }
+
+            let tempSourceUrl = originalSourceUrl
+            setSubmissionProps({ submissionSourceUrl: tempSourceUrl })
+
+
             setSubmissionProps({ ...submissionMode, submissionMode: "view" });
         } else {
+            let tempDesc = submissionDescription
+            setSubmissionProps({ originalDescription: tempDesc })
+
+            let temp = submissionTitle
+            setSubmissionProps({ originalTitle: temp })
+
+            let tempSourceUrl = submissionSourceUrl
+            setSubmissionProps({ originalSourceUrl: tempSourceUrl })
+
+
             setSubmissionProps({ ...submissionMode, submissionMode: "edit" });
         }
     }
 
     const submitSubmissionChanges = () => {
 
-        let tempTitle = submissionTitle
-        setSubmissionProps({ originalTitle: tempTitle })
+        
 
-        let tempDesc = submissionDescription
-        setSubmissionProps({ originalDescription: tempDesc })
-        handleSubmit()
-        setSubmissionProps({ ...submissionMode, submissionMode: "view" });
+        handleSubmit().then(isSuccessful => {
+            if(isSuccessful){
+                let tempTitle = submissionTitle
+                setSubmissionProps({ originalTitle: tempTitle })
+
+                let tempDesc = submissionDescription
+                setSubmissionProps({ originalDescription: tempDesc })
+
+                let tempSourceUrl = submissionSourceUrl
+                setSubmissionProps({ originalSourceUrl: tempSourceUrl })
+                setSubmissionProps({ ...submissionMode, submissionMode: "view" })
+            }
+        })
+        
     }
 
 
@@ -484,7 +567,17 @@ export default function SubmissionDetails(subData) {
                                                         <Button onClick={handleClickDelete} startIcon={<Delete />} variant="outlined" size="small" color="error">
                                                             Delete
                                                         </Button>
-
+                                                        <Tooltip title="Cancel">
+                                                            <IconButton
+                                                                size="small" color="gray"
+                                                                onClick={changeMode}
+                                                                label="cancel"
+                                                                aria-label="close"
+                                                                variant="outlined"
+                                                            >
+                                                                <CloseOutlined />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     </>
                                                     :
                                                     <Button onClick={changeMode} disabled={submissionMode === "create" && isAConnection} variant="outlined" startIcon={<Edit />} size="small">
@@ -492,20 +585,6 @@ export default function SubmissionDetails(subData) {
                                                     </Button>
                                                 )
 
-                                            }
-
-                                            {submissionMode == "edit" &&
-                                                <Tooltip title="Cancel">
-                                                    <IconButton
-                                                        size="small" color="gray"
-                                                        onClick={changeMode}
-                                                        label="cancel"
-                                                        aria-label="close"
-                                                        variant="outlined"
-                                                    >
-                                                        <CloseOutlined />
-                                                    </IconButton>
-                                                </Tooltip>
                                             }
                                         </>
                                     )
@@ -550,7 +629,7 @@ export default function SubmissionDetails(subData) {
                                         Report submission: {" "}
                                         <a
                                             style={{ fontSize: "20px" }}
-                                            href={submisssionRedirectUrl}
+                                            href={submissionRedirectUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
@@ -724,7 +803,7 @@ export default function SubmissionDetails(subData) {
 
                         </div>
 
-                        {submissionData.submission.type !== "webpage" ? <>
+                        {submissionCanDelete && submissionData.submission.type !== "webpage" ? <>
                             <div style={{
                                 display: "flex",
                                 flex: 1,
@@ -879,13 +958,18 @@ export default function SubmissionDetails(subData) {
 
                 <Snackbar
                     open={isSnackBarOpen}
-                    autoHideDuration={1000}
-                    onClick={closeSnackbar}
-                    message={snackBarMessage}
-                    severity={"red"}
+                    autoHideDuration={6000}
                     onClose={closeSnackbar}
-                />
-
+                    onClick={closeSnackbar}
+                >
+                    <Alert
+                        onClose={closeSnackbar}
+                        severity={snackBarSeverity}
+                        sx={{ width: '100%' }}
+                    >
+                        {snackBarMessage}
+                    </Alert>
+                </Snackbar>
             </Box >
         </>
     )

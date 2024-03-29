@@ -109,7 +109,7 @@ export default function SignIn({setUrlState}) {
               required
               fullWidth
               id="email"
-              label="Username"
+              label="Username or Email"
               name="username"
               autoComplete="email"
               autoFocus

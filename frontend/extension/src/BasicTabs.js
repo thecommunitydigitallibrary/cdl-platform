@@ -4,7 +4,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import SubmitTab from './SubmitTab';
+import SaveTab from './SaveTab';
 import FindTab from './FindTab';
 import SettingsTab from './SettingsTab';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
@@ -48,7 +48,7 @@ function a11yProps(index) {
 }
 
 export default function BasicTabs() {
-  const [value, setValue] = React.useState(localStorage.getItem('defaultTab') === "submit" ? 1 : 2);
+  const [value, setValue] = React.useState(localStorage.getItem('defaultTab') === "save" ? 1 : 2);
   const [url, setUrl] = React.useState();
   const [highlightedText, setHighlightedText] = React.useState();
 
@@ -101,7 +101,7 @@ export default function BasicTabs() {
           <TabPanel value={value} index={0}>
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <SubmitTab setUrlState={setUrlState}/>
+            <SaveTab setUrlState={setUrlState}/>
           </TabPanel>
           <TabPanel value={value} index={2}>
             <FindTab setUrlState={setUrlState}/>

@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+
   html,
   body {
-    @apply dark:bg-trueGray-900;
+    /* @apply dark:bg-trueGray-900; */
   }
 }

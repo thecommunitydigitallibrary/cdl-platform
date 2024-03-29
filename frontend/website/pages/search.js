@@ -12,6 +12,7 @@ import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import Divider from "@mui/material/Divider";
 import Footer from "../components/footer";
+import CommunityDisplay from "../components/communityDisplay";
 
 
 
@@ -85,10 +86,9 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
   }
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    var innerDiv = document.querySelector('#searchResultsBlock');
+    innerDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   };
 
 
@@ -105,24 +105,25 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
           <link rel="icon" href="/images/tree32.png" />
         </Head>
         <div className="searchR">
-          <Header />
-        </div>
-        <hr />
 
-        <div style={{ textAlign: 'center' }}>
+        </div>
+
+        <div style={{ textAlign: 'center', height: '300px' }}>
           <div>
-            <h6>Search Results</h6>{" "}
-            {data.query == "" ? (
-              <h6>No results found.</h6>
-            ) : (
-              <h6>
-                {" "}
-                No results found for <i>"{data.query}" </i> in {searchedCommunity}
-              </h6>
-            )}
+            <Grid item sx={{ textAlign: 'center' }}>
+              <h4>Search Results</h4>{" "}
+              {<h6>Community: {searchedCommunity}</h6>}
+              <Typography>
+                Community: <CommunityDisplay k={community} communities_part_of={Object} />
+              </Typography>
+
+              {own_submissions && <h6>Filtered by your own submissions</h6>}
+            </Grid>
+            <hr />
+            <h5>No results found.</h5>
           </div>
         </div>
-        <Footer alt={true} />
+        {/* <Footer alt={true} /> */}
       </div>
     );
   }
@@ -134,42 +135,52 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         <link rel="icon" href="/images/tree32.png" />
       </Head>
 
-      <Header />
 
-      <Grid container display={"flex"} direction={"column"} justifyContent={"center"} alignItems={"center"}>
+      <Grid id={'searchResultsBlock'} container display={"flex"} direction={"column"} justifyContent={"center"} alignItems={"center"}>
 
-        {own_submissions && (
-          <>
-            <Grid item sx={{ textAlign: 'center' }}>
-              <h4>Your Submissions</h4>
-            </Grid>
-
-            <Grid item sx={{ textAlign: 'center' }}>
-              <h6>Total Submissions: {data.total_num_results}</h6>
-            </Grid>
-          </>
-        )}
-        {!own_submissions && (
-
-          <Grid item sx={{ textAlign: 'center' }}>
-            {data.query == "" ? (
-              <h6>Search Results (Total: {data.total_num_results})</h6>
-            ) : (
-              <h6>Search Results for "{data.query}" in {searchedCommunity} (Total: {data.total_num_results})</h6>
-            )}
+        <Grid container sx={{ position: 'relative' }} justifyContent={'center'}>
+          <Grid item xs={12} sx={{ textAlign: 'center' }}>
+            <h4>Search Results (Total: {data.total_num_results})</h4>
+            {own_submissions && <Typography textAlign={'center'} variant="caption">Filtered by your own submissions</Typography>}
           </Grid>
-        )}
+          <Grid item>
+
+            <Typography variant="subtitle2">
+              Community: <CommunityDisplay k={community} />
+            </Typography>
+
+          </Grid>
+          <Grid item sx={{ position: 'absolute', top: 0, right: 5 }}>
+            <a
+              style={{
+                border: '1px solid #1976d2',
+                padding: '5px 10px',
+                textDecoration: 'none',
+                borderRadius: '5px',
+                display: 'inline-block',
+                margin: '5px',
+                fontSize: '14px',
+              }}
+              target="_blank"
+              rel="noopener noreferrer"
+              href={"/export?search_id=" + data.search_id}
+
+            >
+              Export Search Results
+            </a>
+          </Grid>
+        </Grid>
 
         <Grid item sx={{ textAlign: 'center' }}>
         </Grid>
 
-        <Grid container borderTop={"1px solid lightgray"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+        <Grid container minWidth={'600px'} width={'100ch'} direction={'column'} borderTop={"1px solid lightgray"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
           <InfiniteScroll
             dataLength={items.length}
             next={loadMoreResults}
             hasMore={page % 5 == 0 ? false : true}
             loader="" >
-            <Grid item>
+            <Grid item margin={'auto'}>
               {items !== undefined && items.length !== 0 &&
                 items.map(function (d, idx) {
                   return (
@@ -201,7 +212,9 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
             <div style={{
               textAlign: 'center'
             }}>
-              <Fab variant="extended" sx={{ color: 'white', backgroundColor: '#1976d2' }} onClick={loadMoreResults}> Load More
+              <Fab variant="extended"
+                className="my-1 bg-blue-500 hover:bg-blue-700 cursor-pointer"
+                sx={{ color: 'white', backgroundColor: '#1976d2' }} onClick={loadMoreResults}> Load More
               </Fab>
             </div>}
 
@@ -217,7 +230,8 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
                 </Typography>
 
                 <h1>
-                  <Fab variant="extended" onClick={scrollToTop} sx={{ backgroundColor: '#1976d2' }} >
+                  <Fab
+                    className='my-1 bg-blue-500 hover:bg-blue-700 cursor-pointer' variant="extended" onClick={scrollToTop} sx={{ backgroundColor: '#1976d2' }} >
                     <Typography color={"white"}>
                       Back to top
                     </Typography>
@@ -228,7 +242,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         </Grid>
 
       </Grid>
-      <Footer alt={true} />
+      {/* <Footer alt={true} /> */}
     </div>
   );
 }

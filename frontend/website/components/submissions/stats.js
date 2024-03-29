@@ -23,7 +23,7 @@ export default function SubmissionStatistics() {
                     borderColor: 'gray',
                 }}
             >
-                <Tooltip title="Views">
+                <Tooltip title="The number of times that this submission has been viewed.">
                     <IconButton size="small" aria-label="view">
                         <VisibilityIcon fontSize="small" />
                     </IconButton>
@@ -31,7 +31,7 @@ export default function SubmissionStatistics() {
                 <Typography sx={{ borderRight: '1px solid #ccc', paddingX: '4px', fontSize: '12px', fontWeight: 'bold' }}>
                     {submissionStats.views}
                 </Typography>
-                <Tooltip title="Shares">
+                <Tooltip title="The number of communities that this submission is in.">
                     <IconButton size="small" aria-label="go">
                         <ArrowForwardIcon fontSize="small" />
                     </IconButton>
@@ -39,7 +39,7 @@ export default function SubmissionStatistics() {
                 <Typography sx={{ borderRight: '1px solid #ccc', paddingX: '4px', fontSize: '12px', fontWeight: 'bold' }}>
                     {submissionStats.shares}
                 </Typography>
-                <Tooltip title="Clicks">
+                <Tooltip title="The number times this submission has been clicked in search or recommendation results.">
                     <IconButton size="small" aria-label="touch">
                         <TouchAppIcon fontSize="small" />
                     </IconButton>

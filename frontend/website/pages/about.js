@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import FrequentlyAskedQuestions from "./faq";
-import Header from "../components/header";
-import Footer from "../components/footer";
 import Head from "next/head";
 import Hero from "../components/homepage/hero";
 import SectionTitle from "../components/homepage/sectionTitle";
@@ -9,7 +7,6 @@ import { benefitOne, benefitTwo, benefitThree, benefitFour } from "../components
 import Benefits from "../components/homepage/benefits";
 import Testimonials from "../components/homepage/testimonials";
 import Cta from "../components/homepage/cta";
-
 
 export default function About({ loggedOut }) {
   const [value, setValue] = React.useState(0);
@@ -28,7 +25,6 @@ export default function About({ loggedOut }) {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header />
       <div className="allResults">
         <Hero />
         <SectionTitle
@@ -57,7 +53,7 @@ export default function About({ loggedOut }) {
         </SectionTitle>
         <FrequentlyAskedQuestions />
         <Cta />
-        <Footer />
+
 
       </div>
     </>);

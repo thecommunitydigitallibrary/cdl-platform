@@ -38,3 +38,6 @@ class Mongo(ABC):
 	# Searching all directly to MongoDB without Model
 	def find_db(self, query):
 		return self.collection.find(query)
+
+	def aggregate(self,query):
+		return self.collection.aggregate(query)

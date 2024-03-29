@@ -3,16 +3,12 @@
 import React, { useEffect } from "react";
 import SearchResult from "./searchresult";
 import CircularProgress from "@mui/material/CircularProgress";
-import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import SearchIcon from "@mui/icons-material/Search";
-import Stack from "@mui/material/Stack";
 import axios from "axios";
 import Box from "@mui/material/Box";
 import Snackbar from "@mui/material/Snackbar";
 import { Alert } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import { FormControl, MenuItem, Select } from "@mui/material";
+import SearchBar from "./SearchBar";
 
 let show_relevant = true;
 
@@ -255,26 +251,25 @@ export default function FindTab() {
     });
   };
 
-  let search = async (e) => {
+  let search = async (query) => {
     setSearchStart(true);
     setUserQueried(true);
     var hasHttp = url.includes("http") || url.includes("https");
     if (!hasHttp) {
       setUrl("");
     }
-    e.preventDefault();
     try {
       var config = {
         method: "get",
         url:
           baseURL +
           "search?query=" +
-          encodeURIComponent(text) +
+          encodeURIComponent(query.searchText) +
           "&highlighted_text=" +
           encodeURIComponent(highlightedText) +
           "&url=" +
           encodeURIComponent(url) +
-          "&source=extension_search&page=0&community=" + e.target.community.value,
+          "&source=extension_search&page=0&community="+ query.selectedCommunity,
         headers: {
           Authorization: localStorage.getItem("authToken"),
         },
@@ -322,51 +317,22 @@ export default function FindTab() {
     getSearchSelectionText();
   }, []);
 
-  const onChange = (e) => setText(e.target.value);
+  const onSearch = (query) => {
+    setText(query.searchText);
+    search(query);
+  }
 
-
+  const setTextChanged = (data) => {
+    setText(data);
+  }
+  
   return (
     <div>
-      <form onSubmit={search} sx={{ mt: 1 }}>
-        <Stack direction="row" spacing={2}>
-          <TextField
-            sx={{ ml: 1, flex: 1 }}
-            value={text}
-            onChange={onChange}
-            placeholder="What would you like to know?"
-            id="margin-none"
-            required
-            InputProps={{
-              endAdornment:
-                <IconButton type="submit" variant="contained" >
-                  <SearchIcon />
-                </IconButton>
-            }}
-            autoFocus
-          />
-          <FormControl style={{ maxWidth: 100 }}>
-            <Select
-              style={{ backgroundColor: "white" }}
-              name="community"
-              defaultValue={"all"}
-            >
-              <MenuItem value="all">All</MenuItem>
-              {allCommunities.length > 0 &&
-                allCommunities.map(function (community, idx) {
-                  return (
-                    <MenuItem
-                      key={community.community_id}
-                      value={community.community_id}
-                    >
-                      {community.name}
-                    </MenuItem>);
-                })}
-            </Select>
-          </FormControl>
-
-        </Stack>
-      </form>
-
+      <SearchBar
+        allCommunities={allCommunities}
+        onSearch={onSearch}
+        searchBarTextChanged={setTextChanged}
+      ></SearchBar>
       {!searchStart && searchResults && (
         <div>
           {searchResults.length !== 0 ? (

@@ -22,14 +22,11 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
         setTextBoxVisible(true);
     };
 
-    const handleViewConnectionsClick = () => {
-        setSelectedOption('graph');
-    }
-
     return (
         <>
-            <Box minWidth={'750px'}>
+            <Box style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Button
+                    className='my-1 bg-blue-500 hover:bg-blue-700 cursor-pointer'
                     onClick={handleButtonClick}
                     variant="contained"
                     size="small"
@@ -39,8 +36,19 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                     Make Submission with Mention
                 </Button>
 
-                <Slide direction="left" in={isTextBoxVisible} mountOnEnter unmountOnExit>
-                    <div style={{ padding: 2 }}>
+                <Slide
+                    direction="right"
+                    in={isTextBoxVisible}
+                    mountOnEnter
+                    unmountOnExit
+                    style={{
+                        width: '100%',
+                        padding: 2,
+                        marginTop: 10,
+                        alignSelf: 'flex-end',
+                    }}
+                >
+                    <div>
                         <SubmissionForm
                             isAConnection={true}
                             isTextBoxVisible={isTextBoxVisible}
@@ -50,7 +58,6 @@ const AddConnectionsButton = ({ setSelectedOption }) => {
                             description={`[${submissionTitle}](${WEBSITE_URL}submissions/${submissionId})`}
                             communitiesNameMap={submissionCommunitiesNameMap}
                         />
-
                     </div>
                 </Slide>
             </Box>

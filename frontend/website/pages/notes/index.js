@@ -89,7 +89,7 @@ function Notes({ data }) {
       </Head>
       <div className="allResults">
         <div className="searchR">
-          <Header />
+          {/* <Header /> */}
         </div>
       </div>
 
@@ -139,7 +139,7 @@ function Notes({ data }) {
           )}
         </div>
       </div>
-      <Footer />
+
     </div>
   );
 }

@@ -2,11 +2,11 @@ import Container from "./container";
 import jsCookie from "js-cookie";
 
 import React, { useState, useEffect } from "react";
+import useUserDataStore from "../../store/userData";
 
 const Hero = () => {
 
-
-  const [loggedOut, setLoggedOut] = useState(true);
+  const { isLoggedOut, setLoggedOut } = useUserDataStore();
 
   useEffect(() => {
     setLoggedOut(
@@ -26,12 +26,12 @@ const Hero = () => {
               <b>Save</b> what you know. <b>Find</b> what you don't.
             </h3>
             <p className="py-5 text-xl leading-normal text-gray-500 lg:text-xl xl:text-xl dark:text-gray-300">
-            TextData is an online and open-source platform that helps you save what you know and find what you don't. Use our website or Chrome browser extension to form communities, bookmark webpages, and take notes to create and save online information. <br/><br/>Then, using everything that you and your collaborators have saved, we'll help you find old information, ask and answer questions, and contextualize new information.            
+              TextData is an online and open-source platform that helps you save what you know and find what you don't. Use our website or Chrome browser extension to form communities, bookmark webpages, and take notes to create and save online information. <br /><br />Then, using everything that you and your collaborators have saved, we'll help you find old information, ask and answer questions, and contextualize new information.
             </p>
 
             <div className="flex flex-col m-3 items-start space-y-3 sm:space-x-4 sm:space-y-0 sm:items-center sm:flex-row">
 
-              {!loggedOut ? <a href="/" className="px-8 py-3 text-lg font-medium text-center text-white bg-blue-500 rounded-md no-underline">
+              {!isLoggedOut ? <a href="/" className="px-8 py-3 text-lg font-medium text-center text-white bg-blue-500 rounded-md no-underline">
                 Home
               </a> : <a href="/auth" className="px-8 py-3 text-lg font-medium text-center text-white bg-blue-500 rounded-md no-underline">
                 Get Started

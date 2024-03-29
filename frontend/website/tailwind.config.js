@@ -1,39 +1,37 @@
-const defaultTheme = require("tailwindcss/defaultTheme");
-const colors = require("tailwindcss/colors");
-
-// Define for ul and ol styles
-function applyListStyles({ addBase }) {
-  addBase({
-    'ul': {
-      listStyleType: 'disc',
-      listStylePosition: 'outside',
-      listStyleImage: 'none',
-    },
-    'ol': {
-      listStyleType: 'decimal', // Use 'decimal' for numbered lists
-      listStylePosition: 'outside',
-      listStyleImage: 'none',
-    }
-  });
-}
-
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  mode: "jit",
-  content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
-  darkMode: "class", //
+  darkMode: ["class"],
+  content: [
+    './pages/**/*.{js,jsx}',
+    './components/**/*.{js,jsx}',
+    './app/**/*.{js,jsx}',
+    './src/**/*.{js,jsx}',
+  ],
+  prefix: "",
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
-      colors: {
-        trueGray: colors.neutral,
-      }
-    },
-    fontFamily: {
-      sans: ["Inter", ...defaultTheme.fontFamily.sans],
-      stock: [defaultTheme.fontFamily.sans],
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
     },
   },
-  variants: {
-    extend: {},
-  },
-  plugins: [require("@tailwindcss/aspect-ratio"), applyListStyles],
-};
+  plugins: [require("tailwindcss-animate")],
+}

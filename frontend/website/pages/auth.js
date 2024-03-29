@@ -11,6 +11,9 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Head from "next/head";
 import { CircularProgress, LinearProgress } from "@mui/material";
+import useCommunitiesStore from "../store/communitiesStore";
+import useUserDataStore from "../store/userData";
+import useQuickAccessStore from "../store/quickAccessStore";
 
 const baseURL_server = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 const getCommunitiesEndpoint = "getCommunities";
@@ -58,7 +61,9 @@ export default function ({ data }) {
   const [authMessage, setAuthMessage] = useState("");
 
 
+  const { communityData, setcommunityData } = useQuickAccessStore();
   const [showProgress, setShowProgress] = useState(false);
+  const { userCommunities, isLoggedOut, setLoggedOut, setUserDataStoreProps } = useUserDataStore();
 
   const handleClick = () => {
     setOpen(true);
@@ -80,6 +85,10 @@ export default function ({ data }) {
       }),
     });
     const responseComm = await resp.json();
+    // community_info
+
+    setUserDataStoreProps({ userCommunities: responseComm.community_info });
+    setcommunityData(responseComm.community_info);
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
   };
 
@@ -97,6 +106,7 @@ export default function ({ data }) {
       let resJson = await res.json();
       if (res.status === 200) {
         jsCookie.set("token", resJson.token);
+        setLoggedOut(false);
 
         // adding dropdown data to local storage
         updateDropDownSearch();
@@ -139,6 +149,7 @@ export default function ({ data }) {
       let resJson = await res.json();
       if (res.status === 200) {
         jsCookie.set("token", resJson.token);
+        setLoggedOut(false);
         updateDropDownSearch();
         setShowProgress(false)
         Router.push("/");
@@ -271,14 +282,14 @@ export default function ({ data }) {
             </h3>
 
             <div className="form-group mt-3">
-              <label>Username</label>
+              <label>Username or Email</label>
               <input
                 type="text"
                 className="form-control mt-1"
                 name="username"
                 onChange={(e) => setUsername(e.target.value)}
                 value={username}
-                placeholder="Enter Username"
+                placeholder="Enter Username or Email"
               />
             </div>
             <div className="form-group mt-3">
@@ -611,4 +622,5 @@ export default function ({ data }) {
         </div>
       </div>
     );
+  else return <div>Refresh</div>;
 }

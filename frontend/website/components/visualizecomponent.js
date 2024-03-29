@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
-import Router, {useRouter} from 'next/router';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Router, { useRouter } from 'next/router';
 import jsCookie from "js-cookie";
 import {
     forceCollide as d3ForceCollide
@@ -14,7 +14,7 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import SearchResult from "./searchresult";
 import Head from "next/head";
 import Footer from "./footer";
-import {Alert, Box, Button, FormControlLabel, FormGroup, FormHelperText, FormLabel, Snackbar} from "@mui/material";
+import { Alert, Box, Button, FormControlLabel, FormGroup, FormHelperText, FormLabel, Snackbar } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
@@ -83,8 +83,9 @@ const VisualizeMap = () => {
         metadescs: false,
         ownSubmissions: false
     });
-    const {communities, hashtags, topics, metadescs, ownSubmissions} = checkState;
+    const { communities, hashtags, topics, metadescs, ownSubmissions } = checkState;
     const [filterOrder, setFilterOrder] = useState(arr);
+    const [leafNode, setLeafNode] = useState(filterOrder[filterOrder.length - 1]);
     const error = [communities, hashtags, topics, metadescs, ownSubmissions].filter((v) => v).length < 1;
     const [levelView, setLevelView] = useState("")
 
@@ -97,26 +98,25 @@ const VisualizeMap = () => {
     };
     const handleClose = (event, reason) => {
         if (reason === "clickaway") {
-          return;
+            return;
         }
         setOpen(false);
     };
 
-    const updateFilterOrderList = () => {
+    const updateCheckState = () => {
         let newState = {};
         Object.keys(checkState).forEach(key => {
             newState[key] = checkState[key];
         })
-        for(let fil of filterOrder) {
+        for (let fil of filterOrder) {
             newState[fil] = true;
         }
         setCheckState(newState);
-        updateLevelView();
     };
 
     const updateLevelView = () => {
         let op = [];
-        for(let itr of filterOrder) {
+        for (let itr of filterOrder) {
             op.push(levelMap[itr]);
         }
         setLevelView(op.join(" > "));
@@ -173,7 +173,8 @@ const VisualizeMap = () => {
     useEffect(() => {
         setIsClient(true);
         if (jsCookie.get("token") != undefined) {
-            updateFilterOrderList();
+            setLeafNode(filterOrder[filterOrder.length - 1]);
+            updateCheckState();
             getCommunityDocuments();
             setHeight(window.innerHeight);
             let canvasWidth = window.innerWidth; //- 0.01 * window.innerWidth
@@ -191,6 +192,10 @@ const VisualizeMap = () => {
         updateLevelView();
     }, [checkState]);
 
+    useEffect(() => {
+        updateCheckState();
+    }, [filterOrder]);
+
     const getPrunedTree = useCallback(() => {
         const visibleNodes = [];
         const visibleLinks = [];
@@ -205,11 +210,11 @@ const VisualizeMap = () => {
                 .forEach(traverseTree);
         })();
 
-        return {nodes: visibleNodes, links: visibleLinks};
+        return { nodes: visibleNodes, links: visibleLinks };
     }, [nodesById]);
 
-    const ForceTree = ({data}) => {
-        const [controls] = useState({"DAG Orientation": "td"});
+    const ForceTree = ({ data }) => {
+        const [controls] = useState({ "DAG Orientation": "td" });
         const [prunedTree, setPrunedTree] = useState();
 
         useEffect(() => {
@@ -241,7 +246,7 @@ const VisualizeMap = () => {
         };
 
         const handleNodeClick = useCallback((node) => {
-            if (node.type === filterOrder[filterOrder.length-1]) {
+            if (node.type === leafNode) {
                 if (prevNodeId == undefined) {
                     if (!isModalOpen) {
                         setIsModalOpen(true);
@@ -366,13 +371,14 @@ const VisualizeMap = () => {
     };
 
     const handleCheckBoxChange = (e) => {
-        if(!!e.target.checked) {
+        if (!!e.target.checked) {
             setFilterOrder([...filterOrder, e.target.name]);
         }
         else {
             let l = [...filterOrder];
-            setFilterOrder(l.filter(function(i) { return i !== e.target.name }));
+            setFilterOrder(l.filter(function (i) { return i !== e.target.name }));
         }
+
         //Update the state of the checkbox
         setCheckState({
             ...checkState,
@@ -381,14 +387,14 @@ const VisualizeMap = () => {
     };
 
     const handleFilterOnClick = (e) => {
-        if(!!error) {
+        if (!!error) {
             setSeverity("error");
             setMessage("Check at least one Checkbox!");
             handleClick();
             return;
         }
         let url = router.pathname;
-        if(!!router.query["query"]) {
+        if (!!router.query["query"]) {
             url += "?query=" + router.query["query"] + "&community=all" + "&levelfilter=" + filterOrder.join(";");
         }
         else {
@@ -401,65 +407,64 @@ const VisualizeMap = () => {
         <>
             <Head>
                 <title>Visualize - TextData</title>
-                <link rel="icon" href="/images/tree32.png"/>
+                <link rel="icon" href="/images/tree32.png" />
             </Head>
-            <Header/>
             {isClient ? (
                 <div className="graph" id="graph-outer-div"
-                     style={{display: "flex", position: "relative", zIndex: "1"}}>
+                    style={{ display: "flex", position: "relative", zIndex: "1" }}>
                     <Box id={"filter-div"}
-                         style={{
-                             marginTop: "70px",
-                             marginLeft: "1%",
-                             zIndex: "2",
-                             position: "absolute",
-                             top: "0",
-                             display: "flex",
-                             fontSize: "14px",
-                             alignItems: "flex-start",
-                             flexDirection: "column"
-                         }}
+                        style={{
+                            marginTop: "70px",
+                            marginLeft: "1%",
+                            zIndex: "2",
+                            position: "absolute",
+                            top: "0",
+                            display: "flex",
+                            fontSize: "14px",
+                            alignItems: "flex-start",
+                            flexDirection: "column"
+                        }}
                     >
                         <FormControl
                             required
                             error={error}
                             component="fieldset"
-                            sx={{m: 3}}
+                            sx={{ m: 3 }}
                             variant="standard"
                         >
-                            <FormLabel component="legend" style={{fontSize: "15px"}}>
-                                HIERARCHICAL VIEW: <span style={{fontWeight: "bold"}}>{levelView}</span>
+                            <FormLabel component="legend" style={{ fontSize: "15px" }}>
+                                HIERARCHICAL VIEW: <span style={{ fontWeight: "bold" }}>{levelView}</span>
                             </FormLabel>
                             <FormGroup>
                                 <FormControlLabel
                                     control={
-                                        <Checkbox style={{transform: "scale(.8)"}} checked={communities} onChange={handleCheckBoxChange} name="communities"/>
+                                        <Checkbox style={{ transform: "scale(.8)" }} checked={communities} onChange={handleCheckBoxChange} name="communities" />
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Communities</span>}
+                                    label={<span style={{ fontSize: "14px" }}>Communities</span>}
                                 />
                                 <FormControlLabel
                                     control={
-                                        <Checkbox style={{transform: "scale(.8)"}} checked={ownSubmissions} onChange={handleCheckBoxChange} name="ownSubmissions"/>
+                                        <Checkbox style={{ transform: "scale(.8)" }} checked={ownSubmissions} onChange={handleCheckBoxChange} name="ownSubmissions" />
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Own Submissions</span>}
+                                    label={<span style={{ fontSize: "14px" }}>Own Submissions</span>}
                                 />
                                 <FormControlLabel
                                     control={
-                                        <Checkbox style={{transform: "scale(.8)"}} checked={hashtags} onChange={handleCheckBoxChange} name="hashtags"/>
+                                        <Checkbox style={{ transform: "scale(.8)" }} checked={hashtags} onChange={handleCheckBoxChange} name="hashtags" />
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Hashtags</span>}
+                                    label={<span style={{ fontSize: "14px" }}>Hashtags</span>}
                                 />
                                 <FormControlLabel
                                     control={
-                                        <Checkbox style={{transform: "scale(.75)"}} checked={topics} onChange={handleCheckBoxChange} name="topics"/>
+                                        <Checkbox style={{ transform: "scale(.75)" }} checked={topics} onChange={handleCheckBoxChange} name="topics" />
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Topics</span>}
+                                    label={<span style={{ fontSize: "14px" }}>Topics</span>}
                                 />
                                 <FormControlLabel
                                     control={
-                                        <Checkbox style={{transform: "scale(.75)"}} checked={metadescs} onChange={handleCheckBoxChange} name="metadescs"/>
+                                        <Checkbox style={{ transform: "scale(.75)" }} checked={metadescs} onChange={handleCheckBoxChange} name="metadescs" />
                                     }
-                                    label={<span style={{fontSize: "14px"}}>Meta-descriptors</span>}
+                                    label={<span style={{ fontSize: "14px" }}>Meta-descriptors</span>}
                                 />
                             </FormGroup>
                             <FormHelperText>Please select at least one level to display</FormHelperText>
@@ -469,13 +474,13 @@ const VisualizeMap = () => {
                             onClick={handleFilterOnClick}
                             size="medium"
                             endIcon={<FilterAltIcon />}
-                            style={{transform: "scale(0.75)"}}
+                            style={{ transform: "scale(0.75)" }}
                         >
                             Filter
                         </Button>
                     </Box>
-                    <Paper elevation={0} id="graph-wrapper" style={{width: "inherit"}}>
-                        {nodesById && <ForceTree data={graphData}/>}
+                    <Paper elevation={0} id="graph-wrapper" style={{ width: "inherit" }}>
+                        {nodesById && <ForceTree data={graphData} />}
                     </Paper>
                     <div style={{
                         marginLeft: '-1.5%',
@@ -484,8 +489,8 @@ const VisualizeMap = () => {
                         display: "flex"
                     }}>
                         <button title={"Collapse Modal"}
-                                style={{display: "flex", flexDirection: "column", marginTop: "70px"}}
-                                onClick={collapseModal}>
+                            style={{ display: "flex", flexDirection: "column", marginTop: "70px" }}
+                            onClick={collapseModal}>
                             <div id={"arrow-container"}>
                                 <Tooltip title="Expand/Collapse">
                                     <div id={"arrow"} style={{
@@ -509,8 +514,8 @@ const VisualizeMap = () => {
                             // boxShadow: "rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px"
                         }}>
                             <Grid container display={"flex"} direction={"row"} justifyContent={"center"}
-                                  alignItems={"center"}>
-                                <Grid item sx={{textAlign: 'center', display: 'flex', marginTop: "2%",}}>
+                                alignItems={"center"}>
+                                <Grid item sx={{ textAlign: 'center', display: 'flex', marginTop: "2%", }}>
                                     {
                                         submissions["md_name"].length > 0 ?
                                             (
@@ -527,7 +532,7 @@ const VisualizeMap = () => {
                                 </Grid>
                                 <Grid container display={"flex"}>
                                     <InfiniteScroll
-                                        style={{height: height}}
+                                        style={{ height: height }}
                                         dataLength={submissions["submission_list"].length}
                                         loader="">
                                         <Grid item style={{
@@ -569,12 +574,11 @@ const VisualizeMap = () => {
             ) : (
                 "Loading..."
             )}
-            <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
-                  {message}
+                    {message}
                 </Alert>
             </Snackbar>
-            <Footer/>
         </>
     );
 };

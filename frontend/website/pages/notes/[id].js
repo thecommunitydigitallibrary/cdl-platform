@@ -186,7 +186,7 @@ function Notes({ data }) {
 
       <div className="app-container">
         <div style={{ zIndex: 1, position: "relative" }}>
-          <Header />
+          {/* <Header /> */}
         </div>
 
         <div
@@ -391,7 +391,7 @@ function Notes({ data }) {
           </div>
         );
       })}
-      <Footer alt={true} />
+      {/* <Footer alt={true} /> */}
     </div>
   );
 }

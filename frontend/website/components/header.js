@@ -48,6 +48,7 @@ import Image from "next/image";
 import useSubmissionStore from "../store/submissionStore";
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from "../static/constants";
 import useUserDataStore from "../store/userData";
+import useQuickAccessStore from "../store/quickAccessStore";
 
 
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -190,7 +191,7 @@ function Header(props) {
   const [openSubmission, setOpenSubmission] = useState(false);
 
   const { submissionMode, submissionCommunitiesNameMap, setSubmissionProps } = useSubmissionStore();
-  const { userCommunities, setUserDataStoreProps } = useUserDataStore();
+  const { userCommunities, isLoggedOut, setLoggedOut, setUserDataStoreProps } = useUserDataStore();
   const [selectedCommunity, setSelectedCommunity] = useState("");
 
   const handleClickSubmission = () => {
@@ -215,6 +216,7 @@ function Header(props) {
   };
 
   const handleNewSubmissionRequest = async (event) => {
+    console.log(submissionMode)
     if (newSubTitle == "") {
       setSeverity("error");
       setMessage("Title cannot be empty!");
@@ -250,13 +252,15 @@ function Header(props) {
 
     const response = await res.json();
     if (res.status == 200) {
-      setSubmissionProps({ submissionMode: "edit" });
       setCommunity("");
       setSelectedCommunity("");
       handleCancelNewSubTitleDialog();
       // Open a new tab
       window.open(WEBSITE_URL + 'submissions/' + response.submission_id, '_blank');
     }
+
+    console.log(submissionMode)
+
   }
 
   const handleCloseSubmission = (event, reason) => {
@@ -352,7 +356,8 @@ function Header(props) {
       },
     },
   });
-  const [loggedOut, setLoggedOut] = useState(false);
+  // const [loggedOut, setLoggedOut] = useState(false);
+  const { communityData, setcommunityData } = useQuickAccessStore();
   const [dropdowndata, setDropDownData] = useState({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -363,6 +368,7 @@ function Header(props) {
 
 
   const getCommunitiesEndpoint = "getCommunities";
+
   const updateDropDownSearch = async () => {
     let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
       method: "GET",
@@ -378,13 +384,15 @@ function Header(props) {
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
 
     setDropDownData(responseComm);
+    setcommunityData(responseComm.community_info);
+
   };
 
   useEffect(() => {
     if (window.localStorage.getItem("dropdowndata")) {
       var responseComm = JSON.parse(window.localStorage.getItem("dropdowndata"))
       setDropDownData(responseComm);
-
+      setcommunityData(responseComm.community_info);
       setUserDataStoreProps({ userCommunities: responseComm.community_info });
       setUserDataStoreProps({ username: responseComm.username });
 
@@ -392,9 +400,9 @@ function Header(props) {
       updateDropDownSearch();
       // window.location.reload()
     }
-    setLoggedOut(
-      jsCookie.get("token") == "" || jsCookie.get("token") == undefined
-    );
+
+    setLoggedOut(jsCookie.get("token") == "" || jsCookie.get("token") == undefined);
+
   }, [jsCookie.get("token")]);
 
   useEffect(() => {
@@ -466,7 +474,7 @@ function Header(props) {
 
 
   // for some reason, adding && != undefined makes box render weirdly
-  if (!loggedOut) {
+  if (!isLoggedOut) {
     return (<>
       <ThemeProvider theme={theme}>
         <AppBar>
@@ -546,7 +554,10 @@ function Header(props) {
                   <Grid item sx={{ flexGrow: 0, ml: "1%" }}>
                     <Tooltip title="Account Information">
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar />
+                        {/* <Avatar />  */}
+                        <Typography variant="h6" sx={{ border: 2, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', borderColor: '#ceddeb', backgroundColor: '#ceddeb', color: '#1976d2' }}>
+                          {dropdowndata.username ? dropdowndata.username[0].toUpperCase() : 'A'}
+                        </Typography>
                       </IconButton>
                     </Tooltip>
                   </Grid>
@@ -609,7 +620,7 @@ function Header(props) {
           <Dialog open={openNewSubTitleDialog} >
             <DialogTitle>
               {" "}
-              Title for new Submission
+              Title for New Submission
             </DialogTitle>
             <DialogContent>
               <Stack direction={'column'} textAlign={'center'} spacing={2}>
@@ -666,19 +677,6 @@ function Header(props) {
             </DialogActions>
           </Dialog>
           <Dialog open={openSubmission} onClose={handleCloseSubmission} fullWidth maxWidth="md">
-
-            {/* {!batch ? (
-              <SubmissionForm
-                dialog_title="Create a New Submission"
-                method="create"
-                source_url=""
-                title=""
-                description=""
-                submission_id=""
-                communityNameMap={dropdowndata.community_info}
-                handle_close={handleCloseSubmission}
-              />
-            ) :  */}
             (
             <div>
               <DialogContent>
@@ -842,26 +840,8 @@ function Header(props) {
                 <span className="mb-2">TextData</span>
               </div>
 
-              {/* Add links below based on what to show on About page when logged out */}
-
-              {/* Desktop Menu */}
-              {/* <div className="hidden text-center lg:flex lg:items-center">
-                <ul className="items-center justify-end flex-1 pt-6 list-none lg:pt-0 lg:flex">
-                  {Object.entries(loggedOutSettings).map(([key, item]) => (
-
-                    <li key={key}>
-                      <a className="no-underline" href={`/${item.value}`}>
-                        <a className="block px-4 py-2 text-white rounded-md dark:text-white-300 hover:text-white-500 focus:text-white-500 focus:bg-white-100 dark:focus:bg-white-800 focus:outline-none no-underline">
-                          {item.label}
-                        </a>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div> */}
-
               <div className="mr-3 space-x-4 lg:flex nav__item ">
-                {!loggedOut ? (
+                {!isLoggedOut ? (
                   <a href="/" className="w-full px-6 py-2 text-center text-white bg-blue-500 rounded-md lg:ml-5 no-underline">
                     Home
                   </a>
@@ -875,24 +855,10 @@ function Header(props) {
                 {/* <ThemeChanger /> */}
 
               </div>
-
-              {/* If we decide to add more links to the header, we'll need a collapsabel drawer but not rn. So commenting it out: */}
-
-              {/* {isMedium ? (
-                <Grid item>
-                  <DrawerComp
-                    settings={loggedOutSettings}
-                    handleUserClickMenu={handleUserClickMenu}
-                    handleClickSubmission={handleClickSubmission}
-                    username={dropdowndata.username}
-                    style={{ position: 'sticky', top: '0', right: '0' }}
-                  />
-                </Grid>
-              ) : <></>} */}
             </nav>
           </div>
 
-          <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
+          <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
             <Alert
               onClose={handleClose}
               severity={severity}

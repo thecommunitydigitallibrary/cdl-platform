@@ -11,7 +11,7 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import { IconButton, List, ListItem, ListItemText, Typography } from "@mui/material"
 
 const topics = [
-    
+
     {
         category: "Overview",
         items: [
@@ -69,14 +69,14 @@ const topics = [
                 content: (
                     <>
                         <p>
-                        TextData has been built on and has led to numerous publications and posters:
+                            TextData has been built on and has led to numerous publications and posters:
                         </p>
                         <ul>
                             <li>
                                 Ros, Kevin, Maxwell Jong, Chak Ho Chan, and ChengXiang Zhai. "<a target="_blank" rel="noopener noreferrer" href="../../papers/student_question_generation.pdf">Generation of Student Questions for Inquiry-based Learning.</a>" In Proceedings of the 15th International Conference on Natural Language Generation, pp. 186-195. 2022.
                             </li>
                             <li>
-                                Ros, Kevin, Matthew Jin, Jacob Levine, and ChengXiang Zhai. "<a target="_blank" rel="noopener noreferrer" href="../../papers/retrieving_webpages.pdf">Retrieving Webpages Using Online Discussions.</a>" In Proceedings of the 2023 ACM SIGIR International Conference on Theory of Information Retrieval, pp. 159-168. 2023.    
+                                Ros, Kevin, Matthew Jin, Jacob Levine, and ChengXiang Zhai. "<a target="_blank" rel="noopener noreferrer" href="../../papers/retrieving_webpages.pdf">Retrieving Webpages Using Online Discussions.</a>" In Proceedings of the 2023 ACM SIGIR International Conference on Theory of Information Retrieval, pp. 159-168. 2023.
                             </li>
                             <li>
                                 Ros, Kevin, and ChengXiang Zhai. "<a target="_blank" rel="noopener noreferrer" href="../../papers/demo_cscw.pdf">The CDL: An Online Platform for Creating Community-based Digital Libraries.</a>" In Computer Supported Cooperative Work and Social Computing, pp. 372-375. 2023.
@@ -86,14 +86,14 @@ const topics = [
                             </li>
                         </ul>
                         <p>
-                            Our current and future research projects include many exciting directions, including contextual search, automatic content organization, content visualization, chatbot integration, and user studies. We are always looking for collaborators; if you would like to get involved, then please reach out to Kevin Ros at <a href="mailto:kjros2@illinois.edu">kjros2@illinois.edu</a>. 
+                            Our current and future research projects include many exciting directions, including contextual search, automatic content organization, content visualization, chatbot integration, and user studies. We are always looking for collaborators; if you would like to get involved, then please reach out to Kevin Ros at <a href="mailto:kjros2@illinois.edu">kjros2@illinois.edu</a>.
                         </p>
                     </>
                 )
             }
 
         ]
-        
+
     },
     {
         category: "Setup",
@@ -104,7 +104,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            You must make an account before you can begin using TextData. An account can be created <a target="_blank" rel="noopener noreferrer" href="/auth">here</a>. Note that accounts made on the website will not work when running the the service locally through localhost, so you will need to create separate accounts. 
+                            You must make an account before you can begin using TextData. An account can be created <a target="_blank" rel="noopener noreferrer" href="/auth">here</a>. Note that accounts made on the website will not work when running the the service locally through localhost, so you will need to create separate accounts.
                         </p>
                     </>
                 ),
@@ -115,8 +115,8 @@ const topics = [
                 content: (
                     <>
                         <p>
-                             The Chrome extension is available in the Chrome web store and can be installed from <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0">here</a>. After installing, you will be able to log into your account that you created using the TextData website. The extension defaults to logging in users via the hosted version of TextData, so if you wish to use the extension with your local instance, then you will need to change the extension "Backend Source" setting.
-                        </p>                
+                            The Chrome extension is available in the Chrome web store and can be installed from <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0">here</a>. After installing, you will be able to log into your account that you created using the TextData website. The extension defaults to logging in users via the hosted version of TextData, so if you wish to use the extension with your local instance, then you will need to change the extension "Backend Source" setting.
+                        </p>
                     </>
                 ),
             }
@@ -131,7 +131,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            Much like a group chat, a subreddit, or a folder, a community is place for you and your peers to save organize content. You can create, join, or leave communities, and any member of a community can search for or browse all content present in the community. Moreover, any user not in a community will not be able to view its content.                          
+                            Much like a group chat, a subreddit, or a folder, a community is place for you and your peers to save organize content. You can create, join, or leave communities, and any member of a community can search for or browse all content present in the community. Moreover, any user not in a community will not be able to view its content.
                             A community can have any number of members, ranging from just yourself (e.g., a private community to save your personal notes) to hundreds of members (e.g., a large class all taking notes together on lectures and textbooks).
                         </p>
                     </>
@@ -143,7 +143,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            You can create a community by selecting the "Communities" tab in the navigation header bar at the top of the TextData website, and then clicking the "+" in the "Create" box. You will need to provide a name, which should describe the purpose of the community (e.g., "Papers", "CS410 Fall 2023", or "Cool News Articles"). After creating a community, your page should refresh and you should see the newly-created community's card on your screen. If you would like to change the name or add a description, you can click the pen "edit" button on the card and edit the desired details. 
+                            You can create a community by selecting the "Communities" tab in the navigation header bar at the top of the TextData website, and then clicking the "+" in the "Create" box. You will need to provide a name, which should describe the purpose of the community (e.g., "Papers", "CS410 Fall 2023", or "Cool News Articles"). After creating a community, your page should refresh and you should see the newly-created community's card on your screen. If you would like to change the name or add a description, you can click the pen "edit" button on the card and edit the desired details.
                         </p>
                     </>
                 ),
@@ -187,10 +187,10 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            A submission is the fundamental building block of TextData. Submissions are user-created, and consist of an optional source URL, a title, and a description. Submissions can be added to or removed from communities, and if you are are a member of a community, then you can search over, browse, and view all submissions currently added to a community. 
+                            A submission is the fundamental building block of TextData. Submissions are user-created, and consist of an optional source URL, a title, and a description. Submissions can be added to or removed from communities, and if you are are a member of a community, then you can search over, browse, and view all submissions currently added to a community.
                         </p>
                         <p>
-                            The source URL of a submission is to provide you with a way to link external content (e.g., a video, a news article, a published paper, etc.). This field is optional, and if not included, the field will default to the submission's webpage on TextData. The title of a submission is meant to give you and other users a brief overview of the submission. And the description is meant to provide you with the ability to create markdown-style notes for whatever you're submitting. 
+                            The source URL of a submission is to provide you with a way to link external content (e.g., a video, a news article, a published paper, etc.). This field is optional, and if not included, the field will default to the submission's webpage on TextData. The title of a submission is meant to give you and other users a brief overview of the submission. And the description is meant to provide you with the ability to create markdown-style notes for whatever you're submitting.
                         </p>
                     </>
                 ),
@@ -201,16 +201,16 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            You can create a submission by using either Chrome extension's "Submit" tab or by clicking the "+" on the TextData website header. The source URL is optional when using the TextData website header, but while using the Chrome extension, it will be the page that you open the extension on. Next, you can add a title, a description, and decide whether or not the submission should be anonymous (i.e., if it displays your username to other community members).Then, after selecting a community, you can click "Submit" to save the submission to the selected community. 
+                            You can create a submission by using either Chrome extension's "Submit" tab or by clicking the "+" on the TextData website header. The source URL is optional when using the TextData website header, but while using the Chrome extension, it will be the page that you open the extension on. Next, you can add a title, a description, and decide whether or not the submission should be anonymous (i.e., if it displays your username to other community members).Then, after selecting a community, you can click "Submit" to save the submission to the selected community.
                         </p>
                         <p>
                             To check your submission(s), you can click the "Submissions" tab in the header at the top of the TextData website. This will bring you to a page that displays, in reverse chronological order, all of your submissions that you have made to all of your communities.
                         </p>
                         <p>
-                            If you included a source URL and the webpage is publicly available, then TextData's server will try to index the webpage. This is why you may sometimes see search results and recommendations with the community listed as "Webpage". 
+                            If you included a source URL and the webpage is publicly available, then TextData's server will try to index the webpage. This is why you may sometimes see search results and recommendations with the community listed as "Webpage".
                         </p>
                         <p>
-                            While typing the description, TextData provides a quick way to connect notes together. By typing "[[search terms]]" followed by a space, TextData will suggest submissions in your communities related to these search terms. Then, clicking any one of these suggestions will replace the brackets with a hyperlink to that submission. For example, typing "[[textdata demos]] " will return suggestions related to "textdata demos". 
+                            While typing the description, TextData provides a quick way to connect notes together. By typing "[[search terms]]" followed by a space, TextData will suggest submissions in your communities related to these search terms. Then, clicking any one of these suggestions will replace the brackets with a hyperlink to that submission. For example, typing "[[textdata demos]] " will return suggestions related to "textdata demos".
                         </p>
                     </>
                 ),
@@ -221,13 +221,13 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            The submission card provides you with numerous ways to view and interact with the submission. Clicking the hyperlinked title at the top of the submission card will open the submitted URL in another tab. If no source URL was included, then this will take you to TextData's submission page. Below the hyperlinked title is the shortened submitted URL and submission time. Below this is the submission's description. And at the bottom left of the submission are the names of the communities that the submission is a part of, and the list of hashtags (if any). Hashtags are automatically extracted from the title and description, and are meant to provide you with a way to easily search for and filter submissions. More information about hashtags can be found in the Search section below. Following searches or recommendations, each submission card will contain relevance judgment buttons at the bottom left. These buttons are meant to provide you with a way to rate the submissions with respect to your query or recommendation context. 
+                            The submission card provides you with numerous ways to view and interact with the submission. Clicking the hyperlinked title at the top of the submission card will open the submitted URL in another tab. If no source URL was included, then this will take you to TextData's submission page. Below the hyperlinked title is the shortened submitted URL and submission time. Below this is the submission's description. And at the bottom left of the submission are the names of the communities that the submission is a part of, and the list of hashtags (if any). Hashtags are automatically extracted from the title and description, and are meant to provide you with a way to easily search for and filter submissions. More information about hashtags can be found in the Search section below. Following searches or recommendations, each submission card will contain relevance judgment buttons at the bottom left. These buttons are meant to provide you with a way to rate the submissions with respect to your query or recommendation context.
                         </p>
                         <p>
                             Each submission card also contains three dots at the top right corner. Clicking these three dots will open a small menu with multiple options. Clicking the first option, "View Submission", will bring you to TextData's submission page. On this page, you will be able to view the submission's full title and description, see the submissions views/clicks/shares, add or remove the submission from a community, and edit or delete the submission (if you are the submission's creator). The submission page also displays a basic visualization of the submission with respect to other submissions and webpages. Clicking the "Feedback" button will open a small pop-up window where you can send feedback about the submission to TextData (e.g., if the submission is inappropriate or the link is broken). And clicking the "Share URL" will copy the URL of the page to your clipboard. This "Feedback" and "Share URL" functionality is also available as the second and third option in the three dot menu. Finally, clicking "Get Connection ID" will copy the submission ID to your clipboard, which is used to reply (described below)
                         </p>
                         <p>
-                            The submission page also supports the ability to reply to the submission. To reply, you have two options: you can connect an existing submission or create a new submission. To connect an existing submission, you only need to post the submission's connection ID in the field and click submit. And to create a new submission, you need to fill out the information in the presented form after clicking "Reply". In either case, the connected/created submission will be displayed on the source submission's page below its description. 
+                            The submission page also supports the ability to reply to the submission. To reply, you have two options: you can connect an existing submission or create a new submission. To connect an existing submission, you only need to post the submission's connection ID in the field and click submit. And to create a new submission, you need to fill out the information in the presented form after clicking "Reply". In either case, the connected/created submission will be displayed on the source submission's page below its description.
                         </p>
                     </>
                 ),
@@ -281,7 +281,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            TextData provides various ways to help you discover submissions made to your communities. The overarching goal of the recommendation functionalities is to provide you with submissions according to your context: your current webpage, previously-clicked submissions, previously-submitted webpages, other members of your community, etc. 
+                            TextData provides various ways to help you discover submissions made to your communities. The overarching goal of the recommendation functionalities is to provide you with submissions according to your context: your current webpage, previously-clicked submissions, previously-submitted webpages, other members of your community, etc.
                         </p>
                     </>
                 )
@@ -292,7 +292,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            The homepage of TextData, accessible by clicking the logo at the top left of the webpage header, provides you with two methods of general recommendations: "Explore" and "Most Recent". You can select one or the other via the dropdown menu towards the top of the homepage. The "Explore" method recommends submissions most similar to your most recent submissions. And the "Most Recent" method displays all submissions made to all of your communities in reverse chronological order. 
+                            The homepage of TextData, accessible by clicking the logo at the top left of the webpage header, provides you with two methods of general recommendations: "Explore" and "Most Recent". You can select one or the other via the dropdown menu towards the top of the homepage. The "Explore" method recommends submissions most similar to your most recent submissions. And the "Most Recent" method displays all submissions made to all of your communities in reverse chronological order.
                         </p>
                     </>
                 )
@@ -336,7 +336,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            In some search or recommendation results, you may notice submissions that are from a community called "Webpage". These submissions are public webpages that have been automatically scraped by TextData. The title and description of the submission are the title and description of the webpage, respectively. TextData attempts to scrape and index all submitted webpages that are publicly available, so that all users can benefit from a submission. 
+                            In some search or recommendation results, you may notice submissions that are from a community called "Webpage". These submissions are public webpages that have been automatically scraped by TextData. The title and description of the submission are the title and description of the webpage, respectively. TextData attempts to scrape and index all submitted webpages that are publicly available, so that all users can benefit from a submission.
                         </p>
                     </>
                 ),
@@ -361,7 +361,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            One of the primary use cases of TextData is personal bookmarking and archiving. This is best supported by creating a community (or communities) according to the type of content that you would like to save. For example, a community where you save interesting news articles could be called "News Articles", or a community where you save academic publications could be called "Papers and Demos". And, as you save notes to your personal community, you can add hashtags according to whatever taxonomy you would like to have (e.g., "#empirical" or "#politics"). And after creating the community, you will be its only member, meaning that all bookmarks saved by you are accessible and viewable by only you.                      
+                            One of the primary use cases of TextData is personal bookmarking and archiving. This is best supported by creating a community (or communities) according to the type of content that you would like to save. For example, a community where you save interesting news articles could be called "News Articles", or a community where you save academic publications could be called "Papers and Demos". And, as you save notes to your personal community, you can add hashtags according to whatever taxonomy you would like to have (e.g., "#empirical" or "#politics"). And after creating the community, you will be its only member, meaning that all bookmarks saved by you are accessible and viewable by only you.
                         </p>
                     </>
                 )
@@ -372,7 +372,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            Any meeting note, lecture note, or thought can be made into a submission and saved to any of your communities. You can collaborate with any sized group - from just yourself in a private community for personal thoughts to a class-wide community taking notes on lecture content. With replies, hyperlinks, searches, and recommendations, you will be able to easily organize and discover notes and external webpages related to your interests and goals. 
+                            Any meeting note, lecture note, or thought can be made into a submission and saved to any of your communities. You can collaborate with any sized group - from just yourself in a private community for personal thoughts to a class-wide community taking notes on lecture content. With replies, hyperlinks, searches, and recommendations, you will be able to easily organize and discover notes and external webpages related to your interests and goals.
                         </p>
                     </>
                 )
@@ -383,7 +383,7 @@ const topics = [
                 content: (
                     <>
                         <p>
-                            TextData can also be used for adding and organizing online content relating to course lectures. One pain point of courses prevalent today, especially in online courses, is that students often seek course-related online information independently. For example, while watching a lecture, a student may have a question about something mentioned in the lecture. Then, the student may turn to an online search engine to find webpages helpful for resolving their information need. This is done independently of other students or the instructor. As a result, neither other students nor the instructor can benefit from the student's work of finding helpful course-related information. TextData aims to mitigate this problem by providing a way to organize online content with respect to the course content and a way to search and discover the online content when in specific course-related contexts. 
+                            TextData can also be used for adding and organizing online content relating to course lectures. One pain point of courses prevalent today, especially in online courses, is that students often seek course-related online information independently. For example, while watching a lecture, a student may have a question about something mentioned in the lecture. Then, the student may turn to an online search engine to find webpages helpful for resolving their information need. This is done independently of other students or the instructor. As a result, neither other students nor the instructor can benefit from the student's work of finding helpful course-related information. TextData aims to mitigate this problem by providing a way to organize online content with respect to the course content and a way to search and discover the online content when in specific course-related contexts.
                         </p>
                         <p>
                             Instructors who wish to leverage this functionality in their course should first create a course community named accordingly (e.g., "Spring 2023 CS101"). Then, to optionally leverage the core community content feature, they can add each lecture webpage to define a coupling between webpage URL and hashtag. Each submission for the core community content should contain at least two hashtags: "#core" and the hashtag(s) that define this web resource (e.g., "#lecture1", "quiz1", etc.). Once the community is created and the core content is added, the instructor should have each student create an account and send the community join key to all of the students.
@@ -469,7 +469,7 @@ export default function Documentation() {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <div className="flex flex-col space-y-14">
-                <Header />
+                {/* <Header /> */}
                 <div className="flex">
                     <div className="w-1/5 bg-gray-100 p-4 sidebar-container">
                         <h3 className="text-xl font-semibold mb-2">Quick Links</h3>
@@ -502,7 +502,7 @@ export default function Documentation() {
                         </Paper>
                     </div>
                 </div>
-                <Footer />
+
             </div>
         </>
     );

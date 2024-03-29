@@ -355,7 +355,7 @@ const [open, setOpen] = React.useState(false);
           </Tooltip>
           <Snackbar
               open={openShareUrlSuccess}
-              autoHideDuration={2000}
+              autoHideDuration={6000}
               onClick={handleCloseSnackbar}
               message={snackBarMessage} //"Link copied: "+shareUrlLink
               action={action}
@@ -524,7 +524,7 @@ const [open, setOpen] = React.useState(false);
       
       </div>  
       <hr />
-      <Snackbar open={open} autoHideDuration={5000} onClose={handleClose}>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
           {message}
         </Alert>

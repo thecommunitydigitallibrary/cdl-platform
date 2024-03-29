@@ -120,13 +120,18 @@ def get_communities_helper(current_user, return_dict=False):
 					is_admin = True
 			except:
 				pass
-		community_struct.append({
+
+		comm_item = {
 			"community_id": str(community.id),
 			"name": community.name,
 			"description": community.description,
-			"join_key": community.join_key,
 			"is_admin": is_admin
-		})
+		}
+
+		if is_admin:
+			comm_item["join_key"] = community.join_key
+
+		community_struct.append(comm_item)
 
 	if return_dict:
 		new_community_struct = {}
@@ -153,6 +158,7 @@ def create_community(current_user):
 		200 : dictionary JSON with "status" as "ok" and success message "message"
 		500 : dictionary JSON with "status" as "error" and error message "message"
 	"""
+	## TODO update docs with is_public and community_homepage_url
 	try:
 		user_id = current_user.id
 		ip = request.remote_addr
@@ -205,6 +211,7 @@ def create_community(current_user):
 				return response.error("Must be a community admin to edit the title or description.",
 				                      Status.UNAUTHORIZED)
 
+			## TODO update here with community_homepage_url and is_public
 			insert_obj = {}
 			if community_name:
 				insert_obj["name"] = community_name

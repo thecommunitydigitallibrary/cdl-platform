@@ -258,11 +258,17 @@ def login():
 		users = Users()
 
 		user_acct = users.find_one({"username": username})
+		if not user_acct or username == "":
+			# try logging in with email
+			user_acct = users.find_one({"email": username})
+			if not user_acct:
+				return response.error("User not found. Please try again.", Status.UNAUTHORIZED)
+
+
 		hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
 
-		if not user_acct or username == "":
-			return response.error("User not found or Incorrect Username. Please try again.", Status.UNAUTHORIZED)
-		elif user_acct and user_acct.hashed_password != hashed_password:
+		
+		if user_acct and user_acct.hashed_password != hashed_password:
 			return response.error("Password is incorrect. Please try again.", Status.UNAUTHORIZED)
 		elif user_acct and user_acct.hashed_password == hashed_password:
 			token = jwt.encode({"id": str(user_acct.id)}, os.environ["jwt_secret"], "HS256")

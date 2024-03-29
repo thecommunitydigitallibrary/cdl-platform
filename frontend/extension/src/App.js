@@ -15,6 +15,10 @@ function App() {
     localStorage.setItem('defaultTab', "search")
   }
 
+  if (localStorage.getItem('extCachedData') === null) {
+    localStorage.setItem('extCachedData', '[]')
+  }
+
   return (
     <div className="App">
       <Router>

@@ -100,30 +100,43 @@ class ElasticManager:
         hits_total_value, hits = self.postprocess(r.text)
         return hits_total_value, hits
 
-    def get_submissions(self, user_id, page=0, page_size=10):
+    def get_submissions(self, user_id, community_id=None, page=0, page_size=10):
         """
         Get the community submissions.
 
         Arguments:
             user_id : (string) : the user_id.
+            community_id: (string): id of a community for finding a user's submissions in a particular community
             page : (int) : the page number to return (default 0).
             page_size : (int) : the number of results per page (default 10).
         
         Returns:
             The JSON hits for the community.
         """
+        
         query = {
             "from": page * page_size,
             "size": page_size,
             "sort": [{"time": "desc"}],
             "query": {
-                "match": {
-                    "user_id": user_id
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "user_id": user_id
+                            }
+                        }
+                    ]
                 }
             }
         }
 
+        if community_id:
+            query["query"]["bool"]["must"].append({"match": {"communities": community_id}})
+
         r = requests.get(self.domain + self.index_name + "/_search", json=query, auth=self.auth)
+        print(r.text)
+
         hits_total_value, hits = self.postprocess(r.text)
         return hits_total_value, hits
 
