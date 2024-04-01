@@ -112,12 +112,12 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
           <div>
             <Grid item sx={{ textAlign: 'center' }}>
               <h4>Search Results</h4>{" "}
-              {<h6>Community: {searchedCommunity}</h6>}
+              {own_submissions && <Typography textAlign={'center'} variant="caption">Filtered by your own submissions</Typography>}
+
               <Typography>
                 Community: <CommunityDisplay k={community} communities_part_of={Object} />
               </Typography>
 
-              {own_submissions && <h6>Filtered by your own submissions</h6>}
             </Grid>
             <hr />
             <h5>No results found.</h5>
@@ -174,7 +174,14 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         <Grid item sx={{ textAlign: 'center' }}>
         </Grid>
 
-        <Grid container minWidth={'600px'} width={'100ch'} direction={'column'} borderTop={"1px solid lightgray"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+        <Grid container
+          minWidth={'600px'}
+          width={'100ch'}
+          direction={'column'}
+          borderTop={"1px solid lightgray"}
+          display={"flex"}
+          justifyContent={"center"}
+          alignItems={"center"}>
           <InfiniteScroll
             dataLength={items.length}
             next={loadMoreResults}
@@ -242,7 +249,6 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
         </Grid>
 
       </Grid>
-      {/* <Footer alt={true} /> */}
     </div>
   );
 }

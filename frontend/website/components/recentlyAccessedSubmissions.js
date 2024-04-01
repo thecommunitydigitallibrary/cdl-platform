@@ -1,60 +1,48 @@
 import Paper from "@mui/material/Paper";
-import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
-import React, { useState, useContext, useEffect } from "react";
-import Box from '@mui/material/Box';
 import Grid from "@mui/material/Grid";
-import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
+import { Tooltip } from "@mui/material";
 
 export default function RecentlyAccessedSubmissions({ rec_acc_sub_data }) {
     return (
         <Grid
             container
-            display={"flex"}
-            justifyContent={"center"}
-            alignItems={"center"}
-            maxWidth={'60%'}
+            spacing={2}
+            justifyContent="center"
+            alignItems="stretch"
+            maxWidth={'100ch'}
         >
-            <Grid item width={'95%'}>
-                <h4>Recently Accessed Submissions</h4>
-            </Grid>
-            <Box
-                sx={{
-                    width: '90%',
-                    flex: '1 1 auto',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    '& > :not(style)': {
-                        m: 1,
-                        width: 200,
-                        height: 38,
-                    },
-                }}
-            >
-                {rec_acc_sub_data.map((item, index) => (
-                    <Paper
-                        key={index}
-                        id={index}
-                        elevation={0}
-                        sx={{
-                            padding: "5px",
-                            border: "1px solid #ddd",
-                            wordBreak: 'break-word'
-                        }}
-                    >
-                        <a href={item.submission_url}>
-                            <div style={{
-                                display: "flex", alignItems: 'center',
-                                justifyContent: 'center',
-                                textAlign: 'center'
-                            }}>
-                                <div title={item.explanation} style={{ margin: "0px 0px 0px 0px" }}>
-                                    {item.explanation.length >= 20 ? item.explanation.substring(0, 20) + '...' : item.explanation}
-                                </div>
+            {rec_acc_sub_data.map((item, index) => (
+                <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
+                    <Tooltip title={item.explanation}>
+                        <Paper
+                            elevation={2}
+                            sx={{
+                                padding: "10px",
+                                borderRadius: "8px",
+                                backgroundColor: "#f5f5f5",
+                                transition: "background-color 0.3s",
+                                cursor: 'pointer', // Add pointer cursor to indicate clickable
+                                "&:hover": {
+                                    backgroundColor: "#e0e0e0",
+                                },
+                            }}
+                            onClick={() => window.open(item.submission_url, "_blank")}
+                        >
+                            <div style={{ display: "flex", alignItems: 'center' }}>
+                                <img
+                                    style={{ width: "24px", height: "24px", marginRight: "8px" }}
+                                    src={'/images/tree48.png'}
+                                    alt="Tree Icon"
+                                />
+                                <Typography variant="body1" noWrap>
+                                    {item.explanation}
+                                </Typography>
                             </div>
-                        </a>
-                    </Paper>
-                ))}
-            </Box>
+                        </Paper>
+                    </Tooltip>
+                </Grid>
+            ))}
         </Grid>
     );
 }

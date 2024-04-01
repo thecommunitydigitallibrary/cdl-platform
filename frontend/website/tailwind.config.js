@@ -1,4 +1,22 @@
 /** @type {import('tailwindcss').Config} */
+
+// Define for ul and ol styles
+function applyListStyles({ addBase }) {
+  addBase({
+    'ul': {
+      listStyleType: 'disc',
+      listStylePosition: 'outside',
+      listStyleImage: 'none',
+    },
+    'ol': {
+      listStyleType: 'decimal', // Use 'decimal' for numbered lists
+      listStylePosition: 'outside',
+      listStyleImage: 'none',
+    }
+  });
+}
+
+
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -33,5 +51,8 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("@tailwindcss/aspect-ratio"),
+    applyListStyles,
+    require("tailwindcss-animate")],
 }

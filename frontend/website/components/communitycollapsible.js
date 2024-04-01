@@ -76,7 +76,8 @@ export function CollapsibleCommunity({ community }) {
                             background: "aliceblue",
                         }}
                     >
-                        {community.name}
+                        {community.name.substring(0, 15)}
+                        {community.name.length > 15 ? "..." : ""}
                     </a>
                 </Tooltip>
                 <CollapsibleTrigger asChild>

@@ -191,7 +191,7 @@ function Header(props) {
   const [openSubmission, setOpenSubmission] = useState(false);
 
   const { submissionMode, submissionCommunitiesNameMap, setSubmissionProps } = useSubmissionStore();
-  const { userCommunities, isLoggedOut, setLoggedOut, setUserDataStoreProps } = useUserDataStore();
+  const { userCommunities, username, isLoggedOut, setLoggedOut, setUserDataStoreProps } = useUserDataStore();
   const [selectedCommunity, setSelectedCommunity] = useState("");
 
   const handleClickSubmission = () => {
@@ -362,6 +362,7 @@ function Header(props) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -388,8 +389,9 @@ function Header(props) {
 
   };
 
-  useEffect(() => {
-    if (window.localStorage.getItem("dropdowndata")) {
+  useEffect(async () => {
+    if (window.localStorage.getItem("dropdowndata") && window.localStorage.getItem("dropdowndata").status != 'error') {
+
       var responseComm = JSON.parse(window.localStorage.getItem("dropdowndata"))
       setDropDownData(responseComm);
       setcommunityData(responseComm.community_info);
@@ -397,7 +399,7 @@ function Header(props) {
       setUserDataStoreProps({ username: responseComm.username });
 
     } else {
-      updateDropDownSearch();
+      await updateDropDownSearch();
       // window.location.reload()
     }
 
@@ -454,6 +456,12 @@ function Header(props) {
     event.preventDefault();
     jsCookie.remove("token");
     localStorage.removeItem("dropdowndata");
+
+    setcommunityData([]);
+    setUserDataStoreProps({ userCommunities: [] });
+    setUserDataStoreProps({ username: [] });
+    setLoggedOut(true);
+
     Router.push("/");
   };
 
@@ -486,23 +494,24 @@ function Header(props) {
               sx={{ minHeight: "65px", overflow: "hidden" }}
 
             >
-              <Grid className="flex items-center space-x-2 text-2xl mr-2 mt-2 font-medium text-white-500 dark:text-white-100">
-                <a href="/">
-                  <a>
-                    <Image
-                      src="/images/tree48.png"
-                      alt="TextData"
-                      width="40"
-                      height="40"
-                      className="w-8"
-                    />
+              {!isSmall &&
+                <Grid className="flex items-center space-x-2 text-2xl mr-2 mt-2 font-medium text-white-500 dark:text-white-100">
+                  <a href="/">
+                    <a>
+                      <Image
+                        src="/images/tree48.png"
+                        alt="TextData"
+                        width="40"
+                        height="40"
+                        className="w-8"
+                      />
+                    </a>
                   </a>
-                </a>
-              </Grid>
+                </Grid>}
               <Grid item sx={{ flexGrow: 1 }}>
                 {props.renderSearchBar != undefined ? (
                   <Typography className="user_name" fontSize={15}>
-                    &nbsp; Welcome, {dropdowndata.username}
+                    &nbsp; Welcome, {username}
                   </Typography>
                 ) : (
                   <SearchBarHeader dropdowndata={dropdowndata.community_info} isMedium={isMedium} isSmall={isSmall} />
@@ -516,7 +525,7 @@ function Header(props) {
                     handleUserClickMenu={handleUserClickMenu}
                     // handleClickSubmission={handleClickSubmission}
                     handleClickSubmission={() => { handleClickOpenNewSubTitleDialog(true) }}
-                    username={dropdowndata.username}
+                    username={username}
                     style={{ position: 'sticky', top: '0', right: '0' }}
                   />
                 </Grid>
@@ -554,10 +563,13 @@ function Header(props) {
                   <Grid item sx={{ flexGrow: 0, ml: "1%" }}>
                     <Tooltip title="Account Information">
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        {/* <Avatar />  */}
-                        <Typography variant="h6" sx={{ border: 2, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', borderColor: '#ceddeb', backgroundColor: '#ceddeb', color: '#1976d2' }}>
-                          {dropdowndata.username ? dropdowndata.username[0].toUpperCase() : 'A'}
-                        </Typography>
+
+                        {username ?
+                          <Typography variant="h6" sx={{ border: 2, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', borderColor: '#ceddeb', backgroundColor: '#ceddeb', color: '#1976d2' }}>
+                            {username[0].toUpperCase()}
+                          </Typography>
+                          :
+                          <Avatar />}
                       </IconButton>
                     </Tooltip>
                   </Grid>
@@ -580,7 +592,7 @@ function Header(props) {
                     >
                       <MenuItem>
                         <Typography noWrap>
-                          Hello, {dropdowndata.username}
+                          Hello, {username}
                         </Typography>
                       </MenuItem>
 
@@ -600,7 +612,6 @@ function Header(props) {
 
                       <MenuItem>
                         <Button
-                          variant="contained"
                           size="small"
                           color="error"
                           onClick={(event) =>
@@ -824,21 +835,21 @@ function Header(props) {
 
           <div style={{ position: 'sticky', top: '0', right: '0', zIndex: '50' }} className="w-full">
             <nav className="container relative flex flex-wrap items-center justify-between mx-auto lg:justify-between xl:px-0">
-
-              <div className="flex items-center space-x-2 text-2xl font-medium text-white-500 dark:text-white-100">
-                <a href="/">
-                  <a>
-                    <Image
-                      src="/images/tree48.png"
-                      alt="TextData"
-                      width="40"
-                      height="40"
-                      className="w-8"
-                    />
+              {!isSmall &&
+                <div className="flex items-center space-x-2 text-2xl font-medium text-white-500 dark:text-white-100">
+                  <a href="/">
+                    <a>
+                      <Image
+                        src="/images/tree48.png"
+                        alt="TextData"
+                        width="40"
+                        height="40"
+                        className="w-8"
+                      />
+                    </a>
                   </a>
-                </a>
-                <span className="mb-2">TextData</span>
-              </div>
+                  <span className="mb-2">TextData</span>
+                </div>}
 
               <div className="mr-3 space-x-4 lg:flex nav__item ">
                 {!isLoggedOut ? (

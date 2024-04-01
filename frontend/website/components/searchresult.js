@@ -26,7 +26,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import { Snackbar, Alert, Box, Typography } from "@mui/material";
 import React, { useState, useContext, useEffect } from "react";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
-import { Bookmark, BookmarkAddOutlined, Close, Launch } from "@mui/icons-material";
+import { Bookmark, BookmarkAddOutlined, Close, Launch, PersonPin } from "@mui/icons-material";
 
 import rehypeSanitize from "rehype-sanitize";
 import CommunityDisplay from "./communityDisplay";
@@ -278,7 +278,7 @@ function SearchResult(props) {
       className="mt-2"
       sx={{
         // width: '85%',
-        minWidth: '600px',
+        minWidth: '100ch',
         padding: "15px",
         border: "1px solid #ddd",
         margin: 'auto',
@@ -366,6 +366,13 @@ function SearchResult(props) {
                 <Button onClick={handleCreateFeedbackForm}>Send</Button>
               </DialogActions>
             </Dialog>
+            {false && <Tooltip title="You submitted on MM/YY" placement="top">
+              <IconButton size="small" onClick={(e) => { e.preventDefault() }}>
+                {console.log(props)}
+                <PersonPin />
+              </IconButton>
+            </Tooltip>}
+
             <Tooltip title="Options">
               <IconButton size="small" onClick={handleOpenOptionsMenu}>
                 <MoreVert />

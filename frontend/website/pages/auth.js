@@ -266,348 +266,67 @@ export default function ({ data }) {
     }
   }, [router.isReady]);
 
-  if (authMode === "signin") {
-    return (
-      <div className="Auth-form-container">
-        <Head>
-          <title>Sign In - TextData</title>
-          <link rel="icon" href="/images/tree32.png" />
-        </Head>
+  if (isLoggedOut === true) {
+    if (authMode === "signin") {
+      return (
+        <div className="Auth-form-container">
+          <Head>
+            <title>Sign In - TextData</title>
+            <link rel="icon" href="/images/tree32.png" />
+          </Head>
 
-        <form className="Auth-form" id="signin" onSubmit={handleSignin}>
+          <form className="Auth-form" id="signin" onSubmit={handleSignin}>
 
-          <div className="Auth-form-content">
-            <h3 className="Auth-form-title">
-              <a href="/about">TextData</a>
-            </h3>
-
-            <div className="form-group mt-3">
-              <label>Username or Email</label>
-              <input
-                type="text"
-                className="form-control mt-1"
-                name="username"
-                onChange={(e) => setUsername(e.target.value)}
-                value={username}
-                placeholder="Enter Username or Email"
-              />
-            </div>
-            <div className="form-group mt-3">
-              <label>Password</label>
-              <input
-                type="password"
-                className="form-control mt-1"
-                name="password"
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-                placeholder="Enter Password"
-              />
-            </div>
-            <p align="right">
-              <Button onClick={() => changeAuthMode("resetPassword")}>
-                <Typography variant="caption">Forgot Password?</Typography>
-              </Button>
-            </p>
-            <div className="d-grid gap-2 mt-3 text-center">
-              <ActionButton form="Auth-form" type="submit" variant="contained" style={{ fontSize: '0.875rem' }}>
-                Sign In
-              </ActionButton>
-              {showProgress ?
-                <LinearProgress value={showProgress} /> : null}
-            </div>
-            <div align="center" style={{ marginTop: 10 }}>
-              Not registered yet?  {" "}
-              <div style={{ display: "inline-block" }}>
-
-                <button className="appearance-none text-blue-500 underline cursor-pointer"
-                  onClick={() => changeAuthMode("signup")}>
-                  Create Account
-                </button>
-
-              </div>
-            </div>
-          </div>
-        </form>
-        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-          <Alert
-            onClose={handleClose}
-            severity={severity}
-            sx={{ width: "100%" }}
-          >
-            {authMessage}
-          </Alert>
-        </Snackbar>
-      </div>
-    );
-  } else if (authMode === "signup")
-    return (
-      <div className="Auth-form-container">
-        <Head>
-          <title>Create an Account - TextData</title>
-          <link rel="icon" href="/images/tree32.png" />
-        </Head>
-        <form className="Auth-form" onSubmit={handleCreateAccount}>
-          <div className="Auth-form-content">
-            <h3 className="Auth-form-title">
-              <a href="/about">TextData</a>
-            </h3>
-
-            <div className="form-group mt-3">
-              <label>Email</label>
-              <input
-                type="email"
-                className="form-control mt-1"
-                name="create_email"
-                onChange={(e) => setCreateEmail(e.target.value)}
-                value={create_email}
-                placeholder="Enter Email"
-              />
-            </div>
-            <div className="form-group mt-3">
-              <label>Username</label>
-              <input
-                type="text"
-                className="form-control mt-1"
-                name="create_username"
-                onChange={(e) => setCreateUsername(e.target.value)}
-                value={create_username}
-                placeholder="Enter Username"
-                minLength={minUsernameLength}
-              />
-            </div>
-            <div className="form-group mt-3">
-              <label>Password</label>
-              <input
-                type="password"
-                className="form-control mt-1"
-                name="create_password"
-                onChange={(e) => setCreatePassword(e.target.value)}
-                value={create_password}
-                placeholder="Enter Password"
-                minLength={minPasswordLength}
-              />
-            </div>
-            <div className="form-group mt-3">
-              <label>Repeat Password</label>
-              <input
-                type="password"
-                className="form-control mt-1"
-                name="check_password"
-                onChange={(e) => {
-                  if (create_password != e.target.value) {
-                    setMatches(false);
-                  } else {
-                    setMatches(true);
-                  }
-                  setCheckPassword(e.target.value);
-                }}
-                value={check_password}
-                placeholder="Repeat Password"
-                minLength={minPasswordLength}
-              />
-              {matches ? null : (
-                <Alert sx={{ marginTop: "15px" }} severity="error">
-                  Passwords do not match!
-                </Alert>
-              )}
-            </div>
-            <div className="d-grid gap-2 mt-3 text-center">
-              <ActionButton form="Auth-form" type="submit" variant="contained" style={{ fontSize: '0.875rem' }}>
-                Create Account
-              </ActionButton>
-
-              {showProgress ?
-                <LinearProgress value={showProgress} /> : null}
-            </div>
-            <div className="text-center" style={{ marginTop: 10 }}>
-              Already registered?{" "}
-              <div style={{ display: "inline-block" }}>
-
-                <button className="appearance-none text-blue-500 underline cursor-pointer"
-                  onClick={() => changeAuthMode("signin")}>
-                  Log in
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-          <Alert
-            onClose={handleClose}
-            severity={severity}
-            sx={{ width: "100%" }}
-          >
-            {authMessage}
-          </Alert>
-        </Snackbar>
-      </div>
-    );
-  else if (authMode === "resetPassword")
-    return (
-      <div className="Auth-form-container">
-        <Head>
-          <title>Request Password Reset - TextData</title>
-          <link rel="icon" href="/images/tree32.png" />
-        </Head>
-        <div className="d-grid gap-2 mt-3">
-          <form className="Auth-form" onSubmit={handleResetEmail}>
             <div className="Auth-form-content">
               <h3 className="Auth-form-title">
-                <a>Reset Password</a>
+                <a href="/about">TextData</a>
               </h3>
-              {pwdResetReqSent ? (
-                <p>
-                  {" "}
-                  Success! You will shortly receive an email from no-reply@textdata.org containing the password reset link.
-                  Note that the link will expire in 72 hours.
-                </p>
-              ) : (
-                <p>
-                  {" "}
-                  Please enter the email address for the account requesting the
-                  password reset.
-                </p>
-              )}
+
               <div className="form-group mt-3">
-                <label>Email</label>
-                {pwdResetReqSent ? (
-                  <input
-                    type="email"
-                    className="form-control mt-1"
-                    name="create_email"
-                    disabled={true}
-                    value={resetEmailInput}
-                    placeholder="Reset request for"
-                  />
-                ) : (
-                  <input
-                    type="email"
-                    className="form-control mt-1"
-                    name="create_email"
-                    onChange={(e) => setResetEmailInput(e.target.value)}
-                    value={resetEmailInput}
-                    placeholder="Enter Email"
-                  />
-                )}
+                <label>Username or Email</label>
+                <input
+                  type="text"
+                  className="form-control mt-1"
+                  name="username"
+                  onChange={(e) => setUsername(e.target.value)}
+                  value={username}
+                  placeholder="Enter Username or Email"
+                />
               </div>
-
-              {pwdResetReqSent ? (
-                <Grid item className="d-grid gap-2 mt-3">
-                  <ActionButton
-                    form="Auth-form"
-                    type="submit"
-                    variant="contained"
-                    style={{ fontSize: '0.875rem' }}
-                    action={() => changeAuthMode("signin")}
-                  >
-                    Done
-                  </ActionButton>
-                </Grid>
-              ) : (
-                <Grid container justifyContent="space-evenly">
-                  <Grid item className="d-grid gap-2 mt-3">
-                    <ActionButton
-                      form="Auth-form"
-                      type="submit"
-                      variant="contained"
-                      style={{ fontSize: '0.875rem' }}
-                    >
-                      Submit
-                    </ActionButton>
-                  </Grid>
-                  <Grid item className="d-grid gap-2 mt-3">
-                    <ActionButton
-                      form="Auth-form"
-                      type="submit"
-                      variant="contained"
-                      style={{ fontSize: '0.875rem' }}
-                      action={() => changeAuthMode("signin")}
-                    >
-                      Cancel
-                    </ActionButton>
-                  </Grid>
-                </Grid>
-              )}
-            </div>
-          </form>{" "}
-          <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-            <Alert
-              onClose={handleClose}
-              severity={severity}
-              sx={{ width: "100%" }}
-            >
-              {authMessage}
-            </Alert>
-          </Snackbar>
-        </div>
-      </div>
-    );
-  else if (authMode === "resetMode")
-    return (
-      <div className="Auth-form-container">
-        <Head>
-          <title>Reset Password - TextData</title>
-          <link rel="icon" href="/images/tree32.png" />
-        </Head>
-        <div className="d-grid gap-2 mt-3">
-          <form className="Auth-form" onSubmit={handleResetRequest}>
-            <div className="Auth-form-content">
-              <h3 className="Auth-form-title">
-                <a>Reset Password</a>
-              </h3>
               <div className="form-group mt-3">
                 <label>Password</label>
                 <input
                   type="password"
                   className="form-control mt-1"
-                  name="create_password"
-                  onChange={(e) => setResetPassword(e.target.value)}
-                  value={resetPassword}
+                  name="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
                   placeholder="Enter Password"
-                  minlength={minPasswordLength}
                 />
-              </div>
-              <div className="form-group mt-3">
-                <label>Confirm Password</label>
-                <input
-                  type="password"
-                  className="form-control mt-1"
-                  name="check_password"
-                  onChange={(e) => {
-                    if (resetPassword != e.target.value) {
-                      setMatchesReset(false);
-                    } else {
-                      setMatchesReset(true);
-                    }
-                    setResetPasswordConfirm(e.target.value);
-                  }}
-                  value={resetPasswordConfirm}
-                  placeholder="Repeat Password"
-                  minlength={minPasswordLength}
-                />
-                {matchesReset ? null : (
-                  <Alert sx={{ marginTop: "15px" }} severity="error">
-                    Passwords do not match!
-                  </Alert>
-                )}
-              </div>
-              <div className="d-grid gap-2 mt-3">
-                <ActionButton
-                  form="Auth-form"
-                  type="submit"
-                  variant="contained"
-                  style={{ fontSize: '0.875rem' }}
-                >
-                  Confirm
-                </ActionButton>
               </div>
               <p align="right">
                 <Button onClick={() => changeAuthMode("resetPassword")}>
-                  <Typography variant="caption">
-                    Request another link
-                  </Typography>
+                  <Typography variant="caption">Forgot Password?</Typography>
                 </Button>
               </p>
+              <div className="d-grid gap-2 mt-3 text-center">
+                <ActionButton form="Auth-form" type="submit" variant="contained" style={{ fontSize: '0.875rem' }}>
+                  Sign In
+                </ActionButton>
+                {showProgress ?
+                  <LinearProgress value={showProgress} /> : null}
+              </div>
+              <div align="center" style={{ marginTop: 10 }}>
+                Not registered yet?  {" "}
+                <div style={{ display: "inline-block" }}>
+
+                  <button className="appearance-none text-blue-500 underline cursor-pointer"
+                    onClick={() => changeAuthMode("signup")}>
+                    Create Account
+                  </button>
+
+                </div>
+              </div>
             </div>
           </form>
           <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
@@ -620,7 +339,293 @@ export default function ({ data }) {
             </Alert>
           </Snackbar>
         </div>
-      </div>
-    );
-  else return <div>Refresh</div>;
+      );
+    } else if (authMode === "signup")
+      return (
+        <div className="Auth-form-container">
+          <Head>
+            <title>Create an Account - TextData</title>
+            <link rel="icon" href="/images/tree32.png" />
+          </Head>
+          <form className="Auth-form" onSubmit={handleCreateAccount}>
+            <div className="Auth-form-content">
+              <h3 className="Auth-form-title">
+                <a href="/about">TextData</a>
+              </h3>
+
+              <div className="form-group mt-3">
+                <label>Email</label>
+                <input
+                  type="email"
+                  className="form-control mt-1"
+                  name="create_email"
+                  onChange={(e) => setCreateEmail(e.target.value)}
+                  value={create_email}
+                  placeholder="Enter Email"
+                />
+              </div>
+              <div className="form-group mt-3">
+                <label>Username</label>
+                <input
+                  type="text"
+                  className="form-control mt-1"
+                  name="create_username"
+                  onChange={(e) => setCreateUsername(e.target.value)}
+                  value={create_username}
+                  placeholder="Enter Username"
+                  minLength={minUsernameLength}
+                />
+              </div>
+              <div className="form-group mt-3">
+                <label>Password</label>
+                <input
+                  type="password"
+                  className="form-control mt-1"
+                  name="create_password"
+                  onChange={(e) => setCreatePassword(e.target.value)}
+                  value={create_password}
+                  placeholder="Enter Password"
+                  minLength={minPasswordLength}
+                />
+              </div>
+              <div className="form-group mt-3">
+                <label>Repeat Password</label>
+                <input
+                  type="password"
+                  className="form-control mt-1"
+                  name="check_password"
+                  onChange={(e) => {
+                    if (create_password != e.target.value) {
+                      setMatches(false);
+                    } else {
+                      setMatches(true);
+                    }
+                    setCheckPassword(e.target.value);
+                  }}
+                  value={check_password}
+                  placeholder="Repeat Password"
+                  minLength={minPasswordLength}
+                />
+                {matches ? null : (
+                  <Alert sx={{ marginTop: "15px" }} severity="error">
+                    Passwords do not match!
+                  </Alert>
+                )}
+              </div>
+              <div className="d-grid gap-2 mt-3 text-center">
+                <ActionButton form="Auth-form" type="submit" variant="contained" style={{ fontSize: '0.875rem' }}>
+                  Create Account
+                </ActionButton>
+
+                {showProgress ?
+                  <LinearProgress value={showProgress} /> : null}
+              </div>
+              <div className="text-center" style={{ marginTop: 10 }}>
+                Already registered?{" "}
+                <div style={{ display: "inline-block" }}>
+
+                  <button className="appearance-none text-blue-500 underline cursor-pointer"
+                    onClick={() => changeAuthMode("signin")}>
+                    Log in
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+          <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+            <Alert
+              onClose={handleClose}
+              severity={severity}
+              sx={{ width: "100%" }}
+            >
+              {authMessage}
+            </Alert>
+          </Snackbar>
+        </div>
+      );
+    else if (authMode === "resetPassword")
+      return (
+        <div className="Auth-form-container">
+          <Head>
+            <title>Request Password Reset - TextData</title>
+            <link rel="icon" href="/images/tree32.png" />
+          </Head>
+          <div className="d-grid gap-2 mt-3">
+            <form className="Auth-form" onSubmit={handleResetEmail}>
+              <div className="Auth-form-content">
+                <h3 className="Auth-form-title">
+                  <a>Reset Password</a>
+                </h3>
+                {pwdResetReqSent ? (
+                  <p>
+                    {" "}
+                    Success! You will shortly receive an email from no-reply@textdata.org containing the password reset link.
+                    Note that the link will expire in 72 hours.
+                  </p>
+                ) : (
+                  <p>
+                    {" "}
+                    Please enter the email address for the account requesting the
+                    password reset.
+                  </p>
+                )}
+                <div className="form-group mt-3">
+                  <label>Email</label>
+                  {pwdResetReqSent ? (
+                    <input
+                      type="email"
+                      className="form-control mt-1"
+                      name="create_email"
+                      disabled={true}
+                      value={resetEmailInput}
+                      placeholder="Reset request for"
+                    />
+                  ) : (
+                    <input
+                      type="email"
+                      className="form-control mt-1"
+                      name="create_email"
+                      onChange={(e) => setResetEmailInput(e.target.value)}
+                      value={resetEmailInput}
+                      placeholder="Enter Email"
+                    />
+                  )}
+                </div>
+
+                {pwdResetReqSent ? (
+                  <Grid item className="d-grid gap-2 mt-3">
+                    <ActionButton
+                      form="Auth-form"
+                      type="submit"
+                      variant="contained"
+                      style={{ fontSize: '0.875rem' }}
+                      action={() => changeAuthMode("signin")}
+                    >
+                      Done
+                    </ActionButton>
+                  </Grid>
+                ) : (
+                  <Grid container justifyContent="space-evenly">
+                    <Grid item className="d-grid gap-2 mt-3">
+                      <ActionButton
+                        form="Auth-form"
+                        type="submit"
+                        variant="contained"
+                        style={{ fontSize: '0.875rem' }}
+                      >
+                        Submit
+                      </ActionButton>
+                    </Grid>
+                    <Grid item className="d-grid gap-2 mt-3">
+                      <ActionButton
+                        form="Auth-form"
+                        type="submit"
+                        variant="contained"
+                        style={{ fontSize: '0.875rem' }}
+                        action={() => changeAuthMode("signin")}
+                      >
+                        Cancel
+                      </ActionButton>
+                    </Grid>
+                  </Grid>
+                )}
+              </div>
+            </form>{" "}
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+              <Alert
+                onClose={handleClose}
+                severity={severity}
+                sx={{ width: "100%" }}
+              >
+                {authMessage}
+              </Alert>
+            </Snackbar>
+          </div>
+        </div>
+      );
+    else if (authMode === "resetMode")
+      return (
+        <div className="Auth-form-container">
+          <Head>
+            <title>Reset Password - TextData</title>
+            <link rel="icon" href="/images/tree32.png" />
+          </Head>
+          <div className="d-grid gap-2 mt-3">
+            <form className="Auth-form" onSubmit={handleResetRequest}>
+              <div className="Auth-form-content">
+                <h3 className="Auth-form-title">
+                  <a>Reset Password</a>
+                </h3>
+                <div className="form-group mt-3">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    className="form-control mt-1"
+                    name="create_password"
+                    onChange={(e) => setResetPassword(e.target.value)}
+                    value={resetPassword}
+                    placeholder="Enter Password"
+                    minlength={minPasswordLength}
+                  />
+                </div>
+                <div className="form-group mt-3">
+                  <label>Confirm Password</label>
+                  <input
+                    type="password"
+                    className="form-control mt-1"
+                    name="check_password"
+                    onChange={(e) => {
+                      if (resetPassword != e.target.value) {
+                        setMatchesReset(false);
+                      } else {
+                        setMatchesReset(true);
+                      }
+                      setResetPasswordConfirm(e.target.value);
+                    }}
+                    value={resetPasswordConfirm}
+                    placeholder="Repeat Password"
+                    minlength={minPasswordLength}
+                  />
+                  {matchesReset ? null : (
+                    <Alert sx={{ marginTop: "15px" }} severity="error">
+                      Passwords do not match!
+                    </Alert>
+                  )}
+                </div>
+                <div className="d-grid gap-2 mt-3">
+                  <ActionButton
+                    form="Auth-form"
+                    type="submit"
+                    variant="contained"
+                    style={{ fontSize: '0.875rem' }}
+                  >
+                    Confirm
+                  </ActionButton>
+                </div>
+                <p align="right">
+                  <Button onClick={() => changeAuthMode("resetPassword")}>
+                    <Typography variant="caption">
+                      Request another link
+                    </Typography>
+                  </Button>
+                </p>
+              </div>
+            </form>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+              <Alert
+                onClose={handleClose}
+                severity={severity}
+                sx={{ width: "100%" }}
+              >
+                {authMessage}
+              </Alert>
+            </Snackbar>
+          </div>
+        </div>
+      );
+    else return <div>Refresh</div>;
+  }
+  else return <div>
+    <LinearProgress value={true} />
+  </div>;
 }

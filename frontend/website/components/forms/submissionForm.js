@@ -86,11 +86,11 @@ export default function SubmissionForm(props) {
 
     const handleSnackbarClose = (event, reason) => {
         if (reason === "clickaway") {
-          return;
+            return;
         }
         setOpenSnackbar(false);
-      };
-    
+    };
+
     const handleAnonymous = async (event) => {
 
         if (props.isAConnection) {
@@ -173,7 +173,6 @@ export default function SubmissionForm(props) {
 
             setCurrentQuery(text)
         } else {
-            // console.log(response.message, 'SET!!!!!!!!!')
 
             if (props.isAConnection) {
                 setSuggestions(null)
@@ -184,10 +183,9 @@ export default function SubmissionForm(props) {
     }
 
     const setDescriptionListener = async (text) => {
-        
+
 
         if (props.isAConnection) {
-            // console.log('2')
 
             setDescription(text)
             setReplySubCharCount(text.length);
@@ -210,7 +208,6 @@ export default function SubmissionForm(props) {
             }
         }
         else {
-            // console.log('3')
 
             setSubmissionProps({ submissionDescription: text })
             const regex = /\[\[([^\]]+)\]\]/g;
@@ -222,13 +219,11 @@ export default function SubmissionForm(props) {
             }
 
             if (matches.length == 1) {
-                // console.log('4')
 
                 var words_in_match = matches[0]
                 getSuggestions(words_in_match)
             }
             else {
-                // console.log('5')
                 setSubmissionProps({ submissionSuggestions: "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms." });
             }
         }
@@ -424,7 +419,7 @@ export default function SubmissionForm(props) {
 
                     </FormControl>
                     <br />
-                    <div data-color-mode="light">
+                    <div data-color-mode="light" >
                         <MDEditor
                             id="submissionDescription"
                             label="Submission Description"
@@ -483,7 +478,7 @@ export default function SubmissionForm(props) {
                             }}
                         />
                     </div>
-                    <div  style={{ float: 'left'}}> {replySubcharCount} / 50,000 characters</div>
+                    <div style={{ float: 'left' }}> {replySubcharCount} / 50,000 characters</div>
                     <br />
                     <Box sx={{ bgcolor: 'background.paper' }}>
                         {suggestions ? suggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
@@ -591,7 +586,7 @@ export default function SubmissionForm(props) {
                                         },
                                     }}
                                 />
-                               <div  style={{ float: 'left'}}> {submissionDescription.length} / 50,000 characters </div>
+                                <div style={{ float: 'left' }}> {submissionDescription.length} / 50,000 characters </div>
                                 <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose} >
                                     <Alert
                                         severity={severity}
@@ -616,7 +611,7 @@ export default function SubmissionForm(props) {
 
                     {submissionMode == "view" &&
                         <div>
-                            <div data-color-mode="light">
+                            <div data-color-mode="light" >
                                 <MDEditor
                                     hideToolbar={true}
                                     id="submissionDescription"
@@ -676,7 +671,7 @@ export default function SubmissionForm(props) {
                                     }}
                                 />
                             </div>
-                            <div  style={{ float: 'left'}}> {submissionDescription.length} / 50,000 characters </div>
+                            <div style={{ float: 'left' }}> {submissionDescription.length} / 50,000 characters </div>
                             <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose} >
                                 <Alert
                                     severity={severity}
@@ -717,7 +712,7 @@ export default function SubmissionForm(props) {
                             <DialogContentText>
                                 Submission Description
                             </DialogContentText>
-                            <div data-color-mode="light">
+                            <div data-color-mode="light" >
                                 <MDEditor
                                     id="submissionDescription"
                                     label="Submission Description"
@@ -776,7 +771,7 @@ export default function SubmissionForm(props) {
                                     }}
                                 />
                             </div>
-                            <div  style={{float: 'left' }}> {submissionDescription.length} / 50,000 characters </div>
+                            <div style={{ float: 'left' }}> {submissionDescription.length} / 50,000 characters </div>
                             <br />
                             <Box sx={{ bgcolor: 'background.paper' }}>
                                 {submissionSuggestions ? submissionSuggestions : "Pro-tip: Type [[search terms]] followed by a space to auto-link a submission that matches your search terms."}
