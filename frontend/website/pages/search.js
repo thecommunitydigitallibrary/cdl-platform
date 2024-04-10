@@ -75,6 +75,12 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
 
   function findCommunityName(community_id) {
     if (community_id == "all") return community_id + " of your communities"
+
+    // instead, parse the data obj returned by API
+    // to get names of public communities, if present
+    // name is value of id
+    //return data.requested_communities[community_id]
+
     const commArray = JSON.parse(window.localStorage.getItem('dropdowndata')).community_info
     var name;
     for (let i = 0; i < commArray.length; i++) {
@@ -115,7 +121,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
               {own_submissions && <Typography textAlign={'center'} variant="caption">Filtered by your own submissions</Typography>}
 
               <Typography>
-                Community: <CommunityDisplay k={community} communities_part_of={Object} />
+                Community: <CommunityDisplay k={community} name={data.requested_communities[community]} communities_part_of={Object} />
               </Typography>
 
             </Grid>
@@ -146,7 +152,7 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
           <Grid item>
 
             <Typography variant="subtitle2">
-              Community: <CommunityDisplay k={community} />
+            Community: <CommunityDisplay k={community} name={data.requested_communities[community]} />
             </Typography>
 
           </Grid>

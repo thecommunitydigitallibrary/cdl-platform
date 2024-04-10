@@ -69,6 +69,8 @@ export default function CommunitiesDeck(props) {
                   auth={jsCookie.get("token")}
                   name={community.name}
                   description={community.description}
+                  pinned={community.pinned}
+                  is_public={community.is_public}
                 >
                   {community.name}
                 </CommunityBox>

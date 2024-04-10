@@ -29,3 +29,7 @@
     border: 1px solid #e2e8f0;
 
 }
+.MuiIconButton-root.Mui-selected {
+  background-color: #fff !important;
+  color: #007bff !important;
+}

@@ -44,6 +44,14 @@ export default function VisualizeMap() {
   }, []);
 
   useEffect(() => {
+    if (!router.isReady)
+      return;
+    // Router is ready, safe to use router.query or other router properties/methods
+    setQueryParams();
+  }, [router.isReady, router.asPath]);
+
+  // Functions
+  const setQueryParams = () => {
     let obj = router.query;
     let src = "";
     let q = "";
@@ -68,9 +76,8 @@ export default function VisualizeMap() {
     setCommunityId(cid);
     ownSub = ownSub.trim();
     getUserSubmissions(q, cid, ownSub);
-  }, [router.asPath]);
+  }
 
-  // Functions
   const getUserSubmissions = async (query, communityId, ownSub) => {
     let url = baseURL_client + "search?query=" + query + "&community=" + communityId + "&source=visualizeConnections";
     if (ownSub == "True") {
@@ -114,16 +121,13 @@ export default function VisualizeMap() {
       url += "?query=" + router.query["query"] + "&community=all" + "&levelfilter=" + router.query["levelfilter"];
     }
     else {
-      url += "?community=" + router.query["community"] + "&communityName=" + router.query["communityName"] + "&levelfilter=" + router.query["levelfilter"];
+      url += "?community=" + router.query["community"] + "&communityName=" + router.query["communityName"] + "&levelfilter=topics";
     }
     window.location = url;
   }
 
   return (
     <>
-      {
-        source == "visualizeConnections" ? (
-          <>
             <Head>
               <title>Visualize - TextData</title>
               <link rel="icon" href="/images/tree32.png" />
@@ -132,16 +136,6 @@ export default function VisualizeMap() {
               style={{ backgroundColor: "#e5e5e5", borderRadius: "10px", width: width, height: height, marginLeft: '20px' }}>
               {submissions && (
                 <>
-                  <Button variant="outlined"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      marginLeft: "10px"
-                    }}
-                    onClick={openHierarchicalView}
-                  >
-                    Open Detailed View
-                  </Button>
                   <HomeConnections
                     nds={submissions['nodes']}
                     eds={submissions['edges']}
@@ -155,12 +149,6 @@ export default function VisualizeMap() {
                 {message}
               </Alert>
             </Snackbar>
-          </>
-        ) :
-          (
-            <VisualizeComponent />
-          )
-      }
     </>
   )
 };

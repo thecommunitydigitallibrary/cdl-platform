@@ -113,7 +113,6 @@ function searchBarHeader(props) {
         let url = "/visualizemap?query=" +
             encodeURIComponent(inputValue) +
             "&community=all" +
-            "&levelfilter=topics" +
             "&source=visualizeConnections";
 
         if (ownSubmissionToggle)

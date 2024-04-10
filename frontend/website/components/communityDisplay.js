@@ -15,12 +15,20 @@ const CommunityDisplay = (props) => {
 
             setUsersCommunities(initialCommunities);
 
-            const initialCommunitiesMap = initialCommunities.reduce((acc, community) => {
-                acc[community.community_id] = community.name;
-                return acc;
-            }, {});
-
-            setCommunitiesPartOf(initialCommunitiesMap);
+            // this is the case where we pass a specific community to the render
+            // used when a user searches/views a public community and they have not joined
+            // so the community will not be mapped in their account's communities
+            if (props.name !== 'undefined' || props.name != 'all') {
+                var initialCommunitiesMap = {}
+                initialCommunitiesMap[props.k] = props.name
+                setCommunitiesPartOf(initialCommunitiesMap);
+            } else {
+                const initialCommunitiesMap = initialCommunities.reduce((acc, community) => {
+                    acc[community.community_id] = community.name;
+                    return acc;
+                }, {});
+                setCommunitiesPartOf(initialCommunitiesMap);
+            }
         }
     }, []);
 

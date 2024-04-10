@@ -10,9 +10,10 @@ import useSubmissionStore from "../../store/submissionStore";
 import useSnackbarStore from "../../store/snackBar";
 import Alert from '@mui/material/Alert';
 
-export default function SubmissionDetails(subData) {
+export default function SubmissionDetails(subData ) {
 
     const {
+        submissionStats,
         submissionTitle,
         submissionDescription,
         submissionSourceUrl,
@@ -46,7 +47,81 @@ export default function SubmissionDetails(subData) {
     const [message, setMessage] = useState("");
     const [severity, setSeverity] = useState("error");
     const [openDelete, setOpenDelete] = useState(false);
+    
+    
+    const submitRelevanceJudgements = async function (event, rel) {
+        event.preventDefault();
+        try{
+            let URL = BASE_URL_CLIENT + "submitRelJudgments";
+            let judgement = {};
+            const submission_id = await submissionId;
+            judgement[submissionId] = rel;
+            const res = await fetch(URL, {
+            method: "POST",
+            body: JSON.stringify(judgement),
+            headers: new Headers({
+                Authorization: jsCookie.get("token"),
+                "Content-Type": "application/json",
+            }),
+        });
+        const response = await res.json();
+        if (res.status == 200) {
+          setSeverity("success");
+          setMessage(response.message);
+          handleClick();
+          return response.message;
+        } else {
+          setSeverity("error");
+          setMessage(response.message);
+          handleClick();
+          throw new new Error(response.message);
+        }
+        }
+        catch (error) {
+            throw new Error("Failed to submit judgment"|| error);
+        }
+    };
+    
+    const fetchSubmissionStats = async () => {
+        try {
+            const URL = BASE_URL_CLIENT + "fetchSubmissionStats?submissionId=" + submissionId; 
+            const response = await fetch(URL, {
+            method: "GET",
+            headers: {
+                Authorization: jsCookie.get("token"),
+                "Content-Type": "application/json",
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to fetch submission stats: ${response.status}`);
+            }
 
+            const result = await response.json(); 
+            return result.data;
+            } catch (error) {
+            console.error('Error fetching submission stats:', error);
+            }
+    };
+
+      const fetchSubmissionJudgement = async (submissionId) => {
+        try {
+          const URL = BASE_URL_CLIENT + "fetchSubmissionJudgement?submissionId=" + submissionId; 
+          const response = await fetch(URL, {
+            method: "GET",
+            headers: {
+              Authorization: jsCookie.get("token"),
+              "Content-Type": "application/json",
+            },
+          });
+          if (!response.ok) {
+            throw new Error(`Failed to fetch submission judgement: ${response.status}`);
+          }
+          const result = await response.json();
+          return result.data;
+        } catch (error) {
+          console.error('Error fetching submission judgement:', error);
+        }
+      };
     const mapCommunitiesToNames = (commResponse) => {
         let idNameMap = {};
         for (var key in commResponse) {
@@ -949,7 +1024,8 @@ export default function SubmissionDetails(subData) {
                             display: "flex",
                             flex: 1,
                         }}>
-                            <SubmissionStatistics />
+                            
+                            <SubmissionStatistics submitRelevanceJudgements={submitRelevanceJudgements} fetchSubmissionStats = {fetchSubmissionStats} fetchSubmissionJudgement={fetchSubmissionJudgement}/>
                         </div>
 
                     </Stack>

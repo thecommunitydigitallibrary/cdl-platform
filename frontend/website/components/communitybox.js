@@ -23,6 +23,10 @@ import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 import useCommunitiesStore from "../store/communitiesStore";
 import useUserDataStore from "../store/userData";
 import useQuickAccessStore from "../store/quickAccessStore";
+import FormGroup from '@mui/material/FormGroup';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+
 
 // API Endpoints
 const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
@@ -39,6 +43,9 @@ export default function CommunityBox(props) {
   const { setUserDataStoreProps } = useUserDataStore();
 
   const { communityData, setcommunityData } = useQuickAccessStore();
+
+  const [isPublic, setPublic] = useState(props.is_public)
+
 
   const handleClick = () => {
     setOpen(true);
@@ -78,10 +85,20 @@ export default function CommunityBox(props) {
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
   };
 
+  const handlePublic = async (event) => {
+      if (isPublic) {
+          setPublic(false)
+      } else {
+          setPublic(true)
+      }
+}
+
   const handleSubmitEdit = async () => {
     var URL = baseURL_client + createCommunityEndpoint;
     let title_field = document.getElementById("editCommunityName");
     let desc_field = document.getElementById("editCommunityDescription");
+    let pinned = document.getElementById("editCommunityPinned");
+    let is_public = isPublic;
     if (title_field.value == "") {
       setSeverity("error");
       setMessage("Community Name field should not be empty");
@@ -94,6 +111,8 @@ export default function CommunityBox(props) {
         community_name: title_field.value,
         community_id: props.communityId,
         community_description: desc_field.value,
+        community_pinned: pinned.value,
+        community_is_public: is_public
       }),
       headers: new Headers({
         Authorization: props.auth,
@@ -139,8 +158,6 @@ export default function CommunityBox(props) {
       pathname: "/visualizemap",
       query: {
         community: props.communityId,
-        communityName: props.name,
-        levelfilter: "hashtags;topics;metadescs",
         source: "visualizeConnections"
       }
     });
@@ -323,6 +340,20 @@ export default function CommunityBox(props) {
             variant="standard"
             defaultValue={props.description}
           />
+
+          <TextField
+            autoFocus
+            margin="dense"
+            id="editCommunityPinned"
+            label="Pinned Submissions (IDs separated by commas)"
+            fullWidth
+            variant="standard"
+            defaultValue={props.pinned}
+          />
+          <FormGroup>
+            <FormControlLabel control={<Checkbox defaultChecked={isPublic} onChange={handlePublic} />} label="Public" />
+          </FormGroup>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseEdit}>Cancel</Button>

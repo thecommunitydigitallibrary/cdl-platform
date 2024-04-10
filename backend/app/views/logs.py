@@ -9,6 +9,7 @@ from app.models.searches_clicks import *
 from app.models.recommendations_requests import *
 from app.models.recommendations_clicks import *
 from app.models.webpages import *
+from app.models.submission_stats import *
 
 
 def log_community_action(ip, user_id, community_id, action, submission_id=None):
@@ -128,6 +129,8 @@ def log_submission_view(ip, user_id, submission_id):
 		"type": "submission_view",
 		"time": time.time()
 	}
+	cdl_submit_stats = SubmissionStats()
+	update_clicks = cdl_submit_stats.update_stats(submission_id,"submission_view")
 	cdl_searches_clicks = SearchesClicks()
 	insert = cdl_searches_clicks.insert_one_db(log)
 	return insert
@@ -173,6 +176,8 @@ def log_click(ip, result_hash, redirect_url):
 		"type": "click_search_result",
 		"time": time.time()
 	}
+	cdl_submit_stats = SubmissionStats()
+	update_search = cdl_submit_stats.update_stats(submission_id,"click_search_result")
 	cdl_searches_clicks = SearchesClicks()
 	insert = cdl_searches_clicks.insert_one_db(log)
 	if not insert.acknowledged:
@@ -252,7 +257,9 @@ def log_recommendation_click(ip, rec_result_hash, redirect_url):
 		"type": "click_recommendation_result",
 		"time": time.time()
 	}
-
+	
+	cdl_submit_stats = SubmissionStats()
+	update_click = cdl_submit_stats.update_stats(submission_id,"click_recommendation_result")
 	cdl_recommendations_clicks = RecommendationsClicks()
 	insert = cdl_recommendations_clicks.insert_one_db(log)
 	if not insert.acknowledged:

@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import math
 
 from bson import ObjectId, json_util
 from flask import Blueprint, request, redirect
@@ -10,6 +11,7 @@ import traceback
 import time
 import random
 import requests
+
 
 from app.helpers.helpers import token_required, build_display_url, build_result_hash, build_redirect_url, \
     format_time_for_display, validate_submission, hydrate_with_hash_url, create_page, hydrate_with_hashtags, \
@@ -33,6 +35,7 @@ from app.views.logs import log_connection, log_submission, log_click, log_commun
     log_search, log_recommendation_request, log_recommendation_click, log_webpage
 from elastic.manage_data import ElasticManager
 from app.models.users import Users
+from app.models.submission_stats import SubmissionStats
 
 functional = Blueprint('functional', __name__)
 CORS(functional)
@@ -119,7 +122,10 @@ def export_helper(user_id, search_id):
         del result["explanation"]
 
         del result["username"]
-        #del result["children"]
+
+        if "children" in result:
+            del result["children"]
+
         del result["hashtags"]
 
     return {
@@ -477,7 +483,7 @@ def submission(current_user, id):
 
                 community_id = ObjectId(community_id)
                 # adding to a community (NOT THREAD SAFE)
-                submission_communities = submission.communities
+                submission_communities = submission.communities                
 
                 # need to check that user is a member of the community
                 user_communities = current_user.communities
@@ -669,21 +675,43 @@ def submission(current_user, id):
                                          submission.communities[uid]}
 
 
-                # TODO: check to see if any of the submission's communities are public. if so, break into log and format
+                user_str_communities = {str(x): True for x in communities}
+                submission_communities_not_joined_by_user = [x for x in community_submissions if x not in user_str_communities]
 
+                # need to do this all of the time now
+                # then pass the desired formatted community object to format submission
+                comm_db = Communities()
+                all_public = {}
+                for community in submission_communities_not_joined_by_user:
+                   found_comm = comm_db.find_one({"_id": ObjectId(community)})
+                   if found_comm.public:
+                       all_public[community] = found_comm
+                  
+                # Case where user is a member of the community that the submission is in
                 for community in communities:
                     if str(community) in community_submissions:
                         search_id = log_submission_view(ip, user_id, submission.id).inserted_id
-                        submission = format_submission_for_display(submission, current_user, search_id)
+                        submission = format_submission_for_display(submission, current_user, search_id, all_public)
                         submission["mentions"] = find_mentions(ObjectId(id), rc_dict, current_user, search_id)
                         return response.success({"submission": submission}, Status.OK)
 
                 # Case where user is the original submitter but it has been removed from all communities.
                 if str(submission.user_id) == str(user_id):
                     search_id = log_submission_view(ip, user_id, submission.id).inserted_id
-                    submission = format_submission_for_display(submission, current_user, search_id)
+                    submission = format_submission_for_display(submission, current_user, search_id, all_public)
                     submission["mentions"] = find_mentions(ObjectId(id), rc_dict, current_user, search_id)
                     return response.success({"submission": submission}, Status.OK)
+                
+                # case where the submission's communities are public. if so, break into log and format
+                # and user is not a member of any and a user did not submit it
+                if all_public:
+                    search_id = log_submission_view(ip, user_id, submission.id).inserted_id
+                    submission = format_submission_for_display(submission, current_user, search_id, all_public)
+                    submission["mentions"] = find_mentions(ObjectId(id), rc_dict, current_user, search_id)
+                    return response.success({"submission": submission}, Status.OK)
+
+
+
                 
                 return response.error("You do not have access to this submission.", Status.FORBIDDEN)
             elif not submission:
@@ -1071,7 +1099,12 @@ def search(current_user):
 
         ip = request.remote_addr
         user_id = current_user.id
+
+        # combine joined and followed communities
         user_communities = current_user.communities
+        for x in current_user.followed_communities:
+            if x not in user_communities:
+                user_communities.append(x)
 
         # flag for searching over webpage index
         toggle_webpage_results = True
@@ -1080,6 +1113,12 @@ def search(current_user):
         source = request.args.get("source", "webpage_search")
 
         requested_communities = request.args.get("community")
+
+        if requested_communities == "all":
+            ALL_COMM_FLAG = True
+        else:
+            ALL_COMM_FLAG = False
+
         own_submissions = request.args.get("own_submissions", False)
 
         if own_submissions:
@@ -1129,6 +1168,8 @@ def search(current_user):
 
         search_id = request.args.get("search_id", None)
 
+        rc_dict_public = {}
+
         # if the search_id is not included, then user is requesting a new search
         if not search_id:
             if requested_communities == "all":
@@ -1142,9 +1183,17 @@ def search(current_user):
                 except:
                     # need to return community_info for search bar option render
                     return response.error("Community ID is invalid.", Status.INTERNAL_SERVER_ERROR)
-                ## TODO if community is public, allow search
+
+
+                ## if community is public, allow search
+
                 if requested_communities[0] not in user_communities:
-                    return response.error("You do not have access to this community.", Status.FORBIDDEN)
+                    comm_db = Communities()
+                    found_comm = comm_db.find_one({"_id": requested_communities[0]})
+                    if not found_comm or found_comm.public == False:
+                        return response.error("You do not have access to this community.", Status.FORBIDDEN)
+                    else:
+                        rc_dict_public[str(requested_communities[0])] = found_comm.name
             # convert communities to str for elastic
             requested_communities = [str(x) for x in requested_communities]
 
@@ -1161,6 +1210,15 @@ def search(current_user):
                 query = prior_search.query
                 own_submissions = prior_search.own_submissions
                 requested_communities = [str(x) for x in prior_search.community]
+
+                # case where user is paging a public, non-joined community
+                if requested_communities[0] not in user_communities:
+                    comm_db = Communities()
+                    found_comm = comm_db.find_one({"_id": requested_communities[0]})
+                    if found_comm and found_comm.public:
+                        rc_dict_public[str(requested_communities[0])] = found_comm.name
+                    else:
+                        return response.error("You do not have access to this community.", Status.FORBIDDEN)
             else:
                 return response.error("Cannot find search to page.", Status.NOT_FOUND)
 
@@ -1170,8 +1228,14 @@ def search(current_user):
 
         # make requested communities a dict containing the name too, for display
         communities = get_communities_helper(current_user, return_dict=True)["community_info"]
+
+        # add any public communities that the user requests
         rc_dict = {}
+        if rc_dict_public:
+            for x in rc_dict_public:
+                rc_dict[x] = rc_dict_public[x]
         for community_id in requested_communities:
+            if community_id in rc_dict_public: continue
             try:
                 rc_dict[community_id] = communities[community_id]["name"]
             except Exception as e:
@@ -1186,6 +1250,12 @@ def search(current_user):
         return_obj["query"] = query
         return_obj["search_id"] = search_id
         return_obj["current_page"] = page
+
+
+        if ALL_COMM_FLAG:
+            return_obj["requested_communities"] = {"all": "all"}
+        else:
+            return_obj["requested_communities"] = rc_dict
 
         user_id_str = str(user_id)
 
@@ -1223,7 +1293,9 @@ def search(current_user):
 
         # Return nodes and links for community visualisation
         if source == "visualize":
-            root_label = communities[community_id]['name'] if query == "" else query
+            # assume single community when query is empty
+            root_label = rc_dict[list(rc_dict.keys())[0]] if query == "" else query
+            #root_label = communities[community_id]['name'] if query == "" else query
 
             # Get levels filter info
             if request.args.get("levelfilter"):
@@ -1345,7 +1417,15 @@ def get_recommendations(current_user, toggle_webpage_results=True):
 
         user_id_str = str(user_id)
 
-        communities = get_communities_helper(current_user, return_dict=True)["community_info"]
+        communities = get_communities_helper(current_user, return_dict=True)
+        combined_joined_followed = {}
+        for x in communities["community_info"]:
+            combined_joined_followed[x] = communities["community_info"][x]
+        for x in communities["followed_community_info"]:
+            combined_joined_followed[x] = communities["followed_community_info"][x]
+
+        communities = combined_joined_followed
+        
         rc_dict = {}
         for community_id in requested_communities:
             try:
@@ -1784,8 +1864,25 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             else:
                 print("\t Neural Rerank not available")
 
-            submission_pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
 
+            # slightly changed to only re-score the top 50
+            # also to avoid init substats every check
+            # and to only increase score
+            submissions = SubmissionStats()
+            for x in submissions_pages[:50]:
+                metrics = submissions.find_one({"submission_id":ObjectId(x["submission_id"])})
+                metrics_sum = 0
+                if metrics:
+                    metrics_sum = metrics.search_clicks + metrics.recomm_clicks + metrics.views
+                else:
+                    metrics_sum = 1 #webpages recommendations
+                metric_score = math.log10(metrics_sum)
+                x["score"] = (x["score"] * 1.0) + (metric_score * 0.1) 
+
+
+            submission_pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
+            
+            
 
             # issue is now that note pages can have same source url but different content
             # moved inside search
@@ -1814,19 +1911,26 @@ def format_webpage_for_display(webpage, search_id):
     submission["stats"] = {
         "views": 0,
         "clicks": 0,
-        "shares": 0
+        "shares": 0,
+        "likes": 0,
+        "dislikes":0
     }
-    cdl_searches_clicks = SearchesClicks()
-    num__search_clicks = cdl_searches_clicks.count(
-        {"submission_id": submission["submission_id"], "type": "click_search_result"})
-    submission["stats"]["clicks"] = num__search_clicks
+    cdl_submission_stats = SubmissionStats()
+    submission_stats = cdl_submission_stats.find_one({"submission_id": submission["submission_id"]})
+    submission["stats"]["clicks"] = submission_stats.search_clicks +  submission_stats.recomm_clicks
+    submission["stats"]["views"] = submission_stats.views
+    submission["stats"]["likes"] = submission_stats.likes
+    submission["stats"]["dislikes"] = submission_stats.dislikes
+    # cdl_searches_clicks = SearchesClicks()
+    # num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "click_search_result"})
+    # submission["stats"]["clicks"] = num__search_clicks
 
-    cdl_recommendations_clicks = RecommendationsClicks()
-    num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["submission_id"]})
-    submission["stats"]["clicks"] += num_rec_clicks
+    # cdl_recommendations_clicks = RecommendationsClicks()
+    # num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["submission_id"]})
+    # submission["stats"]["clicks"] += num_rec_clicks
 
-    num_views = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "submission_view"})
-    submission["stats"]["views"] = num_views
+    # num_views = cdl_searches_clicks.count({"submission_id": submission["submission_id"], "type": "submission_view"})
+    # submission["stats"]["views"] = num_views
 
     submission["communities"] = {}
     submission["communities_part_of"] = {}
@@ -1859,7 +1963,7 @@ def format_webpage_for_display(webpage, search_id):
     return submission
 
 
-def format_submission_for_display(submission, current_user, search_id):
+def format_submission_for_display(submission, current_user, search_id, submission_public_communities):
     """
 	Helper method to format a raw mongodb submission for frontend display.
 	Mostly takes the original format, except removes any unnecessary information.
@@ -1868,6 +1972,7 @@ def format_submission_for_display(submission, current_user, search_id):
 		current_user : the User object of the current user.
 		communities : list : list of communities that the user is a member of
 		search_id : ObjectID : the id of the view submission log (for tracking clicks)
+        submission_public_communities : dict : a dict of the submission's communities that are public
 	Returns:
 		submission : dict : a slightly-modified submission object.
 	"""
@@ -1879,21 +1984,32 @@ def format_submission_for_display(submission, current_user, search_id):
     submission["stats"] = {
         "views": 0,
         "clicks": 0,
-        "shares": 0
+        "shares": 0,
+        "likes": 0,
+        "dislikes":0
     }
     num_shares = sum([len(submission["communities"][str(id)]) for id in submission["communities"]])
     submission["stats"]["shares"] = num_shares
+    
+    cdl_submission_stats = SubmissionStats()
+    submission_stats = cdl_submission_stats.find_one({"submission_id": submission["_id"]})
+    #print("Submission stats function.py",submission_stats)
+    submission["stats"]["clicks"] = submission_stats.search_clicks +  submission_stats.recomm_clicks
+    submission["stats"]["views"] = submission_stats.views
+    submission["stats"]["likes"] = submission_stats.likes
+    submission["stats"]["dislikes"] = submission_stats.dislikes
+    
 
-    cdl_searches_clicks = SearchesClicks()
-    num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "click_search_result"})
-    submission["stats"]["clicks"] = num__search_clicks
+    # cdl_searches_clicks = SearchesClicks()
+    # num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "click_search_result"})
+    # submission["stats"]["clicks"] = num__search_clicks
 
-    cdl_recommendations_clicks = RecommendationsClicks()
-    num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["_id"]})
-    submission["stats"]["clicks"] += num_rec_clicks
+    # cdl_recommendations_clicks = RecommendationsClicks()
+    # num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["_id"]})
+    # submission["stats"]["clicks"] += num_rec_clicks
 
-    num_views = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "submission_view"})
-    submission["stats"]["views"] = num_views
+    # num_views = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "submission_view"})
+    # submission["stats"]["views"] = num_views
 
     # for deleting the entire submission
     if submission["user_id"] == user_id:
@@ -1908,12 +2024,8 @@ def format_submission_for_display(submission, current_user, search_id):
     all_added_communities = {str(x): True for all_user in submission["communities"] for x in
                              submission["communities"][all_user]}
 
-    ## TODO create all_public_communities
-
     # need to reconstruct user , but username does not matter
-    hydrated_user_communities = \
-        get_communities_helper(current_user, return_dict=True)[
-            "community_info"]
+    hydrated_user_communities = get_communities_helper(current_user, return_dict=True)["community_info"]
 
     for community_id in hydrated_user_communities:
         if community_id in user_contributed_communities:
@@ -1934,8 +2046,14 @@ def format_submission_for_display(submission, current_user, search_id):
                                          for x in hydrated_user_communities
                                          if hydrated_user_communities[x]["valid_action"] != "save"}
     
-    ## TODO have submission['public_communities_part_of] or, just add the community to communities_part_of
+    submission["public_communities_part_of"] = {x: submission_public_communities[x].name for x in submission_public_communities}
 
+    # TODO can only add and remove from community when it is your own submission?
+
+    # TODO remove and make this a different UI
+    # for now, just add to communities part of
+    for x in submission["public_communities_part_of"]:
+        submission["communities_part_of"][x] = submission["public_communities_part_of"][x]
 
     # convert some ObjectIDs to strings for serialization
     submission["submission_id"] = str(submission["_id"])

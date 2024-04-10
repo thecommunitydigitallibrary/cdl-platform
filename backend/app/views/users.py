@@ -72,7 +72,7 @@ def create_account():
 			return response.error("Unable to create account. Username is already in use.", Status.FORBIDDEN)
 
 		try:
-			user = User(username, email, hashed_password, [])
+			user = User(username, email, hashed_password)
 			user_id = users.insert(user)
 			# add user id to token
 			token = jwt.encode({"id": str(user_id.inserted_id)}, os.environ["jwt_secret"], "HS256")

@@ -320,6 +320,7 @@ export default function ImgMediaCard({ setUrlState }) {
         setTitle("");
         setCommunity("");
         setDesciption("");
+        onClear();
         setTimeout(() => {
         }, 2000);
       } else {
@@ -332,8 +333,6 @@ export default function ImgMediaCard({ setUrlState }) {
       setSever("error");
       setMessage("Error occurred. Please submit again!");
       handleClick();
-    } finally {
-      onClear();
     }
   };
 

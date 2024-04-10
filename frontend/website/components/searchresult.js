@@ -14,8 +14,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
-import ThumbDownRoundedIcon from "@mui/icons-material/ThumbDownRounded";
-import ThumbUpRoundedIcon from "@mui/icons-material/ThumbUpRounded";
+
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
 import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
 import MoreVert from "@mui/icons-material/MoreVert";
@@ -71,30 +70,30 @@ function SearchResult(props) {
     setOpen(false);
   };
 
-  const submitRelevanceJudgements = async function (event, rel) {
-    event.preventDefault();
-    let URL = baseURL_client + relJudgmentEndpoint;
-    // Judgement key-value pair
-    let judgement = {};
-    judgement[props.result_hash] = rel;
-    const res = await fetch(URL, {
-      method: "POST",
-      body: JSON.stringify(judgement),
-      headers: new Headers({
-        Authorization: props.auth_token,
-        "Content-Type": "application/json",
-      }),
-    });
+  // const submitRelevanceJudgements = async function (event, rel) {
+  //   event.preventDefault();
+  //   let URL = baseURL_client + relJudgmentEndpoint;
+  //   // Judgement key-value pair
+  //   let judgement = {};
+  //   judgement[props.result_hash] = rel;
+  //   const res = await fetch(URL, {
+  //     method: "POST",
+  //     body: JSON.stringify(judgement),
+  //     headers: new Headers({
+  //       Authorization: props.auth_token,
+  //       "Content-Type": "application/json",
+  //     }),
+  //   });
 
-    const response = await res.json();
-    if (res.status == 200) {
-      setSeverity("success");
-    } else {
-      setSeverity("error");
-    }
-    setMessage(response.message);
-    handleClick();
-  };
+  //   const response = await res.json();
+  //   if (res.status == 200) {
+  //     setSeverity("success");
+  //   } else {
+  //     setSeverity("error");
+  //   }
+  //   setMessage(response.message);
+  //   handleClick();
+  // };
 
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -253,7 +252,7 @@ function SearchResult(props) {
       function (key) {
         return (
           <>
-            <CommunityDisplay k={key} />
+            <CommunityDisplay k={key} name={props.communities_part_of[key]} />
           </>
         );
       }
@@ -495,42 +494,10 @@ function SearchResult(props) {
           </div>
 
 
-          {props.show_relevant ? (
-            <div style={{ float: "right", display: "flex" }}>
-              <Tooltip title="Relevant">
-                <Button
-                  value={1}
-                  onClick={(event) => submitRelevanceJudgements(event, 1)}
-                  size="small"
-                  id="RelevantButton"
-                  variant="text"
-                  style={{
-                    float: "right",
-                    minWidth: "0px"
-                  }}
-                  startIcon={<ThumbUpRoundedIcon value={1} />}
-                ></Button>
-              </Tooltip>
-              <Tooltip title="Not Relevant">
-                <Button
-                  value={0}
-                  onClick={(event) => submitRelevanceJudgements(event, 0)}
-                  size="small"
-                  id="notRelevantButton"
-                  variant="text"
-                  startIcon={<ThumbDownRoundedIcon value={0} />}
-                  style={{
-                    marginLeft: '10%',
-                    float: "right",
-                    minWidth: "0px"
-                  }}
-                ></Button>
-              </Tooltip>
-            </div>
-          ) : null}
+        
 
-        </div>
-
+      </div> 
+      
 
         <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} onClick={(event) => { event.preventDefault() }}>
           <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
