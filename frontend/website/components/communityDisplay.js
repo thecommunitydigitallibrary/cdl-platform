@@ -35,7 +35,7 @@ const CommunityDisplay = (props) => {
     return (<>
         {(props.k === 'all') ?
             <Tooltip title="All Communities">
-                <a href={websiteURL + 'communities'} target="_blank" rel="noopener noreferrer" style={{
+                <a href={websiteURL + 'community'} target="_blank" rel="noopener noreferrer" style={{
                     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
                     fontWeight: "500",
                     fontSize: "0.8125rem",
@@ -55,7 +55,7 @@ const CommunityDisplay = (props) => {
             :
             <Tooltip title={communitiesPartOf[props.k]}>
                 <a
-                    href={websiteURL + searchEndpoint + "?community=" + props.k + "&page=0"}
+                    href={websiteURL + "community/" + props.k}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

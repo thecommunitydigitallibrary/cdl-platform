@@ -54,12 +54,10 @@ export function CollapsibleCommunity({ community }) {
             className="w-full space-y-1"
         >
             <div className="flex items-center justify-between space-x-4 px-4">
-                {/* <h4 onClick={() => { window.open(WEBSITE_URL + SEARCH_ENDPOINT + '?community=' + community.community_id + '&page=0', "_blank"); }} className="text-sm font-semibold underline">
-                    {community.name}
-                </h4> */}
+
                 <Tooltip title={'Go To Community'}>
                     <a
-                        href={WEBSITE_URL + SEARCH_ENDPOINT + '?community=' + community.community_id + '&page=0'}
+                        href={WEBSITE_URL + 'community/' + community.community_id}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{

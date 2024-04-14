@@ -396,6 +396,7 @@ function Header(props) {
       setDropDownData(responseComm);
       setcommunityData(responseComm.community_info);
       setUserDataStoreProps({ userCommunities: responseComm.community_info });
+      setUserDataStoreProps({ userFollowedCommunities: responseComm.followed_community_info });
       setUserDataStoreProps({ username: responseComm.username });
 
     } else {
@@ -456,18 +457,17 @@ function Header(props) {
     event.preventDefault();
     jsCookie.remove("token");
     localStorage.removeItem("dropdowndata");
-
     setcommunityData([]);
     setUserDataStoreProps({ userCommunities: [] });
+    setUserDataStoreProps({ userFollowedCommunities: [] });
     setUserDataStoreProps({ username: [] });
     setLoggedOut(true);
-
     Router.push("/");
   };
 
   const handleUserClickMenu = (event, option) => {
     if (option == "communities") {
-      Router.push("/communities");
+      Router.push("/community");
     } else if (option == "ownSubmissions") {
       Router.push("/search?own_submissions=True&community=all");
     } else if (option == "about") {

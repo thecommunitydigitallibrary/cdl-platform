@@ -93,6 +93,10 @@ def export_helper(user_id, search_id):
             number_of_hits, page = cache.search(user_id, search_id, index)
             number_of_hits = int(number_of_hits)
             all_results += page
+
+    # To query all the results in batch
+    submission_ids_to_find = []
+    webpages_ids_to_find = []
     for result in all_results:
         del result["redirect_url"]
         del result["display_url"]
@@ -110,12 +114,10 @@ def export_helper(user_id, search_id):
         del result["result_hash"]
 
         if result["type"] == "submission":
-            full_sub = cdl_logs.find_one({"_id": ObjectId(result["submission_id"])})
-            result["description"] = full_sub.highlighted_text
+            submission_ids_to_find.append(ObjectId(result["submission_id"]))
         else:
-            full_sub = cdl_webpages.find_one({"_id": ObjectId(result["submission_id"])})
-            result["description"] = full_sub.webpage["metadata"]["description"]
-        
+            webpages_ids_to_find.append(ObjectId(result["submission_id"]))
+
         del result["highlighted_text"]
 
         result["title"] = result["explanation"]
@@ -127,6 +129,25 @@ def export_helper(user_id, search_id):
             del result["children"]
 
         del result["hashtags"]
+
+    submissions = list(cdl_logs.find_db({'_id': {'$in': submission_ids_to_find}}))
+    webpages = list(cdl_webpages.find_db({'_id': {'$in': webpages_ids_to_find}}))
+
+    # Map to hold id -> result obj
+    id_result_map = {}
+    for sub in submissions:
+        id_result_map[str(sub['_id'])] = sub
+
+    for web in webpages:
+        id_result_map[str(web['_id'])] = web
+
+    for result in all_results:
+        # Get the sub/web return from MongoDB
+        curr = id_result_map[result["submission_id"]]
+        if result["type"] == "submission":
+            result["description"] = curr['highlighted_text']
+        else:
+            result["description"] = curr['webpage']["metadata"]["description"]
 
     return {
             "query": query,
@@ -802,6 +823,10 @@ def autocomplete(current_user):
     cutoff = int(request.args.get("cutoff", 60))
 
     user_communities = [str(x) for x in current_user.communities]
+    for x in current_user.followed_communities:
+        x = str(x)
+        if x not in user_communities:
+            user_communities.append(x)
 
     try:
         _, submissions_hits = elastic_manager.auto_complete(query, user_communities, page=0, page_size=20)
@@ -1212,13 +1237,15 @@ def search(current_user):
                 requested_communities = [str(x) for x in prior_search.community]
 
                 # case where user is paging a public, non-joined community
-                if requested_communities[0] not in user_communities:
-                    comm_db = Communities()
-                    found_comm = comm_db.find_one({"_id": requested_communities[0]})
-                    if found_comm and found_comm.public:
-                        rc_dict_public[str(requested_communities[0])] = found_comm.name
-                    else:
-                        return response.error("You do not have access to this community.", Status.FORBIDDEN)
+                if len(requested_communities) == 1:
+                    obj_id_first_comm = ObjectId(requested_communities[0])
+                    if  obj_id_first_comm not in user_communities:
+                        comm_db = Communities()
+                        found_comm = comm_db.find_one({"_id": obj_id_first_comm})
+                        if found_comm and found_comm.public:
+                            rc_dict_public[str(obj_id_first_comm)] = found_comm.name
+                        else:
+                            return response.error("You do not have access to this community.", Status.FORBIDDEN)
             else:
                 return response.error("Cannot find search to page.", Status.NOT_FOUND)
 
@@ -1403,6 +1430,10 @@ def get_recommendations(current_user, toggle_webpage_results=True):
 
         # convert communities to str for elastic
         requested_communities = [str(x) for x in user_communities]
+        for x in current_user.followed_communities:
+            x = str(x)
+            if x not in requested_communities:
+                requested_communities.append(x)
         if CDLweb_community_id in requested_communities:
             requested_communities.remove(CDLweb_community_id)
 

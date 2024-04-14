@@ -23,10 +23,14 @@ const Hero = () => {
               TextData
             </h1>
             <h3>
-              <b>Save</b> what you know. <b>Find</b> what you don't.
+              Save what you know. Find what you don't.
             </h3>
             <p className="py-5 text-xl leading-normal text-gray-500 lg:text-xl xl:text-xl dark:text-gray-300">
-              TextData is an online and open-source platform that helps you save what you know and find what you don't. Use our website or Chrome browser extension to form communities, bookmark webpages, and take notes to create and save online information. <br /><br />Then, using everything that you and your collaborators have saved, we'll help you find old information, ask and answer questions, and contextualize new information.
+              TextData is an online platform that lets you collaboratively save, share, and find online content organized in wiki-style communities. Use our website or Chrome browser extension to create or join communities, make submissions to these communities, and share these communities with the world (or keep them to yourself).
+              
+               <br /><br />
+               
+               Then, using everything that you and your collaborators have saved along with the communities that you have followed, we'll help you find old information, ask and answer questions, and get interesting recommendations.
             </p>
 
             <div className="flex flex-col m-3 items-start space-y-3 sm:space-x-4 sm:space-y-0 sm:items-center sm:flex-row">
@@ -76,7 +80,7 @@ const Hero = () => {
         </div>
         <div className="flex items-center justify-center w-full lg:w-2/4">
           <video muted controls autoPlay loop>
-            <source src="/images/extension_find.mp4" type="video/mp4" />
+            <source src="/images/full_intro.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

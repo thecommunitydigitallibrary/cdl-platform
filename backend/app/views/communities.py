@@ -271,7 +271,7 @@ def create_community(current_user):
 				insert_obj["description"] = community_description
 			if community_ispublic != None:
 				insert_obj["public"] = community_ispublic
-			if community_pinned:
+			if community_pinned != None:
 				insert_obj["pinned"] = community_pinned
 
 			updated = cdl_communities.update_one({"_id": community_id}, {"$set": insert_obj}, upsert=False)
@@ -299,7 +299,8 @@ def community(current_user, id):
 	
 	comm_db = Communities()
 	found_comm = comm_db.find_one({"_id": ObjectId(id)})
-	if not found_comm or not found_comm.public or ObjectId(id) not in user_communities:
+
+	if not found_comm or not found_comm.public and ObjectId(id) not in user_communities:
 		return response.error("Cannot find community.", Status.NOT_FOUND)
 
 	return_obj = {
@@ -317,7 +318,8 @@ def community(current_user, id):
 	if ObjectId(id) in user_followed_communities:
 		return_obj["following"] = True
 
-	pinned_sub_ids = [x.strip() for x in found_comm.pinned.split(",")]
+	# pinned_sub_ids = [x.strip() for x in found_comm.pinned.split(",")] --> bugs out as it takes '' as a pinned submission
+	pinned_sub_ids = [x.strip() for x in found_comm.pinned.split(",") if x.strip()]
 	sub_db = Logs()
 	for psid in pinned_sub_ids:
 		try:
@@ -327,8 +329,8 @@ def community(current_user, id):
 				# check to make sure submission is actually in community before showing
 				if id and all_sub_comms:
 					return_obj["pinned_submissions"].append({
-						"explanation": found_sub.title,
-						"url": format_url("", id)
+						"explanation": found_sub.explanation, #fixed from 'title' to 'explanation'
+						"submission_url": format_url("", str(found_sub.id)) # was calling 'id' user id insteadof sub id + changed 'url' to 'submission_url'
 					})
 		except Exception as e:
 			print(e)
@@ -356,8 +358,8 @@ def follow_community(current_user):
 	try:
 		user_id = current_user.id
 		ip = request.remote_addr
-
 		req_data = request.data
+		req_data = json.loads(req_data.decode("utf-8"))
 		community_id = req_data.get("community_id", None)
 		command = req_data.get("command", None)
 
@@ -369,8 +371,8 @@ def follow_community(current_user):
 		comm_db = Communities()
 		try:
 			community_id_objid = ObjectId(community_id)
-			comm_db.find_one({"_id": community_id_objid})
-			if not comm_db or comm_db.public == False:
+			found_com = comm_db.find_one({"_id": community_id_objid})
+			if not found_com or found_com.public == False:
 				return response.error("Cannot find community.", Status.BAD_REQUEST)
 		except Exception as e:
 			print(e)
@@ -397,7 +399,8 @@ def follow_community(current_user):
 			
 			users_db = Users()
 			updated_unfollowed = [x for x in user_communities_followed if x != community_id_objid]
-			updated = users_db.update_one({"_id": user_id}, {"followed_communities": updated_unfollowed}, upsert=False)
+			# updated = users_db.update_one({"_id": user_id}, {"followed_communities": updated_unfollowed}, upsert=False)
+			updated = users_db.update_one({"_id": user_id}, {"$set": {"followed_communities": updated_unfollowed}}, upsert=False)
 			if updated.acknowledged:
 				if updated.acknowledged:
 					log_community_action(ip, user_id, community_id_objid, "UNFOLLOW")

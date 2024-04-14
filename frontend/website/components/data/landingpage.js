@@ -17,28 +17,30 @@ import ReplyIcon from '@mui/icons-material/Reply';
 import TimelineIcon from '@mui/icons-material/Timeline';
 
 
-import submissionImg from "../../public/images/submission_page.png";
-import extFindImg from "../../public/images/extension_find_2023-12-15.png";
+import visualizeImg from "../../public/images/visualize.png";
+
+
+import extFindImg from "../../public/images/extension_find.png";
 
 const benefitOne = {
   title: "Form Communities",
-  desc: "A community is where you save information. A community consists of any number of users, all generally interested in a similar topic.",
+  desc: "A community is where you save and organize information. A community consists of any number of users, and is generally created for a specific topic or goal.",
   image: communityImg,
   link: "community-overview",
   bullets: [
     {
-      title: "Create a Community",
+      title: "Create Communities",
       desc: "Make one for private personal archives, for class notes, for working on a class project, or for thoughts on interesting articles.",
       icon: <AddCircleOutlineIcon />,
     },
     {
-      title: "Join a Community",
-      desc: "You can join a community by copy-pasting the community join key (accessible from clicking the 'Key' icon).",
+      title: "Join Communities",
+      desc: "Joining a community lets you view everything in the community and make submissions to that community.",
       icon: <ArrowForwardIcon />,
     },
     {
-      title: "Collaborate with Others",
-      desc: "All information saved to a community is accessible by any member of the community, and only members of a community can see the content.",
+      title: "Share and Follow Communities",
+      desc: "Making a community public lets others follow it, vote on content, and search the content.",
       icon: <PeopleIcon />,
     },
   ],
@@ -57,7 +59,7 @@ const benefitTwo = {
     },
     {
       title: "Add a Title and Description",
-      desc: "The title should briefly describe the note's purpose, and the description can be whatever you like.",
+      desc: "The title should briefly describe the note's purpose, and the description can be whatever you like. In the description, you can also link other submissions to create wiki-style connections among submissions in a community.",
       icon: <SaveIcon />,
     },
     {
@@ -69,9 +71,9 @@ const benefitTwo = {
 };
 
 const benefitFour = {
-  title: "Interact with Submissions",
+  title: "Interact with and Visualize Submissions",
   desc: "Visit a submission's TextData-specific page to read, reply, visualize, share.",
-  image: submissionImg,
+  image: visualizeImg,
   link: "submission-overview",
 
   bullets: [
@@ -81,13 +83,13 @@ const benefitFour = {
       icon: <CreateIcon />,
     },
     {
-      title: "Reply",
-      desc: "Replying to a submission will create another submission and display it beneath the description. This way, any future user who visits this submission will see your reply",
+      title: "Make Submission with Mention",
+      desc: "Explicitly mentioning a submission in another submission will create a directed edge between the two.",
       icon: <ReplyIcon />,
     },
     {
       title: "Visualize",
-      desc: "See how similar submissions are related by interacting with the graph.",
+      desc: "See all of the connections among any set of submissions.",
       icon: <TimelineIcon />,
     },
   ],

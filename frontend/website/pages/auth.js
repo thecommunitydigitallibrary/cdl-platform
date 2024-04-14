@@ -88,6 +88,7 @@ export default function ({ data }) {
     // community_info
 
     setUserDataStoreProps({ userCommunities: responseComm.community_info });
+    setUserDataStoreProps({ userFollowedCommunities: responseComm.followed_community_info });
     setcommunityData(responseComm.community_info);
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
   };

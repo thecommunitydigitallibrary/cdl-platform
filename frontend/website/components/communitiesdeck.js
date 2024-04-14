@@ -8,15 +8,23 @@ import useUserDataStore from "../store/userData";
 let gap = "25px";
 export default function CommunitiesDeck(props) {
 
-  const { setUserDataStoreProps } = useUserDataStore();
+
+  const { setUserDataStoreProps, userFollowedCommunities } = useUserDataStore();
 
   useEffect(() => {
-    setUserDataStoreProps({ userCommunities: props.community_info });
+    if (!props.followDeck) {
+      setUserDataStoreProps({ userCommunities: props.community_info });
+    }
+    else {
+      setUserDataStoreProps({ userFollowedCommunities: props.community_info });
+    }
   }, [props.community_info])
 
   return (
     <div>
-      <h1> Your Communities</h1>
+      {console.log(props)}
+      {props.followDeck ? <h1>Communities You've Followed</h1> :
+        <h1>Communities You've Created or Joined</h1>}
       <br />
       <ul
         style={{
@@ -28,7 +36,7 @@ export default function CommunitiesDeck(props) {
         }}
       >
         {[
-          <li
+          !props.followDeck && <li
             style={{
               display: "inline-block",
               marginBottom: gap,
@@ -38,7 +46,7 @@ export default function CommunitiesDeck(props) {
           >
             <JoinCommunityForm auth_token={jsCookie.get("token")} />
           </li>,
-          <li
+          !props.followDeck && <li
             style={{
               display: "inline-block",
               marginBottom: gap,
@@ -49,7 +57,7 @@ export default function CommunitiesDeck(props) {
             <CreateCommunityForm auth_token={jsCookie.get("token")} />
           </li>,
         ].concat(
-          props.community_info.map(function (community, idx) {
+          props.community_info && props.community_info.map(function (community, idx) {
             return (
               <li
                 style={{
@@ -60,9 +68,7 @@ export default function CommunitiesDeck(props) {
                 key={idx}
               >
                 <CommunityBox
-                  link={
-                    "/search?community=" + community.community_id + "&page=0"
-                  }
+                  link={"/community/" + community.community_id}
                   isAdmin={community.is_admin}
                   communityId={community.community_id}
                   joinKey={community.join_key}
@@ -71,6 +77,7 @@ export default function CommunitiesDeck(props) {
                   description={community.description}
                   pinned={community.pinned}
                   is_public={community.is_public}
+                  followDeck={props.followDeck}
                 >
                   {community.name}
                 </CommunityBox>
@@ -79,6 +86,10 @@ export default function CommunitiesDeck(props) {
           })
         )}
       </ul>
+      {props.followDeck && userFollowedCommunities.length == 0 && (
+        <p className="text-center mt-5 pb-5">
+          You are not following any communities.</p>
+      )}
     </div>
   );
 }

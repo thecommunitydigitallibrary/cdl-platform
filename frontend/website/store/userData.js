@@ -7,6 +7,7 @@ const useUserDataStore = create((set) => ({
     email: 'email',
     isLoggedOut: true,
     userCommunities: [],
+    userFollowedCommunities: [],
 
     setUsername: (username) => set((state) => ({ ...state, username })),
     setEmail: (email) => set((state) => ({ ...state, email })),

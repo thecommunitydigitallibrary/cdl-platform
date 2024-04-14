@@ -76,7 +76,7 @@ function searchBarHeader(props) {
     const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
     const AUTOCOMPLETE_ENDPOINT = baseURL_client + "autocomplete"
 
-    const { userCommunities } = useUserDataStore();
+    const { userCommunities, userFollowedCommunities } = useUserDataStore();
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -244,17 +244,18 @@ function searchBarHeader(props) {
                         }}
                     >
                         <MenuItem value="all">All</MenuItem>
-                        {userCommunities && userCommunities.map(function (d, idx) {
-                            return (
-                                <MenuItem key={idx} value={d.community_id}>
-                                    {d.name.length > 50 ?
-                                        d.name.substring(0, 40) + ".."
-                                        :
-                                        d.name
-                                    }
-                                </MenuItem>
-                            );
-                        })}
+                        {userCommunities && userFollowedCommunities &&
+                            userFollowedCommunities.concat(userCommunities).map(function (d, idx) {
+                                return (
+                                    <MenuItem key={idx} value={d.community_id}>
+                                        {d.name.length > 50 ?
+                                            d.name.substring(0, 40) + ".."
+                                            :
+                                            d.name
+                                        }
+                                    </MenuItem>
+                                );
+                            })}
                     </Select>
                 </FormControl>
                 <FormControl

@@ -56,6 +56,7 @@ function CommunityHistoryEntry(props) {
     const responseComm = await resp.json();
 
     setUserDataStoreProps({ userCommunities: responseComm.community_info });
+    setUserDataStoreProps({ userFollowedCommunities: responseComm.followed_community_info });
     setcommunityData(responseComm.community_info);
     localStorage.setItem('dropdowndata', JSON.stringify(responseComm))
   }

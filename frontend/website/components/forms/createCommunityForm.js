@@ -94,9 +94,6 @@ export default function CreateCommunityForm(props) {
 
   return (
     <div>
-      {/* <Button variant="outlined" onClick={handleClickOpen}>
-        Create a New Community
-      </Button> */}
       <Paper
         sx={{
           borderRadius: "15px",
