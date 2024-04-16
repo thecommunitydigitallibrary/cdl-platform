@@ -22,7 +22,6 @@ export default function CommunitiesDeck(props) {
 
   return (
     <div>
-      {console.log(props)}
       {props.followDeck ? <h1>Communities You've Followed</h1> :
         <h1>Communities You've Created or Joined</h1>}
       <br />
@@ -86,7 +85,7 @@ export default function CommunitiesDeck(props) {
           })
         )}
       </ul>
-      {props.followDeck && userFollowedCommunities.length == 0 && (
+      {props.followDeck && userFollowedCommunities && userFollowedCommunities.length == 0 && (
         <p className="text-center mt-5 pb-5">
           You are not following any communities.</p>
       )}

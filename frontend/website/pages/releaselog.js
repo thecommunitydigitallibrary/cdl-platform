@@ -33,6 +33,20 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        April 16th, 2024
+      </h2>
+
+      
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Community page cache hard fix</li>
+            <li className="list-item">Double footer render</li>
+            <li className="list-item">Community links</li>
+        </ul>
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         April 14th, 2024
       </h2>
 

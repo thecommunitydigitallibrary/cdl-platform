@@ -328,7 +328,7 @@ function Home({ data, community_joined_data, recently_accessed_submissions }) {
                 <br />
                 <h6 style={{ textAlign: 'center' }}> No recommendations to display. <br /> <br />
                   {/* Currently is : href needs to be updated to make new submission model open*/}
-                  <a variant="outline" href={"/communities"}>{" Click here to create or join a community!"}</a></h6>
+                  <a variant="outline" href={"/community"}>{" Click here to create or join a community!"}</a></h6>
               </>}
           >
             <Grid item margin={'auto'}>

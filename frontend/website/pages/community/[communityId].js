@@ -2,7 +2,7 @@ import { React, useEffect } from 'react';
 import Head from "next/head";
 import jsCookie from 'js-cookie';
 import { Paper, Button, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
-import { BASE_URL_CLIENT, BASE_URL_SERVER, GET_COMMUNITY_ENDPOINT, SEARCH_ENDPOINT } from '../../static/constants';
+import { BASE_URL_CLIENT, BASE_URL_SERVER, GET_COMMUNITIES_ENDPOINT, GET_COMMUNITY_ENDPOINT, SEARCH_ENDPOINT } from '../../static/constants';
 import useCommunityStore from '../../store/communityStore';
 import QuickSubmissionBox from '../../components/quickSubmissionBox';
 import SearchResult from '../../components/searchresult';
@@ -10,6 +10,8 @@ import Grid from "@mui/material/Grid";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Error from 'next/error';
 import useUserDataStore from '../../store/userData';
+import useCommunitiesStore from '../../store/communitiesStore';
+import useQuickAccessStore from '../../store/quickAccessStore';
 
 
 export default function CommunityHomepage(props) {
@@ -19,6 +21,7 @@ export default function CommunityHomepage(props) {
     }
 
     const { setUserDataStoreProps, userFollowedCommunities } = useUserDataStore();
+    const { communityData, setcommunityData } = useQuickAccessStore();
 
     const {
         communityId,
@@ -96,6 +99,22 @@ export default function CommunityHomepage(props) {
         }
     };
 
+    const updateDropDownSearch = async () => {
+        let resp = await fetch(BASE_URL_CLIENT + GET_COMMUNITIES_ENDPOINT, {
+            method: "GET",
+            headers: new Headers({
+                Authorization: jsCookie.get("token"),
+                "Content-Type": "application/json",
+            }),
+        });
+        const responseComm = await resp.json();
+        setUserDataStoreProps({ userCommunities: responseComm.community_info });
+        setUserDataStoreProps({ userFollowedCommunities: responseComm.followed_community_info });
+        setcommunityData(responseComm.community_info);
+        localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
+    };
+
+
     const followCommunity = async () => {
         const followCommunityURL = BASE_URL_CLIENT + "followCommunity";
 
@@ -116,19 +135,22 @@ export default function CommunityHomepage(props) {
         if (res.status === 200) {
             setCommunityStoreProps({ isFollowing: true });
             // update state for userFollowedCommunities
+            var tempData = [...userFollowedCommunities,
+            {
+                community_id: communityId,
+                name: communityName,
+                description: communityDescription,
+                is_public: isPublic,
+                isFollowing: true,
+                pinned: pinnedSubs,
+            }
+            ];
             setUserDataStoreProps({
-
-                userFollowedCommunities: [...userFollowedCommunities,
-                {
-                    community_id: communityId,
-                    name: communityName,
-                    description: communityDescription,
-                    is_public: isPublic,
-                    isFollowing: true,
-                    pinned: pinnedSubs,
-                }
-                ]
+                userFollowedCommunities: tempData
             });
+
+
+            updateDropDownSearch();
         }
         else {
             console.error("Error following community");
@@ -156,7 +178,11 @@ export default function CommunityHomepage(props) {
         if (res.status === 200) {
             setCommunityStoreProps({ isFollowing: false });
             // update state for userFollowedCommunities
-            setUserDataStoreProps({ userFollowedCommunities: userFollowedCommunities.filter(item => item !== communityId) });
+            var tempData = userFollowedCommunities
+            var temp = tempData.filter((item) => item.community_id !== communityId);
+            setUserDataStoreProps({ userFollowedCommunities: temp });
+            updateDropDownSearch();
+
         }
         else {
             console.error("Error following community");
@@ -190,7 +216,7 @@ export default function CommunityHomepage(props) {
                                 </svg>
                                 You have not joined this community {isPublic && isFollowing ? "but are following it" : ""}
                             </div>
-                            <div>
+                            <div className='mt-2'>
                                 {isPublic && isFollowing ? (
                                     <div className="flex items-center text-sm text-green-600">
                                         <button className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 focus:outline-none"

@@ -26,7 +26,7 @@ const Hero = () => {
               Save what you know. Find what you don't.
             </h3>
             <p className="py-5 text-xl leading-normal text-gray-500 lg:text-xl xl:text-xl dark:text-gray-300">
-              TextData is an online platform that lets you collaboratively save, share, and find online content organized in wiki-style communities. Use our website or Chrome browser extension to create or join communities, make submissions to these communities, and share these communities with the world (or keep them to yourself).
+            TextData is a social platform for collaboratively creating, sharing, and learning from wiki-style communities. Use our website or Chrome browser extension to create or join communities, make submissions to these communities, and share these communities with the world (or keep them to yourself).
               
                <br /><br />
                

@@ -1,5 +1,5 @@
 # TextData
-TextData is an online and open-source platform that helps you save what you know and find what you don't. We offer a stand-alone website and a Chrome extension, all for free.
+TextData is a social platform for collaboratively creating, sharing, and learning from wiki-style communities. We offer a stand-alone website and a Chrome extension, all for free.
 
 
 To use TextData, you have three options:

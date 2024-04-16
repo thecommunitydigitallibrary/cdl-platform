@@ -39,7 +39,7 @@ const steps = [
       <p style={{ margin: "10px 0px 0px 0px" }}>
         Much like a group chat, a subreddit, or a folder, a community is place for you and your peers to save and organize notes. 
         You can create, join, or leave communities, and any member of a community can search for or browse all content present in the community.
-        Click <a target="_blank" and rel="noopener noreferrer" href="/communities">here</a> to join or create a community.
+        Click <a target="_blank" and rel="noopener noreferrer" href="/community">here</a> to join or create a community.
       </p>
     ),
   },
@@ -99,7 +99,6 @@ export default function Setup(props) {
       The following instructions will walk you through account creation, Chrome extension setup, and creating your first community and submission.
       <VerticalLinearStepper steps={steps} updateStepper={props.updateStep ? props.updateStep : 0} extensionFinish={handleSetupFinish} />
     </Paper>
-    <Footer/>
    </>
   );
 }
