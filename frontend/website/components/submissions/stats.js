@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMemo, useState, useEffect,useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import IconButton from '@mui/material/IconButton';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -12,101 +12,99 @@ import useSubmissionStore from '../../store/submissionStore';
 
 
 export default function SubmissionStatistics({ submitRelevanceJudgements, fetchSubmissionStats, fetchSubmissionJudgement }) {
-    const { submissionStats,submissionId, setSubmissionProps } = useSubmissionStore();
+    const { submissionStats, submissionId, setSubmissionProps } = useSubmissionStore();
     const [likeButtonState, setLikeButtonState] = useState(false);
     const [dislikeButtonState, setDislikeButtonState] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [likeCount,setLikeCount] = useState(0);
-    const [dislikeCount,setDislikeCount] = useState(0);
+    const [likeCount, setLikeCount] = useState(0);
+    const [dislikeCount, setDislikeCount] = useState(0);
     const [isJudgementFetched, setIsJudgementFetched] = useState(false);
     //const [isNoInitialJudgement,setIsNoInitialJudgement] = useState(false);
 
     useEffect(() => {
 
-        if (!isJudgementFetched && submissionId.length>0) {
+        if (!isJudgementFetched && submissionId.length > 0) {
 
-                fetchSubmissionJudgement(submissionId)
-                  .then(judgement => {
+            fetchSubmissionJudgement(submissionId)
+                .then(judgement => {
                     if (judgement === '1') {
-                      setLikeButtonState(true);
-                      setDislikeButtonState(false);
+                        setLikeButtonState(true);
+                        setDislikeButtonState(false);
                     } else if (judgement === '0') {
-                      setLikeButtonState(false);
-                      setDislikeButtonState(true);
+                        setLikeButtonState(false);
+                        setDislikeButtonState(true);
                     } else {
-                      setLikeButtonState(false);
-                      setDislikeButtonState(false);
-                      //setIsNoInitialJudgement(true);
+                        setLikeButtonState(false);
+                        setDislikeButtonState(false);
+                        //setIsNoInitialJudgement(true);
                     }
                     setIsJudgementFetched(true);
-                  })
-                  .catch(error => {
+                })
+                .catch(error => {
                     console.error('Error fetching submission judgement:', error);
-                  });
+                });
         };
-        
-      }, [isJudgementFetched,submissionId]);
-     
-      useEffect(() => {
 
-        if (submissionId.length>0) {
-            
-                  fetchSubmissionStats(submissionId)
-                    .then((response) => {
-                        setLikeCount(response.likes);
-                        setDislikeCount(response.dislikes);
-                    })
-                    .catch(error => {
+    }, [isJudgementFetched, submissionId]);
+
+    useEffect(() => {
+
+        if (submissionId.length > 0) {
+
+            fetchSubmissionStats(submissionId)
+                .then((response) => {
+                    setLikeCount(response.likes);
+                    setDislikeCount(response.dislikes);
+                })
+                .catch(error => {
                     console.error('Error fetching submission stats', error);
-                    });
-             
-        };
-        
-      }, [likeButtonState,dislikeButtonState,submissionId]);
-     
-     
-      const handleLike = useCallback(async (event) => {
-        event.preventDefault();
-        if(likeButtonState)
-        {
-            return;
-        }
-        setIsLoading(true);
-        submitRelevanceJudgements(event,1)
-        .then((response)=>{
-            setLikeButtonState(true);
-            setDislikeButtonState(false);
-        })
-        .catch((error)=> {
-            console.log("Error in saving like judgement",error);
-        })
-        .finally(()=>{
-            setIsLoading(false);
-        })   
-       
-      },[submissionId])
+                });
 
-      const handleDislike = useCallback( async (event) => {
+        };
+
+    }, [likeButtonState, dislikeButtonState, submissionId]);
+
+
+    const handleLike = useCallback(async (event) => {
         event.preventDefault();
-        if(dislikeButtonState)
-        {
+        if (likeButtonState) {
             return;
         }
         setIsLoading(true);
-        submitRelevanceJudgements(event,0)
-        .then((response)=>{
-            setLikeButtonState(false);
-            setDislikeButtonState(true);
-        })
-        .catch((error)=> {
-            console.log("Error in saving dislike judgement",error);
-        })
-        .finally(()=>{
-            setIsLoading(false);
-        })   
-       
-      },[submissionId]);
-   
+        submitRelevanceJudgements(event, 1)
+            .then((response) => {
+                setLikeButtonState(true);
+                setDislikeButtonState(false);
+            })
+            .catch((error) => {
+                console.log("Error in saving like judgement", error);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            })
+
+    }, [submissionId])
+
+    const handleDislike = useCallback(async (event) => {
+        event.preventDefault();
+        if (dislikeButtonState) {
+            return;
+        }
+        setIsLoading(true);
+        submitRelevanceJudgements(event, 0)
+            .then((response) => {
+                setLikeButtonState(false);
+                setDislikeButtonState(true);
+            })
+            .catch((error) => {
+                console.log("Error in saving dislike judgement", error);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            })
+
+    }, [submissionId]);
+
     const submissionProps = useMemo(() => ({ submissionStats }), [submissionStats]);
 
     return (
@@ -121,6 +119,7 @@ export default function SubmissionStatistics({ submitRelevanceJudgements, fetchS
                     overflow: 'hidden',
                     paddingX: '4px',
                     borderColor: 'gray',
+                    maxWidth: '250px',
                 }}
             >
                 <Tooltip title="Like">
@@ -137,7 +136,7 @@ export default function SubmissionStatistics({ submitRelevanceJudgements, fetchS
                     </IconButton>
                 </Tooltip>
                 <Typography sx={{ borderRight: '1px solid #ccc', paddingX: '4px', fontSize: '12px', fontWeight: 'bold' }}>
-                {dislikeCount} {/* {submissionStats.dislikes} */}
+                    {dislikeCount} {/* {submissionStats.dislikes} */}
                 </Typography>
                 <Tooltip title="The number of times that this submission has been viewed.">
                     <IconButton size="small" aria-label="view">

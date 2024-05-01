@@ -6,6 +6,7 @@ const useCommunityStore = create((set) => ({
     communityDescription: 'Loading description...',
     isFollowing: false,
     numFollowers: 0,
+    joinedUsers: [],
     numSubs: 0,
     joined: false,
     isPublic: false,

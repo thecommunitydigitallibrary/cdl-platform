@@ -50,7 +50,7 @@ const ChatWindow = () => {
         // >
         <div className="flex" style={{ height: '50vh' }}>
 
-            <div className="overflow-auto border-r  p-1" >
+            <div className="overflow-auto border-r p-1" >
 
                 <Button
                     className="my-1 bg-blue-500 hover:bg-blue-700 cursor-pointer "

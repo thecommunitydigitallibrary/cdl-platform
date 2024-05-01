@@ -33,6 +33,28 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        May 1st, 2024
+      </h2>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Homepage recommended public communities</li>
+            <li className="list-item">Number of followers and joined members for communities</li>
+            <li className="list-item">Summarize search results</li>
+        </ul>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">More mobile-friendly</li>
+            <li className="list-item">Community page ten results, then show more on search</li>
+        </ul>
+
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         April 16th, 2024
       </h2>
 

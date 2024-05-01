@@ -26,11 +26,11 @@ const Hero = () => {
               Save what you know. Find what you don't.
             </h3>
             <p className="py-5 text-xl leading-normal text-gray-500 lg:text-xl xl:text-xl dark:text-gray-300">
-            TextData is a social platform for collaboratively creating, sharing, and learning from wiki-style communities. Use our website or Chrome browser extension to create or join communities, make submissions to these communities, and share these communities with the world (or keep them to yourself).
-              
-               <br /><br />
-               
-               Then, using everything that you and your collaborators have saved along with the communities that you have followed, we'll help you find old information, ask and answer questions, and get interesting recommendations.
+              TextData is a social platform for collaboratively creating, sharing, and learning from wiki-style communities. Use our website or Chrome browser extension to create or join communities, make submissions to these communities, and share these communities with the world (or keep them to yourself).
+
+              <br /><br />
+
+              Then, using everything that you and your collaborators have saved along with the communities that you have followed, we'll help you find old information, ask and answer questions, and get interesting recommendations.
             </p>
 
             <div className="flex flex-col m-3 items-start space-y-3 sm:space-x-4 sm:space-y-0 sm:items-center sm:flex-row">

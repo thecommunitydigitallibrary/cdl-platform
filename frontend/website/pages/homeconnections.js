@@ -69,7 +69,7 @@ export default function HomeConnections({ nds, eds }) {
   };
 
   return (
-    <div className="border 1px h-full">
+    <div className="border 1px h-full " >
       <Graph
         graph={graph}
         options={options}

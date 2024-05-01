@@ -7,7 +7,6 @@ const CommunityDisplay = (props) => {
     const searchEndpoint = "search";
     const [usersCommunities, setUsersCommunities] = useState({});
     const [communitiesPartOf, setCommunitiesPartOf] = useState({});
-
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const storedData = JSON.parse(window.localStorage.getItem('dropdowndata'));

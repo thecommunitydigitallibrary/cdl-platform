@@ -144,7 +144,7 @@ export default function Footer(props) {
   return (
     <>
       <div sx={{ position: 'absolute', bottom: 0 }} >
-        <div className="grid max-w-screen-xl grid-cols-1 gap-10 pt-10 mx-auto border-t border-gray-100 dark:border-trueGray-700 lg:grid-cols-5">
+        <div className="grid max-w-screen-xl grid-cols-1 gap-10 pt-10 mx-auto border-t border-gray-100 dark:border-trueGray-700 lg:grid-cols-5 sm:p-2">
           <div className="lg:col-span-2">
             <div>
               {" "}
@@ -161,7 +161,7 @@ export default function Footer(props) {
             </div>
 
             <div className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
-            TextData is a social platform for collaboratively creating, sharing, and learning from wiki-style communities. We offer a stand-alone website and a Chrome extension, all for free.
+              TextData is a social platform for collaboratively creating, sharing, and learning from wiki-style communities. We offer a stand-alone website and a Chrome extension, all for free.
             </div>
 
 

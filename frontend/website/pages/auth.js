@@ -270,7 +270,7 @@ export default function ({ data }) {
   if (isLoggedOut === true) {
     if (authMode === "signin") {
       return (
-        <div className="Auth-form-container">
+        <div className="Auth-form-container" >
           <Head>
             <title>Sign In - TextData</title>
             <link rel="icon" href="/images/tree32.png" />

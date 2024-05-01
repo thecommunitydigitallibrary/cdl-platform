@@ -1,4 +1,5 @@
 import json
+import random
 from bson import ObjectId
 from flask import Blueprint, request
 from flask_cors import CORS 
@@ -7,7 +8,7 @@ import traceback
 from app.db import *
 from app.helpers.status import Status
 from app.helpers import response
-from app.helpers.helpers import token_required, format_time_for_display, format_url
+from app.helpers.helpers import token_required, token_required_public, format_time_for_display, format_url
 from app.models.communities import Communities, Community
 from app.models.community_logs import CommunityLogs
 from app.models.users import Users
@@ -20,6 +21,30 @@ from app.models.logs import Logs
 
 communities = Blueprint('communities', __name__)
 CORS(communities)
+
+
+@communities.route("/api/communityRecommend", methods=["GET"])
+@token_required
+def get_recommended_communities(current_user):
+	"""
+		top_n
+		method
+			random
+	"""
+	top_n = request.args.get("top_n", 5)
+	method = request.args.get("method", "random")
+
+	textdata_communities = Communities()
+
+	all_public = textdata_communities.find({"public": True})
+	# all_public_list = [{"name": x.name, "id": str(x._id)} for x in all_public]
+	all_public_list = [{"name": x.name, "id": str(x.id)} for x in all_public]
+	if method == "random":
+		random.shuffle(all_public_list)
+		return response.success({"recommended_communities": all_public_list[0:top_n]}, Status.OK)
+	else:
+		return response.error("Not yet implemented.", Status.BAD_REQUEST)
+
 
 
 @communities.route("/api/communityHistory", methods=["GET"])
@@ -184,11 +209,17 @@ def get_communities_helper(current_user, return_dict=False):
 		user_followed_communities_struct = new_followed_community_struct
 
 
+	return_obj = {
+		"community_info": community_struct,
+		"followed_community_info": user_followed_communities_struct
+	}
+	try:
+		username = current_user.username
+		return_obj["username"] = username
+	except Exception as e:
+		print("Accessed as public, no username found.")
 
-	return {"community_info": community_struct, 
-		 	"followed_community_info": user_followed_communities_struct, 
-			"username": current_user.username}
-
+	return return_obj
 
 @communities.route("/api/createCommunity", methods=["POST", "PATCH"])
 @token_required
@@ -285,7 +316,8 @@ def create_community(current_user):
 
 
 @communities.route("/api/community/<id>", methods=["GET"])
-@token_required
+#@token_required
+@token_required_public
 def community(current_user, id):
 	"""
 	Getting data on a single community
@@ -310,15 +342,30 @@ def community(current_user, id):
 		"public": found_comm.public,
 		"following": False,
 		"joined": False,
-		"pinned_submissions": []
+		"pinned_submissions": [],
+		"num_followers": 0,
+		"joined_users": []
 	}
+
+	# currently need to loop through all users to find the number of followers and contributors
+	# fine for now, but will probably need to speed up if ever more users
+	users_db = Users()
+	num_followers = users_db.count({"followed_communities": ObjectId(id)})
+	all_joined = users_db.find({"communities": ObjectId(id)})
+
+	all_joined_users = []
+	for user in all_joined:
+		all_joined_users.append({"username": user.username, "id": str(user_id)})
+	total_num_followers = num_followers + len(all_joined_users)
+	return_obj["num_followers"] = total_num_followers
+	return_obj["joined_users"] = all_joined_users
+	
 
 	if ObjectId(id) in user_communities:
 		return_obj["joined"] = True
 	if ObjectId(id) in user_followed_communities:
 		return_obj["following"] = True
 
-	# pinned_sub_ids = [x.strip() for x in found_comm.pinned.split(",")] --> bugs out as it takes '' as a pinned submission
 	pinned_sub_ids = [x.strip() for x in found_comm.pinned.split(",") if x.strip()]
 	sub_db = Logs()
 	for psid in pinned_sub_ids:
@@ -336,6 +383,7 @@ def community(current_user, id):
 			print(e)
 			traceback.print_exc()
 			continue
+	
 	return response.success(return_obj, Status.OK)
 
 
@@ -638,7 +686,8 @@ def submit_rel_judgments(current_user):
 
 
 @communities.route("/api/fetchSubmissionStats", methods=["GET"])
-@token_required
+#@token_required
+@token_required_public
 def fetch_submission_stats(current_user):
 	"""
 	Endpoint for submitting a relevance judgment
@@ -669,7 +718,8 @@ def fetch_submission_stats(current_user):
 
 
 @communities.route("/api/fetchSubmissionJudgement", methods=["GET"])
-@token_required
+#@token_required
+@token_required_public
 def fetch_submission_judgement(current_user):
 	"""
 	Endpoint for submitting a relevance judgment

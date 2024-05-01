@@ -2,6 +2,7 @@ import json
 import os
 import re
 import time
+import traceback
 from functools import wraps
 from urllib.parse import urlparse, urldefrag, quote
 from collections import defaultdict
@@ -14,6 +15,8 @@ from flask import request, current_app
 from app.helpers import response
 from app.helpers.status import Status
 from app.models.users import Users
+from app.models.not_logged_in_users import NotLoggedInUsers, NotLoggedInUser
+
 
 import validators
 
@@ -91,6 +94,44 @@ def extract_payload(request, fields):
 		return payload if None not in [value for value in payload.values()] else None
 	except:
 		return None
+     
+
+def token_required_public(f):
+    """
+    If user is logged in, continue as normal
+    Else use IP to 
+        check non-user db to find id corresponding to ip
+        create new non-user db entry with ip
+    return the user, and if non-user, put a flag there
+    """
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        token = None
+        logged_in = False
+        ip = request.remote_addr
+
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization']
+        try:
+            data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
+            cdl_users = Users()
+            current_user = cdl_users.find_one({"_id": ObjectId(data["id"])})
+            assert current_user != None
+            logged_in=True
+        except Exception as e:
+            print("Error: Unable to find user, attempting non-user flow")
+
+        if logged_in:
+            return f(current_user, *args, **kwargs)
+        else:
+            non_users = NotLoggedInUsers()
+            new_non_user = non_users.find_one({"ip": ip})
+            if not new_non_user:
+                 new_non_user = NotLoggedInUser(ip)
+                 insert_id = non_users.insert(new_non_user)
+                 new_non_user.id = insert_id
+            return f(new_non_user, *args, **kwargs)
+    return decorator
 
 
 def token_required(f):
@@ -104,14 +145,13 @@ def token_required(f):
 		If the token is valid, then the passed function with the current user and any other params passed to the initial function.
 		If the token is invalid, then a 403 error with an error message.
 	"""
-
 	@wraps(f)
 	def decorator(*args, **kwargs):
 		token = None
 		if 'Authorization' in request.headers:
 			token = request.headers['Authorization']
 		if not token:
-			return response.error("Valid token is missing", Status.BAD_REQUEST)
+			return response.error("You must log in to perform this action", Status.BAD_REQUEST)
 		try:
 			data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
 			cdl_users = Users()
@@ -119,8 +159,7 @@ def token_required(f):
 			assert current_user != None
 		except Exception as e:
 			print("Error: ", e)
-			return response.error("Token is invalid", Status.NOT_FOUND)
-
+			return response.error("You must log in to perform this action", Status.NOT_FOUND)
 		return f(current_user, *args, **kwargs)
 
 	return decorator

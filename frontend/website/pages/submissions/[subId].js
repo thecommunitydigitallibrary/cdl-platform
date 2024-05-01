@@ -137,7 +137,7 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
       <link rel="icon" href="/images/tree32.png" />
     </Head>
 
-    <div>
+    <div className="mr-1 pr-1">
       {
         data ? (
           <Stack marginLeft={3} spacing={1} alignItems={'center'}>
@@ -186,17 +186,17 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
 // This gets called on every request
 export async function getServerSideProps(context) {
   // Fetch data from external API
-  if (
-    context.req.cookies.token === "" ||
-    context.req.cookies.token === undefined
-  ) {
-    return {
-      redirect: {
-        destination: "/auth",
-        permanent: false,
-      },
-    };
-  } else {
+  //if (
+  //  context.req.cookies.token === "" ||
+  //  context.req.cookies.token === undefined
+  //) {
+  //  return {
+  //    redirect: {
+  //      destination: "/auth",
+  //      permanent: false,
+  //    },
+  //  };
+  //} else {
     const id = context.query.subId;
     var target = null
     if (context.query.hasOwnProperty("target")) {
@@ -216,4 +216,4 @@ export async function getServerSideProps(context) {
       props: { errorCode, data, id, target },
     };
   }
-}
+//}

@@ -90,7 +90,7 @@ function CommunityHistoryEntry(props) {
   };
   return (
     <div>
-      <Card variant="outlined" sx={{ width: "1000px", padding: "15px" }}>
+      <Card variant="outlined" sx={{ width: "75%", maxHeight: '200px', padding: "15px" }}>
         <div style={{ display: "flex" }}>
           <div>
             <h4>{props.name}</h4>

@@ -10,12 +10,12 @@ const Cta = () => {
             Ready to try out our extension?
           </h2>
           <p className="mt-2 font-medium text-white text-opacity-90 lg:text-xl">
-            
+
           </p>
         </div>
         <div className="flex-shrink-0 w-full text-center lg:w-auto">
           <a
-            href="https://github.com/thecommunitydigitallibrary/cdl-platform"
+            href="https://chromewebstore.google.com/detail/textdata/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0"
             target="_blank"
             rel="noopener"
             className="inline-block py-3 mx-auto text-lg font-medium text-center text-blue-500 bg-white rounded-md px-7 lg:px-10 lg:py-5 ">

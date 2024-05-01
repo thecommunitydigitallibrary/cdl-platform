@@ -17,19 +17,31 @@
 }
 
 .Auth-form-container {
-    display: flex;
-    flex-direction: column;
-    /* align-items: center; */
-    margin: 5vh;
-    margin-left: 50vh;
-    margin-right: 50vh;
     padding: 5vh;
-    padding-left: 10vh;
-    padding-right: 10vh;
     border: 1px solid #e2e8f0;
-
 }
+
+@media (min-width: 768px) {
+
+    /* for lg screens and above */
+    .Auth-form-container {
+        margin-left: 50vh;
+        margin-right: 50vh;
+        margin-top: 5vh;
+    }
+}
+
+@media (max-width: 767px) {
+
+    /* for sm screens and below */
+    .Auth-form-container {
+        margin: 5vh;
+        padding: 2vh;
+    }
+}
+
+
 .MuiIconButton-root.Mui-selected {
-  background-color: #fff !important;
-  color: #007bff !important;
+    background-color: #fff !important;
+    color: #007bff !important;
 }

@@ -14,6 +14,7 @@ import jsCookie from "js-cookie";
 import Stack from '@mui/material/Stack';
 import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 import useUserDataStore from '../../store/userData';
+import useQuickAccessStore from '../../store/quickAccessStore';
 
 
 
@@ -31,11 +32,11 @@ function searchBarHeader(props) {
     }
 
     const [inputValue, setInputValue] = useState(initQuery);
-    const [ownSubmissionToggle, setOwnSubmissionToggle] = useState(true)
+    const { ownSubmissionToggle, setQuickAccessStoreProps } = useQuickAccessStore();
 
     const updateOwnSubmissionToggle = async (event) => {
         const { value, checked } = event.target;
-        setOwnSubmissionToggle(checked)
+        setQuickAccessStoreProps({ ownSubmissionToggle: checked })
     }
 
 
@@ -63,8 +64,8 @@ function searchBarHeader(props) {
             q = q + "&own_submissions=True"
         }
 
-        //No submit on empty query
-        if (inputValue.length == 0) {
+        //No submit on empty query with all community
+        if (inputValue.length == 0 && event.target.community.value == "all") {
             return
         } else {
             Router.push(q);
@@ -106,6 +107,7 @@ function searchBarHeader(props) {
 
 
     const handleVisualizeCommunity = (event) => {
+
         if (inputValue.length == 0) {
             return
         }
@@ -129,7 +131,7 @@ function searchBarHeader(props) {
 
                 <Stack spacing={2}
                     style={{
-                        width: props.isSmall ? '200px' : '60%', borderRadius: '5px',
+                        width: props.isSmall ? '225px' : '60%', borderRadius: '5px',
                         position: "relative", paddingRight: "5px"
                     }}>
                     <Autocomplete
@@ -145,14 +147,12 @@ function searchBarHeader(props) {
                         value={inputValue}
                         renderInput={(params) =>
                             <TextField {...params}
-                                required
                                 variant="outlined"
-                                sx={{ m: 1 }}
+                                // sx={{ m: 1 }}
                                 style={{
                                     backgroundColor: 'white', borderRadius: '5px',
                                     position: "relative"
                                 }}
-                                size="small"
                                 type="text"
                                 placeholder="Search your communities"
                                 id="query_input"
@@ -215,30 +215,25 @@ function searchBarHeader(props) {
                                     ),
                                     style: {
                                         padding: 0,
-                                        overflow: "hidden"
+                                        overflow: "hidden",
                                     },
-                                }}
-                            />
+                                }}>
+                            </TextField>
                         }
-
                     />
-
-
                 </Stack>
 
-
-                <FormControl
-                    sx={{ m: 1, maxWidth: '25%', backgroundColor: 'white', borderRadius: '5px', float: "left" }}
-                    size="small">
+                <FormControl className="m-1 max-w-1/4 bg-white rounded-5 float-left" size="small">
                     <Select
-                        style={{ backgroundColor: "white" }}
+                        className="bg-white text-md"
+                        size='small'
                         name="community"
                         defaultValue={"all"}
                         MenuProps={{
                             PaperProps: {
                                 style: {
                                     maxHeight: "220px",
-                                    overflowY: "scroll"
+                                    overflowY: "scroll",
                                 }
                             }
                         }}
@@ -258,20 +253,21 @@ function searchBarHeader(props) {
                             })}
                     </Select>
                 </FormControl>
-                <FormControl
+                {!props.isSmall && <FormControl
                     sx={{ m: 1, maxWidth: '15%', borderRadius: '5px', float: "left" }}
                 >
                     <FormControlLabel sx={{ color: "white" }}
                         control={
                             <Checkbox
                                 checked={ownSubmissionToggle}
+                                size='small'
                                 sx={{ color: "white", '&.Mui-checked': { color: "white", }, }}
                                 onChange={updateOwnSubmissionToggle}
                             />
                         }
 
-                        label={<Typography fontSize={'0.8rem'}>{!props.isSmall && 'Only My Submissions'}</Typography>} />
-                </FormControl>
+                        label={<Typography fontSize={'0.7rem'}>{!props.isSmall && 'Only My Submissions'}</Typography>} />
+                </FormControl>}
             </form>
         </>
     )

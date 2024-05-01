@@ -7,17 +7,6 @@ import { PushPin } from "@mui/icons-material";
 export default function QuickSubmissionBox({ submissionData, pinned }) {
 
     return (
-        // {
-        //     pinnedSubs.map((post, index) => (
-        //         <div key={index} >
-        //             <div className="">
-        //                 <h3 className="text-lg font-semibold text-gray-800 truncate">{post.explanation}</h3>
-        //                 <PushPin className="w-5 h-5 text-yellow-500" />
-        //             </div>
-        //         </div>
-        //     ))
-        // }
-
         < div className={pinned ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-center max-w-screen-lg mx-auto"}>
             {
                 submissionData.map((item, index) => (

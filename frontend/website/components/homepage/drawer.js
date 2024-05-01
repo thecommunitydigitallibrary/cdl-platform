@@ -9,15 +9,22 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  FormControl,
+  FormControlLabel,
+  Checkbox,
+  Typography
 } from "@mui/material";
 import Divider from '@mui/material/Divider';
 import MenuIcon from "@mui/icons-material/Menu";
 import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from "../../static/constants";
+import Image from "next/image";
+import useQuickAccessStore from "../../store/quickAccessStore";
 
 function DrawerComp(props) {
   const [openDrawer, setOpenDrawer] = useState(false);
 
+  const { ownSubmissionToggle, setQuickAccessStoreProps } = useQuickAccessStore();
   const handleNewSubmissionRequest = async (event) => {
     var DATA = {
       community: "",
@@ -58,14 +65,39 @@ function DrawerComp(props) {
         onClose={() => setOpenDrawer(false)}
       >
         <List sx={{ maxWidth: '300px', maxHeight: '50px', overflowWrap: 'break-word', textAlign: 'center' }}>
-          {props.username ? <>
+          <>
+            <div className="flex items-center justify-center">
+              <a href="/" className="inline-block">
+                <Image
+                  src="/images/tree48.png"
+                  alt="TextData"
+                  width="40"
+                  height="40"
+                  className="w-8"
+                />
+              </a>
+              <h4 className="ml-2 mb-0">Hello {props.username ? ',' + props.username : ''}</h4>
+            </div>
+            <Divider sx={{ borderColor: 'black', my: '2%' }} />
+            <h6>Search Settings
+            </h6>
+            <FormControl>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={ownSubmissionToggle}
+                    onChange={
+                      (event) => {
+                        setQuickAccessStoreProps({ ownSubmissionToggle: event.target.checked })
+                      }}
+                  />
+                }
+                label={<Typography fontSize={'0.8rem'}>Show only my submissions</Typography>} />
+            </FormControl>
 
-            <h4 sx={{ marginBottom: '2%' }} >
-              Hello, {props.username}
-            </h4>
-            <Divider sx={{ borderColor: 'black', my: '5%', mx: '5%' }} />
+            <Divider sx={{ borderColor: 'black' }} />
           </>
-            : <></>}
+
           {props.settings.map((setting, index) => (
 
             <>
@@ -118,16 +150,22 @@ function DrawerComp(props) {
             </ListItemIcon>
             {props.username ?
               <>
-                <Button variant="contained" color="error" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, 'logout') }}>
+                <Button
+                  className="text-white bg-red-500 rounded-md no-underline"
+
+                  variant="contained" color="error" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, 'logout') }}>
                   <ListItemText>
                     Logout
                   </ListItemText>
-                </Button></>
+                </Button>
+              </>
               :
               <>
-                <Button variant="contained" color="info" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, '/auth') }}>
+                <Button
+                  className="text-white bg-red-500 rounded-md no-underline"
+                  variant="contained" color="info" onClick={(event) => { setOpenDrawer(false); props.handleUserClickMenu(event, '/auth') }}>
                   <ListItemText>
-                    Home
+                    Logout
                   </ListItemText>
                 </Button>
               </>}

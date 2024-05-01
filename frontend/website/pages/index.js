@@ -23,6 +23,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChatWindow from "../components/chatwindow";
 import useUserDataStore from "../store/userData";
 import { BASE_URL_CLIENT, SEARCH_ENDPOINT } from "../static/constants";
+import RecommendedCommunityBox from "../components/recommendedCommunityBox";
 
 const HomeConnections = dynamic(() => import("./homeconnections"), {
   ssr: false,
@@ -34,7 +35,7 @@ const recentlyAccessedSubmissionsEndpoint = "submission/recentlyaccessed";
 const getCommunitiesEndpoint = "getCommunities";
 const searchEndpoint = "search?";
 
-function Home({ data, community_joined_data, recently_accessed_submissions }) {
+function Home({ data, community_joined_data, recently_accessed_submissions, recommendedCommunitiesData }) {
   const router = useRouter();
   const [items, setItems] = useState(data.recommendation_results_page);
   const [page, setPage] = useState(parseInt(data.current_page) + 1);
@@ -115,7 +116,6 @@ function Home({ data, community_joined_data, recently_accessed_submissions }) {
   useEffect(async () => {
     await checkOnboarding();
     setUserDataStoreProps({ userCommunities: community_joined_data.community_info });
-
     // get viz data
     var temp = await getVizData();
     console.log('received vizdata!');
@@ -221,153 +221,119 @@ function Home({ data, community_joined_data, recently_accessed_submissions }) {
 
   if (onboardingStep == 0) {
     homePageContent = (
-      <div>
-        <Grid
-          container
-          display={"flex"}
-          direction="column"
-          justifyContent={"center"}
-          alignItems={"center"}
-        >
-          <Grid item marginTop={'1%'}>
-            <div style={{ textAlign: 'center' }}>
-              <h1>TextData</h1>
-            </div>
-          </Grid>
+      <div className="px-4 sm:mx-6">
+        <div className="text-center">
+          <h1 className="mb-2 text-3xl font-bold text-gray-600">TextData</h1>
+        </div>
+        <Divider className="my-2" />
 
-          <Grid item style={{ width: '100ch' }} >
-            <Divider sx={{ border: '1.5px solid', borderColor: 'black', marginY: '20px' }} />
-          </Grid>
+        {/* <div className="mb-4 flex flex-col lg:flex-row"> */}
+        {/* Recently Accessed Submissions */}
+        <div className="mb-4 lg:mb-0 lg:mx-60">
+          <h2 className="text-xl font-semibold mb-4">Recently Accessed Submissions</h2>
+          <QuickSubmissionBox className="mt-2" submissionData={recently_accessed_submissions} />
+        </div>
 
-          <Grid
-            style={{ display: "flex", width: "100ch", flexDirection: "column" }}>
-            <h4>Recently Accessed Submissions</h4>
-          </Grid>
-          <Grid item width={'100ch'}>
-            <QuickSubmissionBox submissionData={recently_accessed_submissions} />
-          </Grid>
+        {/* Recommended Communities */}
+        <div className="mb-4 lg:mb-0 lg:mx-60">
+          <h2 className="text-xl font-semibold mb-4">Recommended Commmunities</h2>
+          <RecommendedCommunityBox className="mt-2" recommendedCommunitiesData={recommendedCommunitiesData.recommended_communities} />
+        </div>
 
+        <Divider className="mb-4" />
 
-          <Grid item style={{ width: '100ch' }} >
-            <Divider sx={{ border: '1.5px solid', borderColor: 'black', marginY: '20px' }} />
-          </Grid>
-
-          <Grid
-            style={{ display: "flex", width: "100ch", height: "500px", flexDirection: "column" }}>
-            <Grid item >
-              <h4 >Visualizing Your Submissions</h4>
-            </Grid>
-            {!userOwnSubmissions ?
-              <Tooltip title={<Typography>Loading</Typography>} placement="top">
-                <Skeleton
-                  animation="wave"
-                  variant="rectangular"
-                  width={"100ch"}
-                  height={"100vh"}
-                />
+        {/* Submission Graph */}
+        <div className="mb-8 lg:mx-60">
+          <h2 className="text-xl font-semibold mb-4">Visualizing Your Submissions</h2>
+          {!userOwnSubmissions ? (
+            <div className="text-center">
+              <Tooltip title="Loading" placement="top">
+                <Skeleton animation="wave" variant="rectangular" width={300} height={5000} />
               </Tooltip>
-              :
-              <HomeConnections nds={userOwnSubmissions && userOwnSubmissions['nodes']}
-                eds={userOwnSubmissions && userOwnSubmissions['edges']} />
-            }
-          </Grid>
-          <Grid item style={{ width: '100ch', marginTop: '10px' }} >
-            <Divider sx={{ border: '1.5px solid', borderColor: 'black' }} />
-          </Grid>
-          <Grid
-            container
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            width="57%">
-            <Grid item width={'50%'}>
-              <h4>Recommended for you</h4>
-            </Grid>
-            <Grid item>
-              <FormControl
-                sx={{ m: 1, minWidth: 120 }}
+            </div>
+          ) : (
+            <div style={{ height: '65vh' }}>
+              <HomeConnections nds={userOwnSubmissions && userOwnSubmissions['nodes']} eds={userOwnSubmissions && userOwnSubmissions['edges']} />
+            </div>
+          )}
+        </div>
+
+        <Divider className="my-4" />
+
+        <div className="mb-4 lg:mx-60">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Recommended</h2>
+            <FormControl className="ml-2" size="small">
+              <Select
+                labelId="select-recommendation-type"
+                id="select-recommendation-type"
+                name="method"
+                value={selectedRecOption}
+                onChange={handleRecTypeChange}
                 size="small"
-                margintop={0}
+                className="w-40"
               >
-                <Select
-                  labelId="select-small"
-                  id="select-recommendation-type"
-                  name="method"
-                  defaultValue={"recent"}
-                  value={selectedRecOption}
-                  onChange={handleRecTypeChange}
-                >
-                  {/* Currently is : User Submission History + Extension opens searches*/}
-                  <MenuItem value="explore_similar_extension">Explore</MenuItem>
-                  <MenuItem value="recent">New Submissions</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid
-          container
-          display={"flex"}
-          justifyContent={"center"}
-          alignItems={"center"}
-          minWidth={'600px'}
-          margin={'auto'}
-          width={'100ch'}
-          direction={'column'}
-          borderTop={"1px solid lightgray"}
-        >
+                <MenuItem value="explore_similar_extension">Explore</MenuItem>
+                <MenuItem value="recent">New Submissions</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+
           <InfiniteScroll
             dataLength={items.length}
             next={fetchNextPage}
             hasMore={!endOfRecommendations}
-            loader={!endOfRecommendations && <h6 style={{ textAlign: 'center' }} >Loading...</h6>}
-            endMessage={endOfRecommendations && items.length > 0 ?
-              <h4 style={{ textAlign: 'center', marginTop: '15px' }} > You've reached the end of your recommendations.</h4>
-              :
-              <>
-                <br />
-                <h6 style={{ textAlign: 'center' }}> No recommendations to display. <br /> <br />
-                  {/* Currently is : href needs to be updated to make new submission model open*/}
-                  <a variant="outline" href={"/community"}>{" Click here to create or join a community!"}</a></h6>
-              </>}
+            loader={!endOfRecommendations && <div className="text-center">Loading...</div>}
+            endMessage={endOfRecommendations && items.length > 0 ? <div className="text-center">You've reached the end of your recommendations.</div> : <div className="text-center">No recommendations to display. <br /> <a href="/community">Click here to create or join a community!</a></div>}
           >
-            <Grid item margin={'auto'}>
-              {(items !== undefined && items.length > 0) &&
-                items.map(function (d, idx) {
-                  return (
-                    <div key={idx}>
-                      <SearchResult
-                        search_idx={idx}
-                        redirect_url={d.redirect_url}
-                        display_url={d.display_url}
-                        submission_id={d.submission_id}
-                        result_hash={d.result_hash}
-                        highlighted_text={d.highlighted_text}
-                        explanation={d.explanation}
-                        time={d.time}
-                        communities_part_of={d.communities_part_of}
-                        auth_token={jsCookie.get("token")}
-                        show_relevant={true}
-                        hashtags={d.hashtags}
-                      ></SearchResult>
-                    </div>
-                  );
-                })}
-            </Grid>
+            <div className="flex flex-col items-center">
+              {items.map((d, idx) => (
+                <div key={idx} className="mb-4 w-full">
+                  <SearchResult
+                    search_idx={idx}
+                    redirect_url={d.redirect_url}
+                    display_url={d.display_url}
+                    submission_id={d.submission_id}
+                    result_hash={d.result_hash}
+                    highlighted_text={d.highlighted_text}
+                    explanation={d.explanation}
+                    time={d.time}
+                    communities_part_of={d.communities_part_of}
+                    auth_token={jsCookie.get("token")}
+                    show_relevant={true}
+                    hashtags={d.hashtags}
+                  />
+                </div>
+              ))}
+            </div>
           </InfiniteScroll>
-        </Grid>
+        </div >
 
-        {visible && <IconButton
-          variant="extended"
-          onClick={scrollToTop}
-          sx={{
-            width: '50px', height: '50px', ml: "85%", position: 'sticky', border: 'solid', bottom: '10px', "&:hover": {
-              backgroundColor: "#1976d2", color: 'white'
-            }
-          }}>
-          <ArrowUpwardOutlined color="white"></ArrowUpwardOutlined>
-        </IconButton>}
-      </div>
+        {
+          visible && (
+            <IconButton
+              variant="extended"
+              onClick={scrollToTop}
+              sx={{
+                width: '50px',
+                height: '50px',
+                ml: "auto",
+                border: 'solid',
+                bottom: '10px',
+                position: 'fixed',
+                right: '10px',
+                backgroundColor: 'white',
+                "&:hover": {
+                  backgroundColor: "#1976d2",
+                  color: 'white'
+                }
+              }}
+            >
+              <ArrowUpwardOutlined color="primary" />
+            </IconButton>
+          )
+        }
+      </div >
     );
   }
 
@@ -384,6 +350,72 @@ function Home({ data, community_joined_data, recently_accessed_submissions }) {
     </>
   );
 }
+
+// export async function getServerSideProps(context) {
+//   // Early return if no token is present
+//   if (!context.req.cookies.token) {
+//     return {
+//       redirect: {
+//         destination: "/about",
+//         permanent: false,
+//       },
+//     };
+//   }
+
+//   const tokenHeaders = new Headers({
+//     Authorization: context.req.cookies.token,
+//   });
+
+//   try {
+//     // Endpoints
+//     const baseURL = baseURL_server;
+//     const recommendationURL = `${baseURL}${recommendationsEndPoint}?method=recent&page=0`;
+//     const recentlyAccessedSubmissionsURL = `${baseURL}${recentlyAccessedSubmissionsEndpoint}`;
+//     const communityURL = `${baseURL}${getCommunitiesEndpoint}`;
+//     const recommendedCommunitiesURL = `${baseURL}communityRecommend`;
+
+//     // Fetch requests
+//     const [res, recentlyAccessedSubmissions, fetchCommunities, recommendedCommunities] = await Promise.all([
+//       fetch(recommendationURL, { headers: tokenHeaders }),
+//       fetch(recentlyAccessedSubmissionsURL, { headers: tokenHeaders }),
+//       fetch(communityURL, { headers: tokenHeaders }),
+//       fetch(recommendedCommunitiesURL, { headers: tokenHeaders })
+//     ]);
+
+//     // Process JSON data
+//     const [data, recently_accessed_submissions, community_joined_data, recommended_communities_data] = await Promise.all([
+//       res.json(),
+//       recentlyAccessedSubmissions.json(),
+//       fetchCommunities.json(),
+//       recommendedCommunities.json()
+//     ]);
+
+//     // Ensure all fetches are successful
+//     if (res.ok && recentlyAccessedSubmissions.ok && fetchCommunities.ok && recommendedCommunities.ok) {
+//       return {
+//         props: {
+//           data,
+//           recently_accessed_submissions,
+//           community_joined_data,
+//           recommended_communities_data
+//         }
+//       };
+//     } else {
+//       throw new Error('Failed to fetch data');
+//     }
+//   } catch (error) {
+//     // Handle errors or invalid status
+//     console.error('Error fetching data:', error);
+//     return {
+//       redirect: {
+//         destination: "/auth",
+//         permanent: false,
+//       },
+//     };
+//   }
+// }
+
+
 export async function getServerSideProps(context) {
   // Fetch data from external API
   if (
@@ -418,6 +450,16 @@ export async function getServerSideProps(context) {
       }),
     });
 
+    // @communities.route("/api/communityRecommend", methods=["GET"])
+
+    var recommenddedCommunitiesURL = baseURL_server + "communityRecommend";
+    const recommendedCommunities = await fetch(recommenddedCommunitiesURL, {
+      headers: new Headers({
+        Authorization: context.req.cookies.token,
+      }),
+    });
+    const recommendedCommunitiesData = await recommendedCommunities.json();
+
     var searchURL = baseURL_server + searchEndpoint;
     searchURL += "own_submissions=True" + "&community=all&source=visualizeConnections";
 
@@ -434,12 +476,12 @@ export async function getServerSideProps(context) {
           }
           return {
             props: {
-              data, community_joined_data,
+              data, community_joined_data, recommendedCommunitiesData,
               recently_accessed_submissions
             }
           };
         }
-        // }
+
       }
     } else if (res.status == 404) {
       return {
