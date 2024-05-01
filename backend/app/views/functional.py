@@ -958,7 +958,7 @@ def generate(current_user):
         if len(exported_results)==1:
             return response.error("Single Search Result cannot be summarized", Status.BAD_REQUEST)
         else:  
-            all_results = [{"Title "+str(index+1): item['title'] + ". 'Description' - " +item['description']} for index, item in enumerate(exported_results)]
+            all_results = [{"Title "+str(index+1): item['title'] + ". 'Description' - " +item['description'][:100]} for index, item in enumerate(exported_results[:10])]
             context='You are a helpful assistant that summarizes multiple notes about a given topic, clusters important themes, and provides a comprehensive summary of all notes across all the themes.'
             to_ask_1 = f"""\
             The following are a set of text notes known by me - 
