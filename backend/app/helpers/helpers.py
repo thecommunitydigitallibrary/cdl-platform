@@ -244,6 +244,9 @@ def create_page(hits, communities, toggle_display="highlight"):
             "username": ""
         }
 
+        if not result["score"]: 
+            result["score"] = 0
+
         if "webpage" in hit["_source"]:
             result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title") or hit["_source"]["webpage"]["metadata"].get("h1") or "No title available"
             result["type"] = "webpage"

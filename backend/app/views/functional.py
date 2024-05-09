@@ -1182,15 +1182,14 @@ def search_sort_by(user_id,search_id,sort_by):
             penalize = 0.6*downvotes if downvotes > 1 else 1 # > 1 coz if 1, then penalize = 0.6, which would increase the score
             rewards = 0.6* upvotes + 0.1* views + 0.5* clicks
             metrics_score = 1 + math.log10(1 + (rewards /penalize)) #always greater than score
-            # non-query searches don't have scores, so need to make sure to not fail in this case
-            x["popularity"] = x.get("score",1) * metrics_score
+            x["popularity"] = x["score"] + metrics_score
 
            
 
         sorted_submissions = sorted(all_submissions,reverse=True,key = lambda x :float(x['popularity']))
 
     elif sort_by == 'relevance':
-        sorted_submissions = sorted(all_submissions,reverse=True,key = lambda x :float(x.get('score',1)))
+        sorted_submissions = sorted(all_submissions,reverse=True,key = lambda x :float(x['score']))
 
     all_page_keys = cache.hash_keys(name)
     all_page_keys.remove("number_of_hits")
