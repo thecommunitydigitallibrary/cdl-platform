@@ -738,7 +738,7 @@ def submission(current_user, id):
 
 
                 
-                return response.error("You do not have access to this submission.", Status.FORBIDDEN)
+                return response.error("Cannot find submission.", Status.NOT_FOUND)
             elif not submission:
                 try:
                     webpage = cdl_webpages.find_one({"_id": ObjectId(id)})
