@@ -1169,7 +1169,7 @@ def search_sort_by(user_id,search_id,sort_by):
         for x in all_submissions:
             metrics = submissions.find_one({"submission_id":ObjectId(x["submission_id"])})
             # because we did not backfill
-            if not metrics:
+            if metrics:
                 clicks = metrics.search_clicks + metrics.recomm_clicks
                 views = metrics.views
                 upvotes = metrics.likes
