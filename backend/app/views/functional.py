@@ -1168,10 +1168,17 @@ def search_sort_by(user_id,search_id,sort_by):
     elif sort_by == 'popularity': 
         for x in all_submissions:
             metrics = submissions.find_one({"submission_id":ObjectId(x["submission_id"])})
-            clicks = metrics.search_clicks + metrics.recomm_clicks
-            views = metrics.views
-            upvotes = metrics.likes
-            downvotes = metrics.dislikes if metrics.dislikes > 0 else 1
+            # because we did not backfill
+            if not metrics:
+                clicks = metrics.search_clicks + metrics.recomm_clicks
+                views = metrics.views
+                upvotes = metrics.likes
+                downvotes = metrics.dislikes if metrics.dislikes > 0 else 1
+            else:
+                clicks = 0
+                views = 0
+                upvotes = 0
+                downvotes = 1
             penalize = 0.6*downvotes if downvotes > 1 else 1 # > 1 coz if 1, then penalize = 0.6, which would increase the score
             rewards = 0.6* upvotes + 0.1* views + 0.5* clicks
             metrics_score = 1 + math.log10(1 + (rewards /penalize)) #always greater than score

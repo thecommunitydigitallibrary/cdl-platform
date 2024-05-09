@@ -227,8 +227,8 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
                 onChange={handleSortByOption}
                className="text-xs"  
               >
-                <MenuItem value="popularity">Top Voted</MenuItem>
-                <MenuItem value="date">Latest</MenuItem>
+                <MenuItem value="popularity">Popularity</MenuItem>
+                <MenuItem value="date">Most Recent</MenuItem>
                 <MenuItem value="relevance">Relevant</MenuItem>
               </Select>
             </FormControl>
