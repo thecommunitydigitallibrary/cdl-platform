@@ -81,7 +81,7 @@ export default function CommunityHomepage(props) {
     }
 
     const loadMoreResults = async () => {
-        window.open(WEBSITE_URL + "search/" + "?community=" + props.community.id + "&page=0", '_blank');
+        window.open(WEBSITE_URL + "search?community=" + props.community.id + "&page=0", '_blank');
     };
 
     const updateDropDownSearch = async () => {
@@ -204,7 +204,7 @@ export default function CommunityHomepage(props) {
                                 </div>
                                 <div className="text-sm text-gray-400 flex items-center  mt-3">
                                     <GroupIcon className="text-gray-400 h-5 w-5 mr-2" />
-                                    {joinedUsers.length} joined users
+                                    {joinedUsers.length} contributors
                                 </div>
                             </div>
                         </div>
@@ -241,7 +241,7 @@ export default function CommunityHomepage(props) {
                                     </div>
                                     <div className="text-sm text-gray-400 flex items-center  mt-3">
                                         <GroupIcon className="text-gray-400 h-5 w-5 mr-2" />
-                                        {joinedUsers.length} joined users
+                                        {joinedUsers.length} contributors
                                     </div>
                                 </div>
                             </div>

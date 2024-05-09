@@ -235,7 +235,7 @@ function Header(props) {
       source_url: "",
       title: newSubTitle,
       description: "",
-      anonymous: true,
+      anonymous: false,
     }
 
     var URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT

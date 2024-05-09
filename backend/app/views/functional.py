@@ -1135,6 +1135,74 @@ def context_analysis(current_user):
     return response.success({"analyzed_ht": ht_stats}, Status.OK)
 
 
+def search_sort_by(user_id,search_id,sort_by):
+    '''
+    Function to sort cached search results by relevance, popularity, date 
+    Arguments:
+        user_id: Object Id of the user 
+        search_id: search_id
+        sort_by: relevant, popularity or date
+    Returns:
+		None
+    '''
+    user_id = user_id
+    search_id = search_id
+    sort_by = sort_by
+    name = user_id + '-' + search_id
+    sorted_submissions = []
+    cache = Cache()
+    all_values = cache.hash_vals(name)
+    submissions = SubmissionStats()
+  
+    all_submissions = list()
+    for pages in all_values:
+        pages = json.loads(pages)
+        if isinstance(pages,int):
+            pass
+        else:
+            for submission in pages: 
+                all_submissions.append(submission)
+   
+    if sort_by == 'date':
+        sorted_submissions = sorted(all_submissions,reverse=True,key = lambda x :x['time'])
+    elif sort_by == 'popularity': 
+        for x in all_submissions:
+            metrics = submissions.find_one({"submission_id":ObjectId(x["submission_id"])})
+            clicks = metrics.search_clicks + metrics.recomm_clicks
+            views = metrics.views
+            upvotes = metrics.likes
+            downvotes = metrics.dislikes if metrics.dislikes > 0 else 1
+            penalize = 0.6*downvotes if downvotes > 1 else 1 # > 1 coz if 1, then penalize = 0.6, which would increase the score
+            rewards = 0.6* upvotes + 0.1* views + 0.5* clicks
+            metrics_score = 1 + math.log10(1 + (rewards /penalize)) #always greater than score
+            x["popularity"] = x["score"] * metrics_score
+
+           
+
+        sorted_submissions = sorted(all_submissions,reverse=True,key = lambda x :float(x['popularity']))
+
+    elif sort_by == 'relevance':
+        sorted_submissions = sorted(all_submissions,reverse=True,key = lambda x :float(x['score']))
+
+    all_page_keys = cache.hash_keys(name)
+    all_page_keys.remove("number_of_hits")
+    reranked_pages = list()
+    for page_no in all_page_keys:
+        page_no = int(page_no)
+        start, end =  page_no*10, page_no*10 + 10
+        reranked_page = hydrate_with_hash_url(sorted_submissions[start:end],search_id,page_no)
+       
+        reranked_pages.extend(reranked_page)
+   
+    def sort_by_hash_rank(x):
+        result_hash = x['result_hash']
+        rank = int(result_hash.split("_")[0])
+        return rank
+    reranked_pages.sort(key = sort_by_hash_rank)
+
+    cache.insert(user_id,search_id,reranked_pages,page_no)
+   
+
 @functional.route("/api/search", methods=["GET"])
 #@token_required
 @token_required_public
@@ -1172,6 +1240,7 @@ def search(current_user):
 
         ip = request.remote_addr
         user_id = current_user.id
+       
 
         # combine joined and followed communities
         user_communities = current_user.communities
@@ -1184,7 +1253,7 @@ def search(current_user):
 
         query = request.args.get("query", "")
         source = request.args.get("source", "webpage_search")
-
+        sort_by = request.args.get("sort_by") if "sort_by" in request.args else None
         requested_communities = request.args.get("community")
 
         if requested_communities == "all":
@@ -1274,15 +1343,21 @@ def search(current_user):
             search_id, _ = log_search(ip, user_id, source, query, requested_communities, own_submissions, url=url,
                                       highlighted_text=highlighted_text)
             search_id = str(search_id)  # for return
+            
 
-        # if the search_id is included, then the user is looking for a specific page of a previous search
+        # if the search_id is included, then the user is looking for a specific page of a previous search or sort_by field has changed
         else:
+            if sort_by != None:
+                search_sort_by(str(user_id),search_id,sort_by)
+                
             cdl_searches_clicks = SearchesClicks()
             prior_search = cdl_searches_clicks.find_one({"_id": ObjectId(search_id)})
             if prior_search:
                 query = prior_search.query
                 own_submissions = prior_search.own_submissions
                 requested_communities = [str(x) for x in prior_search.community]
+                #prev_sort_by = prior_search.sort_by
+
 
                 # case where user is paging a public, non-joined community
                 if len(requested_communities) == 1:
@@ -1942,25 +2017,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
             else:
                 print("\t Neural Rerank not available")
 
-
-            # slightly changed to only re-score the top 50
-            # also to avoid init substats every check
-            # and to only increase score
-            submissions = SubmissionStats()
-            for x in submissions_pages[:50]:
-                metrics = submissions.find_one({"submission_id":ObjectId(x["submission_id"])})
-                metrics_sum = 0
-                if metrics:
-                    metrics_sum = metrics.search_clicks + metrics.recomm_clicks + metrics.views
-                else:
-                    metrics_sum = 1 #webpages recommendations
-                metric_score = math.log10(metrics_sum)
-                x["score"] = (x["score"] * 1.0) + (metric_score * 0.1) 
-
-
             submission_pages = sorted(submissions_pages, reverse=True, key=lambda x: x["score"])
-            
-            
 
             # issue is now that note pages can have same source url but different content
             # moved inside search
@@ -1976,7 +2033,7 @@ def cache_search(query, search_id, index, communities, user_id, own_submissions=
         number_of_hits = len(pages)
         page = cache.insert(user_id, search_id, pages, index)
         print("\tCache: ", time.time() - start_time)
-
+  
     return number_of_hits, page
 
 
@@ -2076,18 +2133,6 @@ def format_submission_for_display(submission, current_user, search_id, submissio
     submission["stats"]["views"] = submission_stats.views
     submission["stats"]["likes"] = submission_stats.likes
     submission["stats"]["dislikes"] = submission_stats.dislikes
-    
-
-    # cdl_searches_clicks = SearchesClicks()
-    # num__search_clicks = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "click_search_result"})
-    # submission["stats"]["clicks"] = num__search_clicks
-
-    # cdl_recommendations_clicks = RecommendationsClicks()
-    # num_rec_clicks = cdl_recommendations_clicks.count({"submission_id": submission["_id"]})
-    # submission["stats"]["clicks"] += num_rec_clicks
-
-    # num_views = cdl_searches_clicks.count({"submission_id": submission["_id"], "type": "submission_view"})
-    # submission["stats"]["views"] = num_views
 
     # for deleting the entire submission
     if submission["user_id"] == user_id:

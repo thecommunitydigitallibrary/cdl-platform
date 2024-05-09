@@ -29,7 +29,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 export default function ImgMediaCard({ setUrlState }) {
   const [community, setCommunity] = React.useState("");
   const [title, setTitle] = React.useState("");
-  const [isAnonymous, setAnonymous] = React.useState(true);
+  const [isAnonymous, setAnonymous] = React.useState(false);
   const [allCommunities, setAllCommunities] = React.useState([]);
   const [description, setDesciption] = React.useState("");
   const [url, setUrl] = React.useState("");

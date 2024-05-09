@@ -19,11 +19,12 @@ const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-let backendSource = localStorage.getItem('backendSource');
 
 const theme = createTheme();
 
 export default function ImgMediaCard({setUrlState}) {
+
+  let backendSource = localStorage.getItem('backendSource');
 
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
@@ -72,7 +73,7 @@ export default function ImgMediaCard({setUrlState}) {
   }, []);
 
   const onDefault = () => {
-    setDefaultTab("search");
+    setDefaultTab("save");
     setSelectedValue(TEXTDATA_URL);
     setSource(LOCALHOST_DEFAULT);
     setDisabled(true);

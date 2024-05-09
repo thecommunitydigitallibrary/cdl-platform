@@ -236,7 +236,7 @@ function Home({ data, community_joined_data, recently_accessed_submissions, reco
 
         {/* Recommended Communities */}
         <div className="mb-4 lg:mb-0 lg:mx-60">
-          <h2 className="text-xl font-semibold mb-4">Recommended Commmunities</h2>
+          <h2 className="text-xl font-semibold mb-4">Recommended Public Commmunities</h2>
           <RecommendedCommunityBox className="mt-2" recommendedCommunitiesData={recommendedCommunitiesData.recommended_communities} />
         </div>
 

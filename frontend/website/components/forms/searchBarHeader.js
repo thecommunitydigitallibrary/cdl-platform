@@ -32,6 +32,7 @@ function searchBarHeader(props) {
     }
 
     const [inputValue, setInputValue] = useState(initQuery);
+    const [selectedCommunity, setSelectedCommunity] = useState("all");
     const { ownSubmissionToggle, setQuickAccessStoreProps } = useQuickAccessStore();
 
     const updateOwnSubmissionToggle = async (event) => {
@@ -105,6 +106,10 @@ function searchBarHeader(props) {
         }
     }, [inputValue]);
 
+    const captureCommunityChange = (e) => {
+        e.preventDefault();
+        setSelectedCommunity(e.target.value);
+    };
 
     const handleVisualizeCommunity = (event) => {
 
@@ -114,7 +119,8 @@ function searchBarHeader(props) {
 
         let url = "/visualizemap?query=" +
             encodeURIComponent(inputValue) +
-            "&community=all" +
+            "&community=" +
+            selectedCommunity +
             "&source=visualizeConnections";
 
         if (ownSubmissionToggle)
@@ -229,6 +235,7 @@ function searchBarHeader(props) {
                         size='small'
                         name="community"
                         defaultValue={"all"}
+                        onChange={captureCommunityChange}
                         MenuProps={{
                             PaperProps: {
                                 style: {

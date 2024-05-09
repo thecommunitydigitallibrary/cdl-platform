@@ -83,8 +83,8 @@ export default function SubmissionForm(props) {
     const [connection, setConnection] = useState("")
 
     const [currentQuery, setCurrentQuery] = useState("")
-
-    const [isAnonymous, setAnonymous] = useState(props?.username == undefined)
+    
+    const [isAnonymous, setAnonymous] = useState(false)
 
     const [replySubHasUnsavedChanges, setReplySubHasUnsavedChanges] = useState(false);
 

@@ -33,6 +33,32 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        May 9th, 2024
+      </h2>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Sort results by popularity, relevance, and recency</li>
+        </ul>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Community name on visualization is properly pulled instead of "All"</li>
+            <li className="list-item">Extension default behavior and source now saved on tab changes</li>
+            <li className="list-item">Search summarization not persisted across searches</li>
+        </ul>
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Submission default is now non-anonymous</li>
+        </ul>
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         May 1st, 2024
       </h2>
 
@@ -43,6 +69,7 @@ export default function ReleaseLog() {
             <li className="list-item">Homepage recommended public communities</li>
             <li className="list-item">Number of followers and joined members for communities</li>
             <li className="list-item">Summarize search results</li>
+            <li className="list-item">Public community submissions can be viewed without an account</li>
         </ul>
 
       <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
