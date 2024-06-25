@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "./header";
 import Footer from "./footer";
-import SideNav from "./sidenav";
 import useQuickAccessStore from "../store/quickAccessStore";
 import { Divider, Paper } from "@mui/material";
 import jsCookie from "js-cookie";
@@ -62,7 +61,7 @@ export default function Layout({ children }) {
             <div className="max-h-[900px] min-h-[600px] items-stretch" style={{ marginTop: '70px', display: 'flex' }}>
 
                 {/* <div className="flex flex-col min-h-[590px] " style={{ marginTop: '70px', display: 'flex' }}> */}
-                {
+                { /*
                     !isLoggedOut &&
                     <div
                         // style={{ overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'gray white' }} 
@@ -71,6 +70,7 @@ export default function Layout({ children }) {
                             <SideNav />
                         </div>
                     </div>
+                  */
                 }
                 <Divider orientation="vertical" flexItem style={{ color: 'grey' }} />
 

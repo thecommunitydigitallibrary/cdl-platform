@@ -382,8 +382,8 @@ function Notes({ data }) {
               display_url={d.display_url}
               submission_id={d.submission_id}
               result_hash={d.result_hash}
-              highlighted_text={d.highlighted_text}
-              explanation={d.explanation}
+              description={d.description}
+              title={d.title}
               communities_part_of={d.communities_part_of}
               auth_token={jsCookie.get("token")}
               show_relevant={true}

@@ -33,6 +33,28 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        June 25th, 2024
+      </h2>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Features
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Questions added to submission visualization</li>
+            <li className="list-item">Web results and submission results in extension</li>
+        </ul>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Simplified extension UI</li>
+            <li className="list-item">Removal of various features not central to platform</li>
+            <li className="list-item">Refactoring of backend API</li>
+        </ul>
+
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         May 9th, 2024
       </h2>
 

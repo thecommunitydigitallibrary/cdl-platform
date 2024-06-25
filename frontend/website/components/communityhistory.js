@@ -7,10 +7,8 @@ import useCommunitiesStore from "../store/communitiesStore";
 import useUserDataStore from "../store/userData";
 import useQuickAccessStore from "../store/quickAccessStore";
 
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const getCommunityHistoryEndpoint = "communityHistory";
-const joinCommunityEndpoint = "joinCommunity";
-const getCommunitiesEndpoint = "getCommunities";
+import { BASE_URL_CLIENT, COMMUNITIES_ENDPOINT, JOIN_COMMUNITY_ENDPOINT } from "../static/constants"
+
 
 function CommunityHistoryEntry(props) {
   const [open, setOpen] = useState(false);
@@ -46,7 +44,7 @@ function CommunityHistoryEntry(props) {
   };
 
   const updateDropDownSearch = async () => {
-    let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
+    let resp = await fetch(BASE_URL_CLIENT + COMMUNITIES_ENDPOINT, {
       method: "GET",
       headers: new Headers({
         Authorization: jsCookie.get("token"),
@@ -62,7 +60,7 @@ function CommunityHistoryEntry(props) {
   }
 
   const joinCommunity = async (event) => {
-    var URL = baseURL_client + joinCommunityEndpoint;
+    var URL = BASE_URL_CLIENT + JOIN_COMMUNITY_ENDPOINT;
     const res = await fetch(URL, {
       method: "POST",
       body: JSON.stringify({

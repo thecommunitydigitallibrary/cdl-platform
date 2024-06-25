@@ -6,7 +6,7 @@ import jsCookie from "js-cookie";
 import Head from "next/head";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import { Box, Button } from "@mui/material";
+import { Box } from "@mui/material";
 
 import CommunityHistory from "../../components/communityhistory";
 import CommunitiesDeck from "../../components/communitiesdeck";
@@ -19,13 +19,11 @@ import TabUnstyled, { tabUnstyledClasses } from "@mui/base/TabUnstyled";
 import useUserDataStore from "../../store/userData";
 import useQuickAccessStore from "../../store/quickAccessStore";
 
-const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const getCommunitiesEndpoint = "getCommunities";
-const getCommunityHistoryEndpoint = "communityHistory";
-const joinCommunityEndpoint = "joinCommunity";
 
-let gap = "25px";
+import { BASE_URL_SERVER, COMMUNITIES_ENDPOINT, COMMUNITY_HISTORY_ENDPOINT } from "../../static/constants";
+
+
+
 const blue = {
     50: "#F0F7FF",
     100: "#C2E0FF",
@@ -214,14 +212,14 @@ export async function getServerSideProps(context) {
             },
         };
     } else {
-        var communityURL = baseURL_server + getCommunitiesEndpoint;
+        var communityURL = BASE_URL_SERVER + COMMUNITIES_ENDPOINT;
         const fetchCommunities = await fetch(communityURL, {
             headers: new Headers({
                 Authorization: context.req.cookies.token,
             }),
         });
 
-        var historyURL = baseURL_server + getCommunityHistoryEndpoint;
+        var historyURL = BASE_URL_SERVER + COMMUNITY_HISTORY_ENDPOINT;
         const fetchHistory = await fetch(historyURL, {
             method: "GET",
             headers: new Headers({

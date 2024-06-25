@@ -10,11 +10,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { Snackbar, Alert } from "@mui/material";
 import { Paper, IconButton } from "@mui/material";
 import { AddCircle, East, Add, ControlPoint } from "@mui/icons-material";
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const createCommunityEndpoint = "createCommunity";
 
-const baseURL_server = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const getCommunitiesEndpoint = "getCommunities";
+import { BASE_URL_CLIENT, COMMUNITIES_ENDPOINT } from "../../static/constants";
 
 export default function CreateCommunityForm(props) {
   // States for Login/Create Account Alerts
@@ -42,7 +39,7 @@ export default function CreateCommunityForm(props) {
   };
 
   const updateDropDownSearch = async () => {
-    let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
+    let resp = await fetch(BASE_URL_CLIENT + COMMUNITIES_ENDPOINT, {
       method: "GET",
       headers: new Headers({
         Authorization: props.auth_token,
@@ -63,7 +60,7 @@ export default function CreateCommunityForm(props) {
       return;
     }
     event.preventDefault();
-    var URL = baseURL_client + createCommunityEndpoint;
+    var URL = BASE_URL_CLIENT + COMMUNITIES_ENDPOINT;
     const res = await fetch(URL, {
       method: "POST",
       body: JSON.stringify({

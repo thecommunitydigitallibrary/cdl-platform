@@ -1,12 +1,10 @@
 # TextData
-TextData is a social platform for collaboratively creating, sharing, and learning from wiki-style communities. We offer a stand-alone website and a Chrome extension, all for free.
+TextData is an online platform for communities of users to discover the right information at the right place.
 
-
-To use TextData, you have three options:
+To use TextData, you have two options:
 
 1. Full online version: Visit [textdata.org](https://textdata.org/), install the [Chrome extension](https://chrome.google.com/webstore/detail/the-community-digital-lib/didjjbenidcdopncjajdoeniaplicdee?hl=en&authuser=0), create an account, and begin using TextData.
 2. Full offline version: Clone this repository, set up Docker, and run the services locally. This is described in the section below titled "Setting Up the Local Version".
-3. Hosted backend, local frontend: You can leverage the APIs for the backend, and create or extend your own frontend (website or browser extension). The API documentation is [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend).
 
 <details>
 <summary>Setting Up the Offline Version</summary>
@@ -27,8 +25,7 @@ open powershell
 wsl -d docker-desktop
 sysctl -w vm.max_map_count=262144
 ```
-- With all of the Docker containers, packages, and models, the total size is ~10GB. Without Neural, it is ~3GB.
-
+- With all of the Docker containers, packages, and models, the total size is ~2GB.
 ### Configuring the env files
 Copy the following to ``backend\env_local.ini``:
 
@@ -48,7 +45,6 @@ elastic_password=admin
 elastic_index_name=submissions
 elastic_webpages_index_name=webpages
 elastic_domain=http://host.docker.internal:9200/
-elastic_domain_backfill=http://localhost:9200/
 ```
 
 Copy the following to ``frontend\website\.env.local``":
@@ -150,13 +146,7 @@ neural_api=http://host.docker.internal:9300/
 
 Note that the slashes need to be reversed if running on Mac/Linux (above is written for windows).
 
-Then, navigate to the neural folder, add the following to ``env_neural_prod.ini``
-
-```
-hf_token=<your huggingface token>
-```
-
-Finally, to start the neural docker container (requires GPU), run the following from the ``neural`` folder: 
+To start the neural docker container (requires GPU), run the following from the ``neural`` folder: 
 
 ```
 docker build -t .
@@ -166,31 +156,6 @@ docker run --gpus --env-file env_neural_prod.ini -p 9300:80 hash_of_above_image
 #### Extension:
 Navigate to ``frontend\extension`` and run ``npm ci`` and then run ``npm run build``. Then upload the ``build`` file to Chrome while using Development Mode. Once uploaded, open the extention, go to the setting section and chnage the backend source from textdata.org to other and click on Save. 
 
-
-### Running Test cases
-Note: Local Docker containers must be up and running before you run below commands
-```
-cd <project-directory>\backend
-pytest .\tests\test_server.py
-```
-
-### Running the Back-Fill script
-Note: Local Docker containers must be up and running before you run below commands
-```
-cd <project-directory>\backend
-python .\app\helpers\backfill.py [--env_path] [--type=<"submissions" or "webpages">]
-```
-Here, `--env_path` is an optional argument that takes the path to the environment file, and the default file considered is `backend\env_local.ini`.
-
-The `--type` is another optional argument that takes two values: `submissions` or `webpages`, and the default value is `submissions`.
-</details>
-
-<details>
-<summary>Building on Top of the Hosted Backend</summary>
-<br>
-
-## Building on Top of the Hosted Backend
-See the API documentation [here](https://github.com/thecommunitydigitallibrary/cdl-platform/tree/dev/backend). Please be courteous regarding the amount of API calls so that the backend servers do not get overwhelmed.
 
 </details>
 

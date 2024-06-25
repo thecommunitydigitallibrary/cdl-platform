@@ -8,14 +8,14 @@ import traceback
 from app.db import *
 from app.helpers.status import Status
 from app.helpers import response
-from app.helpers.helpers import token_required, token_required_public, format_time_for_display, format_url
+from app.helpers.helpers import token_required, token_required_public, format_time_for_display, format_url, get_communities_helper
 from app.models.communities import Communities, Community
 from app.models.community_logs import CommunityLogs
 from app.models.users import Users
 from app.models.judgment import *
 from app.models.relevance_judgements import *
 from app.models.submission_stats import *
-from app.views.logs import log_community_action
+from app.views.submissions import log_community_action
 from app.models.logs import Logs
 
 
@@ -23,7 +23,7 @@ communities = Blueprint('communities', __name__)
 CORS(communities)
 
 
-@communities.route("/api/communityRecommend", methods=["GET"])
+@communities.route("/api/communities/recommend", methods=["GET"])
 @token_required
 def get_recommended_communities(current_user):
 	"""
@@ -47,7 +47,7 @@ def get_recommended_communities(current_user):
 
 
 
-@communities.route("/api/communityHistory", methods=["GET"])
+@communities.route("/api/communities/history", methods=["GET"])
 @token_required
 def get_community_history(current_user):
 	"""
@@ -97,7 +97,7 @@ def get_community_history(current_user):
 		return response.error("Failed to get community history, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-@communities.route("/api/getCommunities", methods=["GET"])
+@communities.route("/api/communities", methods=["GET"])
 @token_required
 def get_communities(current_user):
 	"""
@@ -116,112 +116,8 @@ def get_communities(current_user):
 		return response.error("Failed to get communities, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-def get_communities_helper(current_user, return_dict=False):
-	"""
-	The helper function for getting a user's communities.
-	Arguments:
-		current_user : dictionary : the user recovered from the JWT token.
-		return_dict : boolean : to return as a dictionary.
-	Returns:
-		A dictionary with
-			community_info: for joined communities, a list of dicts, each containing 
-				community_id
-				name
-				description
-				pinned
-				is_public
-				join_key (if admin)
-				is_admin. 
 
-				If return_dict is true, then this is a dictionary mapped with the community_id.
-
-			followed_community_info: for followed communities, a list of dicts, each containing
-				community_id
-				name
-				description
-			username: the username of the user.
-	"""
-
-	user_communities = current_user.communities
-	user_followed_communities = current_user.followed_communities
-	user_id = current_user.id
-
-	cdl_communities = Communities()
-
-	user_followed_communities_struct = []
-	for community_id in user_followed_communities:
-		community = cdl_communities.find_one({"_id": community_id})
-		## TODO probably need to handle here the case where a public community becomes private
-		## what to do with the followers?
-		if not community:
-			print(f"Could not find community for community id: {community_id} and user id: {user_id}")
-			continue
-		comm_item = {
-			"community_id": str(community.id),
-			"name": community.name,
-			"description": community.description
-		}
-		user_followed_communities_struct.append(comm_item)
-		
-
-	community_struct = []
-	for community_id in user_communities:
-		if user_id == community_id:
-			continue
-		community = cdl_communities.find_one({"_id": community_id})
-		if not community:
-			print(f"Could not find community for community id: {community_id} and user id: {user_id}")
-			continue
-		else:
-			is_admin = False
-
-			# some communities do not have admin property?
-			try:
-				if user_id in community.admins:
-					is_admin = True
-			except:
-				pass
-
-		comm_item = {
-			"community_id": str(community.id),
-			"name": community.name,
-			"description": community.description,
-			"is_admin": is_admin
-		}
-
-		if is_admin:
-			comm_item["join_key"] = community.join_key
-
-		comm_item["is_public"] = community.public
-		comm_item["pinned"] = community.pinned
-
-		community_struct.append(comm_item)
-
-	if return_dict:
-		new_community_struct = {}
-		for community in community_struct:
-			new_community_struct[community["community_id"]] = community
-		community_struct = new_community_struct
-
-		new_followed_community_struct = {}
-		for community in user_followed_communities_struct:
-			new_followed_community_struct[community["community_id"]] = community
-		user_followed_communities_struct = new_followed_community_struct
-
-
-	return_obj = {
-		"community_info": community_struct,
-		"followed_community_info": user_followed_communities_struct
-	}
-	try:
-		username = current_user.username
-		return_obj["username"] = username
-	except Exception as e:
-		print("Accessed as public, no username found.")
-
-	return return_obj
-
-@communities.route("/api/createCommunity", methods=["POST", "PATCH"])
+@communities.route("/api/communities", methods=["POST", "PATCH"])
 @token_required
 def create_community(current_user):
 	"""
@@ -315,7 +211,7 @@ def create_community(current_user):
 		return response.error("Failed to create community, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-@communities.route("/api/community/<id>", methods=["GET"])
+@communities.route("/api/communities/<id>", methods=["GET"])
 #@token_required
 @token_required_public
 def community(current_user, id):
@@ -389,7 +285,7 @@ def community(current_user, id):
 
 
 
-@communities.route("/api/followCommunity", methods=["POST"])
+@communities.route("/api/communities/follow", methods=["POST"])
 @token_required
 def follow_community(current_user):
 	"""
@@ -463,7 +359,7 @@ def follow_community(current_user):
 
 
 
-@communities.route("/api/joinCommunity", methods=["POST"])
+@communities.route("/api/communities/join", methods=["POST"])
 @token_required
 def join_community(current_user):
 	"""
@@ -502,7 +398,7 @@ def join_community(current_user):
 		return response.error("Failed to join community, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-@communities.route("/api/leaveCommunity", methods=["POST"])
+@communities.route("/api/communities/leave", methods=["POST"])
 @token_required
 def leave_community(current_user):
 	"""
@@ -545,206 +441,3 @@ def leave_community(current_user):
 	except Exception as e:
 		print(e)
 		return response.error("Failed to leave community, please try again later.", Status.INTERNAL_SERVER_ERROR)
-
-def update_relevance_stats(stats, submission_id, relevance):
-	'''
-	Updates the judgement of the user for the submission if it exists else creates a new record
-	Args:
-		- stats: submission_stats db instance
-		- submission_id: submission_id of the submission for which the user submits the judgement
-		- relevance: like or dislike (1/0)
-		- judgement_exists: indicates if it's the user's first judgement for the submission or not
-	
-	Return:
-		Boolean value indicating if the update was successful
-
-	'''
-	if relevance == 1:
-		likes_result = stats.update_stats(submission_id, "likes", 1)
-		if likes_result['nModified'] == 1:
-			dislikes_result = stats.update_stats(submission_id, "dislikes", -1)
-			return dislikes_result['nModified'] == 1
-		
-	elif relevance == 0:
-		dislikes_result = stats.update_stats(submission_id, "dislikes", 1)
-		if dislikes_result['nModified'] == 1:
-			likes_result = stats.update_stats(submission_id, "likes", -1)
-			return likes_result['nModified'] == 1
-		
-	return False
-
-
-def update_stats_for_new_relevance(stats,submission_id, relevance):
-	'''
-	Creates a new document in the submission_stats db to record the user's judgement for the submission
-	Args:
-		- stats: submission_stats db instance
-		- submission_id: submission_id of the submission for which the user submits the judgement
-		- relevance: like or dislike (1/0)	
-	Return:
-		Boolean value indicating if the insertion was successful
-
-	'''
-	result = {}
-	if relevance == 1:
-		result = stats.update_stats(submission_id, "likes", 1)
-	elif relevance == 0:
-		result= stats.update_stats(submission_id, "dislikes", 1)
-	
-	return result['nModified'] == 1
-	
-# Judgments
-def log_rel_judgment(ip, user_id, judgments):
-	"""
-	Logs the relevance judgment submitted by the user.
-	Arguments:
-		ip : (string) : the IP address of the request sent by the user.
-		user_id : (ObjectID) : the ID of the user making the judgment.
-		judgments: (dictionary) : keys are result hashes (as described in log_click), values are either 0 or 1.
-	Returns:
-		insert : Pymongo object with property .acknowledged (should be true on success).
-	TODO: change return value to .acknowledged
-	"""
-	try:
-		submission_id, relevance = None, None
-		for k,v in judgments.items():
-			submission_id = ObjectId(k)
-			relevance = v 
-		relevance_judgement = Relevance(user_id,submission_id,relevance)
-		submission_judgements = Relevance_Judgements()
-		judgement_exists = submission_judgements.find_one({"submission_id":submission_id,"user_id":user_id})
-		submission_judgements.update_relevance(relevance_judgement)
-
-		stats = SubmissionStats()
-		stats_result = None
-		if not judgement_exists: 
-			stats_result = update_stats_for_new_relevance(stats, submission_id, relevance)
-		else:
-			if judgement_exists.relevance != relevance:
-				stats_result = update_relevance_stats(stats,submission_id,relevance)
-
-		judgment = Judgment(ip, user_id, judgments)
-		cdl_judgments = Judgments()
-		return cdl_judgments.insert(judgment)
-	except Exception as e:
-		print(e)
-		return response.error("Failed to log relevant judgement, please try again later.", Status.INTERNAL_SERVER_ERROR)
-
-
-def get_rel_judgment_count(user_id):
-	"""
-	Helper function for counting the number of relevance judgments. For MP2.2.
-	Arguments:
-		user_id : (string) : the ID of the user.
-
-	Returns:
-		valid_count : (integer) : the number of judged queries.
-	"""
-	try:
-		cdl_judgments = Judgments()
-		all_judgments = [x for x in cdl_judgments.find({"user_id": ObjectId(user_id)})]
-		return len(all_judgments)
-	except Exception as e:
-		print(e)
-		return response.error("Failed to get relevant judgements count, please try again later.",
-		                      Status.INTERNAL_SERVER_ERROR)
-
-@communities.route("/api/submitRelJudgments", methods=["POST"])
-@token_required
-def submit_rel_judgments(current_user):
-	"""
-	Endpoint for submitting a relevance judgment
-	Arguments:
-		current_user : (dictionary): the user recovered from the JWT token.
-		request data (website) with a mapping between result IDs and 1/0 labels.
-			Example:
-				{"63094100d999b482814f371c: "1"}
-				where
-				63094100d999b482814f371c is the submission id
-
-				This result ID should be included in the search result items.
-	Returns:
-		200 : JSON with "status" as "ok" and a success "message".
-	"""
-	try:
-		user_id = current_user.id
-		ip = request.remote_addr
-		submitted_judgments = request.data
-		if submitted_judgments:
-			submitted_judgments = json.loads(submitted_judgments.decode("utf-8"))
-			if submitted_judgments == {}:
-				return response.error("Error: Missing judgment in request.", Status.BAD_REQUEST)
-			update = log_rel_judgment(ip, user_id, submitted_judgments)
-			if update.acknowledged:
-				return response.success({"message": "Relevance judgment successfully saved!"}, Status.OK)
-		return response.error("Something went wrong. Please try again later", Status.INTERNAL_SERVER_ERROR)
-	except Exception as e:
-		print(e)
-		traceback.print_exc()
-		return response.error("Failed to submit relevant judgement, please try again later.",
-		                      Status.INTERNAL_SERVER_ERROR)
-
-
-@communities.route("/api/fetchSubmissionStats", methods=["GET"])
-#@token_required
-@token_required_public
-def fetch_submission_stats(current_user):
-	"""
-	Endpoint for submitting a relevance judgment
-	Arguments:
-		current_user : (dictionary): the user recovered from the JWT token.
-	Returns
-		200 : JSON with "status" as "ok" and a success "data" that has like and dislike counts for a particular submission.
-	"""
-	try:
-		submission_id = request.args.get("submissionId")
-		if not submission_id:
-			return response.error("Submission ID is missing", Status.BAD_REQUEST)
-		stats = SubmissionStats()
-		submission_stats = stats.find_one({"submission_id":ObjectId(submission_id)})
-		if submission_stats:
-			submission_stats_dict = {
-				"likes": submission_stats.likes,
-				"dislikes": submission_stats.dislikes 
-			}	
-			return response.success({"data": submission_stats_dict}, Status.OK)
-	
-		return response.error("Something went wrong. Please try again later", Status.INTERNAL_SERVER_ERROR)
-	except Exception as e:
-		print(e)
-		traceback.print_exc()
-		return response.error("Failed to retrieve submission stats, please try again later.",
-		                      Status.INTERNAL_SERVER_ERROR)
-
-
-@communities.route("/api/fetchSubmissionJudgement", methods=["GET"])
-#@token_required
-@token_required_public
-def fetch_submission_judgement(current_user):
-	"""
-	Endpoint for submitting a relevance judgment
-	Arguments:
-		current_user : (dictionary): the user recovered from the JWT token.
-	Returns
-		200 : JSON with "status" as "ok" and a success "data" with user's choice for a particular submission.
-	"""
-	try:
-		user_id = ObjectId(current_user.id)
-		submission_id = request.args.get("submissionId")
-		if not submission_id:
-			return response.error("Submission ID is missing", Status.BAD_REQUEST)
-		
-		judgements = Relevance_Judgements()
-		user_judgement = judgements.find_one({"submission_id":ObjectId(submission_id),"user_id":user_id})
-		
-		if user_judgement:
-			return response.success({"data": str(user_judgement.relevance)}, Status.OK)
-		else:
-			return response.success({"data": str(-1)}, Status.OK)
-	
-	except Exception as e:
-		print(e)
-		traceback.print_exc()
-		return response.error("Failed to retrieve user-submission judgement, please try again later.",
-		                      Status.INTERNAL_SERVER_ERROR)
-

@@ -1,47 +1,38 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import jsCookie from "js-cookie";
-import Router, { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import SearchResult from "../components/searchresult";
-import Header from "../components/header";
 import Head from "next/head";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useState } from "react";
-import Grid from "@mui/material/Grid";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
-import Divider from "@mui/material/Divider";
-import Footer from "../components/footer";
 import CommunityDisplay from "../components/communityDisplay";
-import Paper from '@mui/material/Paper';
 import CircularProgress from "@mui/material/CircularProgress";
 import { Snackbar, Alert, Accordion, AccordionSummary, AccordionDetails, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { maxWidth, width } from "@mui/system";
 
-
-
-const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const websiteURL = process.env.NEXT_PUBLIC_FROM_CLIENT;
-const searchEndpoint = "search?";
-var searchURL = baseURL_client + searchEndpoint;
-
+import { BASE_URL_CLIENT, BASE_URL_SERVER, WEBSITE_SEARCH_ENDPOINT, SUMMARIZE_ENDPOINT} from "../static/constants";
 
 // Relevant Flag here for now
 //let show_relevant = true;
 
 function SearchResults({ data, show_relevance_judgment, own_submissions, community }) {
+  console.log(data)
+  console.log(show_relevance_judgment)
+  console.log(own_submissions)
+  console.log(community)
+
 
   const [items, setItems] = useState(data.search_results_page);
   const [page, setPage] = useState(parseInt(data.current_page) + 1);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(Math.ceil(data.total_num_results / 10));
   const [searchedCommunity, setSearchedCommunity] = useState("all")
-  const [selectedSortByOption,setSelectedSortByOption] = useState("relevance")
+  const [selectedSortByOption, setSelectedSortByOption] = useState("relevance")
 
 
   const [searchSummary, setSearchSummary] = useState();
@@ -70,18 +61,14 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
 
   const handleSearchSummary = async () => {
     setGenerationSpinner(true)
-    const generateURL = baseURL_server + "generate"
+    const summarizeURL = BASE_URL_CLIENT + SUMMARIZE_ENDPOINT + "?search_id=" + data.search_id
     try {
-      const searchSummaryApi = await fetch(generateURL, {
-        method: "POST",
+      const searchSummaryApi = await fetch(summarizeURL, {
+        method: "GET",
         headers: {
           Authorization: jsCookie.get("token"),
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          "mode": "summary_rag",
-          "search_id": data.search_id,
-        }),
+        }
       })
       const search_summary = await searchSummaryApi.json()
       if (searchSummaryApi.ok) {
@@ -101,9 +88,8 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
 
   const loadMoreResults = async () => {
 
-    console.log('loading more rez')
     try {
-      const response = await fetch(searchURL + 'search_id=' + data.search_id + '&page=' + page, {
+      const response = await fetch(BASE_URL_CLIENT + WEBSITE_SEARCH_ENDPOINT + '?search_id=' + data.search_id + '&page=' + page, {
         headers: new Headers({
           Authorization: jsCookie.get("token"),
         }),
@@ -125,11 +111,11 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
       console.log(error);
     }
   };
-  const handleSortByOption = async(event)=>{
+  const handleSortByOption = async (event) => {
     setSelectedSortByOption(event.target.value);
     //setItems([]);
     setLoading(true);
-    const response = await fetch(searchURL + 'search_id=' + data.search_id + '&page=0'+'&sort_by='+event.target.value , {
+    const response = await fetch(BASE_URL_CLIENT + WEBSITE_SEARCH_ENDPOINT + '?search_id=' + data.search_id + '&page=0' + '&sort_by=' + event.target.value, {
       headers: new Headers({
         Authorization: jsCookie.get("token"),
       }),
@@ -209,31 +195,36 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
       </Head>
 
       <div id="searchResultsBlock" className="px-4 justify-center">
-        <h4 className="text-center">Search Results ({data.total_num_results}) <span><a
-          href={"/export?search_id=" + data.search_id}
-          className="inline-block py-1 px-3 text-sm border border-blue-500 rounded hover:bg-blue-200 hover:text-black"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Export
-        </a></span></h4>
+        <h4 className="text-center">Search Results ({data.total_num_results}) 
+          <span>
+            <a
+              href={"/export?search_id=" + data.search_id}
+              className="inline-block py-1 px-3 text-sm border border-blue-500 rounded hover:bg-blue-200 hover:text-black"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Export
+            </a>
+
+          </span>
+        </h4>
         <div  style={{display: 'flex', justifyContent: 'center'}}>
-          <FormControl className="w-24 h-18" size="small">
-              <Select
-                labelId="select-sortBy-type"
-                id="select-sortBy-type"
-                name="method"selectedSortByOption
-                value={selectedSortByOption}
-                onChange={handleSortByOption}
-               className="text-xs"  
-              >
-                <MenuItem value="popularity">Popularity</MenuItem>
-                <MenuItem value="date">Most Recent</MenuItem>
-                <MenuItem value="relevance">Relevant</MenuItem>
-              </Select>
-            </FormControl>
-        </div>
-          
+              <FormControl className="w-24 h-18" size="small">
+                  <Select
+                    labelId="select-sortBy-type"
+                    id="select-sortBy-type"
+                    name="method"selectedSortByOption
+                    value={selectedSortByOption}
+                    onChange={handleSortByOption}
+                  className="text-xs"  
+                  >
+                    <MenuItem value="popularity">Popularity</MenuItem>
+                    <MenuItem value="date">Most Recent</MenuItem>
+                    <MenuItem value="relevance">Relevant</MenuItem>
+                  </Select>
+                </FormControl>
+            </div>
+      
           
           
           <div className="text-center py-1">
@@ -304,14 +295,12 @@ function SearchResults({ data, show_relevance_judgment, own_submissions, communi
                   redirect_url={d.redirect_url}
                   display_url={d.display_url}
                   submission_id={d.submission_id}
-                  result_hash={d.result_hash}
                   hashtags={d.hashtags}
-                  highlighted_text={d.highlighted_text}
-                  explanation={d.explanation}
+                  description={d.description}
+                  title={d.title}
                   time={d.time}
                   communities_part_of={d.communities_part_of}
                   auth_token={jsCookie.get("token")}
-                  show_relevant={show_relevance_judgment}
                   username={d.username}
                 />
               </div>
@@ -380,17 +369,19 @@ export async function getServerSideProps(context) {
       },
     };
   } else {
-    var searchURL = baseURL_server + searchEndpoint;
+    var searchURL = BASE_URL_SERVER + WEBSITE_SEARCH_ENDPOINT + "?";
     if (context.query.search_id != undefined) {
       searchURL += "search_id=" + context.query.search_id;
     } else {
+      searchURL += "community=" + context.query.community;
+      searchURL += "&source=website_searchbar"
+
       if (context.query.query != undefined) {
-        searchURL += "query=" + encodeURIComponent(context.query.query);
+        searchURL += "&query=" + encodeURIComponent(context.query.query);
       } else {
         context.query.query = "";
         show_relevance_judgment = false
       }
-      searchURL += "&community=" + context.query.community;
 
       if (context.query.own_submissions != undefined) {
         searchURL += "&own_submissions=True"

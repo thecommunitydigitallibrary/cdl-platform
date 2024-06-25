@@ -37,7 +37,11 @@ export default function ImgMediaCard({ setUrlState }) {
   const [open, setOpen] = React.useState(false);
   const [sever, setSever] = React.useState("");
   const [message, setMessage] = React.useState("");
+  
   const baseURL = localStorage.getItem('backendSource') + "api/";
+  const getCommunitiesEndpoint = baseURL + "communities"
+  const submitEndpoint = baseURL + "submission"
+
 
   const handleClick = () => {
     setOpen(true);
@@ -142,7 +146,7 @@ export default function ImgMediaCard({ setUrlState }) {
 
   let getCommunities = async () => {
     try {
-      var config = await fetch(baseURL + "getCommunities", {
+      var config = await fetch(getCommunitiesEndpoint, {
         method: "get",
         headers: {
           Authorization: localStorage.getItem("authToken"),
@@ -304,7 +308,7 @@ export default function ImgMediaCard({ setUrlState }) {
       data.append("community", community);
       data.append("anonymous", isAnonymous);
 
-      let res = await fetch(baseURL + "submission/", {
+      let res = await fetch(submitEndpoint, {
         method: "post",
         headers: {
           Authorization: localStorage.getItem("authToken"),

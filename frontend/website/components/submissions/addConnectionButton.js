@@ -6,7 +6,7 @@ import { Typography } from '@mui/material';
 import SubmissionForm from '../forms/submissionForm';
 import useSubmissionStore from '../../store/submissionStore';
 import { ReplyAllOutlined } from '@mui/icons-material';
-import { GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from '../../static/constants';
+import { WEBSITE_URL } from '../../static/constants';
 
 const AddConnectionsButton = ({ setSelectedOption }) => {
     const [isTextBoxVisible, setTextBoxVisible] = useState(false);

@@ -5,21 +5,20 @@ import {
     forceCollide as d3ForceCollide
 } from "d3-force";
 import ForceGraph2D from "react-force-graph-2d";
-import Header from "./header";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Tooltip from '@mui/material/Tooltip';
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import SearchResult from "./searchresult";
 import Head from "next/head";
-import Footer from "./footer";
 import { Alert, Box, Button, FormControlLabel, FormGroup, FormHelperText, FormLabel, Snackbar } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
+
+import { BASE_URL_CLIENT, WEBSITE_SEARCH_ENDPOINT } from "../static/constants";
+
 const graphRoot2 = "Loading...";
 const graphData2 = {
     "nodes": [
@@ -125,9 +124,9 @@ const VisualizeMap = () => {
     const getCommunityDocuments = async () => {
         let url;
         if (communityId == "all")
-            url = baseURL_client + "search?query=" + encodeURIComponent(query) + "&community=all&source=visualize&levelfilter=" + filterOrder.join(";");
+            url = BASE_URL_CLIENT + WEBSITE_SEARCH_ENDPOINT + "?query=" + encodeURIComponent(query) + "&community=all&source=website_visualize&levelfilter=" + filterOrder.join(";");
         else
-            url = baseURL_client + "search?community=" + communityId + "&source=visualize&levelfilter=" + filterOrder.join(";");
+            url = BASE_URL_CLIENT + WEBSITE_SEARCH_ENDPOINT + "?community=" + communityId + "&source=website_visualize&levelfilter=" + filterOrder.join(";");
         const res = await fetch(url, {
             method: "GET",
             headers: new Headers({
@@ -555,8 +554,8 @@ const VisualizeMap = () => {
                                                                 submission_id={d.submission_id}
                                                                 result_hash={d.result_hash}
                                                                 hashtags={d.hashtags}
-                                                                highlighted_text={d.highlighted_text}
-                                                                explanation={d.explanation}
+                                                                description={d.description}
+                                                                title={d.title}
                                                                 time={d.time}
                                                                 communities_part_of={d.communities_part_of}
                                                                 auth_token={jsCookie.get("token")}

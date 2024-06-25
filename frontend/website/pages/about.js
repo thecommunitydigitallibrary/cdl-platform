@@ -29,9 +29,9 @@ export default function About({ loggedOut }) {
         <Hero />
         <SectionTitle
           pretitle="Why TextData?"
-          title=" What does TextData Provide?">
-          Below, we describe how TextData helps you create, save, and find online information.
-        </SectionTitle>
+          title="Our Mission">
+          To remove the knowledge barriers of online information discovery by leveraging the collaboration of communities.
+          </SectionTitle>
 
         <Benefits data={benefitOne} />
         <Benefits data={benefitTwo} imgPos="right" />
@@ -58,19 +58,3 @@ export default function About({ loggedOut }) {
       </div>
     </>);
 }
-
-// export async function getServerSideProps(context) {
-//   // Fetch data from external API
-//   if (
-//     context.req.cookies.token === "" ||
-//     context.req.cookies.token === undefined
-//   ) {
-//     return {
-//       redirect: {
-//         destination: "/about",
-//         permanent: false,
-//       },
-//     };
-//   }
-//   else return { props: { loggedOut: false } };
-// }

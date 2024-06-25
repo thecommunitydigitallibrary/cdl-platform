@@ -22,6 +22,7 @@ export default function SignIn({setUrlState}) {
   const [message, setMessage] = React.useState("");
   const [sever, setSever] = React.useState("");
   const baseURL = localStorage.getItem('backendSource') + "api/";
+  const loginEndpoint = baseURL + "users/login"
   const handleClick = () => {
     setOpen(true);
   };
@@ -53,7 +54,7 @@ export default function SignIn({setUrlState}) {
     }
 
     try {
-      let res = await fetch(baseURL + "login", {
+      let res = await fetch(loginEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

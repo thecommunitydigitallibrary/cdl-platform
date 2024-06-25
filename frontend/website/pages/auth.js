@@ -10,18 +10,11 @@ import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Head from "next/head";
-import { CircularProgress, LinearProgress } from "@mui/material";
-import useCommunitiesStore from "../store/communitiesStore";
+import { LinearProgress } from "@mui/material";
 import useUserDataStore from "../store/userData";
 import useQuickAccessStore from "../store/quickAccessStore";
 
-const baseURL_server = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const getCommunitiesEndpoint = "getCommunities";
-
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const loginEndpoint = "login";
-const createAccountEndpoint = "createAccount";
-const requestPwdResetEndPoint = "passwordReset";
+import { BASE_URL_CLIENT, COMMUNITIES_ENDPOINT, LOGIN_ENDPOINT, CREATE_ACCOUNT_ENDPOINT, RESET_PW_REQUEST_ENDPOINT } from "../static/constants";
 
 const minUsernameLength = "2";
 const minPasswordLength = "6";
@@ -31,9 +24,7 @@ export default function ({ data }) {
 
   const router = useRouter();
   let { queryParam } = router.query;
-  const [tempEmail, setTempEmail] = useState(
-    "mailto:kjros2@illinois.edu??subject=Subject&body=Requesting password reset link for: "
-  );
+
   const [resetParam, setResetParam] = useState(
     queryParam ? queryParam.reset : false
   );
@@ -77,7 +68,7 @@ export default function ({ data }) {
   };
 
   const updateDropDownSearch = async () => {
-    let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
+    let resp = await fetch(BASE_URL_CLIENT + COMMUNITIES_ENDPOINT, {
       method: "GET",
       headers: new Headers({
         Authorization: jsCookie.get("token"),
@@ -97,7 +88,7 @@ export default function ({ data }) {
     e.preventDefault();
     setShowProgress(true)
     try {
-      let res = await fetch(baseURL_client + loginEndpoint, {
+      let res = await fetch(BASE_URL_CLIENT + LOGIN_ENDPOINT, {
         method: "POST",
         body: JSON.stringify({
           username: username,
@@ -139,7 +130,7 @@ export default function ({ data }) {
         handleClick();
         return;
       }
-      let res = await fetch(baseURL_client + createAccountEndpoint, {
+      let res = await fetch(BASE_URL_CLIENT + CREATE_ACCOUNT_ENDPOINT, {
         method: "POST",
         body: JSON.stringify({
           username: create_username,
@@ -181,7 +172,7 @@ export default function ({ data }) {
         return alert("Please enter a valid email inside the text box.");
       } else {
         let res = await fetch(
-          baseURL_client + "account/" + requestPwdResetEndPoint,
+          BASE_URL_CLIENT + RESET_PW_REQUEST_ENDPOINT,
           {
             method: "POST",
             body: JSON.stringify({
@@ -193,10 +184,6 @@ export default function ({ data }) {
 
         if (res.status === 200) {
           setPwdResetReqSent(true);
-          setTempEmail(
-            "mailto:" + resetEmailInput + "?subject=Subject&body=Requesting password reset link for: " +
-            resetEmailInput
-          );
           setShowProgress(false)
         } else {
           setShowProgress(false)
@@ -225,7 +212,7 @@ export default function ({ data }) {
       return;
     }
     try {
-      const res = await fetch(baseURL_client + createAccountEndpoint, {
+      const res = await fetch(BASE_URL_CLIENT + CREATE_ACCOUNT_ENDPOINT, {
         method: "PATCH",
         body: JSON.stringify({
           token: hashParam,

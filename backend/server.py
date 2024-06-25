@@ -6,10 +6,9 @@ import nltk
 
 from app.views.users import users
 from app.views.communities import communities
-from app.views.notes import notes
-from app.views.functional import functional
-from app.views.graph import graph
-from app.views.logs import *
+from app.views.search import search
+from app.views.submissions import submissions
+
 from app.db import get_db, get_redis
 
 app = Flask(__name__)
@@ -17,9 +16,9 @@ CORS(app)
 
 app.register_blueprint(users)
 app.register_blueprint(communities)
-app.register_blueprint(notes)
-app.register_blueprint(functional)
-app.register_blueprint(graph)
+app.register_blueprint(search)
+app.register_blueprint(submissions)
+
 
 parser = argparse.ArgumentParser()
 

@@ -1,3 +1,5 @@
+/*global chrome*/
+
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -56,33 +58,6 @@ const [open, setOpen] = React.useState(false);
       return;
     }
     setOpen(false);
-  };
-
-
-  const submitRelevanceJudgements = async function (rel) {
-    let URL = baseURL + relJudgmentEndpoint;
-    
-    // Judgement key-value pair
-    let judgement = {};
-    judgement[props.result_hash] = rel;
-
-    const res = await fetch(URL, {
-      method: "POST",
-      body: JSON.stringify(judgement),
-      headers: new Headers({
-        Authorization: props.auth_token,
-        "Content-Type": "application/json",
-      }),
-    });
-
-    const response = await res.json();
-    if (res.status === 200) {
-      setSeverity("success");
-    } else {
-      setSeverity("error");
-    }
-    setMessage(response.message);
-    handleClick();
   };
 
 
@@ -179,6 +154,12 @@ const [open, setOpen] = React.useState(false);
       </IconButton>
     </React.Fragment>
   );
+
+  const openWebsite = async (url) => {
+    chrome.tabs.create({url: url, active: false});
+  }
+
+
 
   const [openShareUrlSuccess, setOpenShareUrlSuccess] = React.useState(false);
 
@@ -296,8 +277,10 @@ const [open, setOpen] = React.useState(false);
         />
        </div>
         <div style={{ margin: "0px 0px 0px 0px"}}>
-          <a 
+          <button 
             style={{ 
+              background: "None",
+              border: "None",
               fontSize: "17px",
               width: "100%",
               display: '-webkit-box',
@@ -305,120 +288,18 @@ const [open, setOpen] = React.useState(false);
               WebkitLineClamp: 2,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              textAlign: "left",
+              color: "blue",
+              textDecoration: "underline"
              }}
-            href={props.redirect_url}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={() => openWebsite(props.redirect_url)}
           >
-            {props.explanation} 
-          </a>
+            {props.title} 
+          </button>
         </div>
         
-        <ButtonGroup sx={{ marginLeft: "auto", height: "35px" }}>
-          <Dialog open={openFeedbackForm}>
-            <DialogTitle>
-              {" "}
-              Feedback for{" "}
-              <a
-                style={{ fontSize: "20px" }}
-                href={props.redirect_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {props.explanation}
-              </a>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-              </DialogContentText>
-              <TextField
-                autoFocus
-                margin="dense"
-                id="message"
-                name="message"
-                value={feedbackMessage}
-                onChange={handleMessageType}
-                label="Description"
-                fullWidth
-                variant="standard"
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCancelFeedbackForm}>Cancel</Button>
-              <Button onClick={handleCreateFeedbackForm}>Send</Button>
-            </DialogActions>
-          </Dialog>
-          <Tooltip title="Options">
-            <IconButton size="small" onClick={handleOpenOptionsMenu}>
-              <MoreVert />
-            </IconButton>
-          </Tooltip>
-          <Snackbar
-              open={openShareUrlSuccess}
-              autoHideDuration={6000}
-              onClick={handleCloseSnackbar}
-              message={snackBarMessage} //"Link copied: "+shareUrlLink
-              action={action}
-              onClose={() => setOpenShareUrlSuccess(false)}
-            />
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorElUser}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-            open={Boolean(anchorElUser)}
-            onClose={handleCloseOptionsMenu}
-          >
-            <MenuItem
-              name="view"
-              onClick={(event) => handleClickOptionsMenu(event, "view", props.submission_id)}>
-              <ListItemIcon>
-                <Launch />
-              </ListItemIcon>
-              <ListItemText
-              >View Submission
-              </ListItemText>
-            </MenuItem>
-            <MenuItem
-              name="feedback"
-              onClick={(event) => handleClickOptionsMenu(event, "feedback")}>
-              <ListItemIcon>
-                <FeedbackIcon />
-              </ListItemIcon>
-              <ListItemText
-              >Feedback</ListItemText>
-            </MenuItem>
-            <MenuItem
-              name="shareurl"
-              value={props.submission_id}
-              onClick={(event) => handleClickOptionsMenu(event, "share", props.submission_id)}>
-              <ListItemIcon>
-                <ShareIcon />
-              </ListItemIcon>
-              <ListItemText
-              >Share URL</ListItemText>
-            </MenuItem>
-            <MenuItem
-              name="connID"
-              onClick={(event) => handleClickOptionsMenu(event, "connID", props.submission_id)}>
-              <ListItemIcon>
-                <Launch />
-              </ListItemIcon>
-              <ListItemText
-              >Get Connection ID
-              </ListItemText>
-            </MenuItem>
-          </Menu>
-        </ButtonGroup>
       </div>
-
+      
       <p
           style={{
           fontSize: "14px",
@@ -442,87 +323,30 @@ const [open, setOpen] = React.useState(false);
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           }}>
-          {props.highlighted_text && props.highlighted_text.length > 0 && (
-            <span dangerouslySetInnerHTML={{ __html: props.highlighted_text }}></span>
+          {props.description && props.description.length > 0 && (
+            <span>{props.description }</span>
           )}
       </p>
 
-
-      {props.hashtags !== undefined && props.hashtags.length !== 0 &&
-      <div style={{ display:"flex", marginTop:"-20px", width:"100%"}}>
-          <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
-          <Tooltip title="Hashtags">
-            <TagIcon style={{ paddingTop:"19px", verticalAlign: "middle", height: "22px", color: "#1976d2" }}/>
-          </Tooltip> 
-          </div>
-          <div style={{ overflowX:"auto" }}>
-          <p>{hashtag_results}</p>
-         </div>
-      </div>}
       </div> 
-
-      <div style={{ display:"flex", marginTop:"-10px",width:"100%"}}>
-
-        <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
-        <Tooltip title="Communities">
-            <LocalLibraryRoundedIcon style={{ paddingTop:"20px", verticalAlign: "middle", height: "20px", color: "#1976d2" }}/>
-        </Tooltip> 
-        </div>
-
-        <div style={{ width: "75%", float: "left", overflowX: "auto" }}>
-        {communityNamesList && communityNamesList.length !== 0 ? (
-          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
-            {communityNamesList}
-          </p>
-        ) : (
-          <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
-            Webpage
-          </p>
-        )}
-        </div>
-
-        {props.show_relevant ? (
-          <div style={{ width:"25%", float: "right"}}>
-            <Tooltip title="Relevant">
-            <Button
-              value={1}
-              onClick={() => submitRelevanceJudgements(1)}
-              size="small"
-              variant="text"
-              style={{
-                float: "right",
-                minWidth: "0px",
-                paddingTop:"20px",
-                paddingLeft: "4px",
-                paddingRight: "2px"
-              }}
-              startIcon={<ThumbUpRoundedIcon  value={1}/>}
-            >
-            </Button>
-            </Tooltip>
-
-            <Tooltip title="Not Relevant">
-            <Button
-              value={0}
-              onClick={() => submitRelevanceJudgements(0)}
-              size="small"
-              variant="text"
-              style={{
-                margin: "0px 5px 0px 0px",
-                float: "right",
-                minWidth: "0px",
-                paddingTop:"20px",
-                paddingLeft: "8px",
-                paddingRight: "2px"
-              }}
-              startIcon={<ThumbDownRoundedIcon value = {0}/>}
-            >
-            </Button>
-            </Tooltip>
-          </div>
-        ) : null}
       
-      </div>  
+      
+      {communityNamesList && communityNamesList.length !== 0 && (
+        <div style={{ display:"flex", marginTop:"-10px",width:"100%"}}>
+
+          <div style={{ width:"5%", float:"left", paddingRight:"5px"}}>
+            <Tooltip title="Communities">
+                <LocalLibraryRoundedIcon style={{ paddingTop:"20px", verticalAlign: "middle", height: "20px", color: "#1976d2" }}/>
+            </Tooltip> 
+          </div>
+          <div style={{ width: "75%", float: "left", overflowX: "auto" }}>
+            <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
+              {communityNamesList}
+            </p>
+          </div>
+        </div>
+        )
+      }
       <hr />
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>

@@ -3,14 +3,11 @@ import jsCookie from "js-cookie";
 import { Grid, Paper, Skeleton, Stack, Breadcrumbs } from '@mui/material';
 import { React, useState, useEffect } from 'react';
 import Head from "next/head";
-import { APP_NAME, BASE_URL_CLIENT, BASE_URL_SERVER, GET_SUBMISSION_ENDPOINT } from '../../static/constants';
-import Header from '../../components/header';
+import { BASE_URL_CLIENT, BASE_URL_SERVER, SUBMISSION_ENDPOINT } from '../../static/constants';
 import { Box } from '@mui/system';
 import SubmissionDetails from '../../components/submissions/submissionDetails';
 import Error from 'next/error';
 import NoteEditor from '../../components/submissions/noteEditor';
-import Hashtags from '../../components/submissions/hashtags';
-import Footer from '../../components/footer';
 import useSubmissionStore from "../../store/submissionStore";
 import SubmissionExtensions from "../../components/submissions/submissionExtensions";
 
@@ -104,10 +101,10 @@ export default function SubmissionPage({ errorCode, data, id, target }) {
     var METH = "POST"
 
     if (mode == "create") {
-      URL = URL + "submission/"
+      URL = URL + SUBMISSION_ENDPOINT
 
     } else if (mode == "edit") {
-      URL = URL + GET_SUBMISSION_ENDPOINT + id
+      URL = URL + SUBMISSION_ENDPOINT + "/" + id
       METH = "PATCH"
     }
 
@@ -203,7 +200,7 @@ export async function getServerSideProps(context) {
       target = context.query.target
     }
     //const target = context.query.target;
-    let URL = BASE_URL_SERVER + GET_SUBMISSION_ENDPOINT + ((target == null) ? id : target);
+    let URL = BASE_URL_SERVER + SUBMISSION_ENDPOINT + "/" + ((target == null) ? id : target);
     const res = await fetch(URL, {
       headers: new Headers({
         Authorization: context.req.cookies.token,

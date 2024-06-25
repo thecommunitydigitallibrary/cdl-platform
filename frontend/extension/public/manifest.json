@@ -1,7 +1,7 @@
 {
 	"name": "TextData",
 	"description": "Save what you know and find what you don't.",
-	"version": "0.0.0.8",
+	"version": "0.0.1.0",
 	"manifest_version": 3,
 	"action": {
 		"default_popup": "index.html",

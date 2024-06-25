@@ -26,11 +26,9 @@ const Hero = () => {
               Save what you know. Find what you don't.
             </h3>
             <p className="py-5 text-xl leading-normal text-gray-500 lg:text-xl xl:text-xl dark:text-gray-300">
-              TextData is a social platform for collaboratively creating, sharing, and learning from wiki-style communities. Use our website or Chrome browser extension to create or join communities, make submissions to these communities, and share these communities with the world (or keep them to yourself).
-
+              TextData is an online platform for communities of users to discover the right information at the right place. We provide a website and a browser extension where users can effortlessly ask and answer questions in any online context. We also provide question recommendations based on what other users have asked in similar prior contexts.
               <br /><br />
-
-              Then, using everything that you and your collaborators have saved along with the communities that you have followed, we'll help you find old information, ask and answer questions, and get interesting recommendations.
+              Answers are provided from both the general web and user-created submissions to TextData communities. The recommended questions and provided answers help users efficiently discover high-quality information while mitigating many of the challenges in knowing what to ask and where it should be asked.
             </p>
 
             <div className="flex flex-col m-3 items-start space-y-3 sm:space-x-4 sm:space-y-0 sm:items-center sm:flex-row">

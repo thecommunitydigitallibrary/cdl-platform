@@ -4,8 +4,7 @@ import re
 import time
 import traceback
 from functools import wraps
-from urllib.parse import urlparse, urldefrag, quote
-from collections import defaultdict
+from urllib.parse import urlparse
 
 import jwt
 import bleach
@@ -15,44 +14,115 @@ from flask import request, current_app
 from app.helpers import response
 from app.helpers.status import Status
 from app.models.users import Users
+from app.models.communities import Communities
 from app.models.not_logged_in_users import NotLoggedInUsers, NotLoggedInUser
 
 
-import validators
+
+def get_communities_helper(current_user, return_dict=False):
+	"""
+	The helper function for getting a user's communities.
+	Arguments:
+		current_user : dictionary : the user recovered from the JWT token.
+		return_dict : boolean : to return as a dictionary.
+	Returns:
+		A dictionary with
+			community_info: for joined communities, a list of dicts, each containing 
+				community_id
+				name
+				description
+				pinned
+				is_public
+				join_key (if admin)
+				is_admin. 
+
+				If return_dict is true, then this is a dictionary mapped with the community_id.
+
+			followed_community_info: for followed communities, a list of dicts, each containing
+				community_id
+				name
+				description
+			username: the username of the user.
+	"""
+
+	user_communities = current_user.communities
+	user_followed_communities = current_user.followed_communities
+	user_id = current_user.id
+
+	cdl_communities = Communities()
+
+	user_followed_communities_struct = []
+	for community_id in user_followed_communities:
+		community = cdl_communities.find_one({"_id": community_id})
+		## TODO probably need to handle here the case where a public community becomes private
+		## what to do with the followers?
+		if not community:
+			print(f"Could not find community for community id: {community_id} and user id: {user_id}")
+			continue
+		comm_item = {
+			"community_id": str(community.id),
+			"name": community.name,
+			"description": community.description
+		}
+		user_followed_communities_struct.append(comm_item)
+		
+
+	community_struct = []
+	for community_id in user_communities:
+		if user_id == community_id:
+			continue
+		community = cdl_communities.find_one({"_id": community_id})
+		if not community:
+			print(f"Could not find community for community id: {community_id} and user id: {user_id}")
+			continue
+		else:
+			is_admin = False
+
+			# some communities do not have admin property?
+			try:
+				if user_id in community.admins:
+					is_admin = True
+			except:
+				pass
+
+		comm_item = {
+			"community_id": str(community.id),
+			"name": community.name,
+			"description": community.description,
+			"is_admin": is_admin
+		}
+
+		if is_admin:
+			comm_item["join_key"] = community.join_key
+
+		comm_item["is_public"] = community.public
+		comm_item["pinned"] = community.pinned
+
+		community_struct.append(comm_item)
+
+	if return_dict:
+		new_community_struct = {}
+		for community in community_struct:
+			new_community_struct[community["community_id"]] = community
+		community_struct = new_community_struct
+
+		new_followed_community_struct = {}
+		for community in user_followed_communities_struct:
+			new_followed_community_struct[community["community_id"]] = community
+		user_followed_communities_struct = new_followed_community_struct
 
 
-def validate_submission(highlighted_text, explanation, source_url=None):
-    """
-    Checks to make sure submitted text is not a URL!
-    """
-    if validators.url(highlighted_text) or validators.url(explanation):
-        return False, "Error: The title or description should not be a URL"
+	return_obj = {
+		"community_info": community_struct,
+		"followed_community_info": user_followed_communities_struct
+	}
+	try:
+		username = current_user.username
+		return_obj["username"] = username
+	except Exception as e:
+		print("Accessed as public, no username found.")
 
-    # check to make sure source url is not on wrong page
-    # Empty string when text-only submission
-    if source_url != None and source_url != "":
-        if not validators.url(source_url):
-            return False, "Error: The URL is invalid: " + source_url
-        forbidden_URLs = ["chrome://"]
-        for url in forbidden_URLs:
-            if url in source_url:
-                return False, "Error: You cannot submit content on URL " + source_url
-
-    char_max_desc = 50000
-
-    char_max_title = 1000
-
-    # cap highlighted text, explanation length
-    if highlighted_text and (len(highlighted_text) > char_max_desc):
-        return False, "The description is too long. Please limit to 50,000 characters"
-    if explanation and (len(explanation) > char_max_title):
-        return False, "The title is too long. Please limit to 1,000 characters"
-    
-    if explanation == "":
-        return False, "The title cannot be empty"
-
-
-    return True, "Validation successful"
+	return return_obj
 
 
 def format_time_for_display(timestamp, format="date"):
@@ -81,20 +151,6 @@ def format_time_for_display(timestamp, format="date"):
     elif format == "date":
         return str(int(float(timestamp) * 1000))
 	
-
-
-def extract_payload(request, fields):
-	try:
-		payload = {field: request.form.get(field) for field in fields}
-		if None in [value for value in payload.values()] and request.data:
-			payload = {}
-			request_data = json.loads(request.data.decode("utf-8"))
-			for field in fields:
-				payload[field] = request_data[field]
-		return payload if None not in [value for value in payload.values()] else None
-	except:
-		return None
-     
 
 def token_required_public(f):
     """
@@ -154,23 +210,15 @@ def token_required(f):
 			return response.error("You must log in to perform this action", Status.BAD_REQUEST)
 		try:
 			data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
-			cdl_users = Users()
-			current_user = cdl_users.find_one({"_id": ObjectId(data["id"])})
+			users = Users()
+			current_user = users.find_one({"_id": ObjectId(data["id"])})
 			assert current_user != None
 		except Exception as e:
-			print("Error: ", e)
+			print("Error: ", e, token)
 			return response.error("You must log in to perform this action", Status.NOT_FOUND)
 		return f(current_user, *args, **kwargs)
 
 	return decorator
-
-
-def build_result_hash(rank, submission_id, search_id):
-	"""
-	Helper function for building the result hash of format rank_submissionID_searchID
-	"""
-	result_hash = str(rank) + "_" + submission_id + "_" + search_id
-	return result_hash
 
 
 def build_display_url(url):
@@ -184,148 +232,6 @@ def build_display_url(url):
 	display_url = parsed_url.netloc + re.sub("/", " > ", path)
 	return display_url
 
-
-def build_redirect_url(url, result_hash, highlighted_text, method="search"):
-	"""
-	Helper function for building the redirect URL (so clicks are logged on our backend)
-	Arguments:
-		url : string : the URL that the submission points to
-		result_hash : string : the rank_submissionID_searchID from above function
-		highlighted_text : string : the highlighted text of the submission
-	"""
-	# if method is anything other than 'search', assume redirection call is made from rec and not search (since method = recent/trending/unseen etc)
-	if(method!="search"): method="recommendation"
-
-	redirect_url = os.environ["api_url"] + ":" + os.environ["api_port"] + "/api/redirect?"
-	redirect_url += "method="+ str(method)
-	redirect_url += "&hash=" + result_hash
-	url, fragment = urldefrag(url)
-	# handling edge cases
-	if "pdf" in url or "smartdiff" in url and fragment != "":  # for proxies
-		redirect_url += "&redirect_url=" + url + "#" + fragment
-	elif "youtube" in url:
-		redirect_url += "&redirect_url=" + quote(url)
-	else:
-		redirect_url += "&redirect_url=" + url
-
-	return redirect_url
-
-
-def create_page(hits, communities, toggle_display="highlight"):
-    """
-	Helper function for formatting raw elastic results.
-	Arguments:
-		hits : (dict): json raw output from elastic
-		communities : (dict) : the user's communities
-        toggle_display : (str) : highlight to show matched highlighted text, preview to show best preview
-	Returns:
-		return_obj : (list) : a list of formatted submissions for frontend display
-							Note that result_hash and redirect_url will be empty (need to hydrate)
-	"""
-
-    return_obj = []
-
-
-    cdl_users = Users()
-
-    for i, hit in enumerate(hits):
-        result = {
-            "redirect_url": None,
-            "display_url": None,
-            "orig_url": None,
-            "submission_id": None,
-            "result_hash": None,
-            "highlighted_text": None,
-            "explanation": None,
-            "score": hit.get("_score", 0),
-            "time": "",
-            "type": "submission",
-            "communities_part_of": [],
-            "username": ""
-        }
-
-        if not result["score"]: 
-            result["score"] = 0
-
-        if "webpage" in hit["_source"]:
-            result["explanation"] = hit["_source"]["webpage"]["metadata"].get("title") or hit["_source"]["webpage"]["metadata"].get("h1") or "No title available"
-            result["type"] = "webpage"
-            possible_matches = []
-            if "highlight" in hit and toggle_display == "highlight":
-                possible_matches = hit["highlight"].get("webpage.metadata.description", [])
-                if not possible_matches:
-                     possible_matches = hit["highlight"].get("webpage.metadata.h1", [])
-                if not possible_matches:
-                    # in case there are a lot of paragraphs
-                    possible_matches = hit["highlight"].get("webpage.all_paragraphs", [])[:10]
-
-                description = " .... ".join(possible_matches)
-            else:
-                description = None
-
-            if not description:
-                description = hit["_source"]["webpage"]["metadata"].get("description", None)
-            if not description:
-                description = hit["_source"]["webpage"]["metadata"].get("h1", None)
-            if not description:
-                description = "No Preview Available"
-            result["highlighted_text"] = description
-
-        else:
-            result["explanation"] = hit["_source"].get("explanation", "No Explanation Available")
-
-
-            # Old submissions may not have the anonymous field, default to true
-            is_anonymous  = hit["_source"].get("anonymous", True)
-            if not is_anonymous:
-                creator = cdl_users.find_one({"_id": ObjectId(hit["_source"]["user_id"])})
-                if creator:
-                     result["username"] = creator.username
-
-
-            description = " .... ".join(hit["highlight"].get("highlighted_text", [])) if hit.get("highlight", None) and toggle_display == "highlight" else hit["_source"].get("highlighted_text", None)
-            if not description:
-                description ="No Preview Available"
-
-            
-            
-            result["highlighted_text"] = description
-
-        # So that we can (1) mitigate XSS and (2) keep the highlighted match text
-        # AND (3) properly render markdown pages on submission view (quote, code, etc.)
-        result["highlighted_text"] = re.sub("<mark>", "@startmark@", result["highlighted_text"])
-        result["highlighted_text"] = re.sub("<\/mark>", "@endmark@", result["highlighted_text"])
-        result["highlighted_text"] = sanitize_input(result["highlighted_text"])
-        result["highlighted_text"] = re.sub("@startmark@", "<mark>", result["highlighted_text"])
-        result["highlighted_text"] = re.sub("@endmark@", "</mark>", result["highlighted_text"])
-
-
-
-        # possible that returns additional communities?
-        result["communities_part_of"] = {community_id: communities[community_id] for community_id in
-                                         hit["_source"].get("communities", []) if community_id in communities}
-
-        result["submission_id"] = str(hit["_id"])
-
-        if "time" in hit["_source"]:
-            formatted_time = format_time_for_display(hit["_source"]["time"])
-            result["time"] = formatted_time
-        elif "scrape_time" in hit["_source"]:
-            formatted_time = format_time_for_display(hit["_source"]["scrape_time"])
-            result["time"] = formatted_time
-
-
-        # Display URL
-        url = hit["_source"].get("source_url", "")
-
-        url = format_url(url, str(result["submission_id"]))
-        display_url = build_display_url(url)
-        result["display_url"] = display_url
-        result["orig_url"] = url             
-
-        return_obj.append(result)
-
-    return return_obj
 
 def format_url(url, submission_id):
     """
@@ -343,102 +249,43 @@ def format_url(url, submission_id):
             url = os.environ["api_url"] + "/submissions/" + submission_id
     return url
     
-     
+    
 
-def hydrate_with_hash_url(results, search_id, page=0, page_size=10, method="search"):
+def hydrate_with_hashtags(title, description):
+    """Extracts hashtags from a submission title and description
+
+    Method Parameters
+    ----------
+    title : str, required
+        The title of the submission.
+
+    description : str, required
+        The description of the submission.
+
+    Returns
+    ---------
+    list of str
+        A list of hashtags extracted
     """
-	Helper function hydrating with result hash and url.
-	This is separate from create_page because neural reranking happens in between.
-	Arguments:
-		results : (list): output of create_pages
-		search_id : (string) : the id of the search
-		page : (int, default=0) : current page
-		page_size : (int, default=10) : the size of each page
-	Returns:
-		pages : (list) : a reranked pages	
-	"""
-    for i, result in enumerate(results):
-        # result hash
-        result_hash = build_result_hash(str((page * page_size) + i), str(result["submission_id"]), str(search_id))
+    hashtags_title = extract_hashtags(title)
+    hashtags_description = extract_hashtags(description)
 
-        result["result_hash"] = result_hash
+    hashtags = hashtags_title + hashtags_description
 
-        # build the redirect URL for clicks
-        redirect_url = build_redirect_url(result["orig_url"], result_hash, result["highlighted_text"], method)
-        result["redirect_url"] = redirect_url
-    return results
+    # remove mark in case hashtag is in body
+    hashtags = [re.sub("<mark>", "", x) for x in hashtags]
+    hashtags = [re.sub("</mark>", "", x) for x in hashtags]
 
+    hashtags = list(set(hashtags))
 
-def hydrate_with_hashtags(results):
-    for result in results:
-        # add the hashtags
-        result["hashtags"] = []
-        hashtags_explanation = extract_hashtags(result["explanation"])
-        hashtags_ht = extract_hashtags(result["highlighted_text"])
+    return hashtags
 
-        hashtags = hashtags_explanation + hashtags_ht
-
-        # remove mark in case hashtag is in body
-        hashtags = [re.sub("<mark>", "", x) for x in hashtags]
-        hashtags = [re.sub("</mark>", "", x) for x in hashtags]
-
-        hashtags = list(set(hashtags))
-
-        result["hashtags"] = hashtags
-
-    return results
-
-def diversify(pages, topn=10):
-    """
-    Slightly reorders pages to make top n domain-diverse.
-    """
-    pass
-
-def standardize_url(url):
-    # remove fragment from query
-    if "#" in url:
-        url = url.split("#")[0]
-    return url
 
 def extract_hashtags(text):
       # ignores multiple hashtags in a row (from markdown)
       hashtags = [x for x in text.split() if len(x) > 1 and x[0] == "#" and x[1] != "#"]
       return hashtags
 
-
-def deduplicate(pages):
-    """
-    Helper function to remove all duplicate pages. Saves them as "children" in top-rated page.
-    """
-    map_pages = defaultdict(list)
-
-    for page in pages:
-        url = page["orig_url"].split("#")[0]
-        map_pages[url].append(page)
-
-    for key in map_pages.keys():
-        map_pages[key][0]["children"] = map_pages[key][1:11] if len(map_pages[key]) > 10 else map_pages[key][1:]
-
-    return [p[0] for p in map_pages.values()]
-
-def combine_pages(submissions_pages, webpages_index_pages):
-
-    # Building an inverted index to map orig_url to index using the submissions_pages list
-    subpgs_url_to_id = {}
-    for i, submission_page in enumerate(submissions_pages):
-        subpgs_url_to_id[submission_page["orig_url"]] = i
-
-    remaining_webpages = []
-
-    # Using the orig_url_to_idx_map to see if there is an in entry in webpages_index_pages to update score
-    for webpage in webpages_index_pages:
-        if webpage["orig_url"] in subpgs_url_to_id:
-            i = subpgs_url_to_id.get(webpage["orig_url"])
-            submissions_pages[i]["score"] = submissions_pages[i]["score"] + webpage["score"]
-        else:
-            remaining_webpages.append(webpage)
-   
-    return submissions_pages + remaining_webpages
 
 def sanitize_input(input_data):
 	"""

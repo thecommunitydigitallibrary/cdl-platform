@@ -27,15 +27,12 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 import Box from '@mui/material/Box';
 import useSubmissionStore from "../../store/submissionStore";
-import { BASE_URL_CLIENT, BASE_URL_SERVER, GET_SUBMISSION_ENDPOINT } from "../../static/constants";
 import { CloseFullscreenOutlined, CloseOutlined, ElevatorSharp } from "@mui/icons-material";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const AUTOCOMPLETE_ENDPOINT = baseURL_client + "autocomplete"
 
 
-const SUB_WEB_ENDPOINT = process.env.NEXT_PUBLIC_FROM_CLIENT + "submissions/";
+import { BASE_URL_CLIENT, AUTOCOMPLETE_ENDPOINT, SUBMISSION_ENDPOINT, WEBSITE_URL } from "../../static/constants";
 
 export default function SubmissionForm(props) {
 
@@ -64,7 +61,7 @@ export default function SubmissionForm(props) {
         setSubmissionProps,
         hasUnsavedChanges,
     } = useSubmissionStore();
-    
+
     // States for Alerts
     const [openSnackbar, setOpenSnackbar] = React.useState(false);
     const [severity, setSeverity] = React.useState("error");
@@ -110,11 +107,11 @@ export default function SubmissionForm(props) {
         else {
             if (submissionIsAnonymous) {
                 setSubmissionProps({ ...submissionIsAnonymous, submissionIsAnonymous: false })
-                setSubmissionProps({hasUnsavedChanges : true})
+                setSubmissionProps({ hasUnsavedChanges: true })
 
             } else {
                 setSubmissionProps({ ...submissionIsAnonymous, submissionIsAnonymous: true })
-                setSubmissionProps({hasUnsavedChanges : true})
+                setSubmissionProps({ hasUnsavedChanges: true })
             }
         }
     }
@@ -122,7 +119,7 @@ export default function SubmissionForm(props) {
     const handleAutoSuggestClick = async (event) => {
 
         const regex = /\[\[([^\]]+)\]\]/i;
-        var replacement_text = "[" + event.target.title + "](" + SUB_WEB_ENDPOINT + event.target.id + ")"
+        var replacement_text = "[" + event.target.title + "](" + WEBSITE_URL + "submissions/" + event.target.id + ")"
         // console.log(props)
 
         if (props.isAConnection) {
@@ -150,7 +147,7 @@ export default function SubmissionForm(props) {
             return
         }
 
-        const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + text + "&topn=5", {
+        const res = await fetch(BASE_URL_CLIENT + AUTOCOMPLETE_ENDPOINT + "?query=" + text + "&topn=5", {
             method: "GET",
             headers: new Headers({
                 Authorization: jsCookie.get("token"),
@@ -258,7 +255,7 @@ export default function SubmissionForm(props) {
             var URL = BASE_URL_CLIENT
             var METH = "POST"
 
-            URL = URL + GET_SUBMISSION_ENDPOINT
+            URL = URL + SUBMISSION_ENDPOINT
 
             const res = await fetch(URL, {
                 method: METH,
@@ -276,7 +273,7 @@ export default function SubmissionForm(props) {
                 setMessage(response.message);
                 props.setTextBoxVisible(false)
                 setOpenSnackbar(true);
-                URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + response.submission_id;
+                URL = BASE_URL_CLIENT + SUBMISSION_ENDPOINT + "/" + response.submission_id;
 
                 const newSubmissionRes = await fetch(URL, {
                     method: "GET",
@@ -309,11 +306,11 @@ export default function SubmissionForm(props) {
                 anonymous: submissionIsAnonymous
             }
 
-            var URL = baseURL_client
+            var URL = SUBMISSION_ENDPOINT
             var METH = "POST"
 
             if (submissionMode == "create") {
-                URL = URL + "submission/"
+                URL = BASE_URL_CLIENT + SUBMISSION_ENDPOINT
 
             } else if (submissionMode == "reply") {
 
@@ -322,7 +319,7 @@ export default function SubmissionForm(props) {
                 DATA["connection_source"] = props.submission_id
 
             } else if (submissionMode == "edit") {
-                URL = URL + "submission/" + props.submission_id
+                URL = BASE_URL_CLIENT + SUBMISSION_ENDPOINT + "/" + props.submission_id
                 METH = "PATCH"
             }
 
@@ -355,46 +352,46 @@ export default function SubmissionForm(props) {
     };
 
     useEffect(() => { }, [submissionIncomingConnections]);
-    
+
     useEffect(() => {
-        const handleRouteChangeStart = () => { 
-            if (replySubHasUnsavedChanges == true){
-             if(!confirm('You have unsaved changes. Are you sure you want to leave?')) {
-                Router.events.emit('routeChangeError');
-                throw 'Abort route change. Please ignore this error.';
+        const handleRouteChangeStart = () => {
+            if (replySubHasUnsavedChanges == true) {
+                if (!confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                    Router.events.emit('routeChangeError');
+                    throw 'Abort route change. Please ignore this error.';
+                }
             }
-        }
         };
-        if(replySubHasUnsavedChanges == false) {
+        if (replySubHasUnsavedChanges == false) {
             Router.events.off('routeChangeStart', handleRouteChangeStart);
         }
-        if(replySubHasUnsavedChanges == true) {
+        if (replySubHasUnsavedChanges == true) {
             Router.events.on('routeChangeStart', handleRouteChangeStart);
         }
-       
+
         return () => {
             Router.events.off('routeChangeStart', handleRouteChangeStart);
         };
     }, [replySubHasUnsavedChanges]);
     useEffect(() => {
         const handleBeforeUnload = (event) => {
-          if (replySubHasUnsavedChanges == true) {
-            event.preventDefault();
-            event.returnValue = '';
-          }
+            if (replySubHasUnsavedChanges == true) {
+                event.preventDefault();
+                event.returnValue = '';
+            }
         };
 
-        if(replySubHasUnsavedChanges == false) {
+        if (replySubHasUnsavedChanges == false) {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         }
-        if(replySubHasUnsavedChanges == true) {
+        if (replySubHasUnsavedChanges == true) {
             window.addEventListener('beforeunload', handleBeforeUnload);
         }
-      
+
         return () => {
-          window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-      }, [replySubHasUnsavedChanges]);
+    }, [replySubHasUnsavedChanges]);
 
     return (
 
@@ -479,7 +476,9 @@ export default function SubmissionForm(props) {
                         </Select>
 
                     </FormControl>
-                    <br />
+                    <div className="lg:hidden mt-20">
+
+                    </div>
                     <div data-color-mode="light" >
                         <MDEditor
                             id="submissionDescription"
@@ -579,7 +578,7 @@ export default function SubmissionForm(props) {
                                 value={submissionSourceUrl}
                                 onChange={(event) => {
                                     setSubmissionProps({ submissionSourceUrl: event.target.value })
-                                    setSubmissionProps({hasUnsavedChanges: true})
+                                    setSubmissionProps({ hasUnsavedChanges: true })
                                 }}
                             />
                             <TextField
@@ -591,7 +590,7 @@ export default function SubmissionForm(props) {
                                 value={submissionTitle}
                                 onChange={(event) => {
                                     setSubmissionProps({ submissionTitle: event.target.value })
-                                    setSubmissionProps({ hasUnsavedChanges : true})
+                                    setSubmissionProps({ hasUnsavedChanges: true })
                                 }}
                             />
                             <br />
@@ -765,7 +764,7 @@ export default function SubmissionForm(props) {
                                 value={submissionSourceUrl}
                                 onChange={(event) => {
                                     setSubmissionProps({ submissionSourceUrl: event.target.value })
-                                    setSubmissionProps({hasUnsavedChanges: true})
+                                    setSubmissionProps({ hasUnsavedChanges: true })
                                 }}
                             />
                             <TextField
@@ -777,7 +776,7 @@ export default function SubmissionForm(props) {
                                 value={submissionTitle}
                                 onChange={(event) => {
                                     setSubmissionProps({ submissionTitle: event.target.value })
-                                    setSubmissionProps({ hasUnsavedChanges : true})
+                                    setSubmissionProps({ hasUnsavedChanges: true })
                                 }}
                             />
                             <br />

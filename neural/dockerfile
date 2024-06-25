@@ -8,7 +8,7 @@ WORKDIR /docker-flask
 
 COPY requirements.txt requirements.txt
 
-COPY vicuna-7b-v1.5-awq/ vicuna-7b-v1.5-awq/
+COPY llama3-8b-awq/ llama3-8b-awq
 
 COPY prompts.json prompts.json
 

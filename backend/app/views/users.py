@@ -3,6 +3,7 @@ import re
 import traceback
 import hashlib
 import jwt
+import json
 
 from flask import request
 from sendgrid import SendGridAPIClient
@@ -15,13 +16,13 @@ from app.models.users import *
 from app.models.resets import *
 from app.helpers.status import Status
 
-from app.helpers import response, helpers
+from app.helpers import response
 
 users = Blueprint('users', __name__)
 CORS(users)
 
 
-@users.route("/api/createAccount", methods=["POST"])
+@users.route("/api/users/createAccount", methods=["POST"])
 def create_account():
 	"""
 	Endpoint to create an account.
@@ -38,7 +39,7 @@ def create_account():
 	"""
 	try:
 		fields = ["email", "username", "password"]
-		payload = helpers.extract_payload(request, fields)
+		payload = extract_payload(request, fields)
 		# If okay with using payload['field'] remove this block
 		if payload:
 			email = payload["email"]
@@ -116,7 +117,7 @@ def send_reset_email(username, token, email):
 
 
 
-@users.route("/api/account/passwordReset", methods=["POST"])
+@users.route("/api/users/passwordReset", methods=["POST"])
 def forgot_password():
 	"""
 	API for reset password request.
@@ -131,7 +132,7 @@ def forgot_password():
 	"""
 	try:
 		fields = ["email"]
-		payload = helpers.extract_payload(request, fields)
+		payload = extract_payload(request, fields)
 		if payload:
 			email = payload["email"]
 		else:
@@ -177,7 +178,7 @@ def forgot_password():
 		return response.error("Failed to reset password, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-@users.route("/api/createAccount", methods=["PATCH"])
+@users.route("/api/users/createAccount", methods=["PATCH"])
 def reset_password():
 	"""
 	API for reset password request.
@@ -191,7 +192,7 @@ def reset_password():
 	"""
 	try:
 		fields = ["token", "password"]
-		payload = helpers.extract_payload(request, fields)
+		payload = extract_payload(request, fields)
 		if payload:
 			token = payload["token"]
 			password = payload["password"]
@@ -231,7 +232,7 @@ def reset_password():
 		return response.error("Failed to reset password, please try again later.", Status.INTERNAL_SERVER_ERROR)
 
 
-@users.route("/api/login", methods=["POST"])
+@users.route("/api/users/login", methods=["POST"])
 def login():
 	"""
 	Endpoint to login.
@@ -248,7 +249,7 @@ def login():
 	"""
 	try:
 		fields = ["username", "password"]
-		payload = helpers.extract_payload(request, fields)
+		payload = extract_payload(request, fields)
 		if payload:
 			username = payload["username"]
 			password = payload["password"]
@@ -279,3 +280,17 @@ def login():
 		print(e)
 		traceback.print_exc()
 		return response.error("Failed to login, please try again later.", Status.INTERNAL_SERVER_ERROR)
+
+
+
+def extract_payload(request, fields):
+	try:
+		payload = {field: request.form.get(field) for field in fields}
+		if None in [value for value in payload.values()] and request.data:
+			payload = {}
+			request_data = json.loads(request.data.decode("utf-8"))
+			for field in fields:
+				payload[field] = request_data[field]
+		return payload if None not in [value for value in payload.values()] else None
+	except:
+		return None

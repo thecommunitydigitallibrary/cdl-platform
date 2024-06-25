@@ -18,7 +18,7 @@ const steps = [
     ),
   },
   {
-    label: "(Optional) Install and Log In to the Chrome Extension",
+    label: "Install and Log In to the Chrome Extension",
     description: (
       <div>
       <p style={{ margin: "10px 0px 0px 0px" }}>
@@ -26,9 +26,6 @@ const steps = [
         After opening the extension, you should see a login screen. Please log
         in to the extension with the same credentials that you used for the
         website account you created in Step 1.
-      </p>
-      <p>
-        Installation of the Chrome extension is optional - TextData works best with it installed, but you can still use the basic functionality of the platform without the Chrome extension.
       </p>
       </div>
     ),

@@ -16,6 +16,7 @@ import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 import useUserDataStore from '../../store/userData';
 import useQuickAccessStore from '../../store/quickAccessStore';
 
+import { BASE_URL_CLIENT, AUTOCOMPLETE_ENDPOINT } from "../../static/constants";
 
 
 function searchBarHeader(props) {
@@ -73,16 +74,11 @@ function searchBarHeader(props) {
         }
     };
 
-
-
-    const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-    const AUTOCOMPLETE_ENDPOINT = baseURL_client + "autocomplete"
-
     const { userCommunities, userFollowedCommunities } = useUserDataStore();
 
     useEffect(() => {
         const fetchSuggestions = async () => {
-            const res = await fetch(AUTOCOMPLETE_ENDPOINT + "?query=" + inputValue, {
+            const res = await fetch(BASE_URL_CLIENT + AUTOCOMPLETE_ENDPOINT + "?query=" + inputValue, {
                 method: "GET",
                 headers: new Headers({
                     Authorization: jsCookie.get("token"),
@@ -121,7 +117,7 @@ function searchBarHeader(props) {
             encodeURIComponent(inputValue) +
             "&community=" +
             selectedCommunity +
-            "&source=visualizeConnections";
+            "&visualize=True";
 
         if (ownSubmissionToggle)
             url += "&own_submissions=True"

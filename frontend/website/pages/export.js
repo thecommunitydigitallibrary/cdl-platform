@@ -1,12 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Head from "next/head";
 
-
-
-
-const baseURL_server = process.env.NEXT_PUBLIC_FROM_SERVER + "api/";
-const exportEndpoint = "export?";
-
+import { BASE_URL_SERVER, EXPORT_ENDPOINT } from '../static/constants';
 
 // Relevant Flag here for now
 //let show_relevant = true;
@@ -44,9 +39,9 @@ export async function getServerSideProps(context) {
             },
         };
     } else {
-        var exportURL = baseURL_server + exportEndpoint;
+        var exportURL = BASE_URL_SERVER + EXPORT_ENDPOINT;
         if (context.query.search_id != undefined) {
-            exportURL += "search_id=" + context.query.search_id;
+            exportURL += "?search_id=" + context.query.search_id;
         }
 
         const res = await fetch(exportURL, {

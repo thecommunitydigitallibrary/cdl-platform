@@ -10,11 +10,7 @@ import { Paper, IconButton } from "@mui/material";
 import { AddCircle, East } from "@mui/icons-material";
 import { Snackbar, Alert } from "@mui/material";
 
-
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const joinCommunityEndpoint = "joinCommunity";
-const baseURL_server = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const getCommunitiesEndpoint = "getCommunities";
+import { BASE_URL_CLIENT, JOIN_COMMUNITY_ENDPOINT, COMMUNITIES_ENDPOINT } from "../../static/constants";
 
 export default function JoinCommunityForm(props) {
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
@@ -41,7 +37,7 @@ export default function JoinCommunityForm(props) {
   };
 
   const updateDropDownSearch = async ()=>{
-    let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
+    let resp = await fetch(BASE_URL_CLIENT + COMMUNITIES_ENDPOINT, {
       method: "GET",
       headers: new Headers({
         Authorization: props.auth_token,
@@ -61,7 +57,7 @@ export default function JoinCommunityForm(props) {
       return;
     }
     event.preventDefault();
-    var URL = baseURL_client + joinCommunityEndpoint;
+    var URL = BASE_URL_CLIENT + JOIN_COMMUNITY_ENDPOINT;
     const res = await fetch(URL, {
       method: "POST",
       body: JSON.stringify({

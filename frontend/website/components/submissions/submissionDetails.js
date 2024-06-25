@@ -2,7 +2,13 @@ import jsCookie from "js-cookie";
 import { ContentCopy, Delete, Save, Edit, CloseOutlined, Close, Cancel, Block } from '@mui/icons-material';
 import { Box, Checkbox, FormControl, IconButton, InputLabel, Link, ListItemText, Tooltip, Menu, MenuItem, OutlinedInput, Select, Stack, Typography, Grid, Button, ButtonGroup, Snackbar, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField } from '@mui/material';
 import { React, useState, useEffect } from 'react';
-import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, SEARCH_ENDPOINT, WEBSITE_URL } from '../../static/constants';
+
+
+
+import { BASE_URL_CLIENT, SUBMISSION_ENDPOINT, WEBSITE_URL, SUBMIT_REL_JUD, SUBMISSION_STATS, SUBMISSION_JUDGMENTS, FEEDBACK_ENDPOINT } from '../../static/constants';
+
+
+
 import SubmissionStatistics from "./stats";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import LocalLibraryRoundedIcon from '@mui/icons-material/LocalLibraryRounded';
@@ -56,7 +62,7 @@ export default function SubmissionDetails(subData) {
     const submitRelevanceJudgements = async function (event, rel) {
         event.preventDefault();
         try {
-            let URL = BASE_URL_CLIENT + "submitRelJudgments";
+            let URL = BASE_URL_CLIENT + SUBMIT_REL_JUD;
             let judgement = {};
             const submission_id = await submissionId;
             judgement[submissionId] = rel;
@@ -88,7 +94,7 @@ export default function SubmissionDetails(subData) {
 
     const fetchSubmissionStats = async () => {
         try {
-            const URL = BASE_URL_CLIENT + "fetchSubmissionStats?submissionId=" + submissionId;
+            const URL = BASE_URL_CLIENT + SUBMISSION_STATS + "?submissionId=" + submissionId;
             const response = await fetch(URL, {
                 method: "GET",
                 headers: {
@@ -109,7 +115,7 @@ export default function SubmissionDetails(subData) {
 
     const fetchSubmissionJudgement = async (submissionId) => {
         try {
-            const URL = BASE_URL_CLIENT + "fetchSubmissionJudgement?submissionId=" + submissionId;
+            const URL = BASE_URL_CLIENT + SUBMISSION_JUDGMENTS + "?submissionId=" + submissionId;
             const response = await fetch(URL, {
                 method: "GET",
                 headers: {
@@ -169,7 +175,7 @@ export default function SubmissionDetails(subData) {
     const deleteSubmissionEntirely = async (event) => {
 
         var submissionId = submissionData.submission.submission_id;
-        var URL = BASE_URL_CLIENT + 'submission/' + submissionId;
+        var URL = BASE_URL_CLIENT + SUBMISSION_ENDPOINT + "/" + submissionId;
 
         if (subData.data.submission.can_delete) {
             const res = await fetch(URL, {
@@ -318,7 +324,7 @@ export default function SubmissionDetails(subData) {
         for (let i = 0; i < submissionRemoveCommunityIDList.length; ++i) {
             var URL =
                 BASE_URL_CLIENT +
-                GET_SUBMISSION_ENDPOINT +
+                SUBMISSION_ENDPOINT + "/" +
                 submissionData.submission.submission_id;
             const res = await fetch(URL, {
                 method: "DELETE",
@@ -376,7 +382,7 @@ export default function SubmissionDetails(subData) {
         for (i = 0; i < submissionSaveCommunityIDList.length; i++) {
             var URL =
                 BASE_URL_CLIENT +
-                GET_SUBMISSION_ENDPOINT +
+                SUBMISSION_ENDPOINT + "/" +
                 submissionId;
             const res = await fetch(URL, {
                 method: "PATCH",
@@ -462,7 +468,7 @@ export default function SubmissionDetails(subData) {
             time: new Date().getTime()
         }
 
-        var URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT + submissionId
+        var URL = BASE_URL_CLIENT + SUBMISSION_ENDPOINT + "/" + submissionId
 
         const res = await fetch(URL, {
             method: "PATCH",
@@ -573,7 +579,7 @@ export default function SubmissionDetails(subData) {
 
     const handleCreateFeedbackForm = async (event) => {
         //send feedback
-        var URL = BASE_URL_CLIENT + "feedback" + "/";
+        var URL = BASE_URL_CLIENT + FEEDBACK_ENDPOINT;
         const res = await fetch(URL, {
             method: "POST",
             body: JSON.stringify({

@@ -1,21 +1,17 @@
 import dynamic from "next/dynamic";
-import Router, { useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import jsCookie from "js-cookie";
-import { Alert, Snackbar, Button } from "@mui/material";
+import { Alert, Snackbar } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
-import Header from "../components/header";
-import Footer from "../components/footer";
 
 // Dynamic imports for visualizations
-const VisualizeComponent = dynamic(() => import("../components/visualizecomponent"), {
-  ssr: false,
-});
 const HomeConnections = dynamic(() => import("./homeconnections"), {
   ssr: false,
 });
 
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
+import { BASE_URL_CLIENT, WEBSITE_SEARCH_ENDPOINT} from "../static/constants";
+
 
 export default function VisualizeMap() {
   // Declaration
@@ -79,7 +75,7 @@ export default function VisualizeMap() {
   }
 
   const getUserSubmissions = async (query, communityId, ownSub) => {
-    let url = baseURL_client + "search?query=" + query + "&community=" + communityId + "&source=visualizeConnections";
+    let url = BASE_URL_CLIENT + WEBSITE_SEARCH_ENDPOINT + "?query=" + query + "&community=" + communityId + "&source=website_visualize";
     if (ownSub == "True") {
       url += "&own_submissions=True";
     }
@@ -94,7 +90,8 @@ export default function VisualizeMap() {
     if (response.status === "ok") {
       let graphData = {
         nodes: response['nodes'],
-        edges: response['edges']
+        edges: response['edges'],
+        options: response['options']
       }
       setSubmissions(graphData);
     } else {
@@ -115,16 +112,6 @@ export default function VisualizeMap() {
     setOpen(false);
   };
 
-  const openHierarchicalView = (e) => {
-    let url = router.pathname;
-    if (!!router.query["query"]) {
-      url += "?query=" + router.query["query"] + "&community=all" + "&levelfilter=" + router.query["levelfilter"];
-    }
-    else {
-      url += "?community=" + router.query["community"] + "&communityName=" + router.query["communityName"] + "&levelfilter=topics";
-    }
-    window.location = url;
-  }
 
   return (
     <>
@@ -139,6 +126,7 @@ export default function VisualizeMap() {
                   <HomeConnections
                     nds={submissions['nodes']}
                     eds={submissions['edges']}
+                    opt={submissions['options']}
                   />
                 </>
               )

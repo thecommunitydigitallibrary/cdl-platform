@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import Divider from '@mui/material/Divider';
 import MenuIcon from "@mui/icons-material/Menu";
-import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from "../../static/constants";
+import { BASE_URL_CLIENT, SUBMISSION_ENDPOINT, WEBSITE_URL } from "../../static/constants";
 import Image from "next/image";
 import useQuickAccessStore from "../../store/quickAccessStore";
 
@@ -34,7 +34,7 @@ function DrawerComp(props) {
       anonymous: false,
     }
 
-    var URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT
+    var URL = BASE_URL_CLIENT + SUBMISSION_ENDPOINT
 
     const res = await fetch(URL, {
       method: 'POST',

@@ -1,4 +1,4 @@
-import { BASE_URL_CLIENT, GET_COMMUNITIES_ENDPOINT } from "../static/constants";
+import { BASE_URL_CLIENT, COMMUNITIES_ENDPOINT } from "../static/constants";
 import jsCookie from "js-cookie";
 import useUserDataStore from "../store/userData";
 import useQuickAccessStore from "../store/quickAccessStore";
@@ -8,7 +8,7 @@ const { setUserDataStoreProps } = useUserDataStore();
 const { communityData, setcommunityData } = useQuickAccessStore();
 
 export const updateDropDownSearch = async () => {
-    let resp = await fetch(BASE_URL_CLIENT + GET_COMMUNITIES_ENDPOINT, {
+    let resp = await fetch(BASE_URL_CLIENT + COMMUNITIES_ENDPOINT, {
         method: "GET",
         headers: new Headers({
             Authorization: jsCookie.get("token"),

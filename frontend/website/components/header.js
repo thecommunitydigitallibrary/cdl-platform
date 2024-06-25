@@ -46,12 +46,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import Image from "next/image";
 import useSubmissionStore from "../store/submissionStore";
-import { BASE_URL_CLIENT, GET_SUBMISSION_ENDPOINT, WEBSITE_URL } from "../static/constants";
+import { BASE_URL_CLIENT, BATCH_SUBMISSION_ENDPOINT, COMMUNITIES_ENDPOINT, SUBMISSION_ENDPOINT, WEBSITE_URL } from "../static/constants";
 import useUserDataStore from "../store/userData";
 import useQuickAccessStore from "../store/quickAccessStore";
 
-
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
 
 // Example of JSON, this is displayed to frontend.
 const json_example = `{
@@ -238,7 +236,7 @@ function Header(props) {
       anonymous: false,
     }
 
-    var URL = BASE_URL_CLIENT + GET_SUBMISSION_ENDPOINT
+    var URL = BASE_URL_CLIENT + SUBMISSION_ENDPOINT
     var METH = "POST"
 
     const res = await fetch(URL, {
@@ -289,7 +287,7 @@ function Header(props) {
 
     // Assumes the file has been parsed and saved to uploadJSON
     var ret_issues = await validateSubmissionJSON(uploadJSON["data"]);
-    var URL = baseURL_client + createSubmissionEndpoint + "batch/";
+    var URL = BASE_URL_CLIENT + BATCH_SUBMISSION_ENDPOINT
     // After validating the JSON, if we find any issues (client side)
     // such as missing fields or invalid entries, show Alert message
     if (Object.keys(ret_issues).length > 0) {
@@ -367,10 +365,9 @@ function Header(props) {
   };
 
 
-  const getCommunitiesEndpoint = "getCommunities";
 
   const updateDropDownSearch = async () => {
-    let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
+    let resp = await fetch(BASE_URL_CLIENT + COMMUNITIES_ENDPOINT, {
       method: "GET",
       headers: new Headers({
         Authorization: jsCookie.get("token"),

@@ -24,13 +24,13 @@ import extFindImg from "../../public/images/extension_find.png";
 
 const benefitOne = {
   title: "Form Communities",
-  desc: "A community is where you save and organize information. A community consists of any number of users, and is generally created for a specific topic or goal.",
+  desc: "A community is where members can save and organize information. A community can consist of any number of users.",
   image: communityImg,
   link: "community-overview",
   bullets: [
     {
       title: "Create Communities",
-      desc: "Make one for private personal archives, for class notes, for working on a class project, or for thoughts on interesting articles.",
+      desc: "Make one for a class, an enterprise team, a research group, or for private personal notes.",
       icon: <AddCircleOutlineIcon />,
     },
     {
@@ -40,7 +40,7 @@ const benefitOne = {
     },
     {
       title: "Share and Follow Communities",
-      desc: "Making a community public lets others follow it, vote on content, and search the content.",
+      desc: "Making a community public lets others follow it, search the content, and provide feedback.",
       icon: <PeopleIcon />,
     },
   ],
@@ -53,8 +53,8 @@ const benefitTwo = {
   link: "how-to-bookmark",
   bullets: [
     {
-      title: "Optionally Add an External URL",
-      desc: "Adding a Source URL will link your notes to an external webpage. Use this to take notes with respect to something online (e.g., a lecture video).",
+      title: "Optionally Add a Source URL",
+      desc: "Adding a Source URL will link your notes to an external webpage. Use this to reference something online (e.g., a lecture video).",
       icon: <CreateIcon />,
     },
     {
@@ -64,15 +64,39 @@ const benefitTwo = {
     },
     {
       title: "Submit from Anywhere",
-      desc: "You can create submission from the website and from the Chrome browser extension.",
+      desc: "You can create submission from the TextData website and from the Chrome browser extension.",
       icon: <CollectionsBookmarkIcon />,
+    },
+  ],
+};
+
+const benefitThree = {
+  title: "Ask and Answer Questions",
+  desc: "Search the web and submissions from your joined and followed communities using in-context search and recommended questions.",
+  image: extFindImg,
+  link: "search-overview",
+  bullets: [
+    {
+      title: "In-Context Search",
+      desc: "Highlight some text and type a word or phrase to let TextData predict your question. Add a '?' at the end of your query to ask the typed question.",
+      icon: <SearchIcon />,
+    },
+    {
+      title: "People Also Asked...",
+      desc: "See what other community members and TextData users have asked in your given context.",
+      icon: <FeedIcon />,
+    },
+    {
+      title: "Search Everything",
+      desc: "Search results come from both the general web and submissions made to your joined and followed communities.",
+      icon: <ChangeCircleIcon />,
     },
   ],
 };
 
 const benefitFour = {
   title: "Interact with and Visualize Submissions",
-  desc: "Visit a submission's TextData-specific page to read, reply, visualize, share.",
+  desc: "Use the TextData website to read, reply, visualize, share submissions.",
   image: visualizeImg,
   link: "submission-overview",
 
@@ -83,41 +107,21 @@ const benefitFour = {
       icon: <CreateIcon />,
     },
     {
-      title: "Make Submission with Mention",
-      desc: "Explicitly mentioning a submission in another submission will create a directed edge between the two.",
+      title: "Make Connections",
+      desc: "Explicitly mentioning a submission URL in another submission will create a directed edge between the two submissions.",
       icon: <ReplyIcon />,
     },
     {
-      title: "Visualize",
-      desc: "See all of the connections among any set of submissions.",
+      title: "Visualize Submissions, Questions, and Answers",
+      desc: "For any community or search, see all submissions' connections, asked questions, and answers (if any).",
       icon: <TimelineIcon />,
     },
   ],
 };
 
-const benefitThree = {
-  title: "Find Information",
-  desc: "Search, view recommendations, ask questions, and more from the content submitted to your communities.",
-  image: extFindImg,
-  link: "search-overview",
-  bullets: [
-    {
-      title: "Search and Browse Your Communities",
-      desc: "The submissions to your joined communities are searchable using the search bar on the website or in the extension.",
-      icon: <SearchIcon />,
-    },
-    {
-      title: "Get Recommendations",
-      desc: "View your recommendation feed on the homepage or open the extension on a webpage to see contextual recommendations. Open the extension with highlighted text to see submissions tailored to your selected context.",
-      icon: <FeedIcon />,
-    },
-    {
-      title: "Interact in Context",
-      desc: "Use the extension to ask questions in context, summarize selected text, and drive curiosity with automatically generated questions.",
-      icon: <ChangeCircleIcon />,
-    },
-  ],
-};
+
+
+
 
 
 export { benefitOne, benefitTwo, benefitThree, benefitFour };

@@ -2,7 +2,6 @@ import os
 import requests
 from requests.auth import HTTPBasicAuth
 import json
-from pymongo import MongoClient
 import traceback
 import validators
 
@@ -10,8 +9,6 @@ import sys
 sys.path.append("..")
 from app.helpers.helpers import extract_hashtags
 
-
-# TODO: added better error handling
 
 class ElasticManager:
     def __init__(self, elastic_username, elastic_password, elastic_domain, elastic_index_name, cdl_logs, index_mapping):
@@ -351,16 +348,6 @@ class ElasticManager:
         r = requests.put(self.domain + self.index_name + "/_doc/" + doc_id, json=inserted_doc, auth=self.auth)
         return r.text, hashtags
 
-    def backfill(self):
-        """
-    Method to push all submitted content into the Elastic index. Likely will need to update on indexing changes.
-    """
-        all_content = self.cdl_logs.find({"type": "submit_context"})
-        for content in all_content:
-            if not content.get("deleted", False):
-                status = self.add_to_index(content)
-                print(status)
-
     def create_index_with_mapping(self, index_mapping):
         """
     Method to create a new elastic index with mapping. Uses the config information. 
@@ -463,6 +450,7 @@ class ElasticManager:
             print("\tTook: ", resp["took"])
         except Exception as e:
             print(e)
+            print(json.loads(text))
             traceback.print_exc()
             return 0, []
 

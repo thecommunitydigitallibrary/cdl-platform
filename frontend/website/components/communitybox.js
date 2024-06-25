@@ -18,23 +18,12 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useState } from "react";
 import jsCookie from "js-cookie";
-import Router, { useRouter } from 'next/router';
-import BubbleChartIcon from '@mui/icons-material/BubbleChart';
-import useCommunitiesStore from "../store/communitiesStore";
 import useUserDataStore from "../store/userData";
 import useQuickAccessStore from "../store/quickAccessStore";
 import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { BASE_URL_CLIENT } from "../static/constants";
-
-
-// API Endpoints
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const leaveCommunityEndpoint = "leaveCommunity";
-const unfollowCommunityEndpoint = "followCommunity";
-const createCommunityEndpoint = "createCommunity";
-const getCommunitiesEndpoint = "getCommunities";
+import { BASE_URL_CLIENT, LEAVE_COMMUNITY_ENDPOINT, FOLLOW_COMMUNITY_ENDPOINT, COMMUNITIES_ENDPOINT } from "../static/constants";
 
 export default function CommunityBox(props) {
   // Necessary States for Alert Message
@@ -74,7 +63,7 @@ export default function CommunityBox(props) {
   };
 
   const updateDropDownSearch = async () => {
-    let resp = await fetch(baseURL_client + getCommunitiesEndpoint, {
+    let resp = await fetch(BASE_URL_CLIENT + COMMUNITIES_ENDPOINT, {
       method: "GET",
       headers: new Headers({
         Authorization: jsCookie.get("token"),
@@ -98,7 +87,7 @@ export default function CommunityBox(props) {
   }
 
   const handleSubmitEdit = async () => {
-    var URL = baseURL_client + createCommunityEndpoint;
+    var URL = BASE_URL_CLIENT + COMMUNITIES_ENDPOINT;
     let title_field = document.getElementById("editCommunityName");
     let desc_field = document.getElementById("editCommunityDescription");
     let pinned = document.getElementById("editCommunityPinned");
@@ -157,16 +146,6 @@ export default function CommunityBox(props) {
     setOpenLeave(true);
   };
 
-  const handleVisualizeCommunity = () => {
-    Router.push({
-      pathname: "/visualizemap",
-      query: {
-        community: props.communityId,
-        source: "visualizeConnections"
-      }
-    });
-  }
-
   const handleCloseLeave = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -175,7 +154,7 @@ export default function CommunityBox(props) {
   };
 
   const leaveCommunity = async (event) => {
-    var URL = baseURL_client + leaveCommunityEndpoint;
+    var URL = BASE_URL_CLIENT + LEAVE_COMMUNITY_ENDPOINT;
     const res = await fetch(URL, {
       method: "POST",
       body: JSON.stringify({
@@ -204,7 +183,7 @@ export default function CommunityBox(props) {
 
   const unfollowCommunity = async (event) => {
 
-    var URL = BASE_URL_CLIENT + unfollowCommunityEndpoint;
+    var URL = BASE_URL_CLIENT + FOLLOW_COMMUNITY_ENDPOINT;
     const res = await fetch(URL, {
       method: "POST",
       body: JSON.stringify({
@@ -332,16 +311,6 @@ export default function CommunityBox(props) {
             />
           </Tooltip>
         )}
-        {
-          <Tooltip title={<Typography>Visualize Community</Typography>}>
-            <BubbleChartIcon
-              style={{ marginLeft: "5px", marginRight: "5px" }}
-              size="medium"
-              onClick={handleVisualizeCommunity}
-            >
-            </BubbleChartIcon>
-          </Tooltip>
-        }
         {
           <Tooltip title={<Typography>{followDeck ? "Unfollow Community" : "Leave Community"}</Typography>}>
             <IconButton

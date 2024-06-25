@@ -5,7 +5,6 @@ import IconButton from "@mui/material/IconButton";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
-import Router from 'next/router';
 
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -16,28 +15,19 @@ import DialogTitle from "@mui/material/DialogTitle";
 
 
 import LocalLibraryRoundedIcon from "@mui/icons-material/LocalLibraryRounded";
-import ScheduleRounded from "@mui/icons-material/ScheduleRounded";
 import MoreVert from "@mui/icons-material/MoreVert";
 import TagIcon from '@mui/icons-material/Tag';
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import ShareIcon from "@mui/icons-material/Share";
 
-import { Snackbar, Alert, Box, Typography } from "@mui/material";
-import React, { useState, useContext, useEffect } from "react";
+import { Snackbar, Alert, Typography } from "@mui/material";
+import React, { useState, useEffect } from "react";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
-import { Bookmark, BookmarkAddOutlined, Close, Launch, PersonPin } from "@mui/icons-material";
+import { Close, Launch, PersonPin } from "@mui/icons-material";
 
-import rehypeSanitize from "rehype-sanitize";
 import CommunityDisplay from "./communityDisplay";
 
-
-const baseURL_client = process.env.NEXT_PUBLIC_FROM_CLIENT + "api/";
-const websiteURL = process.env.NEXT_PUBLIC_FROM_CLIENT;
-
-const submissionEndpoint = "submissions/";
-const relJudgmentEndpoint = "submitRelJudgments";
-const postFeedbackEndpoint = "feedback";
-const searchEndpoint = "search";
+import { BASE_URL_CLIENT, WEBSITE_URL, SUBMISSION_ENDPOINT, FEEDBACK_ENDPOINT, WEBSITE_SEARCH_ENDPOINT } from "../static/constants";
 
 function SearchResult(props) {
   const [open, setOpen] = React.useState(false);
@@ -46,6 +36,8 @@ function SearchResult(props) {
   const [paperWidth, setPaperWidth] = React.useState("100%");
   const [paperMargin, setPaperMargin] = React.useState("15px 10px");
   const [paperMarginX, setPaperMarginX] = React.useState("20%");
+
+  var titleURL = props.redirect_url
 
   useEffect(() => {
     setPaperMargin("15px 10px");
@@ -69,31 +61,6 @@ function SearchResult(props) {
 
     setOpen(false);
   };
-
-  // const submitRelevanceJudgements = async function (event, rel) {
-  //   event.preventDefault();
-  //   let URL = baseURL_client + relJudgmentEndpoint;
-  //   // Judgement key-value pair
-  //   let judgement = {};
-  //   judgement[props.result_hash] = rel;
-  //   const res = await fetch(URL, {
-  //     method: "POST",
-  //     body: JSON.stringify(judgement),
-  //     headers: new Headers({
-  //       Authorization: props.auth_token,
-  //       "Content-Type": "application/json",
-  //     }),
-  //   });
-
-  //   const response = await res.json();
-  //   if (res.status == 200) {
-  //     setSeverity("success");
-  //   } else {
-  //     setSeverity("error");
-  //   }
-  //   setMessage(response.message);
-  //   handleClick();
-  // };
 
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -125,7 +92,7 @@ function SearchResult(props) {
 
   const handleCreateFeedbackForm = async (event) => {
     //send feedback
-    var URL = baseURL_client + postFeedbackEndpoint + "/";
+    var URL = BASE_URL_CLIENT + FEEDBACK_ENDPOINT;
     const res = await fetch(URL, {
       method: "POST",
       body: JSON.stringify({
@@ -151,11 +118,8 @@ function SearchResult(props) {
     switch (option) {
       case "view":
         // because the router does not work when viewing a submission and clicking a connection
-        window.open(websiteURL + "submissions/" + param, "_blank");
+        window.open(WEBSITE_URL + "submissions/" + param, "_blank");
         handleCloseOptionsMenu();
-        //Router.push(
-        //  websiteURL + "submissions/" + param
-        //)
         break;
       case "share":
         handleShareUrl(param);
@@ -212,7 +176,7 @@ function SearchResult(props) {
 
   const handleShareUrl = (subId) => {
     if (subId) {
-      var shareLink = websiteURL + submissionEndpoint + subId;
+      var shareLink = WEBSITE_URL + "submissions/" + subId;
       setShareUrlLink(shareLink);
       setSnackBarMessage("Link copied: " + shareLink);
       copyPageUrl(shareLink);
@@ -235,7 +199,7 @@ function SearchResult(props) {
     var hashtag_results = props.hashtags.map(function (item) {
       return (
         <a
-          href={websiteURL + "search?query=" + encodeURIComponent(item) + "&community=all&page=0"}
+          href={BASE_URL_CLIENT + WEBSITE_SEARCH_ENDPOINT + "?query=" + encodeURIComponent(item) + "&community=all&page=0"}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -273,8 +237,8 @@ function SearchResult(props) {
   return (
     <Paper
       elevation={0}
+      className="mt-1"
       id={"card_id" + props.search_idx}
-      className="mt-2"
       sx={{
         // width: '85%',
         minWidth: '100ch',
@@ -284,7 +248,7 @@ function SearchResult(props) {
         wordBreak: 'break-word'
       }}
     >
-      <a href={websiteURL + "submissions/" + props.submission_id} style={{ textDecoration: "none", color: "unset" }} target="_blank" rel="noopener noreferrer">
+      <a href={titleURL} style={{ textDecoration: "none", color: "unset" }} target="_blank" rel="noopener noreferrer">
         <div style={{ display: "flex" }}>
           <div
             style={{
@@ -296,8 +260,8 @@ function SearchResult(props) {
             <div>
               <img
                 style={{
-                  width: "18px",
-                  height: "18px",
+                  width: "20px",
+                  height: "20px",
                   verticalAlign: "baseline",
                 }}
                 src={image_url}
@@ -306,17 +270,17 @@ function SearchResult(props) {
           </div>
           <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <div>
-              <Tooltip title={props.explanation}>
+              <Tooltip title={props.title}>
                 <a
                   style={{
                     fontSize: "18px", maxWidth: '100%', display: '-webkit-box', WebkitBoxOrient: 'vertical',
                     WebkitLineClamp: '1', overflow: 'hidden', textOverflow: 'ellipsis'
                   }}
-                  href={props.redirect_url}
+                  href={titleURL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {props.explanation}
+                  {props.title}
                 </a>
               </Tooltip>
             </div>
@@ -336,15 +300,7 @@ function SearchResult(props) {
             <Dialog open={openFeedbackForm}>
               <DialogTitle>
                 {" "}
-                Feedback for{" "}
-                <a
-                  style={{ fontSize: "20px" }}
-                  href={props.redirect_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {props.explanation}
-                </a>
+                Please enter your feedback below.
               </DialogTitle>
               <DialogContent>
                 <DialogContentText></DialogContentText>
@@ -365,12 +321,6 @@ function SearchResult(props) {
                 <Button onClick={handleCreateFeedbackForm}>Send</Button>
               </DialogActions>
             </Dialog>
-            {false && <Tooltip title="You submitted on MM/YY" placement="top">
-              <IconButton size="small" onClick={(e) => { e.preventDefault() }}>
-                {console.log(props)}
-                <PersonPin />
-              </IconButton>
-            </Tooltip>}
 
             <Tooltip title="Options">
               <IconButton size="small" onClick={handleOpenOptionsMenu}>
@@ -452,8 +402,8 @@ function SearchResult(props) {
           fontSize: '14px', marginTop: '1%', marginBottom: '1%', textAlign: 'justify', maxWidth: '100%',
           display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: '5', overflow: 'hidden', textOverflow: 'ellipsis'
         }}>
-          {props.highlighted_text && props.highlighted_text.length > 0 && (
-            <span dangerouslySetInnerHTML={{ __html: props.highlighted_text }}></span>
+          {props.description && props.description.length > 0 && (
+            <span dangerouslySetInnerHTML={{ __html: props.description }}></span>
           )}
         </p>
 
@@ -488,16 +438,16 @@ function SearchResult(props) {
               </p>
             ) : (
               <p style={{ verticalAlign: "top", whiteSpace: "nowrap", marginBottom: "auto" }}>
-                Webpage
+                No Longer a Member
               </p>
             )}
           </div>
 
 
-        
 
-      </div> 
-      
+
+        </div>
+
 
         <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} onClick={(event) => { event.preventDefault() }}>
           <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
