@@ -340,6 +340,7 @@ def website_search(current_user):
     if validate_community_access(user_communities, requested_communities):
         if source not in ["website_visualize", "website_homepage_recs", "website_community_page", "website_searchbar"]:
             return response.error("Invalid source.", Status.BAD_REQUEST) 
+
         num_search_results, search_results = search_submissions(str(user_id), [str(x) for x in requested_communities], query=query, own_submissions=own_submissions)
         community_names = find_community_names(requested_communities)
         search_id = log_search_request(user_id, 
@@ -409,15 +410,6 @@ def website_search(current_user):
                         if q_obj not in questions_list:
                             questions_list.append(q_obj)
 
-            # Gather all of the asked questions about the submissions
-            searches_on_url = sl_db.find({"context.url": sub_url}) 
-            for search_log in searches_on_url:
-                genq = search_log.intent["generated_question"]
-                # Probably need to make some distinction between opening and typing (sep between ht and webpage desc)
-                if search_log.intent.get("typed_query", "") != "":
-                    q_obj = {"text": genq, "source_id": obj["submission_id"]}
-                    if q_obj not in questions_list:
-                        questions_list.append(q_obj)
             
             if docs and questions_list:
                 scored_docs = rerank([x["text"] for x in questions_list], docs)
@@ -901,6 +893,7 @@ def export_helper(user_id, search_id):
         # Get the sub/web return from MongoDB
         curr = id_result_map[result["submission_id"]]
         result["description"] = curr['highlighted_text']
+
 
     return {
             "query": query,

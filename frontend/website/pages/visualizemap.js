@@ -78,6 +78,8 @@ export default function VisualizeMap() {
     let url = BASE_URL_CLIENT + WEBSITE_SEARCH_ENDPOINT + "?query=" + query + "&community=" + communityId + "&source=website_visualize";
     if (ownSub == "True") {
       url += "&own_submissions=True";
+    } else {
+      url += "&own_submissions=False"
     }
     const res = await fetch(url, {
       method: "GET",
