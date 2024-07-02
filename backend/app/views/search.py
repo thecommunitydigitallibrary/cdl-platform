@@ -783,8 +783,7 @@ def search_submissions(user_id, requested_communities, query="", own_submissions
         elif len(requested_communities) == 1:
             number_of_hits, hits = elastic_manager.get_community(requested_communities[0], page_size=num_results)
         else:
-            print("Not supported")
-            return 0, []
+            number_of_hits, hits = elastic_manager.get_most_recent_submissions(user_id, requested_communities, topn=50)
     else:
         # Case - querying own submissions
         if own_submissions:
