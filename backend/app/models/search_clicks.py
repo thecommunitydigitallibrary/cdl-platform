@@ -11,7 +11,7 @@ class SearchClicks(Mongo):
 		return SearchClick(
 			sc_db["search_id"],
 			sc_db["clicked_url"],
-			time=sc_db["time"],
+			click_time=sc_db["time"],
 			id=sc_db["_id"]
 		)
 
@@ -25,8 +25,8 @@ class SearchClicks(Mongo):
 
 
 class SearchClick:
-	def __init__(self, search_id, clicked_url, time=time.time(), id=None):
+	def __init__(self, search_id, clicked_url, click_time=None, id=None):
 		self.id = id
-		self.time=time
+		self.time = time.time() if not click_time else click_time
 		self.search_id=search_id
 		self.clicked_url=clicked_url

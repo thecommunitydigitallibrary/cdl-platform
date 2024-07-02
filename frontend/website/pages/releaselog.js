@@ -33,6 +33,18 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        July 2nd, 2024
+      </h2>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Bug Fixes
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Can now search non-submissions on website</li>
+            <li className="list-item">Time logged properly for searches and clicks</li>
+        </ul>
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         June 25th, 2024
       </h2>
 

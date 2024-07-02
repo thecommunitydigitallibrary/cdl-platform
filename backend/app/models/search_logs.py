@@ -11,12 +11,12 @@ class SearchLogs(Mongo):
 		return SearchLog(
 			sl_db["user_id"],
 			source = sl_db["source"],
-			time = sl_db["time"],
 			scope = sl_db["scope"],
 			filters = sl_db["filters"],
 			context = sl_db["context"],
 			intent = sl_db["intent"],
-			id=sl_db["_id"]
+			id=sl_db["_id"],
+			log_time = sl_db["time"],
 		)
 
 	def insert(self, searchlog):
@@ -33,11 +33,11 @@ class SearchLogs(Mongo):
 
 
 class SearchLog:
-	def __init__(self, user_id, source, time=time.time(), scope={}, context={}, intent={}, filters={}, id=None):
+	def __init__(self, user_id, source, scope={}, context={}, intent={}, filters={}, id=None, log_time=None):
 		self.id = id
 		self.user_id = user_id
 		self.source = source
-		self.time=time
+		self.time = time.time() if not log_time else log_time
 		self.scope=scope
 		self.filters=filters
 		self.context=context

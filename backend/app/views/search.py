@@ -5,6 +5,7 @@ import math
 import json
 import requests
 import random
+import time
 
 from flask import Blueprint, request, redirect
 from flask_cors import CORS
@@ -275,8 +276,10 @@ def website_search(current_user):
     # Parameters for new search
     query = request.args.get("query", "")
     user_requested_communities = request.args.get("community", None)
-    own_submissions = request.args.get("own_submissions", True)
-    if own_submissions == "False":
+    own_submissions = request.args.get("own_submissions", False)
+    if own_submissions == "True":
+        own_submissions = True
+    else:
         own_submissions = False
     source = request.args.get("source", None)    
 
