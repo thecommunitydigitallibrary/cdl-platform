@@ -34,7 +34,7 @@ export default function ImgMediaCard({setUrlState}) {
   const [selectedValue, setSelectedValue] = React.useState((backendSource === null || backendSource === TEXTDATA_URL) ? TEXTDATA_URL : 'other');
   const [disabled, setDisabled] = React.useState(selectedValue !== "other");
   const [source, setSource] = React.useState(selectedValue === "other" ? backendSource : LOCALHOST_DEFAULT);
-  const [defaultTab, setDefaultTab] = React.useState(localStorage.getItem('defaultTab') === null ? "save" : localStorage.getItem('defaultTab'));
+  const [defaultTab, setDefaultTab] = React.useState(localStorage.getItem('defaultTab') === null ? "find" : localStorage.getItem('defaultTab'));
   const handleClick = () => {
     setOpen(true);
   };

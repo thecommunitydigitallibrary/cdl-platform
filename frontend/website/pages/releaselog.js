@@ -33,6 +33,20 @@ export default function ReleaseLog() {
       </h1>
 
       <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
+        July 8th, 2024
+      </h2>
+
+      <h5 className="text-2xl font-bold mb-3" style={{ margin: "10px 0px 0px 0px" }}>
+        Miscellaneous
+      </h5>
+        <ul className="list-disc pl-6">
+            <li className="list-item">Changed About page video</li>
+            <li className="list-item">Updated About page buttons to be clearer and more consistent</li>
+            <li className="list-item">Updated About page messages to be clearer</li>
+        </ul>
+
+
+      <h2 className="text-3xl mb-4"  style={{ margin: "20px 0px 0px 0px" }}>
         July 2nd, 2024
       </h2>
 

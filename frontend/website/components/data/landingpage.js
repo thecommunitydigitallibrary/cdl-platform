@@ -23,8 +23,32 @@ import visualizeImg from "../../public/images/visualize.png";
 import extFindImg from "../../public/images/extension_find.png";
 
 const benefitOne = {
+  title: "Effortlessly Search from Anywhere",
+  desc: "Use our Chrome Extension to ask and answer questions while viewing any webpage.",
+  image: extFindImg,
+  link: "search-overview",
+  bullets: [
+    {
+      title: "Get Predicted Questions",
+      desc: "Highlight some text and open the extension to the Find Tab to see a predicted question along with search results.",
+      icon: <SearchIcon />,
+    },
+    {
+      title: "Type Any Question",
+      desc: "Type a single word or phrase in the search bar and TextData will update the question based on what you type. Add a '?' at the end of your query to ask the typed query without any prediction.",
+      icon: <ChangeCircleIcon />,
+    },
+    {
+      title: "People Also Asked...",
+      desc: "See what other community members and TextData users have asked in your given context.",
+      icon: <FeedIcon />,
+    }
+  ],
+};
+
+const benefitTwo = {
   title: "Form Communities",
-  desc: "A community is where members can save and organize information. A community can consist of any number of users.",
+  desc: "A Community lets TextData users create, describe, and save online content to enrich search results.",
   image: communityImg,
   link: "community-overview",
   bullets: [
@@ -46,7 +70,7 @@ const benefitOne = {
   ],
 };
 
-const benefitTwo = {
+const benefitThree = {
   title: "Create and Save Information",
   desc: "Create markdown-style notes and save them to any of your communities.",
   image: submitImg,
@@ -70,29 +94,7 @@ const benefitTwo = {
   ],
 };
 
-const benefitThree = {
-  title: "Ask and Answer Questions",
-  desc: "Search the web and submissions from your joined and followed communities using in-context search and recommended questions.",
-  image: extFindImg,
-  link: "search-overview",
-  bullets: [
-    {
-      title: "In-Context Search",
-      desc: "Highlight some text and type a word or phrase to let TextData predict your question. Add a '?' at the end of your query to ask the typed question.",
-      icon: <SearchIcon />,
-    },
-    {
-      title: "People Also Asked...",
-      desc: "See what other community members and TextData users have asked in your given context.",
-      icon: <FeedIcon />,
-    },
-    {
-      title: "Search Everything",
-      desc: "Search results come from both the general web and submissions made to your joined and followed communities.",
-      icon: <ChangeCircleIcon />,
-    },
-  ],
-};
+
 
 const benefitFour = {
   title: "Interact with and Visualize Submissions",

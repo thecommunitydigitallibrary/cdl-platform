@@ -48,11 +48,7 @@ export default function FrequentlyAskedQuestions() {
           <Divider />
           <AccordionDetails>
             For some pages, your highlighted text will not be captured by the
-            extension. You can tell that this is the case when the “Highlighted
-            text” area doesn’t display any text. If you want to save the
-            highlighted text in the context or ask a question about the
-            highlighted text, then first copy-paste it into the field right
-            below the highlighted text display.{" "}
+            extension (e.g., on PDFs). For searching, you'll need to type a full question. And for saving, you'll need to manually copy and paste the text to the description field.{" "}
           </AccordionDetails>
         </Accordion>
         <Accordion>

@@ -12,7 +12,7 @@ function App() {
   }
 
   if (localStorage.getItem('defaultTab') === null) {
-    localStorage.setItem('defaultTab', "search")
+    localStorage.setItem('defaultTab', "find")
   }
 
   if (localStorage.getItem('extCachedData') === null) {

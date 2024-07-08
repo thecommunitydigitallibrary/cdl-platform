@@ -30,7 +30,7 @@ export default function About({ loggedOut }) {
         <SectionTitle
           pretitle="Why TextData?"
           title="Our Mission">
-          To remove the knowledge barriers of online information discovery by leveraging the collaboration of communities.
+          To remove the knowledge barriers of online information discovery.
           </SectionTitle>
 
         <Benefits data={benefitOne} />
