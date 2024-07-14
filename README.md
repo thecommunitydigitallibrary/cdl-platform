@@ -1,5 +1,5 @@
 # TextData
-TextData is an online platform for communities of users to discover the right information at the right place.
+TextData is an online platform to help you to discover the right information at the right place.
 
 To use TextData, you have two options:
 

@@ -203,9 +203,9 @@ def extension_search(current_user):
                     # Only include one result from submission
                     break
 
-    # Add Users Also Ask questions (only from a user's communities)
+    # Add Users Also Ask questions (used to be from just user's communities, now it is pulled from everywhere)
     sl_db = SearchLogs()
-    searches_on_url = sl_db.find({"context.url": url, "filters.communities": {"$in": user_communities}})
+    searches_on_url = sl_db.find({"context.url": url})#, "filters.communities": {"$in": user_communities}})
     asked_questions = []
     for search_log in searches_on_url:
         genq = search_log.intent["generated_question"]
