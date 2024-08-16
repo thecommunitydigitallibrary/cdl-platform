@@ -12,7 +12,7 @@ import validators
 
 from app.helpers.helpers import token_required, token_required_public, build_display_url,\
     format_time_for_display, hydrate_with_hashtags, \
-    extract_hashtags, format_url, build_display_url, get_communities_helper
+    extract_hashtags, format_url, build_display_url, get_communities_helper, publish_to_queue
 from app.helpers import response
 from app.helpers.status import Status
 from app.models.communities import Communities
@@ -66,7 +66,7 @@ def create_submission(current_user):
         req = request.form
         if not request.form:
             req = request.get_json()
-
+        
         highlighted_text = req.get("highlighted_text", "") or req.get("description")
         source_url = req.get("source_url")
         explanation = req.get("explanation") or req.get("title")
@@ -83,8 +83,18 @@ def create_submission(current_user):
                                                                   highlighted_text=highlighted_text,
                                                                   source_url=source_url, explanation=explanation,
                                                                   community=community, anonymous=anonymous)
-
+        community = Communities().find_one({"_id": ObjectId(community)})
         if status == Status.OK:
+            publish_msg ={
+                'notify_timestamp':time.time(),
+                'notify_type':'new submission',
+                'notify_read':False,
+                'notify_delivered':False,
+                'community':str(community.id), 
+                'notify_src_email':current_user.email,
+                'notify_msg': f'{current_user.username} has made a new submission titled {explanation} to the {community.name} community'
+            }
+            publish_to_queue('add_submission',publish_msg)
             return response.success({
                 "message": message,
                 "submission_id": str(submission_id)

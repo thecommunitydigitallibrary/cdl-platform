@@ -1,4 +1,3 @@
-import time
 from app.db import get_db
 from app.models.mongo import Mongo
 

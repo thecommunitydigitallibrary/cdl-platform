@@ -189,7 +189,7 @@ function Header(props) {
   const [openSubmission, setOpenSubmission] = useState(false);
 
   const { submissionMode, submissionCommunitiesNameMap, setSubmissionProps } = useSubmissionStore();
-  const { userCommunities, username, isLoggedOut, setLoggedOut, setUserDataStoreProps } = useUserDataStore();
+  const { userCommunities, user_id, username, isLoggedOut, setLoggedOut, setUserDataStoreProps } = useUserDataStore();
   const [selectedCommunity, setSelectedCommunity] = useState("");
 
   const handleClickSubmission = () => {
@@ -376,8 +376,10 @@ function Header(props) {
     });
 
     var responseComm = await resp.json();
+    console.log("updateDrop responseComm",responseComm);
     setUserDataStoreProps({ userCommunities: responseComm.community_info });
     setUserDataStoreProps({ username: responseComm.username });
+    setUserDataStoreProps({ user_id: responseComm.user_id });
     localStorage.setItem("dropdowndata", JSON.stringify(responseComm));
 
     setDropDownData(responseComm);
@@ -389,11 +391,13 @@ function Header(props) {
     if (window.localStorage.getItem("dropdowndata") && window.localStorage.getItem("dropdowndata").status != 'error') {
 
       var responseComm = JSON.parse(window.localStorage.getItem("dropdowndata"))
+      console.log("use affect dropdown responseComm",responseComm);
       setDropDownData(responseComm);
       setcommunityData(responseComm.community_info);
       setUserDataStoreProps({ userCommunities: responseComm.community_info });
       setUserDataStoreProps({ userFollowedCommunities: responseComm.followed_community_info });
       setUserDataStoreProps({ username: responseComm.username });
+      setUserDataStoreProps({ user_id: responseComm.user_id });
 
     } else {
       await updateDropDownSearch();
@@ -457,6 +461,7 @@ function Header(props) {
     setUserDataStoreProps({ userCommunities: [] });
     setUserDataStoreProps({ userFollowedCommunities: [] });
     setUserDataStoreProps({ username: [] });
+    setUserDataStoreProps({ user_id: [] });
     setLoggedOut(true);
     Router.push("/");
   };

@@ -10,12 +10,14 @@ import jwt
 import bleach
 from bson import ObjectId
 from flask import request, current_app
+import requests
 
 from app.helpers import response
 from app.helpers.status import Status
 from app.models.users import Users
 from app.models.communities import Communities
 from app.models.not_logged_in_users import NotLoggedInUsers, NotLoggedInUser
+from app.models.notifications import *
 
 
 
@@ -118,7 +120,9 @@ def get_communities_helper(current_user, return_dict=False):
 	}
 	try:
 		username = current_user.username
+		user_id = current_user.id
 		return_obj["username"] = username
+		return_obj["user_id"] = str(user_id)
 	except Exception as e:
 		print("Accessed as public, no username found.")
 
@@ -305,3 +309,29 @@ def sanitize_input(input_data):
 			print(f"Error occured while sanitizing input data {input_data}: ", e)
 
 	return input_data
+
+
+def publish_to_queue(routing_key, message):
+    try:
+        url = "http://notification_service:80/notify/publish"
+
+
+        payload = {
+            "routing_key": routing_key,
+            "message": message
+        }
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'  
+        }
+        response = requests.post(url, data=json.dumps(payload), headers=headers)
+       
+        if response.status_code == 200:
+            print(f"Message published successfully: {response.json()}")
+        else:
+            print(f"Failed to publish message: {response.json()}")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+
+
+     

@@ -15,7 +15,6 @@ from flask_cors import CORS
 from app.models.users import *
 from app.models.resets import *
 from app.helpers.status import Status
-
 from app.helpers import response
 
 users = Blueprint('users', __name__)
@@ -273,7 +272,7 @@ def login():
 			return response.error("Password is incorrect. Please try again.", Status.UNAUTHORIZED)
 		elif user_acct and user_acct.hashed_password == hashed_password:
 			token = jwt.encode({"id": str(user_acct.id)}, os.environ["jwt_secret"], "HS256")
-			return response.success({"username": username, "token": token}, Status.OK)
+			return response.success({"username": user_acct.username, "token": token,"userid": str(user_acct.id)}, Status.OK)
 		else:
 			return response.error("Internal server error. Please try again later.", Status.INTERNAL_SERVER_ERROR)
 	except Exception as e:

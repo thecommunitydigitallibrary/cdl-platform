@@ -1,3 +1,6 @@
 FROM nginx:alpine
 COPY nginx-local.conf /etc/nginx/nginx.conf
 RUN apk update && apk add bash
+RUN apk add --no-cache openssl curl
+RUN curl -sL https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-alpine-linux-amd64-v0.6.1.tar.gz | tar -C /usr/local/bin -xz
+RUN ls -l /usr/local/bin/dockerize
